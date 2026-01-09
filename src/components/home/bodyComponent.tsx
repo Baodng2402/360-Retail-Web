@@ -151,7 +151,7 @@ export default function BodyComponent() {
       </section>
 
       {/* Simple 3 Section */}
-      <section className="relative px-6 py-24 bg-linear-to-b from-background to-teal-50/30 dark:to-teal-950/20">
+      <section className="relative px-6 py-10 bg-linear-to-b from-background to-teal-50/30 dark:to-teal-950/20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20 max-w-2xl mx-auto">
             <h2
