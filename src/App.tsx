@@ -1,23 +1,23 @@
-import { useAppTheme } from "./zustand/store";
+import HomePage from "./pages/HomePage";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "./routes/protectedRoute";
+import "./App.css";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 
 function App() {
-  const darkMode = useAppTheme((state) => state.darkMode);
-  const toggleDarkMode = useAppTheme((state) => state.toggleDarkMode);
-
   return (
-    // Sử dụng dấu huyền `` để truyền biến vào class
-    <div className={`min-h-screen transition-colors duration-300 ${
-      darkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"
-    }`}>
-      <div className="p-8">
-        <h1 className="text-2xl font-bold">Hello Tailwind + Zustand!</h1>
-        <button 
-          onClick={toggleDarkMode}
-          className="mt-4 px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
-        >
-          {darkMode ? "Chế độ Sáng" : "Chế độ Tối"}
-        </button>
-      </div>
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route element={<ProtectedRoute allowedRoles={[]} />}>
+            <Route path="/" element={<HomePage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
