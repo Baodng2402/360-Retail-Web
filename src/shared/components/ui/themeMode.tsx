@@ -4,7 +4,6 @@ import { useAppTheme } from "@/shared/store/themeStore";
 const Switch = () => {
   const { darkMode, toggleDarkMode } = useAppTheme();
 
-  // Sync "dark" class to the html element for Tailwind
   useEffect(() => {
     const html = document.documentElement;
 
@@ -35,9 +34,7 @@ const Switch = () => {
         className={`
         absolute content-[''] h-[1.4em] w-[1.4em] rounded-full left-[10%] bottom-[15%] 
         transition-all duration-500 bg-[#28096b]
-        /* Hiệu ứng Mặt Trăng (chưa check) */
         shadow-[inset_8px_-4px_0px_0px_#fff000]
-        /* Hiệu ứng Mặt Trời (khi check) */
         peer-checked:translate-x-full 
         peer-checked:shadow-[inset_15px_-4px_0px_15px_#fff000]
       `}
