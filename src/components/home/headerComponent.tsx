@@ -116,8 +116,8 @@ const Navbar1 = ({
     },
   ],
   auth = {
-    login: { title: "Login", url: "#" },
-    signup: { title: "Sign up", url: "#" },
+    login: { title: "Login", url: "/login" },
+    signup: { title: "Sign up", url: "/signup" },
   },
   className,
 }: Navbar1Props) => {
@@ -149,14 +149,14 @@ const Navbar1 = ({
               {/* Logo */}
               <a
                 href={logo.url}
-                className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-80"
+                className="flex items-center transition-opacity duration-300 hover:opacity-80"
               >
                 <img
                   src={logo.src}
-                  className="h-8 w-auto dark:invert transition-all duration-300"
+                  className="h-12 w-auto scale-150 dark:invert transition-all duration-300"
                   alt={logo.alt}
                 />
-                <span className="text-lg font-semibold tracking-tight">
+                <span className="text-lg font-semibold tracking-tight -ml-3">
                   {logo.title}
                 </span>
               </a>
@@ -199,14 +199,14 @@ const Navbar1 = ({
               {/* Mobile Logo */}
               <a
                 href={logo.url}
-                className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-80"
+                className="flex items-center transition-opacity duration-300 hover:opacity-80"
               >
                 <img
                   src={logo.src}
-                  className="h-8 w-auto dark:invert transition-all duration-300"
+                  className="h-12 w-auto dark:invert transition-all duration-300"
                   alt={logo.alt}
                 />
-                <span className="text-lg font-semibold tracking-tight">
+                <span className="text-lg font-semibold tracking-tight -ml-2">
                   {logo.title}
                 </span>
               </a>
