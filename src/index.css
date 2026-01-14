@@ -124,3 +124,33 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .signup-card-wrapper {
+    margin-top: -3rem;
+  }
+
+  @media (min-width: 640px) {
+    .signup-card-wrapper {
+      margin-top: -4rem;
+    }
+  }
+
+  @media (max-height: 720px) {
+    .signup-card-wrapper {
+      margin-top: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) and (min-height: 720px) {
+    .signup-card-wrapper {
+      margin-top: -10rem;
+    }
+  }
+
+  @media (min-width: 1024px) and (min-height: 800px) {
+    .signup-card-wrapper {
+      margin-top: -18rem;
+    }
+  }
+}
