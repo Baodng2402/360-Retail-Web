@@ -1,12 +1,2 @@
-import { Navbar1 } from "../components/home/headerComponent";
-import BodyComponent from "../components/home/bodyComponent";
-
-const HomePage = () => {
-  return (
-    <>
-      <Navbar1 />
-      <BodyComponent />
-    </>
-  );
-};
+import HomePage from "@/features/home/pages/HomePage";
 export default HomePage;

@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/zustand/authStore";
+import { useAuthStore } from "@/shared/store/authStore";
 import { Navigate, Outlet } from "react-router-dom";
 
 interface ProtectedRouteProps {

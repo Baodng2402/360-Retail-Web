@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import fbLogo from "@/assets/facebook.png";
 import googleLogo from "@/assets/google.png";
 
-interface Signup1Props {
+interface SignupFormProps {
   heading?: string;
   buttonText?: string;
   googleText?: string;
@@ -14,17 +14,16 @@ interface Signup1Props {
   className?: string;
 }
 
-const Signup1 = ({
+const SignupForm = ({
   heading = "Register with",
   buttonText = "Create Account",
   signupText = "Already have an account?",
   signupUrl = "https://shadcnblocks.com",
   className,
-}: Signup1Props) => {
+}: SignupFormProps) => {
   return (
     <section className={cn("mt-10", className)}>
       <div className="flex h-full items-center justify-center">
-        {/* Logo */}
         <div className="flex flex-col items-center gap-6 lg:justify-start">
           <div className="flex w-full max-w-md min-w-md flex-col items-center gap-y-3 rounded-md border border-muted bg-background px-6 py-6 shadow-md">
             {heading && (
@@ -33,10 +32,7 @@ const Signup1 = ({
               </h1>
             )}
             <div className="flex gap-3 justify-center w-full">
-              {/* justify-center: căn giữa 2 cái nút so với chiều ngang của form */}
-
               <button className="bg-background border-gray-200 border w-[75px] h-[75px] rounded-lg flex items-center justify-center hover:bg-gray-50 transition-all">
-                {/* flex items-center justify-center: đưa logo vào chính giữa button */}
                 <img src={fbLogo} className="w-8 h-8" alt="Facebook" />
               </button>
 
@@ -48,7 +44,6 @@ const Signup1 = ({
               or
             </span>
 
-            {/* Name Field */}
             <div className="w-full">
               <label
                 htmlFor="name"
@@ -65,7 +60,6 @@ const Signup1 = ({
               />
             </div>
 
-            {/* Email Field */}
             <div className="w-full">
               <label
                 htmlFor="email"
@@ -82,7 +76,6 @@ const Signup1 = ({
               />
             </div>
 
-            {/* Password Field */}
             <div className="w-full">
               <label
                 htmlFor="password"
@@ -99,7 +92,6 @@ const Signup1 = ({
               />
             </div>
 
-            {/* Confirm Password Field */}
             <div className="w-full">
               <label
                 htmlFor="confirm-password"
@@ -120,8 +112,8 @@ const Signup1 = ({
               <input
                 type="checkbox"
                 id="terms"
-                required // Bắt buộc phải tích mới cho submit form
-                className="w-4 h-4 cursor-pointer" // accent giúp đổi màu checkbox khi tích
+                required
+                className="w-4 h-4 cursor-pointer"
               />
               <label
                 htmlFor="terms"
@@ -129,17 +121,16 @@ const Signup1 = ({
               >
                 I agree to the Terms & Conditions
                 <span className="text-red-500 font-bold">*</span>
-                {/* Dấu sao đỏ biểu thị trường bắt buộc */}
               </label>
             </div>
             <div className="flex justify-start items-center gap-2 w-full -mt-3 mb-3">
               <input
                 type="checkbox"
-                id="terms"
+                id="terms-updates"
                 className="w-4 h-4 cursor-pointer"
               />
               <label
-                htmlFor="terms"
+                htmlFor="terms-updates"
                 className="text-sm cursor-pointer select-none text-gray-400"
               >
                 I want to receive news and updates
@@ -167,4 +158,5 @@ const Signup1 = ({
   );
 };
 
-export { Signup1 };
+export { SignupForm };
+

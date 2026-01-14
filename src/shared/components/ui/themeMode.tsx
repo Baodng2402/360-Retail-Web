@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useAppTheme } from "@/zustand/store";
+import { useAppTheme } from "@/shared/store/themeStore";
 
 const Switch = () => {
   const { darkMode, toggleDarkMode } = useAppTheme();
@@ -17,7 +17,6 @@ const Switch = () => {
 
   return (
     <label className="relative inline-block w-[3.5em] h-[2em] text-[17px] cursor-pointer">
-      {/* Ẩn checkbox mặc định */}
       <input
         type="checkbox"
         className="sr-only peer"
@@ -25,7 +24,6 @@ const Switch = () => {
         onChange={toggleDarkMode}
       />
 
-      {/* Khung của Switch (Slider) */}
       <div
         className={`
         absolute inset-0 transition-colors duration-500 rounded-[30px]
@@ -33,7 +31,6 @@ const Switch = () => {
       `}
       ></div>
 
-      {/* Nút gạt (Mặt trăng / Mặt trời) */}
       <div
         className={`
         absolute content-[''] h-[1.4em] w-[1.4em] rounded-full left-[10%] bottom-[15%] 
@@ -50,3 +47,4 @@ const Switch = () => {
 };
 
 export default Switch;
+
