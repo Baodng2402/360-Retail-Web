@@ -1,11 +1,10 @@
 import logo from "@/assets/logo.png";
 import { CornerUpLeft } from "lucide-react";
 
-const headerComponet = () => {
+const LoginHeader = () => {
   return (
     <>
       <div className="bg-gradient-to-r from-[#2efcef] to-[#FF7B21] flex justify-between text-white mx-6 mt-6 px-8 py-6 pb-100 rounded-2xl shadow-xl">
-        {/* Left: Back button + Logo */}
         <div className="flex items-start gap-2">
           <CornerUpLeft
             size={36}
@@ -18,7 +17,6 @@ const headerComponet = () => {
           />
         </div>
 
-        {/* Center: Welcome text */}
         <div className="flex flex-col pt-12 justify-center items-center">
           <h1 className="text-[52px] font-extrabold text-white leading-tight">
             Welcome!
@@ -28,7 +26,6 @@ const headerComponet = () => {
           </p>
         </div>
 
-        {/* Right: Action buttons */}
         <div className="flex items-start gap-3 pt-2">
           <button className="px-5 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-lg text-white font-medium transition-all duration-300 hover:scale-105">
             Sign In
@@ -44,4 +41,6 @@ const headerComponet = () => {
     </>
   );
 };
-export default headerComponet;
+
+export default LoginHeader;
+
