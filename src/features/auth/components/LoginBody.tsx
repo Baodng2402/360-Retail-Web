@@ -1,15 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 
 import logo from "@/assets/logo.png";
+import facebookIcon from "@/assets/icon/facebook-icon.svg";
+import appleIcon from "@/assets/icon/apple-icon.svg";
+import googleIcon from "@/assets/icon/google-icon.svg";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 
+const socialButtons = [
+  { src: facebookIcon, alt: "Facebook" },
+  { src: appleIcon, alt: "Apple" },
+  { src: googleIcon, alt: "Google" },
+] as const;
+
 const LoginBody = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("loginRememberMe");
+    if (stored !== null) {
+      setRememberMe(stored === "true");
+    }
+  }, []);
+
+  const handleRememberChange = (checked: boolean) => {
+    setRememberMe(checked);
+    localStorage.setItem("loginRememberMe", String(checked));
+  };
 
   return (
     <div className="flex min-h-screen w-full bg-white">
@@ -95,8 +117,9 @@ const LoginBody = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={handleRememberChange}
                   className="data-[state=checked]:bg-[#0D9488]"
-                  defaultChecked
                 />
                 <Label
                   htmlFor="remember"
@@ -113,14 +136,49 @@ const LoginBody = () => {
                 LOGIN
               </Button>
 
-              <div className="text-center text-sm">
-                <span className="text-gray-600">Don&apos;t have an account? </span>
-                <Link
-                  to="/signup"
-                  className="font-medium text-[#0D9488] hover:underline"
-                >
-                  Sign up
-                </Link>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <button
+                    type="button"
+                    className="text-gray-500 hover:text-teal-600 underline-offset-4 hover:underline"
+                  >
+                    Forgot password
+                  </button>
+                  <div className="text-right">
+                    <span className="text-gray-600 mr-1">
+                      Don&apos;t have an account?
+                    </span>
+                    <Link
+                      to="/signup"
+                      className="font-medium text-[#0D9488] hover:underline"
+                    >
+                      Sign up
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs text-gray-400">
+                  <div className="h-px flex-1 bg-gray-200" />
+                  <span className="uppercase tracking-[0.2em]">Or</span>
+                  <div className="h-px flex-1 bg-gray-200" />
+                </div>
+
+                <div className="flex items-center justify-center gap-3 sm:gap-4">
+                  {socialButtons.map((social) => (
+                    <Button
+                      key={social.alt}
+                      type="button"
+                      variant="outline"
+                      className="flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] items-center justify-center rounded-[22px] border border-gray-200 bg-white hover:bg-gray-50 shadow-sm p-1.5"
+                    >
+                    <img
+                      src={social.src}
+                      alt={social.alt}
+                      className="h-9 w-9 sm:h-11 sm:w-11 object-contain"
+                    />
+                    </Button>
+                  ))}
+                </div>
               </div>
             </form>
           </div>

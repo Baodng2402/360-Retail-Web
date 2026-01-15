@@ -1,6 +1,3 @@
-// This component renders the sign up page hero + form based on the Figma design.
-// It is used by `src/features/auth/pages/SignupPage.tsx`.
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Apple, Chrome, Facebook, Mail, Lock } from "lucide-react";
@@ -22,10 +19,8 @@ export function AuthSignupForm() {
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center bg-white">
-      {/* Top gradient hero background */}
       <div className="pointer-events-none absolute inset-x-10 top-10 h-[320px] rounded-[24px] bg-[linear-gradient(160deg,rgba(25,214,200,1)_0%,rgba(255,123,33,1)_100%)] shadow-md" />
 
-      {/* Logo in top-left of hero */}
       <div className="pointer-events-none absolute left-16 top-16 z-10">
         <img
           src={logo}
@@ -34,7 +29,6 @@ export function AuthSignupForm() {
         />
       </div>
 
-      {/* Hero text */}
       <div className="pointer-events-none absolute inset-x-0 top-24 z-10 flex justify-center">
         <div className="text-center text-white">
           <h2 className="text-sm font-semibold tracking-wide mb-2">
@@ -57,7 +51,6 @@ export function AuthSignupForm() {
         </div>
       </div>
 
-      {/* Sign up card – always above hero */}
       <div className="relative z-20 mt-24 flex w-full justify-center">
         <div className="w-full max-w-[420px] rounded-[16px] bg-white px-8 py-8 shadow-xl">
           <form className="space-y-6">
