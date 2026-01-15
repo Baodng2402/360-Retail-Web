@@ -1,59 +1,69 @@
-import { TrendingUp, Users, ShoppingCart, DollarSign } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils"; // Giả sử bạn có hàm cn của shadcn/ui
 
-export const DashboardStats = () => {
-  const stats = [
-    {
-      title: "Tổng doanh thu",
-      value: "12,345,000",
-      icon: DollarSign,
-      change: "+12.5%",
-      trend: "up",
-    },
-    {
-      title: "Đơn hàng",
-      value: "1,234",
-      icon: ShoppingCart,
-      change: "+8.2%",
-      trend: "up",
-    },
-    {
-      title: "Khách hàng",
-      value: "5,678",
-      icon: Users,
-      change: "+15.3%",
-      trend: "up",
-    },
-    {
-      title: "Tăng trưởng",
-      value: "23.4%",
-      icon: TrendingUp,
-      change: "+2.1%",
-      trend: "up",
-    },
-  ];
+export interface StatItem {
+  label: string; // Thay cho name
+  subLabel: string; // Thay cho title
+  value: string | number;
+  icon: LucideIcon;
+  change?: string | null;
+  trend?: "up" | "down" | "neutral" | null;
+  color?: string; // Tailwind classes cho icon box
+}
+
+export const DashboardStats = ({ stats }: { stats: StatItem[] }) => (
+  <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
+    {stats.map((stat) => (
+      <StatCard key={stat.label} {...stat} />
+    ))}
+  </div>
+);
+
+const StatCard = ({
+  label,
+  subLabel,
+  value,
+  icon: Icon,
+  change,
+  trend,
+  color,
+}: StatItem) => {
+  const isTrendUp = trend === "up";
+  const isTrendDown = trend === "down";
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {stats.map((stat) => {
-        const Icon = stat.icon;
-        return (
-          <div
-            key={stat.title}
-            className="bg-card border border-border rounded-lg p-6 shadow-sm"
+    <div className="group bg-card border border-border rounded-xl p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/20">
+      <div className="flex items-center justify-between mb-4">
+        {/* Icon Box: Sử dụng color prop ở đây */}
+        <div
+          className={cn("p-2.5 rounded-lg bg-primary/10 text-primary", color)}
+        >
+          <Icon className="h-6 w-6" />
+        </div>
+
+        {/* Chỉ hiển thị nếu có change */}
+        {change && (
+          <span
+            className={cn(
+              "text-sm font-medium px-2 py-0.5 rounded-full bg-secondary",
+              isTrendUp && "text-green-600 bg-green-50",
+              isTrendDown && "text-red-600 bg-red-50"
+            )}
           >
-            <div className="flex items-center justify-between mb-4">
-              <Icon className="h-8 w-8 text-muted-foreground" />
-              <span className="text-sm text-green-600 font-medium">
-                {stat.change}
-              </span>
-            </div>
-            <h3 className="text-sm text-muted-foreground mb-1">
-              {stat.title}
-            </h3>
-            <p className="text-2xl font-bold">{stat.value}</p>
-          </div>
-        );
-      })}
+            {change}
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          {label}
+        </p>
+        <h3 className="text-2xl font-bold tracking-tight">{value}</h3>
+        <span className="text-xs text-muted-foreground/80 font-normal">
+          {subLabel}
+        </span>
+      </div>
     </div>
   );
 };

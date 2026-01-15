@@ -8,6 +8,11 @@ import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import { HomeLayout } from "@/features/home/components/HomeLayout";
 import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
 import { Toaster } from "react-hot-toast";
+import StaffManagementPage from "@/features/dashboard/pages/StaffManagementPage";
+import SalePostPage from "@/features/dashboard/pages/SalePostPage";
+import ReportPage from "@/features/dashboard/pages/ReportPage";
+import SettingPage from "@/features/dashboard/pages/SettingPage";
+import CustomerPage from "@/features/dashboard/pages/CustomerPage";
 
 function App() {
   return (
@@ -28,6 +33,14 @@ function App() {
           >
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route
+                path="/dashboard/staff"
+                element={<StaffManagementPage />}
+              />
+              <Route path="/dashboard/sales" element={<SalePostPage />} />
+              <Route path="/dashboard/reports" element={<ReportPage />} />
+              <Route path="/dashboard/settings" element={<SettingPage />} />\
+              <Route path="/dashboard/customers" element={<CustomerPage />} />
             </Route>
           </Route>
           {/* </Route> */}
