@@ -10,7 +10,14 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  const normalizedAllowedRoles = (allowedRoles ?? []).map((role) =>
+    role.toLowerCase()
+  );
+  if (
+    normalizedAllowedRoles.length > 0 &&
+    user &&
+    !normalizedAllowedRoles.includes(user.role.toLowerCase())
+  ) {
     return <Navigate to="/unauthorized" replace />;
   }
   return <Outlet />;

@@ -4,7 +4,9 @@ import axios, {
 } from "axios";
 
 const instance = axios.create({
-  baseURL: "https://some-domain.com/api/",
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") + "/api/" ||
+    "https://some-domain.com/api/",
 });
 
 instance.interceptors.request.use(
@@ -12,7 +14,7 @@ instance.interceptors.request.use(
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    } else {
+    } else if (config.headers && "Authorization" in config.headers) {
       delete config.headers.Authorization;
     }
     return config;
@@ -36,4 +38,3 @@ instance.interceptors.response.use(
 );
 
 export default instance;
-

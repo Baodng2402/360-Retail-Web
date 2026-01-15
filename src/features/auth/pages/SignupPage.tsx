@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { z } from "zod";
+import toast from "react-hot-toast";
 
 import logo from "@/assets/logo.png";
 import facebookIcon from "@/assets/icon/facebook-icon.svg";
@@ -9,7 +11,22 @@ import googleIcon from "@/assets/icon/google-icon.svg";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { Switch } from "@/shared/components/ui/switch";
+import { authApi } from "@/shared/lib/authApi";
+
+const signupSchema = z
+  .object({
+    name: z.string().min(1, "Vui lòng nhập tên."),
+    email: z.string().min(1, "Vui lòng nhập email.").email("Email không hợp lệ."),
+    password: z
+      .string()
+      .min(1, "Vui lòng nhập mật khẩu.")
+      .min(6, "Mật khẩu phải có ít nhất 6 ký tự."),
+    confirmPassword: z.string().min(1, "Vui lòng nhập lại mật khẩu."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Mật khẩu xác nhận không khớp.",
+  });
 
 const socialButtons = [
   { src: facebookIcon, alt: "Facebook" },
@@ -20,14 +37,47 @@ const socialButtons = [
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("signupRememberMe") === "true";
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handleRememberChange = (checked: boolean) => {
-    setRememberMe(checked);
-    localStorage.setItem("signupRememberMe", String(checked));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const parsed = signupSchema.safeParse({
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
+
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";
+      setError(firstError);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await authApi.register({ email, password });
+
+      toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+      navigate("/login", { replace: true });
+    } catch (err: unknown) {
+      console.error("Register error", err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,7 +143,7 @@ const SignupPage = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4 sm:gap-6">
+              <form className="flex flex-col gap-4 sm:gap-6" onSubmit={handleSubmit}>
                 <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                   <div className="flex flex-col gap-2.5">
                     <Label
@@ -107,6 +157,8 @@ const SignupPage = () => {
                       type="text"
                       placeholder="Your full name"
                       className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-blackampwhitewhite px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                     />
                   </div>
 
@@ -123,6 +175,8 @@ const SignupPage = () => {
                         type={showPassword ? "text" : "password"}
                         placeholder="Your password"
                         className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-blackampwhitewhite pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                       <button
                         type="button"
@@ -151,6 +205,8 @@ const SignupPage = () => {
                       type="email"
                       placeholder="Your email address"
                       className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-blackampwhitewhite px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
 
@@ -167,6 +223,8 @@ const SignupPage = () => {
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your password"
                         className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-blackampwhitewhite pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                       />
                       <button
                         type="button"
@@ -186,26 +244,18 @@ const SignupPage = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                  <Switch
-                    id="remember"
-                    checked={rememberMe}
-                    onCheckedChange={handleRememberChange}
-                    className="data-[state=checked]:bg-[linear-gradient(145deg,rgba(0,187,167,1)_0%,rgba(0,150,137,1)_100%)]"
-                  />
-                  <Label
-                    htmlFor="remember"
-                    className="cursor-pointer text-xs font-normal leading-[18px] text-graygray-700"
-                  >
-                    Remember me
-                  </Label>
-                </div>
+                {error && (
+                  <p className="text-sm text-red-500">
+                    {error}
+                  </p>
+                )}
 
                 <Button
                   type="submit"
-                  className="h-12 sm:h-[52px] rounded-xl bg-[linear-gradient(145deg,rgba(0,187,167,1)_0%,rgba(0,150,137,1)_100%)] px-4 py-3 text-xs sm:text-sm font-bold leading-[18px] tracking-[0.02em] text-white hover:opacity-90"
+                  disabled={loading}
+                  className="h-12 sm:h-[52px] rounded-xl bg-[linear-gradient(145deg,rgba(0,187,167,1)_0%,rgba(0,150,137,1)_100%)] px-4 py-3 text-xs sm:text-sm font-bold leading-[18px] tracking-[0.02em] text-white hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  SIGN UP
+                  {loading ? "ĐANG ĐĂNG KÝ..." : "SIGN UP"}
                 </Button>
 
                 <p className="text-center text-xs font-normal leading-[18px] text-graygray-400">
@@ -217,7 +267,7 @@ const SignupPage = () => {
                     Sign in
                   </Link>
                 </p>
-              </div>
+              </form>
             </div>
           </div>
         </div>

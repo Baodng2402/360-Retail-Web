@@ -7,6 +7,7 @@ import SignupPage from "@/features/auth/pages/SignupPage";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import { HomeLayout } from "@/features/home/components/HomeLayout";
 import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -20,13 +21,18 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
 
-          <Route element={<ProtectedRoute allowedRoles={[]} />}>
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={["StoreOwner", "Manager"]} />
+            }
+          >
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
             </Route>
           </Route>
         </Routes>
       </BrowserRouter>
+      <Toaster position="top-right" />
     </div>
   );
 }
