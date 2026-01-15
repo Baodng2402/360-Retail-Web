@@ -62,7 +62,8 @@ const LoginBody = () => {
 
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
-      const firstError = parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";
+      const firstError =
+        parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";
       setError(firstError);
       return;
     }
@@ -90,8 +91,8 @@ const LoginBody = () => {
     } catch (err: unknown) {
       console.error("Login error", err);
       const message =
-        (err as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
       setError(message);
       toast.error(message);
     } finally {
@@ -173,7 +174,9 @@ const LoginBody = () => {
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-teal-600"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -199,11 +202,7 @@ const LoginBody = () => {
                 </Label>
               </div>
 
-              {error && (
-                <p className="text-sm text-red-500">
-                  {error}
-                </p>
-              )}
+              {error && <p className="text-sm text-red-500">{error}</p>}
 
               <Button
                 type="submit"
@@ -248,11 +247,11 @@ const LoginBody = () => {
                       variant="outline"
                       className="flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] items-center justify-center rounded-[22px] border border-gray-200 bg-white hover:bg-gray-50 shadow-sm p-1.5"
                     >
-                    <img
-                      src={social.src}
-                      alt={social.alt}
-                      className="h-9 w-9 sm:h-11 sm:w-11 object-contain"
-                    />
+                      <img
+                        src={social.src}
+                        alt={social.alt}
+                        className="h-9 w-9 sm:h-11 sm:w-11 object-contain"
+                      />
                     </Button>
                   ))}
                 </div>
@@ -276,4 +275,3 @@ const LoginBody = () => {
 };
 
 export default LoginBody;
-

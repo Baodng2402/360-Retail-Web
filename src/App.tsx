@@ -30,6 +30,7 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
             </Route>
           </Route>
+          {/* </Route> */}
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />
