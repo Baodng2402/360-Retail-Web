@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { z } from "zod";
+import toast from "react-hot-toast";
 
 import logo from "@/assets/logo.png";
 import facebookIcon from "@/assets/icon/facebook-icon.svg";
@@ -10,6 +12,8 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
+import { authApi } from "@/shared/lib/authApi";
+import { useAuthStore } from "@/shared/store/authStore";
 
 const socialButtons = [
   { src: facebookIcon, alt: "Facebook" },
@@ -17,20 +21,82 @@ const socialButtons = [
   { src: googleIcon, alt: "Google" },
 ] as const;
 
+const loginSchema = z.object({
+  email: z.string().min(1, "Vui lòng nhập email.").email("Email không hợp lệ."),
+  password: z
+    .string()
+    .min(1, "Vui lòng nhập mật khẩu.")
+    .min(6, "Mật khẩu phải có ít nhất 6 ký tự."),
+});
+
 const LoginBody = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
 
   useEffect(() => {
-    const stored = localStorage.getItem("loginRememberMe");
-    if (stored !== null) {
-      setRememberMe(stored === "true");
+    const storedRemember = localStorage.getItem("loginRememberMe");
+    const storedEmail = localStorage.getItem("rememberedEmail");
+
+    if (storedRemember === "true") {
+      setRememberMe(true);
+      if (storedEmail) {
+        setEmail(storedEmail);
+      }
     }
   }, []);
 
   const handleRememberChange = (checked: boolean) => {
     setRememberMe(checked);
     localStorage.setItem("loginRememberMe", String(checked));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const parsed = loginSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";
+      setError(firstError);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const loginRes = await authApi.login({ email, password });
+
+      // Lưu tạm token để gọi /auth/me (axios interceptor sẽ tự gắn Bearer)
+      localStorage.setItem("token", loginRes.accessToken);
+
+      // Lấy thông tin user từ claims
+      const user = await authApi.me();
+      setAuth(user, loginRes.accessToken);
+
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
+
+      toast.success("Đăng nhập thành công!");
+
+      navigate("/dashboard", { replace: true });
+    } catch (err: unknown) {
+      console.error("Login error", err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,7 +131,7 @@ const LoginBody = () => {
               </Link>
             </div>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label
                   htmlFor="email"
@@ -80,6 +146,8 @@ const LoginBody = () => {
                     type="email"
                     placeholder="Your email address"
                     className="h-12 bg-white border-gray-200 pl-11"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
@@ -98,6 +166,8 @@ const LoginBody = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Your password"
                     className="h-12 bg-white border-gray-200 pl-11 pr-11"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -129,11 +199,18 @@ const LoginBody = () => {
                 </Label>
               </div>
 
+              {error && (
+                <p className="text-sm text-red-500">
+                  {error}
+                </p>
+              )}
+
               <Button
                 type="submit"
-                className="h-12 w-full bg-[#0D9488] text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0D9488]/90"
+                disabled={loading}
+                className="h-12 w-full bg-[#0D9488] text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0D9488]/90 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                LOGIN
+                {loading ? "ĐANG ĐĂNG NHẬP..." : "LOGIN"}
               </Button>
 
               <div className="space-y-6">
