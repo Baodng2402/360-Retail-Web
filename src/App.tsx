@@ -20,11 +20,11 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
 
-          <Route element={<ProtectedRoute allowedRoles={[]} />}>
-            <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-            </Route>
+          {/* <Route element={<ProtectedRoute allowedRoles={[]} />}> */}
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
           </Route>
+          {/* </Route> */}
         </Routes>
       </BrowserRouter>
     </div>
