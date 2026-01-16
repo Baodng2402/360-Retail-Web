@@ -116,6 +116,10 @@ const StaffManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
+      <div className="flex flex-col items-start ">
+        <h1 className="text-3xl font-bold mb-1">Sales & POS</h1>
+        <p className="text-muted-foreground">Bán hàng & Quản lý kho</p>
+      </div>
       <div className="flex flex-wrap items-center justify-end gap-3">
         <Button
           variant="outline"
