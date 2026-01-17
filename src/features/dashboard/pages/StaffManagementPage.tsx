@@ -1,16 +1,15 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { Users, CalendarCheck, ListChecks, BadgeAlert } from "lucide-react";
 import { DashboardStats } from "@/features/dashboard/components/DashboardStats";
 import type { StatItem } from "@/features/dashboard/components/DashboardStats";
-import DataTable, { type Staff } from "@/components/table-standard-2";
-import { SearchInput } from "@/components/input-search";
+import DataTable, { type Staff } from "@/shared/components/ui/table-standard-2";
+import { SearchInput } from "@/shared/components/ui/input-search";
 import { useState, useMemo } from "react";
 
 const BUTTON_GRADIENT =
   "from-teal-500 to-teal-600 bg-gradient-to-r hover:from-teal-600 hover:to-teal-700 text-white shadow-sm transition-all";
 
-// Mock staff data
 const MOCK_STAFF_DATA: Staff[] = [
   {
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
@@ -54,7 +53,7 @@ const MOCK_STAFF_DATA: Staff[] = [
     role: "Warehouse Staff",
     email: "tom.brown@example.com",
     phone: "+84 333 456 789",
-    checkin: null, // Not checked in yet
+    checkin: null,
     task: "Prepare shipments",
   },
 ];
@@ -65,7 +64,7 @@ const MOCK_STATS: StatItem[] = [
     subLabel: "Tổng nhân viên",
     value: 12,
     icon: Users,
-    color: "bg-teal-50 text-teal-600", // Màu nhẹ nhàng hơn cho icon
+    color: "bg-teal-50 text-teal-600",
   },
   {
     label: "Checked In Today",
@@ -96,7 +95,6 @@ const MOCK_STATS: StatItem[] = [
 const StaffManagement = () => {
   const [query, setQuery] = useState("");
 
-  // Filter staff based on search query (name, role, email, phone)
   const filteredStaff = useMemo(() => {
     if (!query.trim()) return MOCK_STAFF_DATA;
 
@@ -115,11 +113,6 @@ const StaffManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Actions */}
-      <div className="flex flex-col items-start ">
-        <h1 className="text-3xl font-bold mb-1">Sales & POS</h1>
-        <p className="text-muted-foreground">Bán hàng & Quản lý kho</p>
-      </div>
       <div className="flex flex-wrap items-center justify-end gap-3">
         <Button
           variant="outline"
@@ -133,7 +126,6 @@ const StaffManagement = () => {
         </Button>
       </div>
 
-      {/* Stats Grid */}
       <DashboardStats stats={MOCK_STATS} />
       <div className="border pb-10 px-5 rounded-2xl">
         <div className="flex items-center justify-between pt-5">
@@ -143,8 +135,8 @@ const StaffManagement = () => {
           <div className="relative ml-auto w-64">
             <SearchInput
               placeholder="Search staff / Tìm kiếm..."
-              wrapperClassName="w-64 ml-auto" // Chỉnh vị trí và độ rộng khung bao
-              className="from-gray-50 to-gray-100 bg-gradient-to-r" // Chỉnh màu input nếu thích
+              wrapperClassName="w-64 ml-auto"
+              className="from-gray-50 to-gray-100 bg-gradient-to-r"
               value={query}
               onChange={handleSearch}
             />

@@ -72,10 +72,12 @@ const LoginBody = () => {
       setLoading(true);
       const loginRes = await authApi.login({ email, password });
 
-      // Lưu tạm token để gọi /auth/me (axios interceptor sẽ tự gắn Bearer)
+      if (!loginRes.accessToken) {
+        throw new Error("Access token không hợp lệ từ server");
+      }
+
       localStorage.setItem("token", loginRes.accessToken);
 
-      // Lấy thông tin user từ claims
       const user = await authApi.me();
       setAuth(user, loginRes.accessToken);
 

@@ -1,9 +1,9 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
+import { Card } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Switch } from "@/shared/components/ui/switch";
+import { Separator } from "@/shared/components/ui/separator";
 import {
   Settings as SettingsIcon,
   Store,
@@ -13,9 +13,9 @@ import {
   Database,
 } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const SettingPage = () => {
-  // Store Info States
   const [storeName, setStoreName] = useState("My Retail Store");
   const [storeAddress, setStoreAddress] = useState(
     "123 Main Street, District 1, HCMC"
@@ -23,7 +23,6 @@ const SettingPage = () => {
   const [storePhone, setStorePhone] = useState("0901234567");
   const [storeEmail, setStoreEmail] = useState("store@retail360.vn");
 
-  // Active Tab State
   const [activeTab, setActiveTab] = useState("store");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [lowStockAlerts, setLowStockAlerts] = useState(true);
@@ -34,7 +33,6 @@ const SettingPage = () => {
   const [weeklyReport, setWeeklyReport] = useState(false);
 
   const handleSave = () => {
-    // Simulate save operation
     console.log("Saving settings:", {
       storeName,
       storeAddress,
@@ -51,19 +49,12 @@ const SettingPage = () => {
       },
     });
 
-    // Show success feedback
-    alert("✅ Settings saved successfully! / Đã lưu cài đặt thành công!");
+    toast.success("Đã lưu cài đặt thành công!");
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-1">Settings</h1>
-        <p className="text-muted-foreground">Cài đặt hệ thống</p>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Settings Navigation */}
         <Card className="p-4 h-fit">
           <nav className="space-y-1">
             <button
@@ -71,7 +62,7 @@ const SettingPage = () => {
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 activeTab === "store"
                   ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm"
-                  : "hover:bg-teal-50 text-foreground"
+                  : "hover:bg-teal-50 dark:hover:bg-teal-900/20 text-foreground dark:text-foreground"
               }`}
             >
               <Store className="h-4 w-4" />
@@ -82,7 +73,7 @@ const SettingPage = () => {
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 activeTab === "notifications"
                   ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm"
-                  : "hover:bg-teal-50 text-foreground"
+                  : "hover:bg-teal-50 dark:hover:bg-teal-900/20 text-foreground dark:text-foreground"
               }`}
             >
               <Bell className="h-4 w-4" />
@@ -93,7 +84,7 @@ const SettingPage = () => {
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 activeTab === "security"
                   ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm"
-                  : "hover:bg-teal-50 text-foreground"
+                  : "hover:bg-teal-50 dark:hover:bg-teal-900/20 text-foreground dark:text-foreground"
               }`}
             >
               <Shield className="h-4 w-4" />
@@ -104,7 +95,7 @@ const SettingPage = () => {
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 activeTab === "appearance"
                   ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm"
-                  : "hover:bg-teal-50 text-foreground"
+                  : "hover:bg-teal-50 dark:hover:bg-teal-900/20 text-foreground dark:text-foreground"
               }`}
             >
               <Palette className="h-4 w-4" />
@@ -115,7 +106,7 @@ const SettingPage = () => {
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 activeTab === "data"
                   ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm"
-                  : "hover:bg-teal-50 text-foreground"
+                  : "hover:bg-teal-50 dark:hover:bg-teal-900/20 text-foreground dark:text-foreground"
               }`}
             >
               <Database className="h-4 w-4" />
@@ -124,7 +115,6 @@ const SettingPage = () => {
           </nav>
         </Card>
 
-        {/* Settings Content */}
         <Card className="p-6 lg:col-span-2">
           <div className="flex items-center gap-2 mb-6">
             <Store className="h-5 h-5 text-teal-600" />
@@ -134,7 +124,6 @@ const SettingPage = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Store Information Fields */}
             <div className="space-y-2">
               <Label htmlFor="store-name">Store Name / Tên cửa hàng</Label>
               <Input
@@ -179,7 +168,6 @@ const SettingPage = () => {
 
             <Separator />
 
-            {/* Notification Settings */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
                 <Bell className="h-5 w-5 text-teal-600" />
@@ -188,7 +176,6 @@ const SettingPage = () => {
                 </h4>
               </div>
 
-              {/* Email Notifications */}
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label className="text-base font-medium cursor-pointer">
@@ -206,7 +193,6 @@ const SettingPage = () => {
                 />
               </div>
 
-              {/* Low Stock Alerts */}
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label className="text-base font-medium cursor-pointer">
@@ -224,7 +210,6 @@ const SettingPage = () => {
                 />
               </div>
 
-              {/* Order Notifications */}
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label className="text-base font-medium cursor-pointer">
@@ -241,7 +226,6 @@ const SettingPage = () => {
                 />
               </div>
 
-              {/* Customer Feedback Alerts */}
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label className="text-base font-medium cursor-pointer">
@@ -259,7 +243,6 @@ const SettingPage = () => {
                 />
               </div>
 
-              {/* Auto Check-in Reminder */}
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label className="text-base font-medium cursor-pointer">
@@ -277,7 +260,6 @@ const SettingPage = () => {
                 />
               </div>
 
-              {/* Daily Sales Summary */}
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label className="text-base font-medium cursor-pointer">
@@ -294,7 +276,6 @@ const SettingPage = () => {
                 />
               </div>
 
-              {/* Weekly Report */}
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label className="text-base font-medium cursor-pointer">
@@ -315,7 +296,6 @@ const SettingPage = () => {
 
             <Separator />
 
-            {/* Save Buttons */}
             <div className="flex justify-end gap-3">
               <Button variant="outline">Cancel / Hủy</Button>
               <Button

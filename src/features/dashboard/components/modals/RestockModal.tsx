@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import {
   Dialog,
   DialogContent,
@@ -6,11 +7,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 
 interface RestockModalProps {
   open: boolean;
@@ -30,13 +31,12 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
 
   const handleSubmit = () => {
     if (!quantity || parseInt(quantity) <= 0) {
-      alert("Vui lòng nhập số lượng hợp lệ");
+      toast.error("Vui lòng nhập số lượng hợp lệ");
       return;
     }
 
     setIsSubmitting(true);
 
-    // Simulate API call
     setTimeout(() => {
       console.log("Restock operation:", {
         product: product.name,
@@ -45,7 +45,7 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
         reason,
       });
 
-      alert(
+      toast.success(
         `Đã ${operation === "in" ? "nhập" : "xuất"} ${quantity} ${
           product.name
         } thành công!`
@@ -73,7 +73,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Product Info */}
           <div className="flex items-center gap-4 p-4 bg-teal-50 rounded-lg border border-teal-200">
             <span className="text-4xl">{product.image}</span>
             <div className="flex-1">
@@ -85,7 +84,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             </div>
           </div>
 
-          {/* Operation Type */}
           <div className="space-y-2">
             <Label>Operation Type / Loại thao tác</Label>
             <RadioGroup
@@ -107,7 +105,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             </RadioGroup>
           </div>
 
-          {/* Quantity */}
           <div className="space-y-2">
             <Label htmlFor="quantity">
               Quantity / Số lượng <span className="text-red-500">*</span>
@@ -123,7 +120,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             />
           </div>
 
-          {/* Reason/Note */}
           <div className="space-y-2">
             <Label htmlFor="reason">Reason / Lý do</Label>
             <Input

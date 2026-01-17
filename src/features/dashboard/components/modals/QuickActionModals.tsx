@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import {
   Dialog,
   DialogContent,
@@ -6,20 +7,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/components/ui/select";
 import { Search, ShoppingCart, Users, FileText } from "lucide-react";
 
-// New Sale Modal
 interface NewSaleModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,12 +32,12 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
 
   const handleQuickSale = () => {
     if (!selectedProduct) {
-      alert("Vui lòng chọn sản phẩm");
+      toast.error("Vui lòng chọn sản phẩm");
       return;
     }
 
     console.log("Quick sale:", { product: selectedProduct, quantity });
-    alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+    toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
     onOpenChange(false);
   };
 
@@ -118,7 +118,6 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
   );
 };
 
-// Staff Check-in Modal
 interface StaffCheckInModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -133,13 +132,13 @@ export const StaffCheckInModal = ({
 
   const handleCheckIn = () => {
     if (!staffId) {
-      alert("Vui lòng chọn nhân viên");
+      toast.error("Vui lòng chọn nhân viên");
       return;
     }
 
     const time = new Date().toLocaleTimeString("vi-VN");
     console.log("Staff check-in:", { staffId, action, time });
-    alert(
+    toast.success(
       `Đã ${action === "in" ? "check-in" : "check-out"} thành công lúc ${time}!`
     );
     onOpenChange(false);
@@ -220,7 +219,6 @@ export const StaffCheckInModal = ({
   );
 };
 
-// Generate Report Modal
 interface GenerateReportModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -237,12 +235,12 @@ export const GenerateReportModal = ({
 
   const handleGenerate = () => {
     if (!reportType || !dateFrom || !dateTo) {
-      alert("Vui lòng điền đầy đủ thông tin");
+      toast.error("Vui lòng điền đầy đủ thông tin");
       return;
     }
 
     console.log("Generate report:", { reportType, dateFrom, dateTo, format });
-    alert("Đang tạo báo cáo... Bạn sẽ nhận được file qua email!");
+    toast.success("Đang tạo báo cáo... Bạn sẽ nhận được file qua email!");
     onOpenChange(false);
   };
 
