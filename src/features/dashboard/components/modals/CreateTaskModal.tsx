@@ -48,7 +48,6 @@ const CreateTaskModal = ({
 
     setIsSubmitting(true);
 
-    // Simulate API call
     setTimeout(() => {
       console.log("Task created:", {
         title,
@@ -90,7 +89,6 @@ const CreateTaskModal = ({
             </div>
           )}
 
-          {/* Task Title */}
           <div className="space-y-2">
             <Label htmlFor="title">
               Task Title / Tiêu đề <span className="text-red-500">*</span>
@@ -103,7 +101,6 @@ const CreateTaskModal = ({
             />
           </div>
 
-          {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">Description / Mô tả chi tiết</Label>
             <Textarea
@@ -116,7 +113,6 @@ const CreateTaskModal = ({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Assignee */}
             <div className="space-y-2">
               <Label htmlFor="assignee">
                 Assignee / Người thực hiện{" "}
@@ -135,7 +131,6 @@ const CreateTaskModal = ({
               </Select>
             </div>
 
-            {/* Priority */}
             <div className="space-y-2">
               <Label htmlFor="priority">Priority / Độ ưu tiên</Label>
               <Select value={priority} onValueChange={setPriority}>
@@ -151,7 +146,6 @@ const CreateTaskModal = ({
             </div>
           </div>
 
-          {/* Due Date */}
           <div className="space-y-2">
             <Label htmlFor="dueDate">
               Due Date / Hạn hoàn thành <span className="text-red-500">*</span>

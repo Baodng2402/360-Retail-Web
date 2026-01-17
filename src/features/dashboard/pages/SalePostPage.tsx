@@ -46,7 +46,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AddProductModal from "@/features/dashboard/components/modals/AddProductModal";
 
-// Mock Products Data
 const mockProducts = [
   {
     id: "1",
@@ -122,7 +121,6 @@ const mockProducts = [
   },
 ];
 
-// Mock Sales Report Data
 const salesReportData = [
   { product: "Áo thun", sold: 120, revenue: 30000000 },
   { product: "Quần jean", sold: 98, revenue: 44100000 },
@@ -215,12 +213,6 @@ const SalePostPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold mb-1">Sales & POS</h1>
-        <p className="text-muted-foreground">Bán hàng & Quản lý kho</p>
-      </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="pos">POS / Bán hàng</TabsTrigger>
@@ -228,10 +220,8 @@ const SalePostPage = () => {
           <TabsTrigger value="reports">Reports / Báo cáo</TabsTrigger>
         </TabsList>
 
-        {/* POS Tab */}
         <TabsContent value="pos" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Products Grid */}
             <div className="lg:col-span-2">
               <Card className="p-6">
                 <div className="flex items-center gap-4 mb-6">
@@ -295,7 +285,6 @@ const SalePostPage = () => {
               </Card>
             </div>
 
-            {/* Shopping Cart */}
             <div className="lg:col-span-1">
               <Card className="p-6 sticky top-20">
                 <div className="flex items-center gap-2 mb-6">
@@ -402,7 +391,6 @@ const SalePostPage = () => {
           </div>
         </TabsContent>
 
-        {/* Inventory Tab */}
         <TabsContent value="inventory" className="space-y-4">
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
@@ -494,7 +482,6 @@ const SalePostPage = () => {
           </Card>
         </TabsContent>
 
-        {/* Reports Tab */}
         <TabsContent value="reports" className="space-y-4">
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-6">
@@ -565,7 +552,6 @@ const SalePostPage = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Stock Operation Modal */}
       <Dialog open={showStockModal} onOpenChange={setShowStockModal}>
         <DialogContent>
           <DialogHeader>
@@ -611,7 +597,6 @@ const SalePostPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Add Product Modal */}
       <AddProductModal
         open={addProductModalOpen}
         onOpenChange={setAddProductModalOpen}

@@ -40,7 +40,6 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
     setTimeout(() => {
       console.log("Product added:", {
         name: productName,
@@ -103,7 +102,6 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-          {/* Product Name */}
           <div className="space-y-2">
             <Label htmlFor="productName">
               Product Name / Tên sản phẩm{" "}
@@ -118,7 +116,6 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Category */}
             <div className="space-y-2">
               <Label htmlFor="category">
                 Category / Danh mục <span className="text-red-500">*</span>
@@ -140,7 +137,6 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
               </Select>
             </div>
 
-            {/* Image/Emoji */}
             <div className="space-y-2">
               <Label htmlFor="image">Icon / Biểu tượng</Label>
               <Select value={image} onValueChange={setImage}>
@@ -159,7 +155,6 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Price */}
             <div className="space-y-2">
               <Label htmlFor="price">
                 Price / Giá bán (₫) <span className="text-red-500">*</span>
@@ -173,7 +168,6 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
               />
             </div>
 
-            {/* Stock */}
             <div className="space-y-2">
               <Label htmlFor="stock">
                 Stock / Tồn kho <span className="text-red-500">*</span>
@@ -188,7 +182,6 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
             </div>
           </div>
 
-          {/* Barcode */}
           <div className="space-y-2">
             <Label htmlFor="barcode">
               Barcode / Mã vạch
@@ -214,7 +207,6 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
             </div>
           </div>
 
-          {/* Preview */}
           {productName && (
             <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
               <p className="text-sm font-medium text-teal-900 mb-2">Preview:</p>

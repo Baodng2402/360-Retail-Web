@@ -1,14 +1,14 @@
 import { type LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils"; // Giả sử bạn có hàm cn của shadcn/ui
+import { cn } from "@/lib/utils";
 
 export interface StatItem {
-  label: string; // Thay cho name
-  subLabel: string; // Thay cho title
+  label: string;
+  subLabel: string;
   value: string | number;
   icon: LucideIcon;
   change?: string | null;
   trend?: "up" | "down" | "neutral" | null;
-  color?: string; // Tailwind classes cho icon box
+  color?: string;
 }
 
 export const DashboardStats = ({ stats }: { stats: StatItem[] }) => (
@@ -34,14 +34,10 @@ const StatCard = ({
   return (
     <div className="group bg-card border border-border rounded-xl p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/20">
       <div className="flex items-center justify-between mb-4">
-        {/* Icon Box: Sử dụng color prop ở đây */}
-        <div
-          className={cn("p-2.5 rounded-lg bg-primary/10 text-primary", color)}
-        >
+        <div className={cn("p-2.5 rounded-lg", color)}>
           <Icon className="h-6 w-6" />
         </div>
 
-        {/* Chỉ hiển thị nếu có change */}
         {change && (
           <span
             className={cn(

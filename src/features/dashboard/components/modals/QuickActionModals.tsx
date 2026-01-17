@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import { Search, ShoppingCart, Users, FileText } from "lucide-react";
 
-// New Sale Modal
 interface NewSaleModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -118,7 +117,6 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
   );
 };
 
-// Staff Check-in Modal
 interface StaffCheckInModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -220,7 +218,6 @@ export const StaffCheckInModal = ({
   );
 };
 
-// Generate Report Modal
 interface GenerateReportModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

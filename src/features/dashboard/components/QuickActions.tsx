@@ -103,31 +103,36 @@ const QuickActions = () => {
     <>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-stone-900">Quick Actions</h2>
-          <span className="text-sm text-stone-500">Thao tác nhanh</span>
+          <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">
+            Quick Actions
+          </h2>
+          <span className="text-sm text-stone-500 dark:text-stone-400">
+            Thao tác nhanh
+          </span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {quickActions.map((action, idx) => (
             <button
               key={action.title + idx}
               onClick={() => handleActionClick(action)}
-              className="p-4 bg-white rounded-xl border border-stone-200 hover:shadow-lg transition-all group"
+              className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-stone-200 dark:border-gray-700 hover:shadow-lg dark:hover:shadow-gray-900/50 transition-all group"
             >
               <div
-                className={`w-12 h-12 mx-auto mb-3 bg-gradient-to-br ${action.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}
+                className={`w-12 h-12 mx-auto mb-3 bg-gradient-to-br ${action.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md`}
               >
                 <action.icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-sm font-semibold text-stone-900 mb-1">
+              <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100 mb-1">
                 {action.title}
               </h3>
-              <p className="text-xs text-stone-500">{action.description}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                {action.description}
+              </p>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Modals */}
       <NewSaleModal open={newSaleOpen} onOpenChange={setNewSaleOpen} />
       <StaffCheckInModal open={checkInOpen} onOpenChange={setCheckInOpen} />
       <GenerateReportModal open={reportOpen} onOpenChange={setReportOpen} />

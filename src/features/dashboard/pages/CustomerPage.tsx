@@ -90,15 +90,6 @@ const CustomerPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold mb-1">Customer Management</h1>
-        <p className="text-muted-foreground">
-          Quản lý khách hàng · Track loyalty and engagement
-        </p>
-      </div>
-
-      {/* Search Bar */}
       <div className="relative max-w-md">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
@@ -110,7 +101,6 @@ const CustomerPage = () => {
         />
       </div>
 
-      {/* Customer List */}
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card className="p-0 overflow-hidden">
@@ -170,7 +160,6 @@ const CustomerPage = () => {
           </Card>
         </div>
 
-        {/* Customer Detail Panel */}
         <div className="lg:col-span-1">
           {currentCustomer ? (
             <Card className="p-0 overflow-hidden sticky top-6">
@@ -201,7 +190,6 @@ const CustomerPage = () => {
                   </Button>
                 </div>
 
-                {/* Stats */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="p-3 bg-teal-50 rounded-xl">
                     <div className="flex items-center gap-2 mb-1">
@@ -225,14 +213,12 @@ const CustomerPage = () => {
                   </div>
                 </div>
 
-                {/* Send ZNS Button */}
                 <Button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-lg shadow-purple-600/25">
                   <Send className="w-5 h-5 mr-2" />
                   Send ZNS Message · Gửi tin Zalo
                 </Button>
               </div>
 
-              {/* Purchase History */}
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <ShoppingBag className="w-5 h-5 text-foreground" />
@@ -270,7 +256,6 @@ const CustomerPage = () => {
         </div>
       </div>
 
-      {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="p-6">
           <p className="text-sm text-muted-foreground mb-2">Total Customers</p>

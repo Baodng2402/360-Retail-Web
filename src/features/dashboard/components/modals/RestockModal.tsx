@@ -36,7 +36,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
     setTimeout(() => {
       console.log("Restock operation:", {
         product: product.name,
@@ -73,7 +72,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Product Info */}
           <div className="flex items-center gap-4 p-4 bg-teal-50 rounded-lg border border-teal-200">
             <span className="text-4xl">{product.image}</span>
             <div className="flex-1">
@@ -85,7 +83,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             </div>
           </div>
 
-          {/* Operation Type */}
           <div className="space-y-2">
             <Label>Operation Type / Loại thao tác</Label>
             <RadioGroup
@@ -107,7 +104,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             </RadioGroup>
           </div>
 
-          {/* Quantity */}
           <div className="space-y-2">
             <Label htmlFor="quantity">
               Quantity / Số lượng <span className="text-red-500">*</span>
@@ -123,7 +119,6 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             />
           </div>
 
-          {/* Reason/Note */}
           <div className="space-y-2">
             <Label htmlFor="reason">Reason / Lý do</Label>
             <Input

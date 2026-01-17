@@ -170,4 +170,40 @@
   .review-marquee:hover {
     animation-play-state: paused;
   }
+
+  /* Custom scrollbar styling - thin and subtle */
+  .scrollbar-hide {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .dark .scrollbar-hide {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  .dark .scrollbar-hide::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Hide scrollbar when not needed */
+  .scrollbar-hide:not(:hover) {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide:not(:hover)::-webkit-scrollbar {
+    display: none;
+  }
 }

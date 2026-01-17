@@ -1,6 +1,8 @@
 import { useAuthStore } from "@/shared/store/authStore";
 import AvatarDropĐown from "@/components/dropdown-menu-profile-2";
 import { useLocation } from "react-router-dom";
+import ThemeMode from "@/shared/components/ui/themeMode";
+
 const PAGE_NAME: Record<string, { name: string; title: string }> = {
   "/dashboard": { name: "Dashboard", title: "Tổng quan 360°" },
   "/dashboard/staff": { name: "Staff", title: "Quản lý Nhân viên" },
@@ -10,18 +12,33 @@ const PAGE_NAME: Record<string, { name: string; title: string }> = {
   "/dashboard/settings": { name: "Settings", title: "Cài đặt" },
 };
 
-export const DashboardHeader = () => {
+interface DashboardHeaderProps {
+  isSidebarCollapsed: boolean;
+}
+
+export const DashboardHeader = ({
+  isSidebarCollapsed,
+}: DashboardHeaderProps) => {
   const { user } = useAuthStore();
   const location = useLocation();
   const pageName = PAGE_NAME[location.pathname];
   return (
-    <header className="border-b border-border bg-background sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-bold">{pageName?.name}</h1>
-          <h2 className="text-sm text-muted-foreground">{pageName?.title}</h2>
+    <header className="border-b border-gray-200 dark:border-gray-700 bg-background sticky top-0 z-50 h-[73px] flex items-center">
+      <div
+        className={`flex items-center justify-between w-full transition-all duration-300 ${
+          isSidebarCollapsed ? "px-4" : "container mx-auto px-4"
+        }`}
+      >
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold">{pageName?.name}</h1>
+            <h2 className="text-sm text-muted-foreground">{pageName?.title}</h2>
+          </div>
         </div>
         <div className="flex items-center gap-4">
+          <div className="scale-75 origin-right">
+            <ThemeMode />
+          </div>
           <AvatarDropĐown />
           <div className="flex flex-col">
             <span className="text-sm">Xin chào, {user?.name || "User"}</span>
