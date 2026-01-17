@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import {
   Dialog,
   DialogContent,
@@ -6,11 +7,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 
 interface RestockModalProps {
   open: boolean;
@@ -30,7 +31,7 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
 
   const handleSubmit = () => {
     if (!quantity || parseInt(quantity) <= 0) {
-      alert("Vui lòng nhập số lượng hợp lệ");
+      toast.error("Vui lòng nhập số lượng hợp lệ");
       return;
     }
 
@@ -44,7 +45,7 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
         reason,
       });
 
-      alert(
+      toast.success(
         `Đã ${operation === "in" ? "nhập" : "xuất"} ${quantity} ${
           product.name
         } thành công!`

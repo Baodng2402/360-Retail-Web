@@ -1,9 +1,9 @@
 import { DashboardStats } from "@/features/dashboard/components/DashboardStats";
 import type { StatItem } from "@/features/dashboard/components/DashboardStats";
 import { DollarSign, Users, ShoppingBag } from "lucide-react";
-import ChartBar, { type ChartDataItem } from "@/components/chart-bar-mixed";
-import type { ChartConfig } from "@/components/ui/chart";
-import ChartLineDefault from "@/components/chart-line-default";
+import ChartBar, { type ChartDataItem } from "@/shared/components/ui/chart-bar-mixed";
+import type { ChartConfig } from "@/shared/components/ui/chart";
+import ChartLineDefault from "@/shared/components/ui/chart-line-default";
 import { Box } from "lucide-react";
 import RecentTransactions from "@/features/dashboard/components/RecentTransactions";
 import RestockModal from "@/features/dashboard/components/modals/RestockModal";

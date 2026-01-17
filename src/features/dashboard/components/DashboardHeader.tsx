@@ -1,11 +1,12 @@
 import { useAuthStore } from "@/shared/store/authStore";
-import AvatarDropĐown from "@/components/dropdown-menu-profile-2";
+import AvatarDropĐown from "@/shared/components/ui/dropdown-menu-profile-2";
 import { useLocation } from "react-router-dom";
 import ThemeMode from "@/shared/components/ui/themeMode";
 
 const PAGE_NAME: Record<string, { name: string; title: string }> = {
   "/dashboard": { name: "Dashboard", title: "Tổng quan 360°" },
   "/dashboard/staff": { name: "Staff", title: "Quản lý Nhân viên" },
+  "/dashboard/stores": { name: "Stores", title: "Quản lý Cửa hàng" },
   "/dashboard/sales": { name: "Sales & POS", title: "Quản lý Bán hàng" },
   "/dashboard/customers": { name: "Customers", title: "Quản lý Khách hàng" },
   "/dashboard/reports": { name: "Reports", title: "Báo cáo" },

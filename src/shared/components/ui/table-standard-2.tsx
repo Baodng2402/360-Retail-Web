@@ -5,7 +5,7 @@ import {
   CalendarCheck,
   ListTodo,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -13,16 +13,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge"; // Optional: Nếu bạn muốn hiển thị Role đẹp hơn
-import { Button } from "@/components/ui/button";
+} from "@/shared/components/ui/table";
+import { Badge } from "@/shared/components/ui/badge"; // Optional: Nếu bạn muốn hiển thị Role đẹp hơn
+import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/ui/dropdown-menu";
 
 // 1. Định nghĩa Interface chuẩn
 export interface Staff {

@@ -1,9 +1,9 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
+import { Card } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Switch } from "@/shared/components/ui/switch";
+import { Separator } from "@/shared/components/ui/separator";
 import {
   Settings as SettingsIcon,
   Store,
@@ -13,6 +13,7 @@ import {
   Database,
 } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const SettingPage = () => {
   const [storeName, setStoreName] = useState("My Retail Store");
@@ -48,7 +49,7 @@ const SettingPage = () => {
       },
     });
 
-    alert("✅ Settings saved successfully! / Đã lưu cài đặt thành công!");
+    toast.success("Đã lưu cài đặt thành công!");
   };
 
   return (

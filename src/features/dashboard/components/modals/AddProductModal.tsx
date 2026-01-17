@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import {
   Dialog,
   DialogContent,
@@ -6,17 +7,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/components/ui/select";
 
 interface AddProductModalProps {
   open: boolean;
@@ -34,7 +35,7 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
 
   const handleSubmit = () => {
     if (!productName || !category || !price || !stock) {
-      alert("Vui lòng điền đầy đủ thông tin bắt buộc");
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
 
@@ -50,7 +51,7 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
         image,
       });
 
-      alert(`Đã thêm sản phẩm "${productName}" thành công!`);
+      toast.success(`Đã thêm sản phẩm "${productName}" thành công!`);
 
       setIsSubmitting(false);
       resetForm();

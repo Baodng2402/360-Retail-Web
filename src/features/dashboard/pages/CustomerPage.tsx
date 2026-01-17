@@ -8,12 +8,14 @@ import {
   Clock,
   ShoppingBag,
   Users,
+  Star,
+  Activity,
 } from "lucide-react";
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 
 const CustomerPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -256,28 +258,50 @@ const CustomerPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground mb-2">Total Customers</p>
-          <p className="text-3xl font-bold mb-1">{customers.length}</p>
-          <p className="text-sm text-muted-foreground">Tổng khách hàng</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="p-6 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background border-blue-200 dark:border-blue-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Tổng khách hàng</p>
+              <h3 className="text-2xl font-bold text-foreground">{customers.length}</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <Users className="h-6 w-6 text-primary" />
+            </div>
+          </div>
         </Card>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground mb-2">Avg. Spend</p>
-          <p className="text-3xl font-bold mb-1">₫3.0M</p>
-          <p className="text-sm text-muted-foreground">Chi tiêu trung bình</p>
+        <Card className="p-6 bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200 dark:border-green-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Chi tiêu trung bình</p>
+              <h3 className="text-2xl font-bold text-foreground">₫3.0M</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
         </Card>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground mb-2">
-            Total Points Given
-          </p>
-          <p className="text-3xl font-bold mb-1">1,221</p>
-          <p className="text-sm text-muted-foreground">Tổng điểm tích lũy</p>
+        <Card className="p-6 bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-background border-purple-200 dark:border-purple-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Tổng điểm tích lũy</p>
+              <h3 className="text-2xl font-bold text-foreground">1,221</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+              <Star className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            </div>
+          </div>
         </Card>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground mb-2">Active This Week</p>
-          <p className="text-3xl font-bold mb-1">3</p>
-          <p className="text-sm text-muted-foreground">Hoạt động tuần này</p>
+        <Card className="p-6 bg-gradient-to-br from-orange-50 to-white dark:from-orange-950/20 dark:to-background border-orange-200 dark:border-orange-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Hoạt động tuần này</p>
+              <h3 className="text-2xl font-bold text-foreground">3</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+              <Activity className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+            </div>
+          </div>
         </Card>
       </div>
     </div>

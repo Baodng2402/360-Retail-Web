@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { Card } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Badge } from "@/shared/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/shared/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/shared/components/ui/dialog";
 import {
   Search,
   Plus,
@@ -43,7 +43,13 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import toast from "react-hot-toast";
+import { productsApi } from "@/shared/lib/productsApi";
+import { ordersApi } from "@/shared/lib/ordersApi";
+import { storesApi } from "@/shared/lib/storesApi";
+import { useStoreStore } from "@/shared/store/storeStore";
+import type { Product } from "@/shared/types/products";
 import AddProductModal from "@/features/dashboard/components/modals/AddProductModal";
 
 const mockProducts = [
@@ -129,30 +135,100 @@ const salesReportData = [
   { product: "Túi xách", sold: 55, revenue: 20900000 },
 ];
 
+type ProductDisplay = {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  barcode: string;
+  image: string;
+};
+
 interface CartItem {
-  product: (typeof mockProducts)[0];
+  product: ProductDisplay;
   quantity: number;
 }
 
 const SalePostPage = () => {
+  const { currentStore } = useStoreStore();
   const [activeTab, setActiveTab] = useState("pos");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [showStockModal, setShowStockModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(mockProducts[0]);
+  const [products, setProducts] = useState<ProductDisplay[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDisplay | null>(null);
   const [stockOperation, setStockOperation] = useState<"in" | "out">("in");
   const [stockAmount, setStockAmount] = useState("");
   const [addProductModalOpen, setAddProductModalOpen] = useState(false);
 
-  const filteredProducts = mockProducts.filter(
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        let storeId = currentStore?.id;
+        
+        if (!storeId) {
+          try {
+            const myStore = await storesApi.getMyStore();
+            storeId = myStore.id;
+          } catch (storeError) {
+            console.error("Failed to get store:", storeError);
+            toast.error("Không thể lấy thông tin cửa hàng");
+            setProducts([]);
+            return;
+          }
+        }
+
+        const allProducts = await productsApi.getProducts({ 
+          storeId, 
+          includeInactive: false 
+        });
+        const transformed = transformProducts(allProducts);
+        setProducts(transformed);
+        if (transformed.length > 0) {
+          setSelectedProduct(transformed[0]);
+        } else {
+          setSelectedProduct(null);
+        }
+      } catch (error: any) {
+        console.error("Failed to load products:", error);
+        const errorMessage = error?.response?.data?.message || 
+                            error?.message || 
+                            "Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.";
+        toast.error(errorMessage);
+        setProducts([]);
+        setSelectedProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [currentStore?.id]);
+
+  const transformProducts = (apiProducts: Product[]): ProductDisplay[] => {
+    return apiProducts.map((p) => ({
+      id: p.id,
+      name: p.productName,
+      category: p.categoryName || "Uncategorized",
+      price: p.price,
+      stock: p.stockQuantity,
+      barcode: p.barCode || "",
+      image: p.imageUrl || "📦",
+    }));
+  };
+
+  const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.barcode.includes(searchQuery) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const addToCart = (product: (typeof mockProducts)[0]) => {
+  const addToCart = (product: ProductDisplay) => {
     const existingItem = cart.find((item) => item.product.id === product.id);
     if (existingItem) {
       setCart(
@@ -190,15 +266,35 @@ const SalePostPage = () => {
     );
   };
 
-  const handleCompleteOrder = () => {
-    console.log("Order completed:", {
-      cart,
-      customer: selectedCustomer,
-      total: calculateTotal(),
-    });
-    setCart([]);
-    setSelectedCustomer("");
-    alert("Đơn hàng đã được tạo thành công!");
+  const handleCompleteOrder = async () => {
+    if (cart.length === 0) {
+      toast.error("Giỏ hàng trống!");
+      return;
+    }
+
+    try {
+      const storeId = currentStore?.id || (await storesApi.getMyStore()).id;
+      
+      const orderItems = cart.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+        productVariantId: undefined as string | undefined,
+      }));
+
+      await ordersApi.createOrder({
+        customerId: selectedCustomer || undefined,
+        paymentMethod: "Cash",
+        discountAmount: 0,
+        items: orderItems,
+      });
+
+      toast.success("Đơn hàng đã được tạo thành công!");
+      setCart([]);
+      setSelectedCustomer("");
+    } catch (error) {
+      console.error("Failed to create order:", error);
+      toast.error("Không thể tạo đơn hàng. Vui lòng thử lại!");
+    }
   };
 
   const handleStockOperation = () => {
@@ -421,7 +517,7 @@ const SalePostPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockProducts.map((product) => (
+                  {products.map((product) => (
                     <TableRow key={product.id} className="hover:bg-muted/50">
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -560,18 +656,22 @@ const SalePostPage = () => {
                 ? "Stock In / Nhập kho"
                 : "Stock Out / Xuất kho"}
             </DialogTitle>
-            <DialogDescription>{selectedProduct.name}</DialogDescription>
+            <DialogDescription>
+              {selectedProduct ? selectedProduct.name : "No product selected"}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">{selectedProduct.image}</span>
-              <div className="flex-1">
-                <p className="font-medium">{selectedProduct.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  Current stock: {selectedProduct.stock}
-                </p>
+            {selectedProduct && (
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">{selectedProduct.image}</span>
+                <div className="flex-1">
+                  <p className="font-medium">{selectedProduct.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Current stock: {selectedProduct.stock}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="stock-amount">
                 Amount / Số lượng {stockOperation === "in" ? "nhập" : "xuất"}

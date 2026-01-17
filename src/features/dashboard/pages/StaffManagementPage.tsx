@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { Users, CalendarCheck, ListChecks, BadgeAlert } from "lucide-react";
 import { DashboardStats } from "@/features/dashboard/components/DashboardStats";
 import type { StatItem } from "@/features/dashboard/components/DashboardStats";
-import DataTable, { type Staff } from "@/components/table-standard-2";
-import { SearchInput } from "@/components/input-search";
+import DataTable, { type Staff } from "@/shared/components/ui/table-standard-2";
+import { SearchInput } from "@/shared/components/ui/input-search";
 import { useState, useMemo } from "react";
 
 const BUTTON_GRADIENT =
