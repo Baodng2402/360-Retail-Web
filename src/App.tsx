@@ -13,6 +13,7 @@ import SalePostPage from "@/features/dashboard/pages/SalePostPage";
 import ReportPage from "@/features/dashboard/pages/ReportPage";
 import SettingPage from "@/features/dashboard/pages/SettingPage";
 import CustomerPage from "@/features/dashboard/pages/CustomerPage";
+import StoreManagementPage from "@/features/dashboard/pages/StoreManagementPage";
 
 function App() {
   return (
@@ -39,8 +40,9 @@ function App() {
               />
               <Route path="/dashboard/sales" element={<SalePostPage />} />
               <Route path="/dashboard/reports" element={<ReportPage />} />
-              <Route path="/dashboard/settings" element={<SettingPage />} />\
+              <Route path="/dashboard/settings" element={<SettingPage />} />
               <Route path="/dashboard/customers" element={<CustomerPage />} />
+              <Route path="/dashboard/stores" element={<StoreManagementPage />} />
             </Route>
           </Route>
           {/* </Route> */}

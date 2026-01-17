@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import {
   Dialog,
   DialogContent,
@@ -6,18 +7,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
+import { Textarea } from "@/shared/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/components/ui/select";
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -42,7 +43,7 @@ const CreateTaskModal = ({
 
   const handleSubmit = () => {
     if (!title || !assignee || !dueDate) {
-      alert("Vui lòng điền đầy đủ thông tin bắt buộc");
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
 
@@ -58,7 +59,7 @@ const CreateTaskModal = ({
         relatedCustomer: feedbackData?.customer,
       });
 
-      alert("Đã tạo task thành công!");
+      toast.success("Đã tạo task thành công!");
 
       setIsSubmitting(false);
       setTitle("");
