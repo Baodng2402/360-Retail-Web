@@ -14,6 +14,7 @@ import ReportPage from "@/features/dashboard/pages/ReportPage";
 import SettingPage from "@/features/dashboard/pages/SettingPage";
 import CustomerPage from "@/features/dashboard/pages/CustomerPage";
 import StoreManagementPage from "@/features/dashboard/pages/StoreManagementPage";
+import ProductManagementPage from "@/features/dashboard/pages/ProductManagementPage";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
               <Route path="/dashboard/settings" element={<SettingPage />} />
               <Route path="/dashboard/customers" element={<CustomerPage />} />
               <Route path="/dashboard/stores" element={<StoreManagementPage />} />
+              <Route path="/dashboard/products" element={<ProductManagementPage />} />
             </Route>
           </Route>
           {/* </Route> */}

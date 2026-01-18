@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Store as StoreIcon,
+  Package,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
@@ -60,6 +61,13 @@ export const DashboardSideBar = ({
       label: "Stores",
       subLabel: "Cửa hàng",
       path: "/dashboard/stores",
+      end: false,
+    },
+    {
+      icon: Package,
+      label: "Products",
+      subLabel: "Sản phẩm",
+      path: "/dashboard/products",
       end: false,
     },
     {
