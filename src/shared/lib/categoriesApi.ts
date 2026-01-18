@@ -7,33 +7,23 @@ import type {
 import type { ApiResponse } from "@/shared/types/api-response";
 
 export const categoriesApi = {
-  async getCategories(storeId?: string): Promise<Category[]> {
+  async getCategories(storeId?: string, includeInactive?: boolean): Promise<Category[]> {
     const queryParams = new URLSearchParams();
     if (storeId) queryParams.append("storeId", storeId);
+    if (includeInactive !== undefined) {
+      queryParams.append("includeInactive", includeInactive.toString());
+    }
 
     const url = `sales/Categories${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
-    console.log("[categoriesApi.getCategories] Request URL:", url);
-    console.log("[categoriesApi.getCategories] storeId:", storeId);
 
     const res = await salesApi.get<ApiResponse<Category[]> | Category[]>(url);
     
-    console.log("[categoriesApi.getCategories] Raw response:", res.data);
-    console.log("[categoriesApi.getCategories] Response type check:", {
-      hasSuccess: "success" in res.data,
-      success: "success" in res.data ? (res.data as any).success : undefined,
-      hasData: "success" in res.data ? "data" in (res.data as any) : undefined,
-      isArray: Array.isArray(res.data),
-    });
-    
     if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
-      console.log("[categoriesApi.getCategories] Returning data.data:", res.data.data);
       return res.data.data;
     }
     if (Array.isArray(res.data)) {
-      console.log("[categoriesApi.getCategories] Returning res.data as array:", res.data);
       return res.data;
     }
-    console.log("[categoriesApi.getCategories] Returning empty array");
     return [];
   },
 

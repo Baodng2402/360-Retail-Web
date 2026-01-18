@@ -34,7 +34,7 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
   const loadStores = async () => {
     try {
       setStoresLoading(true);
-      const data = await storesApi.getMyOwnedStores();
+      const data = await storesApi.getMyOwnedStores(true);
 
       // Sort stores: default first, then active, then inactive
       const sortedStores = [...data].sort((a, b) => {

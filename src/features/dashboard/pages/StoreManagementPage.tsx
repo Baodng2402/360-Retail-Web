@@ -28,15 +28,10 @@ import {
   Store as StoreIcon,
   MapPin,
   Phone,
-  Users,
-  Clock,
-  DollarSign,
-  TrendingUp,
-  AlertCircle,
   CheckCircle,
   XCircle,
-  Building2,
   Calendar,
+  Loader2,
 } from "lucide-react";
 import { storesApi } from "@/shared/lib/storesApi";
 import type { Store } from "@/shared/types/stores";
@@ -58,6 +53,7 @@ const StoreManagementPage = () => {
   const [editingStore, setEditingStore] = useState<StoreData | null>(null);
   const [toggleDialogOpen, setToggleDialogOpen] = useState(false);
   const [storeToToggle, setStoreToToggle] = useState<StoreData | null>(null);
+  const [savingStore, setSavingStore] = useState(false);
   const [storeForm, setStoreForm] = useState({
     storeName: "",
     address: "",
@@ -67,12 +63,14 @@ const StoreManagementPage = () => {
 
   useEffect(() => {
     fetchStores();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStatus]);
 
   const fetchStores = async () => {
     try {
       setLoading(true);
-      const fetchedStores = await storesApi.getMyOwnedStores();
+      const includeInactive = selectedStatus !== "active";
+      const fetchedStores = await storesApi.getMyOwnedStores(includeInactive);
       
       const mappedStores: StoreData[] = fetchedStores.map((store) => ({
         ...store,
@@ -133,7 +131,12 @@ const StoreManagementPage = () => {
       return;
     }
 
+    if (savingStore) {
+      return;
+    }
+
     try {
+      setSavingStore(true);
       if (editingStore) {
         const updatedStore = await storesApi.updateStore(editingStore.id, {
           storeName: storeForm.storeName,
@@ -154,18 +157,13 @@ const StoreManagementPage = () => {
         );
         toast.success("Cập nhật cửa hàng thành công!");
       } else {
-        const newStore = await storesApi.createStore({
+        await storesApi.createStore({
           storeName: storeForm.storeName,
           address: storeForm.address || undefined,
           phone: storeForm.phone || undefined,
         });
 
-        const storeWithStatus: StoreData = {
-          ...newStore,
-          status: newStore.isActive ? "active" : "inactive",
-        };
-
-        setStores([...stores, storeWithStatus]);
+        await fetchStores();
         toast.success("Tạo cửa hàng thành công!");
       }
 
@@ -178,6 +176,8 @@ const StoreManagementPage = () => {
           ? "Không thể cập nhật cửa hàng"
           : "Không thể tạo cửa hàng";
       toast.error(errorMessage);
+    } finally {
+      setSavingStore(false);
     }
   };
 
@@ -268,10 +268,6 @@ const StoreManagementPage = () => {
 
   const getStatusIcon = (status: StoreData["status"] | boolean) => {
     const isActive = typeof status === "boolean" ? status : status === "active";
-    
-    if (typeof status === "string" && status === "maintenance") {
-      return <AlertCircle className="h-5 w-5 text-yellow-500" />;
-    }
 
     if (isActive) {
       return <CheckCircle className="h-5 w-5 text-green-500" />;
@@ -583,11 +579,22 @@ const StoreManagementPage = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStoreDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setStoreDialogOpen(false)}
+              disabled={savingStore}
+            >
               Hủy
             </Button>
-            <Button onClick={handleSaveStore}>
-              {editingStore ? "Cập nhật" : "Thêm"}
+            <Button onClick={handleSaveStore} disabled={savingStore}>
+              {savingStore ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Đang xử lý...
+                </>
+              ) : (
+                editingStore ? "Cập nhật" : "Thêm"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

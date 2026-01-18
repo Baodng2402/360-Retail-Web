@@ -33,7 +33,6 @@ import {
   Search,
   Plus,
   Edit,
-  Trash2,
   Package,
   Tag,
   DollarSign,
@@ -44,15 +43,15 @@ import {
   Eye,
 } from "lucide-react";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Switch } from "@/shared/components/ui/switch";
+import { CheckCircle, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { categoriesApi } from "@/shared/lib/categoriesApi";
 import { productsApi } from "@/shared/lib/productsApi";
-import { storesApi } from "@/shared/lib/storesApi";
 import { useStoreStore } from "@/shared/store/storeStore";
 import type { Category } from "@/shared/types/categories";
 import type { Product } from "@/shared/types/products";
-import type { Store } from "@/shared/types/stores";
-import { Store as StoreIcon } from "lucide-react";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 
 interface ExtendedCategory extends Category {
   color?: string;
@@ -81,19 +80,20 @@ const generateCategoryColor = (categoryName: string, index: number): string => {
 };
 
 export default function ProductManagementPage() {
-  const { currentStore, switchStore } = useStoreStore();
+  const { currentStore } = useStoreStore();
   const storeId = currentStore?.id;
 
   const [products, setProducts] = useState<ExtendedProduct[]>([]);
   const [categories, setCategories] = useState<ExtendedCategory[]>([]);
-  const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const [storesLoading, setStoresLoading] = useState(false);
-  const [switchingStore, setSwitchingStore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedActiveStatus, setSelectedActiveStatus] = useState<string>("active");
+  const [selectedCategoryActiveStatus, setSelectedCategoryActiveStatus] = useState<string>("active");
+  const [togglingProductIds, setTogglingProductIds] = useState<Set<string>>(new Set());
+  const [togglingCategoryIds, setTogglingCategoryIds] = useState<Set<string>>(new Set());
 
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ExtendedProduct | null>(null);
@@ -108,6 +108,7 @@ export default function ProductManagementPage() {
     imageFile: null as File | null,
     hasVariants: false,
     variantsJson: "",
+    isActive: true,
   });
   const [productFormLoading, setProductFormLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -119,101 +120,53 @@ export default function ProductManagementPage() {
     description: "",
     color: generateCategoryColor("", 0),
     parentId: "",
+    isActive: true,
   });
   const [categoryFormLoading, setCategoryFormLoading] = useState(false);
 
   const [barCodeViewDialogOpen, setBarCodeViewDialogOpen] = useState(false);
   const [barCodeToView, setBarCodeToView] = useState<string>("");
 
-  const [deleteProductDialogOpen, setDeleteProductDialogOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<ExtendedProduct | null>(null);
-  const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<ExtendedCategory | null>(null);
-
-  useEffect(() => {
-    loadStores();
-  }, []);
+  const [toggleProductDialogOpen, setToggleProductDialogOpen] = useState(false);
+  const [productToToggle, setProductToToggle] = useState<ExtendedProduct | null>(null);
+  const [toggleCategoryDialogOpen, setToggleCategoryDialogOpen] = useState(false);
+  const [categoryToToggle, setCategoryToToggle] = useState<ExtendedCategory | null>(null);
 
   useEffect(() => {
     if (storeId) {
       loadCategories();
       loadProducts();
+    } else {
+      setProducts([]);
+      setCategories([]);
     }
-  }, [storeId]);
+  }, [storeId, selectedCategoryActiveStatus, selectedActiveStatus]);
 
-  const loadStores = async () => {
-    try {
-      setStoresLoading(true);
-      const data = await storesApi.getMyOwnedStores();
-      
-      const sortedStores = [...data].sort((a, b) => {
-        if (a.isDefault) return -1;
-        if (b.isDefault) return 1;
-        if (a.isActive && !b.isActive) return -1;
-        if (!a.isActive && b.isActive) return 1;
-        return 0;
-      });
-      
-      setStores(sortedStores);
-      
-      const defaultStore = data.find((s) => s.isDefault);
-      
-      if (defaultStore) {
-        console.log("[loadStores] Default store from token:", defaultStore);
-        console.log("[loadStores] Current store in state:", currentStore);
-        
-        if (!currentStore || currentStore.id !== defaultStore.id) {
-          console.log("[loadStores] Syncing currentStore to match token default store");
-          const storeStore = useStoreStore.getState();
-          storeStore.setCurrentStore(defaultStore);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading stores:", error);
-      toast.error("Không thể tải danh sách cửa hàng. Vui lòng thử lại.");
-    } finally {
-      setStoresLoading(false);
-    }
-  };
-
-  const handleStoreChange = async (storeId: string) => {
-    const selectedStore = stores.find((s) => s.id === storeId);
-    if (!selectedStore || selectedStore.id === currentStore?.id) {
-      return;
-    }
-
-    try {
-      setSwitchingStore(true);
-      await switchStore(selectedStore);
-      toast.success(`Đã chuyển sang cửa hàng: ${selectedStore.storeName}`);
-    } catch (error) {
-      console.error("Error switching store:", error);
-      toast.error("Không thể chuyển cửa hàng. Vui lòng thử lại.");
-    } finally {
-      setSwitchingStore(false);
-    }
-  };
 
   const loadCategories = async () => {
     if (!storeId) {
-      console.log("[loadCategories] No storeId provided");
+      setCategories([]);
       return;
     }
     try {
       setCategoriesLoading(true);
-      console.log("[loadCategories] Loading categories for storeId:", storeId);
-      const data = await categoriesApi.getCategories(storeId);
-      console.log("[loadCategories] Categories response:", data);
+      const includeInactive = selectedCategoryActiveStatus !== "active";
+      const data = await categoriesApi.getCategories(storeId, includeInactive);
       const categoriesWithColors = data.map((cat, index) => ({
         ...cat,
         color: generateCategoryColor(cat.categoryName, index),
         productCount: 0,
+        isActive: cat.isActive ?? true,
       }));
-      console.log("[loadCategories] Categories with colors:", categoriesWithColors);
-      setCategories(categoriesWithColors);
-      setTimeout(() => {
-        console.log("[loadCategories] Categories state should be updated now");
-      }, 0);
+      
+      let filteredCategoriesWithColors = categoriesWithColors;
+      if (selectedCategoryActiveStatus === "active") {
+        filteredCategoriesWithColors = categoriesWithColors.filter(cat => cat.isActive !== false);
+      } else if (selectedCategoryActiveStatus === "inactive") {
+        filteredCategoriesWithColors = categoriesWithColors.filter(cat => cat.isActive === false);
+      }
+      
+      setCategories(filteredCategoriesWithColors);
     } catch (error) {
       console.error("Error loading categories:", error);
       toast.error("Không thể tải danh mục. Vui lòng thử lại.");
@@ -226,7 +179,8 @@ export default function ProductManagementPage() {
     if (!storeId) return;
     try {
       setLoading(true);
-      const data = await productsApi.getProducts({ storeId, includeInactive: false });
+      const includeInactive = selectedActiveStatus !== "active";
+      const data = await productsApi.getProducts({ storeId, includeInactive });
       
       const productsWithStatus: ExtendedProduct[] = data.map((product) => {
         const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
@@ -258,6 +212,7 @@ export default function ProductManagementPage() {
         return {
           ...product,
           status,
+          isActive: product.isActive ?? (selectedActiveStatus === "active" ? true : false),
         };
       });
 
@@ -287,8 +242,12 @@ export default function ProductManagementPage() {
       selectedCategory === "all" || product.categoryId === selectedCategory;
     const matchesStatus =
       selectedStatus === "all" || product.status === selectedStatus;
+    const matchesActive =
+      selectedActiveStatus === "all" ||
+      (selectedActiveStatus === "active" && (product.isActive ?? true)) ||
+      (selectedActiveStatus === "inactive" && (product.isActive === false));
 
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesCategory && matchesStatus && matchesActive;
   });
 
   const handleAddProduct = () => {
@@ -304,6 +263,7 @@ export default function ProductManagementPage() {
       imageFile: null,
       hasVariants: false,
       variantsJson: "",
+      isActive: true,
     });
     setImagePreview(null);
     setProductDialogOpen(true);
@@ -321,8 +281,9 @@ export default function ProductManagementPage() {
       barCode: product.barCode || "",
       description: product.description || "",
       imageFile: null,
-      hasVariants: hasVariants,
+      hasVariants: hasVariants ?? false,
       variantsJson: product.variants ? JSON.stringify(product.variants) : "",
+      isActive: product.isActive ?? true,
     });
     setImagePreview(product.imageUrl || null);
     setProductDialogOpen(true);
@@ -367,7 +328,7 @@ export default function ProductManagementPage() {
           price: parseFloat(productForm.price),
           costPrice: productForm.costPrice ? parseFloat(productForm.costPrice) : undefined,
           stockQuantity: productForm.hasVariants ? 0 : parseInt(productForm.stockQuantity || "0"),
-          isActive: true,
+          isActive: productForm.isActive,
           imageFile: productForm.imageFile || undefined,
           variantsJson: productForm.hasVariants && productForm.variantsJson ? productForm.variantsJson : undefined,
         });
@@ -381,7 +342,7 @@ export default function ProductManagementPage() {
           price: parseFloat(productForm.price),
           costPrice: productForm.costPrice ? parseFloat(productForm.costPrice) : undefined,
           stockQuantity: productForm.hasVariants ? 0 : parseInt(productForm.stockQuantity || "0"),
-          isActive: true,
+          isActive: productForm.isActive,
           imageFile: productForm.imageFile || undefined,
           hasVariants: productForm.hasVariants,
           variants: productForm.hasVariants && productForm.variantsJson ? JSON.parse(productForm.variantsJson) : undefined,
@@ -402,43 +363,84 @@ export default function ProductManagementPage() {
     }
   };
 
-  const handleDeleteProduct = (product: ExtendedProduct) => {
-    setProductToDelete(product);
-    setDeleteProductDialogOpen(true);
+  const handleToggleProductActive = (product: ExtendedProduct) => {
+    setProductToToggle(product);
+    setToggleProductDialogOpen(true);
   };
 
-  const confirmDeleteProduct = async () => {
-    if (!productToDelete) return;
+  const confirmToggleProductActive = async () => {
+    if (!productToToggle) return;
 
-    const productId = productToDelete.id;
-    setDeleteProductDialogOpen(false);
+    const newActiveState = !productToToggle.isActive;
+    
+    setTogglingProductIds((prev) => new Set(prev).add(productToToggle.id));
+    setToggleProductDialogOpen(false);
 
-    const loadingToast = toast.loading("Đang xóa sản phẩm...");
-
+    const confirmMessage = newActiveState
+      ? `Đang kích hoạt sản phẩm "${productToToggle.productName}"...`
+      : `Đang tạm ngừng sản phẩm "${productToToggle.productName}"...`;
+    
+    const loadingToast = toast.loading(confirmMessage);
+    
     try {
-      await productsApi.deleteProduct(productId);
+      await productsApi.updateProduct(productToToggle.id, {
+        id: productToToggle.id,
+        productName: productToToggle.productName,
+        categoryId: productToToggle.categoryId,
+        barCode: productToToggle.barCode || undefined,
+        description: productToToggle.description || undefined,
+        price: productToToggle.price,
+        costPrice: productToToggle.costPrice || undefined,
+        stockQuantity: productToToggle.stockQuantity,
+        isActive: newActiveState,
+      });
+
+      setProducts(
+        products.map((p) =>
+          p.id === productToToggle.id
+            ? {
+                ...p,
+                isActive: newActiveState,
+              }
+            : p
+        )
+      );
+
       toast.dismiss(loadingToast);
-      toast.success("Xóa sản phẩm thành công!");
+      toast.success(
+        newActiveState
+          ? `Sản phẩm "${productToToggle.productName}" đã được kích hoạt`
+          : `Sản phẩm "${productToToggle.productName}" đã được tạm ngừng hoạt động`
+      );
+      
       await loadProducts();
     } catch (error: any) {
-      console.error("Error deleting product:", error);
-      const message =
-        error?.response?.data?.message || "Không thể xóa sản phẩm. Vui lòng thử lại.";
+      console.error("Failed to toggle product active state:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Không thể cập nhật trạng thái sản phẩm";
+      
       toast.dismiss(loadingToast);
-      toast.error(message);
+      toast.error(errorMessage);
     } finally {
-      setProductToDelete(null);
+      setTogglingProductIds((prev) => {
+        const next = new Set(prev);
+        next.delete(productToToggle.id);
+        return next;
+      });
+      setProductToToggle(null);
     }
   };
 
   const handleAddCategory = () => {
     setEditingCategory(null);
-    setCategoryForm({
-      categoryName: "",
-      description: "",
-      color: generateCategoryColor("", categories.length),
-      parentId: "",
-    });
+      setCategoryForm({
+        categoryName: "",
+        description: "",
+        color: generateCategoryColor("", categories.length),
+        parentId: "",
+        isActive: true,
+      });
     setCategoryDialogOpen(true);
   };
 
@@ -449,6 +451,7 @@ export default function ProductManagementPage() {
       description: "",
       color: category.color || generateCategoryColor(category.categoryName, 0),
       parentId: category.parentId || "",
+      isActive: category.isActive,
     });
     setCategoryDialogOpen(true);
   };
@@ -472,7 +475,7 @@ export default function ProductManagementPage() {
           id: editingCategory.id,
           categoryName: categoryForm.categoryName,
           parentId: categoryForm.parentId || undefined,
-          isActive: editingCategory.isActive,
+          isActive: categoryForm.isActive,
         });
         toast.success("Cập nhật danh mục thành công!");
       } else {
@@ -496,41 +499,67 @@ export default function ProductManagementPage() {
     }
   };
 
-  const handleDeleteCategory = (category: ExtendedCategory) => {
-    const productsInCategory = products.filter((p) => p.categoryId === category.id).length;
-    if (productsInCategory > 0) {
-      toast.error(
-        `Không thể xóa danh mục có ${productsInCategory} sản phẩm. Vui lòng di chuyển hoặc xóa sản phẩm trước.`
-      );
-      return;
-    }
-
-    setCategoryToDelete(category);
-    setDeleteCategoryDialogOpen(true);
+  const handleToggleCategoryActive = (category: ExtendedCategory) => {
+    setCategoryToToggle(category);
+    setToggleCategoryDialogOpen(true);
   };
 
-  const confirmDeleteCategory = async () => {
-    if (!categoryToDelete) return;
+  const confirmToggleCategoryActive = async () => {
+    if (!categoryToToggle) return;
 
-    const categoryId = categoryToDelete.id;
-    setDeleteCategoryDialogOpen(false);
+    const newActiveState = !categoryToToggle.isActive;
+    
+    setTogglingCategoryIds((prev) => new Set(prev).add(categoryToToggle.id));
+    setToggleCategoryDialogOpen(false);
 
-    const loadingToast = toast.loading("Đang xóa danh mục...");
-
+    const confirmMessage = newActiveState
+      ? `Đang kích hoạt danh mục "${categoryToToggle.categoryName}"...`
+      : `Đang tạm ngừng danh mục "${categoryToToggle.categoryName}"...`;
+    
+    const loadingToast = toast.loading(confirmMessage);
+    
     try {
-      await categoriesApi.deleteCategory(categoryId);
+      await categoriesApi.updateCategory(categoryToToggle.id, {
+        id: categoryToToggle.id,
+        categoryName: categoryToToggle.categoryName,
+        parentId: categoryToToggle.parentId || undefined,
+        isActive: newActiveState,
+      });
+
+      setCategories(
+        categories.map((c) =>
+          c.id === categoryToToggle.id
+            ? {
+                ...c,
+                isActive: newActiveState,
+              }
+            : c
+        )
+      );
+
       toast.dismiss(loadingToast);
-      toast.success("Xóa danh mục thành công!");
+      toast.success(
+        newActiveState
+          ? `Danh mục "${categoryToToggle.categoryName}" đã được kích hoạt`
+          : `Danh mục "${categoryToToggle.categoryName}" đã được tạm ngừng hoạt động`
+      );
+      
       await loadCategories();
-      await loadProducts();
     } catch (error: any) {
-      console.error("Error deleting category:", error);
-      const message =
-        error?.response?.data?.message || "Không thể xóa danh mục. Vui lòng thử lại.";
+      console.error("Failed to toggle category active state:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Không thể cập nhật trạng thái danh mục";
+      
       toast.dismiss(loadingToast);
-      toast.error(message);
+      toast.error(errorMessage);
     } finally {
-      setCategoryToDelete(null);
+      setTogglingCategoryIds((prev) => {
+        const next = new Set(prev);
+        next.delete(categoryToToggle.id);
+        return next;
+      });
+      setCategoryToToggle(null);
     }
   };
 
@@ -573,21 +602,12 @@ export default function ProductManagementPage() {
         ).toFixed(1)
       : "0";
 
-  if (storesLoading) {
+  if (!currentStore) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!storeId) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">
-          {stores.length === 0
-            ? "Bạn chưa có cửa hàng nào. Vui lòng tạo cửa hàng trước."
-            : "Vui lòng chọn cửa hàng để quản lý sản phẩm."}
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <Package className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+        <p className="text-lg font-medium text-muted-foreground mb-2">
+          Vui lòng chọn cửa hàng để quản lý sản phẩm
         </p>
       </div>
     );
@@ -595,58 +615,7 @@ export default function ProductManagementPage() {
 
   return (
     <div className="space-y-6">
-      {/* Store Selector */}
-      {currentStore && stores.length > 0 && (
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <StoreIcon className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <Label className="text-sm font-medium">
-                  {stores.length > 1 ? "Chọn cửa hàng" : "Cửa hàng hiện tại"}
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  {stores.length > 1
-                    ? "Chuyển đổi để quản lý sản phẩm của cửa hàng khác"
-                    : `Quản lý sản phẩm của ${currentStore.storeName}`}
-                </p>
-              </div>
-            </div>
-            {stores.length > 1 ? (
-              <Select
-                value={storeId || ""}
-                onValueChange={handleStoreChange}
-                disabled={switchingStore || storesLoading}
-              >
-                <SelectTrigger className="w-[300px]" disabled={switchingStore || storesLoading}>
-                  <SelectValue placeholder="Chọn cửa hàng">
-                    {currentStore?.storeName}
-                    {currentStore?.isDefault && " (Mặc định)"}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {stores.map((store) => (
-                    <SelectItem key={store.id} value={store.id}>
-                      {store.storeName}
-                      {store.isDefault && " (Mặc định)"}
-                      {!store.isActive && " - Ngừng hoạt động"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
-                <span className="text-sm font-medium">{currentStore.storeName}</span>
-                {currentStore.isDefault && (
-                  <Badge variant="secondary" className="text-xs">
-                    Mặc định
-                  </Badge>
-                )}
-              </div>
-            )}
-          </div>
-        </Card>
-      )}
+      <StoreSelector pageDescription="Chuyển đổi để quản lý sản phẩm và danh mục của cửa hàng khác" />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -766,6 +735,18 @@ export default function ProductManagementPage() {
                 </SelectContent>
               </Select>
 
+              {/* Active Status Filter */}
+              <Select value={selectedActiveStatus} onValueChange={setSelectedActiveStatus}>
+                <SelectTrigger className="w-full lg:w-[200px]">
+                  <SelectValue placeholder="Tất cả hoạt động" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả</SelectItem>
+                  <SelectItem value="active">Hoạt động</SelectItem>
+                  <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                </SelectContent>
+              </Select>
+
               {/* Add Button */}
               <Button onClick={handleAddProduct} className="gap-2 whitespace-nowrap">
                 <Plus className="h-4 w-4" />
@@ -808,7 +789,7 @@ export default function ProductManagementPage() {
                     ) : (
                       filteredProducts.map((product) => {
                         const category = getCategoryById(product.categoryId);
-                        const { profit, margin } = getProfit(product.price, product.costPrice);
+                        const { profit, margin } = getProfit(product.price, product.costPrice || undefined);
 
                         return (
                           <TableRow key={product.id}>
@@ -891,10 +872,22 @@ export default function ProductManagementPage() {
                               </div>
                             </TableCell>
                             <TableCell className="text-center">
-                              {getStatusBadge(product.status)}
+                              <div className="flex flex-col items-center gap-1">
+                                {getStatusBadge(product.status)}
+                                <Badge
+                                  variant={product.isActive ? "default" : "secondary"}
+                                  className={product.isActive ? "bg-green-500" : "bg-gray-500"}
+                                >
+                                  {product.isActive ? (
+                                    <><CheckCircle className="h-3 w-3 mr-1" />Hoạt động</>
+                                  ) : (
+                                    <><XCircle className="h-3 w-3 mr-1" />Ngừng</>
+                                  )}
+                                </Badge>
+                              </div>
                             </TableCell>
                             <TableCell className="text-right">
-                              <div className="flex gap-2 justify-end">
+                              <div className="flex gap-2 justify-end items-center">
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -902,14 +895,16 @@ export default function ProductManagementPage() {
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteProduct(product)}
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                    {product.isActive ? "Hoạt động" : "Tạm dừng"}
+                                  </span>
+                                  <Switch
+                                    checked={product.isActive}
+                                    onCheckedChange={() => handleToggleProductActive(product)}
+                                    disabled={togglingProductIds.has(product.id)}
+                                  />
+                                </div>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -926,7 +921,7 @@ export default function ProductManagementPage() {
         {/* Categories Tab */}
         <TabsContent value="categories" className="space-y-4">
           <Card className="p-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
               <div>
                 <h3 className="text-lg font-semibold">
                   Danh mục sản phẩm
@@ -935,18 +930,23 @@ export default function ProductManagementPage() {
                   Quản lý danh mục và nhóm sản phẩm
                 </p>
               </div>
-              <Button onClick={handleAddCategory} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Thêm danh mục
-              </Button>
+              <div className="flex gap-3 items-center">
+                <Select value={selectedCategoryActiveStatus} onValueChange={setSelectedCategoryActiveStatus}>
+                  <SelectTrigger className="w-full lg:w-[200px]">
+                    <SelectValue placeholder="Tất cả hoạt động" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="active">Hoạt động</SelectItem>
+                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={handleAddCategory} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Thêm danh mục
+                </Button>
+              </div>
             </div>
-
-            {(() => {
-              console.log("[Categories Tab Render] categories:", categories);
-              console.log("[Categories Tab Render] categories.length:", categories.length);
-              console.log("[Categories Tab Render] categoriesLoading:", categoriesLoading);
-              return null;
-            })()}
 
             {categoriesLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -981,7 +981,7 @@ export default function ProductManagementPage() {
                       >
                         <Tag className="h-6 w-6" style={{ color: category.color }} />
                       </div>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 items-center">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -989,14 +989,16 @@ export default function ProductManagementPage() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteCategory(category)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {category.isActive ? "Hoạt động" : "Tạm dừng"}
+                          </span>
+                          <Switch
+                            checked={category.isActive}
+                            onCheckedChange={() => handleToggleCategoryActive(category)}
+                            disabled={togglingCategoryIds.has(category.id)}
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -1008,9 +1010,21 @@ export default function ProductManagementPage() {
                     )}
 
                     <div className="flex items-center justify-between pt-3 border-t">
-                      <span className="text-sm text-muted-foreground">
-                        Sản phẩm
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-muted-foreground">
+                          Sản phẩm
+                        </span>
+                        <Badge
+                          variant={category.isActive ? "default" : "secondary"}
+                          className={category.isActive ? "bg-green-500" : "bg-gray-500"}
+                        >
+                          {category.isActive ? (
+                            <><CheckCircle className="h-3 w-3 mr-1" />Hoạt động</>
+                          ) : (
+                            <><XCircle className="h-3 w-3 mr-1" />Ngừng</>
+                          )}
+                        </Badge>
+                      </div>
                       <Badge variant="secondary">
                         {products.filter((p) => p.categoryId === category.id).length}
                       </Badge>
@@ -1217,6 +1231,27 @@ export default function ProductManagementPage() {
                   </div>
                 </Card>
               )}
+
+            {/* Active Status - Only show when editing */}
+            {editingProduct && (
+              <div className="space-y-2 min-w-0">
+                <Label htmlFor="product-status">Trạng thái</Label>
+                <Select
+                  value={productForm.isActive ? "active" : "inactive"}
+                  onValueChange={(value) =>
+                    setProductForm({ ...productForm, isActive: value === "active" })
+                  }
+                >
+                  <SelectTrigger id="product-status" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Hoạt động</SelectItem>
+                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -1335,6 +1370,27 @@ export default function ProductManagementPage() {
                 </div>
               </div>
             </Card>
+
+            {/* Active Status - Only show when editing */}
+            {editingCategory && (
+              <div className="space-y-2 min-w-0">
+                <Label htmlFor="category-status">Trạng thái</Label>
+                <Select
+                  value={categoryForm.isActive ? "active" : "inactive"}
+                  onValueChange={(value) =>
+                    setCategoryForm({ ...categoryForm, isActive: value === "active" })
+                  }
+                >
+                  <SelectTrigger id="category-status" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Hoạt động</SelectItem>
+                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -1390,49 +1446,65 @@ export default function ProductManagementPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Product Confirmation Dialog */}
-      <Dialog open={deleteProductDialogOpen} onOpenChange={setDeleteProductDialogOpen}>
+      {/* Toggle Product Active Dialog */}
+      <Dialog open={toggleProductDialogOpen} onOpenChange={setToggleProductDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Xóa sản phẩm</DialogTitle>
+            <DialogTitle>
+              {productToToggle?.isActive ? "Tạm ngừng hoạt động sản phẩm" : "Kích hoạt sản phẩm"}
+            </DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn xóa sản phẩm <strong>"{productToDelete?.productName}"</strong>? 
-              Hành động này không thể hoàn tác.
+              {productToToggle?.isActive ? (
+                <>
+                  Bạn có chắc chắn muốn tạm ngừng hoạt động sản phẩm <strong>"{productToToggle?.productName}"</strong>? 
+                  Sản phẩm sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.
+                </>
+              ) : (
+                <>
+                  Bạn có chắc chắn muốn kích hoạt sản phẩm <strong>"{productToToggle?.productName}"</strong>? 
+                  Sản phẩm sẽ được kích hoạt và có thể tiếp tục hoạt động.
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteProductDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setToggleProductDialogOpen(false)}>
               Hủy
             </Button>
-            <Button
-              onClick={confirmDeleteProduct}
-              variant="destructive"
-            >
-              Xóa
+            <Button onClick={confirmToggleProductActive}>
+              {productToToggle?.isActive ? "Tạm ngừng" : "Kích hoạt"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Category Confirmation Dialog */}
-      <Dialog open={deleteCategoryDialogOpen} onOpenChange={setDeleteCategoryDialogOpen}>
+      {/* Toggle Category Active Dialog */}
+      <Dialog open={toggleCategoryDialogOpen} onOpenChange={setToggleCategoryDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Xóa danh mục</DialogTitle>
+            <DialogTitle>
+              {categoryToToggle?.isActive ? "Tạm ngừng hoạt động danh mục" : "Kích hoạt danh mục"}
+            </DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn xóa danh mục <strong>"{categoryToDelete?.categoryName}"</strong>? 
-              Hành động này không thể hoàn tác.
+              {categoryToToggle?.isActive ? (
+                <>
+                  Bạn có chắc chắn muốn tạm ngừng hoạt động danh mục <strong>"{categoryToToggle?.categoryName}"</strong>? 
+                  Danh mục sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.
+                </>
+              ) : (
+                <>
+                  Bạn có chắc chắn muốn kích hoạt danh mục <strong>"{categoryToToggle?.categoryName}"</strong>? 
+                  Danh mục sẽ được kích hoạt và có thể tiếp tục hoạt động.
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteCategoryDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setToggleCategoryDialogOpen(false)}>
               Hủy
             </Button>
-            <Button
-              onClick={confirmDeleteCategory}
-              variant="destructive"
-            >
-              Xóa
+            <Button onClick={confirmToggleCategoryActive}>
+              {categoryToToggle?.isActive ? "Tạm ngừng" : "Kích hoạt"}
             </Button>
           </DialogFooter>
         </DialogContent>
