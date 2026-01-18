@@ -4,6 +4,7 @@ import type {
   GetProductsParams,
   CreateProductDto,
   UpdateProductDto,
+  ProductsResponse,
 } from "@/shared/types/products";
 import type { ApiResponse } from "@/shared/types/api-response";
 
@@ -22,16 +23,44 @@ export const productsApi = {
 
     const url = `sales/Products?${queryParams.toString()}`;
     console.log("[productsApi] Request URL:", url);
+    console.log("[productsApi] Request params:", params);
     console.log("[productsApi] Base URL:", salesApi.defaults.baseURL);
 
-    const res = await salesApi.get<ApiResponse<Product[]> | Product[]>(url);
+    const res = await salesApi.get<ApiResponse<ProductsResponse> | Product[]>(url);
+    
+    console.log("[productsApi] Full response:", res.data);
 
-    if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
-      return res.data.data;
+    // Case 1: Response có cấu trúc ApiResponse với ProductsResponse (phân trang)
+    if ("success" in res.data && res.data.success && res.data.data) {
+      const data = res.data.data;
+      
+      // Nếu data có cấu trúc ProductsResponse (có items, totalCount, pageNumber, ...)
+      if (typeof data === "object" && "items" in data && Array.isArray(data.items)) {
+        const paginatedData = data as ProductsResponse;
+        console.log("[productsApi] Paginated response:", {
+          totalCount: paginatedData.totalCount,
+          pageNumber: paginatedData.pageNumber,
+          pageSize: paginatedData.pageSize,
+          totalPages: paginatedData.totalPages,
+          itemsCount: paginatedData.items.length,
+        });
+        return paginatedData.items;
+      }
+      
+      // Fallback: Nếu data là mảng Product[] trực tiếp (không có phân trang)
+      if (Array.isArray(data)) {
+        console.log("[productsApi] Response.data is array, length:", data.length);
+        return data;
+      }
     }
+    
+    // Case 2: Response trực tiếp là mảng Product[] (không có wrapper ApiResponse)
     if (Array.isArray(res.data)) {
+      console.log("[productsApi] Response is direct array, length:", res.data.length);
       return res.data;
     }
+    
+    console.warn("[productsApi] Unexpected response format:", res.data);
     return [];
   },
 

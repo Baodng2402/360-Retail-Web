@@ -16,6 +16,7 @@ import { Card } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 
 const CustomerPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,6 +93,7 @@ const CustomerPage = () => {
 
   return (
     <div className="space-y-6">
+      <StoreSelector pageDescription="Chuyển đổi để xem khách hàng của cửa hàng khác" />
       <div className="relative max-w-md">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input

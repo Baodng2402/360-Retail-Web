@@ -41,6 +41,7 @@ import {
   AlertCircle,
   FolderTree,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import toast from "react-hot-toast";
@@ -53,7 +54,6 @@ import type { Product } from "@/shared/types/products";
 import type { Store } from "@/shared/types/stores";
 import { Store as StoreIcon } from "lucide-react";
 
-// Extended types for UI
 interface ExtendedCategory extends Category {
   color?: string;
   productCount?: number;
@@ -61,20 +61,24 @@ interface ExtendedCategory extends Category {
 
 interface ExtendedProduct extends Product {
   status?: "in-stock" | "low-stock" | "out-of-stock";
-  minStock?: number;
 }
 
-// Default colors for categories
-const categoryColors = [
-  "#007BFF",
-  "#28a745",
-  "#ffc107",
-  "#17a2b8",
-  "#dc3545",
-  "#6f42c1",
-  "#fd7e14",
-  "#20c997",
-];
+const generateCategoryColor = (categoryName: string, index: number): string => {
+  const colorPalette = [
+    "hsl(210, 100%, 50%)",  // Blue
+    "hsl(142, 71%, 45%)",   // Green
+    "hsl(45, 96%, 53%)",    // Yellow/Amber
+    "hsl(199, 89%, 48%)",   // Cyan
+    "hsl(0, 84%, 60%)",     // Red
+    "hsl(262, 52%, 47%)",   // Purple
+    "hsl(25, 95%, 53%)",    // Orange
+    "hsl(158, 64%, 52%)",   // Teal
+    "hsl(340, 82%, 52%)",   // Pink
+    "hsl(217, 91%, 60%)",   // Indigo
+  ];
+  
+  return colorPalette[index % colorPalette.length];
+};
 
 export default function ProductManagementPage() {
   const { currentStore, switchStore } = useStoreStore();
@@ -91,7 +95,6 @@ export default function ProductManagementPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
-  // Product Dialog States
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ExtendedProduct | null>(null);
   const [productForm, setProductForm] = useState({
@@ -100,39 +103,37 @@ export default function ProductManagementPage() {
     price: "",
     costPrice: "",
     stockQuantity: "",
-    minStock: "",
     barCode: "",
     description: "",
     imageFile: null as File | null,
+    hasVariants: false,
+    variantsJson: "",
   });
   const [productFormLoading, setProductFormLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  // Category Dialog States
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ExtendedCategory | null>(null);
   const [categoryForm, setCategoryForm] = useState({
     categoryName: "",
     description: "",
-    color: "#007BFF",
+    color: generateCategoryColor("", 0),
+    parentId: "",
   });
   const [categoryFormLoading, setCategoryFormLoading] = useState(false);
 
-  // Load stores
+  const [barCodeViewDialogOpen, setBarCodeViewDialogOpen] = useState(false);
+  const [barCodeToView, setBarCodeToView] = useState<string>("");
+
+  const [deleteProductDialogOpen, setDeleteProductDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<ExtendedProduct | null>(null);
+  const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<ExtendedCategory | null>(null);
+
   useEffect(() => {
     loadStores();
   }, []);
 
-  // Set default store on mount - only once when stores are loaded
-  useEffect(() => {
-    if (stores.length > 0 && !currentStore && !storesLoading) {
-      const defaultStore = stores.find((s) => s.isDefault) || stores[0];
-      if (defaultStore) {
-        switchStore(defaultStore).catch(console.error);
-      }
-    }
-  }, [stores.length, currentStore, storesLoading]);
-
-  // Load data
   useEffect(() => {
     if (storeId) {
       loadCategories();
@@ -144,8 +145,29 @@ export default function ProductManagementPage() {
     try {
       setStoresLoading(true);
       const data = await storesApi.getMyOwnedStores();
-      setStores(data);
       
+      const sortedStores = [...data].sort((a, b) => {
+        if (a.isDefault) return -1;
+        if (b.isDefault) return 1;
+        if (a.isActive && !b.isActive) return -1;
+        if (!a.isActive && b.isActive) return 1;
+        return 0;
+      });
+      
+      setStores(sortedStores);
+      
+      const defaultStore = data.find((s) => s.isDefault);
+      
+      if (defaultStore) {
+        console.log("[loadStores] Default store from token:", defaultStore);
+        console.log("[loadStores] Current store in state:", currentStore);
+        
+        if (!currentStore || currentStore.id !== defaultStore.id) {
+          console.log("[loadStores] Syncing currentStore to match token default store");
+          const storeStore = useStoreStore.getState();
+          storeStore.setCurrentStore(defaultStore);
+        }
+      }
     } catch (error) {
       console.error("Error loading stores:", error);
       toast.error("Không thể tải danh sách cửa hàng. Vui lòng thử lại.");
@@ -164,7 +186,6 @@ export default function ProductManagementPage() {
       setSwitchingStore(true);
       await switchStore(selectedStore);
       toast.success(`Đã chuyển sang cửa hàng: ${selectedStore.storeName}`);
-      // Data will be reloaded automatically via useEffect when storeId changes
     } catch (error) {
       console.error("Error switching store:", error);
       toast.error("Không thể chuyển cửa hàng. Vui lòng thử lại.");
@@ -174,17 +195,25 @@ export default function ProductManagementPage() {
   };
 
   const loadCategories = async () => {
-    if (!storeId) return;
+    if (!storeId) {
+      console.log("[loadCategories] No storeId provided");
+      return;
+    }
     try {
       setCategoriesLoading(true);
+      console.log("[loadCategories] Loading categories for storeId:", storeId);
       const data = await categoriesApi.getCategories(storeId);
-      // Map categories with colors
+      console.log("[loadCategories] Categories response:", data);
       const categoriesWithColors = data.map((cat, index) => ({
         ...cat,
-        color: categoryColors[index % categoryColors.length],
+        color: generateCategoryColor(cat.categoryName, index),
         productCount: 0,
       }));
+      console.log("[loadCategories] Categories with colors:", categoriesWithColors);
       setCategories(categoriesWithColors);
+      setTimeout(() => {
+        console.log("[loadCategories] Categories state should be updated now");
+      }, 0);
     } catch (error) {
       console.error("Error loading categories:", error);
       toast.error("Không thể tải danh mục. Vui lòng thử lại.");
@@ -199,26 +228,41 @@ export default function ProductManagementPage() {
       setLoading(true);
       const data = await productsApi.getProducts({ storeId, includeInactive: false });
       
-      // Calculate status and minStock for each product
       const productsWithStatus: ExtendedProduct[] = data.map((product) => {
-        const minStock = Math.max(1, Math.floor(product.stockQuantity * 0.3)); // Default to 30% of stock
-        const status: ExtendedProduct["status"] =
-          product.stockQuantity === 0
-            ? "out-of-stock"
-            : product.stockQuantity <= minStock
-            ? "low-stock"
-            : "in-stock";
+        const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
+        
+        let status: ExtendedProduct["status"] = "in-stock";
+        
+        if (product.isInStock !== undefined) {
+          if (!product.isInStock) {
+            status = "out-of-stock";
+          } else if (hasVariants) {
+            status = "in-stock";
+          } else if (product.stockQuantity > 0 && product.stockQuantity <= 10) {
+            status = "low-stock";
+          } else {
+            status = "in-stock";
+          }
+        } else {
+          if (hasVariants) {
+            status = "in-stock";
+          } else if (product.stockQuantity === 0) {
+            status = "out-of-stock";
+          } else if (product.stockQuantity <= 10) {
+            status = "low-stock";
+          } else {
+            status = "in-stock";
+          }
+        }
 
         return {
           ...product,
           status,
-          minStock,
         };
       });
 
       setProducts(productsWithStatus);
 
-      // Update product count for categories
       setCategories((prev) =>
         prev.map((cat) => ({
           ...cat,
@@ -233,7 +277,6 @@ export default function ProductManagementPage() {
     }
   };
 
-  // Filter products
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -248,7 +291,6 @@ export default function ProductManagementPage() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  // Product handlers
   const handleAddProduct = () => {
     setEditingProduct(null);
     setProductForm({
@@ -257,27 +299,32 @@ export default function ProductManagementPage() {
       price: "",
       costPrice: "",
       stockQuantity: "",
-      minStock: "",
       barCode: "",
       description: "",
       imageFile: null,
+      hasVariants: false,
+      variantsJson: "",
     });
+    setImagePreview(null);
     setProductDialogOpen(true);
   };
 
   const handleEditProduct = (product: ExtendedProduct) => {
     setEditingProduct(product);
+    const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
     setProductForm({
       productName: product.productName,
       categoryId: product.categoryId,
       price: product.price.toString(),
       costPrice: (product.costPrice || 0).toString(),
-      stockQuantity: product.stockQuantity.toString(),
-      minStock: (product.minStock || Math.max(1, Math.floor(product.stockQuantity * 0.3))).toString(),
+      stockQuantity: hasVariants ? "0" : product.stockQuantity.toString(),
       barCode: product.barCode || "",
       description: product.description || "",
       imageFile: null,
+      hasVariants: hasVariants,
+      variantsJson: product.variants ? JSON.stringify(product.variants) : "",
     });
+    setImagePreview(product.imageUrl || null);
     setProductDialogOpen(true);
   };
 
@@ -311,7 +358,6 @@ export default function ProductManagementPage() {
       setProductFormLoading(true);
 
       if (editingProduct) {
-        // Update existing product
         await productsApi.updateProduct(editingProduct.id, {
           id: editingProduct.id,
           productName: productForm.productName,
@@ -320,13 +366,13 @@ export default function ProductManagementPage() {
           description: productForm.description || undefined,
           price: parseFloat(productForm.price),
           costPrice: productForm.costPrice ? parseFloat(productForm.costPrice) : undefined,
-          stockQuantity: parseInt(productForm.stockQuantity),
+          stockQuantity: productForm.hasVariants ? 0 : parseInt(productForm.stockQuantity || "0"),
           isActive: true,
           imageFile: productForm.imageFile || undefined,
+          variantsJson: productForm.hasVariants && productForm.variantsJson ? productForm.variantsJson : undefined,
         });
         toast.success("Cập nhật sản phẩm thành công!");
       } else {
-        // Add new product
         await productsApi.createProduct({
           productName: productForm.productName,
           categoryId: productForm.categoryId,
@@ -334,14 +380,17 @@ export default function ProductManagementPage() {
           description: productForm.description || undefined,
           price: parseFloat(productForm.price),
           costPrice: productForm.costPrice ? parseFloat(productForm.costPrice) : undefined,
-          stockQuantity: parseInt(productForm.stockQuantity),
+          stockQuantity: productForm.hasVariants ? 0 : parseInt(productForm.stockQuantity || "0"),
           isActive: true,
           imageFile: productForm.imageFile || undefined,
+          hasVariants: productForm.hasVariants,
+          variants: productForm.hasVariants && productForm.variantsJson ? JSON.parse(productForm.variantsJson) : undefined,
         });
         toast.success("Thêm sản phẩm thành công!");
       }
 
       setProductDialogOpen(false);
+      setImagePreview(null);
       await loadProducts();
     } catch (error: any) {
       console.error("Error saving product:", error);
@@ -353,30 +402,42 @@ export default function ProductManagementPage() {
     }
   };
 
-  const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-      return;
-    }
+  const handleDeleteProduct = (product: ExtendedProduct) => {
+    setProductToDelete(product);
+    setDeleteProductDialogOpen(true);
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+
+    const productId = productToDelete.id;
+    setDeleteProductDialogOpen(false);
+
+    const loadingToast = toast.loading("Đang xóa sản phẩm...");
 
     try {
-      await productsApi.deleteProduct(id);
+      await productsApi.deleteProduct(productId);
+      toast.dismiss(loadingToast);
       toast.success("Xóa sản phẩm thành công!");
       await loadProducts();
     } catch (error: any) {
       console.error("Error deleting product:", error);
       const message =
         error?.response?.data?.message || "Không thể xóa sản phẩm. Vui lòng thử lại.";
+      toast.dismiss(loadingToast);
       toast.error(message);
+    } finally {
+      setProductToDelete(null);
     }
   };
 
-  // Category handlers
   const handleAddCategory = () => {
     setEditingCategory(null);
     setCategoryForm({
       categoryName: "",
       description: "",
-      color: categoryColors[categories.length % categoryColors.length],
+      color: generateCategoryColor("", categories.length),
+      parentId: "",
     });
     setCategoryDialogOpen(true);
   };
@@ -386,7 +447,8 @@ export default function ProductManagementPage() {
     setCategoryForm({
       categoryName: category.categoryName,
       description: "",
-      color: category.color || "#007BFF",
+      color: category.color || generateCategoryColor(category.categoryName, 0),
+      parentId: category.parentId || "",
     });
     setCategoryDialogOpen(true);
   };
@@ -406,18 +468,17 @@ export default function ProductManagementPage() {
       setCategoryFormLoading(true);
 
       if (editingCategory) {
-        // Update existing category
         await categoriesApi.updateCategory(editingCategory.id, {
           id: editingCategory.id,
           categoryName: categoryForm.categoryName,
-          parentId: editingCategory.parentId,
+          parentId: categoryForm.parentId || undefined,
           isActive: editingCategory.isActive,
         });
         toast.success("Cập nhật danh mục thành công!");
       } else {
-        // Add new category
         await categoriesApi.createCategory({
           categoryName: categoryForm.categoryName,
+          parentId: categoryForm.parentId || undefined,
         });
         toast.success("Thêm danh mục thành công!");
       }
@@ -435,8 +496,8 @@ export default function ProductManagementPage() {
     }
   };
 
-  const handleDeleteCategory = async (id: string) => {
-    const productsInCategory = products.filter((p) => p.categoryId === id).length;
+  const handleDeleteCategory = (category: ExtendedCategory) => {
+    const productsInCategory = products.filter((p) => p.categoryId === category.id).length;
     if (productsInCategory > 0) {
       toast.error(
         `Không thể xóa danh mục có ${productsInCategory} sản phẩm. Vui lòng di chuyển hoặc xóa sản phẩm trước.`
@@ -444,12 +505,21 @@ export default function ProductManagementPage() {
       return;
     }
 
-    if (!confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
-      return;
-    }
+    setCategoryToDelete(category);
+    setDeleteCategoryDialogOpen(true);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+
+    const categoryId = categoryToDelete.id;
+    setDeleteCategoryDialogOpen(false);
+
+    const loadingToast = toast.loading("Đang xóa danh mục...");
 
     try {
-      await categoriesApi.deleteCategory(id);
+      await categoriesApi.deleteCategory(categoryId);
+      toast.dismiss(loadingToast);
       toast.success("Xóa danh mục thành công!");
       await loadCategories();
       await loadProducts();
@@ -457,7 +527,10 @@ export default function ProductManagementPage() {
       console.error("Error deleting category:", error);
       const message =
         error?.response?.data?.message || "Không thể xóa danh mục. Vui lòng thử lại.";
+      toast.dismiss(loadingToast);
       toast.error(message);
+    } finally {
+      setCategoryToDelete(null);
     }
   };
 
@@ -483,7 +556,6 @@ export default function ProductManagementPage() {
     return { profit, margin: Number(margin.toFixed(1)) };
   };
 
-  // Stats
   const totalProducts = products.length;
   const totalValue = products.reduce((sum, p) => sum + p.price * p.stockQuantity, 0);
   const lowStockProducts = products.filter(
@@ -557,6 +629,7 @@ export default function ProductManagementPage() {
                     <SelectItem key={store.id} value={store.id}>
                       {store.storeName}
                       {store.isDefault && " (Mặc định)"}
+                      {!store.isActive && " - Ngừng hoạt động"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -598,7 +671,7 @@ export default function ProductManagementPage() {
                 Giá trị kho
               </p>
               <h3 className="text-2xl font-bold text-foreground">
-                {(totalValue / 1000000).toFixed(1)}M
+                {totalValue.toLocaleString("vi-VN")}đ
               </h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
@@ -710,7 +783,8 @@ export default function ProductManagementPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Mã</TableHead>
+                      <TableHead className="text-center">Mã</TableHead>
+                      <TableHead className="w-[100px]">Hình ảnh</TableHead>
                       <TableHead>Sản phẩm</TableHead>
                       <TableHead>Danh mục</TableHead>
                       <TableHead className="text-right">Giá bán</TableHead>
@@ -725,7 +799,7 @@ export default function ProductManagementPage() {
                     {filteredProducts.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={9}
+                          colSpan={10}
                           className="text-center text-muted-foreground py-8"
                         >
                           Không tìm thấy sản phẩm
@@ -738,18 +812,39 @@ export default function ProductManagementPage() {
 
                         return (
                           <TableRow key={product.id}>
-                            <TableCell className="font-mono text-sm">
-                              {product.barCode || "-"}
+                            <TableCell className="text-center">
+                              {product.barCode ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 mx-auto"
+                                  onClick={() => {
+                                    setBarCodeToView(product.barCode || "");
+                                    setBarCodeViewDialogOpen(true);
+                                  }}
+                                  title="Xem mã sản phẩm"
+                                >
+                                  <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                                </Button>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
                             </TableCell>
                             <TableCell>
-                              <div>
-                                <div className="font-medium">{product.productName}</div>
-                                {product.description && (
-                                  <div className="text-sm text-muted-foreground line-clamp-1">
-                                    {product.description}
-                                  </div>
-                                )}
-                              </div>
+                              {product.imageUrl ? (
+                                <img
+                                  src={product.imageUrl}
+                                  alt={product.productName}
+                                  className="w-16 h-16 object-cover rounded-md border"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 bg-muted rounded-md border flex items-center justify-center">
+                                  <Package className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-medium">{product.productName}</div>
                             </TableCell>
                             <TableCell>
                               {category && (
@@ -783,10 +878,14 @@ export default function ProductManagementPage() {
                             </TableCell>
                             <TableCell className="text-center">
                               <div className="flex flex-col items-center">
-                                <span className="font-medium">{product.stockQuantity}</span>
-                                {product.minStock && (
+                                <span className="font-medium">
+                                  {product.hasVariants && product.totalStock !== undefined
+                                    ? product.totalStock
+                                    : product.stockQuantity}
+                                </span>
+                                {product.hasVariants && product.variants && product.variants.length > 0 && (
                                   <span className="text-xs text-muted-foreground">
-                                    min: {product.minStock}
+                                    ({product.variants.length} variant)
                                   </span>
                                 )}
                               </div>
@@ -806,7 +905,7 @@ export default function ProductManagementPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => handleDeleteProduct(product.id)}
+                                  onClick={() => handleDeleteProduct(product)}
                                   className="text-destructive hover:text-destructive"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -842,9 +941,30 @@ export default function ProductManagementPage() {
               </Button>
             </div>
 
+            {(() => {
+              console.log("[Categories Tab Render] categories:", categories);
+              console.log("[Categories Tab Render] categories.length:", categories.length);
+              console.log("[Categories Tab Render] categoriesLoading:", categoriesLoading);
+              return null;
+            })()}
+
             {categoriesLoading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : categories.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Package className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">
+                  Chưa có danh mục nào
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Tạo danh mục đầu tiên để bắt đầu quản lý sản phẩm
+                </p>
+                <Button onClick={handleAddCategory} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Thêm danh mục đầu tiên
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -872,7 +992,7 @@ export default function ProductManagementPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDeleteCategory(category.id)}
+                          onClick={() => handleDeleteCategory(category)}
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -905,7 +1025,7 @@ export default function ProductManagementPage() {
 
       {/* Product Dialog */}
       <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>
               {editingProduct ? "Sửa sản phẩm" : "Thêm sản phẩm"}
@@ -915,9 +1035,9 @@ export default function ProductManagementPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 min-w-0">
             {/* Product Name */}
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="product-name">Tên sản phẩm *</Label>
               <Input
                 id="product-name"
@@ -926,12 +1046,13 @@ export default function ProductManagementPage() {
                   setProductForm({ ...productForm, productName: e.target.value })
                 }
                 placeholder="Ví dụ: Coca Cola 330ml"
+                className="w-full"
               />
             </div>
 
             {/* SKU & Category */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-4 min-w-0">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="product-sku">Mã sản phẩm</Label>
                 <Input
                   id="product-sku"
@@ -940,9 +1061,10 @@ export default function ProductManagementPage() {
                     setProductForm({ ...productForm, barCode: e.target.value })
                   }
                   placeholder="Ví dụ: BEV-001"
+                  className="w-full"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="product-category">Danh mục *</Label>
                 <Select
                   value={productForm.categoryId}
@@ -950,7 +1072,7 @@ export default function ProductManagementPage() {
                     setProductForm({ ...productForm, categoryId: value })
                   }
                 >
-                  <SelectTrigger id="product-category">
+                  <SelectTrigger id="product-category" className="w-full">
                     <SelectValue placeholder="Chọn danh mục" />
                   </SelectTrigger>
                   <SelectContent>
@@ -965,8 +1087,8 @@ export default function ProductManagementPage() {
             </div>
 
             {/* Price & Cost */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-4 min-w-0">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="product-price">Giá bán (VND) *</Label>
                 <Input
                   id="product-price"
@@ -976,9 +1098,10 @@ export default function ProductManagementPage() {
                     setProductForm({ ...productForm, price: e.target.value })
                   }
                   placeholder="15000"
+                  className="w-full"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 <Label htmlFor="product-cost">Giá vốn (VND)</Label>
                 <Input
                   id="product-cost"
@@ -988,44 +1111,36 @@ export default function ProductManagementPage() {
                     setProductForm({ ...productForm, costPrice: e.target.value })
                   }
                   placeholder="12000"
+                  className="w-full"
                 />
               </div>
             </div>
 
             {/* Stock */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="product-stock">Tồn kho *</Label>
-                <Input
-                  id="product-stock"
-                  type="number"
-                  value={productForm.stockQuantity}
-                  onChange={(e) =>
-                    setProductForm({ ...productForm, stockQuantity: e.target.value })
-                  }
-                  placeholder="100"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="product-min-stock">Tồn tối thiểu</Label>
-                <Input
-                  id="product-min-stock"
-                  type="number"
-                  value={productForm.minStock}
-                  onChange={(e) =>
-                    setProductForm({ ...productForm, minStock: e.target.value })
-                  }
-                  placeholder="50"
-                  disabled
-                />
+            <div className="space-y-2 min-w-0">
+              <Label htmlFor="product-stock">
+                Tồn kho {productForm.hasVariants ? "(nếu không có variant)" : "*"}
+              </Label>
+              <Input
+                id="product-stock"
+                type="number"
+                value={productForm.stockQuantity}
+                onChange={(e) =>
+                  setProductForm({ ...productForm, stockQuantity: e.target.value })
+                }
+                placeholder="100"
+                disabled={productForm.hasVariants}
+                className="w-full"
+              />
+              {productForm.hasVariants && (
                 <p className="text-xs text-muted-foreground">
-                  (Tự động tính 30% tồn kho)
+                  Sản phẩm có variant sẽ quản lý tồn kho ở từng variant riêng
                 </p>
-              </div>
+              )}
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="product-description">Mô tả</Label>
               <Textarea
                 id="product-description"
@@ -1035,11 +1150,12 @@ export default function ProductManagementPage() {
                 }
                 placeholder="Mô tả sản phẩm..."
                 rows={3}
+                className="w-full resize-none"
               />
             </div>
 
             {/* Image Upload */}
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="product-image">Hình ảnh</Label>
               <Input
                 id="product-image"
@@ -1048,8 +1164,27 @@ export default function ProductManagementPage() {
                 onChange={(e) => {
                   const file = e.target.files?.[0] || null;
                   setProductForm({ ...productForm, imageFile: file });
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setImagePreview(reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  } else {
+                    setImagePreview(editingProduct?.imageUrl || null);
+                  }
                 }}
+                className="w-full"
               />
+              {(imagePreview || editingProduct?.imageUrl) && (
+                <div className="mt-2">
+                  <img
+                    src={imagePreview || editingProduct?.imageUrl || ""}
+                    alt="Preview"
+                    className="w-32 h-32 object-cover rounded-md border"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Profit Preview */}
@@ -1104,7 +1239,7 @@ export default function ProductManagementPage() {
 
       {/* Category Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>
               {editingCategory ? "Sửa danh mục" : "Thêm danh mục"}
@@ -1114,8 +1249,8 @@ export default function ProductManagementPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
+          <div className="grid gap-4 py-4 min-w-0">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-name">Tên danh mục *</Label>
               <Input
                 id="category-name"
@@ -1124,12 +1259,43 @@ export default function ProductManagementPage() {
                   setCategoryForm({ ...categoryForm, categoryName: e.target.value })
                 }
                 placeholder="Ví dụ: Đồ uống"
+                className="w-full"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
+              <Label htmlFor="category-parent">Danh mục cha</Label>
+              <Select
+                value={categoryForm.parentId || "none"}
+                onValueChange={(value) =>
+                  setCategoryForm({
+                    ...categoryForm,
+                    parentId: value === "none" ? "" : value,
+                  })
+                }
+              >
+                <SelectTrigger id="category-parent" className="w-full">
+                  <SelectValue placeholder="Không có (danh mục gốc)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Không có (danh mục gốc)</SelectItem>
+                  {categories
+                    .filter(
+                      (cat) =>
+                        !editingCategory || cat.id !== editingCategory.id
+                    )
+                    .map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.categoryName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-color">Màu sắc</Label>
-              <div className="flex gap-2">
+              <div className="flex gap-2 min-w-0">
                 <Input
                   id="category-color"
                   type="color"
@@ -1137,15 +1303,15 @@ export default function ProductManagementPage() {
                   onChange={(e) =>
                     setCategoryForm({ ...categoryForm, color: e.target.value })
                   }
-                  className="w-20 h-10 cursor-pointer"
+                  className="w-20 h-10 cursor-pointer shrink-0"
                 />
                 <Input
                   value={categoryForm.color}
                   onChange={(e) =>
                     setCategoryForm({ ...categoryForm, color: e.target.value })
                   }
-                  placeholder="#007BFF"
-                  className="flex-1"
+                  placeholder="HSL color"
+                  className="flex-1 min-w-0"
                 />
               </div>
             </div>
@@ -1184,6 +1350,89 @@ export default function ProductManagementPage() {
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               )}
               {editingCategory ? "Cập nhật" : "Thêm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* BarCode View Dialog */}
+      <Dialog open={barCodeViewDialogOpen} onOpenChange={setBarCodeViewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Mã sản phẩm</DialogTitle>
+            <DialogDescription>
+              Mã sản phẩm của bạn
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="p-4 bg-muted rounded-lg">
+              <code className="text-sm font-mono break-all select-all text-foreground">
+                {barCodeToView || "Không có mã"}
+              </code>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(barCodeToView);
+                toast.success("Đã sao chép mã sản phẩm!");
+              }}
+              variant="outline"
+            >
+              Sao chép
+            </Button>
+            <Button onClick={() => setBarCodeViewDialogOpen(false)}>
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Product Confirmation Dialog */}
+      <Dialog open={deleteProductDialogOpen} onOpenChange={setDeleteProductDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Xóa sản phẩm</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa sản phẩm <strong>"{productToDelete?.productName}"</strong>? 
+              Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteProductDialogOpen(false)}>
+              Hủy
+            </Button>
+            <Button
+              onClick={confirmDeleteProduct}
+              variant="destructive"
+            >
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Category Confirmation Dialog */}
+      <Dialog open={deleteCategoryDialogOpen} onOpenChange={setDeleteCategoryDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Xóa danh mục</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa danh mục <strong>"{categoryToDelete?.categoryName}"</strong>? 
+              Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteCategoryDialogOpen(false)}>
+              Hủy
+            </Button>
+            <Button
+              onClick={confirmDeleteCategory}
+              variant="destructive"
+            >
+              Xóa
             </Button>
           </DialogFooter>
         </DialogContent>

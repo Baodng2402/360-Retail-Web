@@ -5,6 +5,7 @@ import { DashboardStats } from "@/features/dashboard/components/DashboardStats";
 import type { StatItem } from "@/features/dashboard/components/DashboardStats";
 import DataTable, { type Staff } from "@/shared/components/ui/table-standard-2";
 import { SearchInput } from "@/shared/components/ui/input-search";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 import { useState, useMemo } from "react";
 
 const BUTTON_GRADIENT =
@@ -113,6 +114,7 @@ const StaffManagement = () => {
 
   return (
     <div className="space-y-6">
+      <StoreSelector pageDescription="Chuyển đổi để quản lý nhân viên của cửa hàng khác" />
       <div className="flex flex-wrap items-center justify-end gap-3">
         <Button
           variant="outline"

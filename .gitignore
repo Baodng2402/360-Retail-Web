@@ -45,9 +45,7 @@ Thumbs.db
 # Testing
 coverage
 .nyc_output
-*.lcov
-
-# Temporary files
+*.lcov# Temporary files
 *.tmp
 *.temp
 .cache

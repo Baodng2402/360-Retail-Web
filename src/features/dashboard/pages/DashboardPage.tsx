@@ -8,6 +8,7 @@ import { Box } from "lucide-react";
 import RecentTransactions from "@/features/dashboard/components/RecentTransactions";
 import RestockModal from "@/features/dashboard/components/modals/RestockModal";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 import { useState } from "react";
 
 const metrics: StatItem[] = [
@@ -106,6 +107,7 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-10">
+      <StoreSelector pageDescription="Chuyển đổi để xem dữ liệu của cửa hàng khác" />
       <section>
         <DashboardStats stats={metrics} />
       </section>

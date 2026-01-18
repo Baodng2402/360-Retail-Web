@@ -51,6 +51,7 @@ import { storesApi } from "@/shared/lib/storesApi";
 import { useStoreStore } from "@/shared/store/storeStore";
 import type { Product } from "@/shared/types/products";
 import AddProductModal from "@/features/dashboard/components/modals/AddProductModal";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 
 const mockProducts = [
   {
@@ -221,6 +222,54 @@ const SalePostPage = () => {
     }));
   };
 
+  const isImageUrl = (str: string): boolean => {
+    if (!str || typeof str !== "string") return false;
+    return str.startsWith("http://") || str.startsWith("https://") || str.startsWith("/");
+  };
+
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+
+  const handleImageError = (productId: string) => {
+    setImageErrors((prev) => new Set(prev).add(productId));
+  };
+
+  const renderProductImage = (
+    productId: string,
+    image: string,
+    size: "sm" | "md" | "lg" = "md"
+  ) => {
+    const hasError = imageErrors.has(productId);
+    const isUrl = isImageUrl(image);
+
+    const imageClasses = {
+      sm: "w-10 h-10 object-cover rounded",
+      md: "w-full h-32 object-cover rounded-md",
+      lg: "w-16 h-16 object-cover rounded",
+    };
+
+    const emojiClasses = {
+      sm: "w-10 h-10 text-2xl flex items-center justify-center",
+      md: "w-full h-32 text-4xl flex items-center justify-center",
+      lg: "w-16 h-16 text-4xl flex items-center justify-center",
+    };
+
+    if (isUrl && !hasError) {
+      return (
+        <img
+          src={image}
+          alt="Product"
+          className={imageClasses[size]}
+          onError={() => handleImageError(productId)}
+        />
+      );
+    }
+    return (
+      <span className={emojiClasses[size]}>
+        {hasError || !isUrl ? image : "📦"}
+      </span>
+    );
+  };
+
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -309,6 +358,7 @@ const SalePostPage = () => {
 
   return (
     <div className="space-y-6">
+      <StoreSelector pageDescription="Chuyển đổi để bán hàng cho cửa hàng khác" />
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="pos">POS / Bán hàng</TabsTrigger>
@@ -344,8 +394,8 @@ const SalePostPage = () => {
                         className="p-4 hover:shadow-lg transition-all cursor-pointer group"
                         onClick={() => addToCart(product)}
                       >
-                        <div className="text-4xl mb-3 text-center">
-                          {product.image}
+                        <div className="mb-3 text-center min-h-[128px] flex items-center justify-center">
+                          {renderProductImage(product.id, product.image, "md")}
                         </div>
                         <h4 className="font-semibold text-sm mb-2 line-clamp-2">
                           {product.name}
@@ -407,7 +457,9 @@ const SalePostPage = () => {
                             key={item.product.id}
                             className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                           >
-                            <div className="text-2xl">{item.product.image}</div>
+                            <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                              {renderProductImage(item.product.id, item.product.image, "sm")}
+                            </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-sm truncate">
                                 {item.product.name}
@@ -521,7 +573,9 @@ const SalePostPage = () => {
                     <TableRow key={product.id} className="hover:bg-muted/50">
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl">{product.image}</span>
+                          <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                            {renderProductImage(product.id, product.image, "sm")}
+                          </div>
                           <span className="font-medium">{product.name}</span>
                         </div>
                       </TableCell>
@@ -663,7 +717,9 @@ const SalePostPage = () => {
           <div className="space-y-4 py-4">
             {selectedProduct && (
               <div className="flex items-center gap-4">
-                <span className="text-4xl">{selectedProduct.image}</span>
+                <div className="w-16 h-16 flex items-center justify-center flex-shrink-0">
+                  {renderProductImage(selectedProduct.id, selectedProduct.image, "lg")}
+                </div>
                 <div className="flex-1">
                   <p className="font-medium">{selectedProduct.name}</p>
                   <p className="text-sm text-muted-foreground">

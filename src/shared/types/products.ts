@@ -1,15 +1,18 @@
 export interface Product {
   id: string;
   productName: string;
-  barCode?: string;
-  description?: string;
+  barCode?: string | null;
+  description?: string | null;
   price: number;
-  costPrice?: number;
+  costPrice?: number | null;
   stockQuantity: number;
   categoryId: string;
   categoryName?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   isActive: boolean;
+  hasVariants?: boolean;
+  isInStock?: boolean;
+  totalStock?: number;
   variants?: ProductVariant[];
   createdAt?: string;
   updatedAt?: string;
@@ -37,9 +40,11 @@ export interface GetProductsParams {
 export interface ProductsResponse {
   items: Product[];
   totalCount: number;
-  page: number;
+  pageNumber: number;
   pageSize: number;
   totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
 }
 
 export interface CreateProductDto {

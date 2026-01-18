@@ -1,10 +1,12 @@
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { FileText, Download, Calendar, TrendingUp } from "lucide-react";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 
 const ReportPage = () => {
   return (
     <div className="space-y-6">
+      <StoreSelector pageDescription="Chuyển đổi để xem báo cáo của cửa hàng khác" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card className="p-6 hover:shadow-lg transition-shadow">
           <FileText className="h-8 w-8 text-teal-600 mb-4" />

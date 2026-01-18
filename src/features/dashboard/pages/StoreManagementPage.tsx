@@ -43,19 +43,7 @@ import type { Store } from "@/shared/types/stores";
 import toast from "react-hot-toast";
 
 interface StoreData extends Store {
-  nameVi?: string;
-  code?: string;
-  city?: string;
-  manager?: string;
-  managerPhone?: string;
-  status?: "active" | "inactive" | "maintenance";
-  openingDate?: string;
-  openingTime?: string;
-  closingTime?: string;
-  staffCount?: number;
-  monthlyRevenue?: number;
-  area?: number;
-  description?: string;
+  status?: "active" | "inactive";
 }
 
 const StoreManagementPage = () => {
@@ -89,18 +77,6 @@ const StoreManagementPage = () => {
       const mappedStores: StoreData[] = fetchedStores.map((store) => ({
         ...store,
         status: store.isActive ? "active" : "inactive",
-        nameVi: store.storeName,
-        code: `ST-${store.id.slice(0, 8).toUpperCase()}`,
-        city: "",
-        manager: "",
-        managerPhone: "",
-        openingDate: store.createdAt ? new Date(store.createdAt).toISOString().split("T")[0] : "",
-        openingTime: "08:00",
-        closingTime: "22:00",
-        staffCount: 0,
-        monthlyRevenue: 0,
-        area: 0,
-        description: "",
       }));
 
       setStores(mappedStores);
@@ -118,9 +94,8 @@ const StoreManagementPage = () => {
   const filteredStores = stores.filter((store) => {
     const matchesSearch =
       store.storeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (store.nameVi && store.nameVi.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (store.code && store.code.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (store.address && store.address.toLowerCase().includes(searchQuery.toLowerCase()));
+      (store.address && store.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (store.phone && store.phone.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesStatus =
       selectedStatus === "all" ||
@@ -307,15 +282,6 @@ const StoreManagementPage = () => {
 
   const totalStores = stores.length;
   const activeStores = stores.filter((s) => s.isActive).length;
-  const totalRevenue = stores
-    .filter((s) => s.isActive)
-    .reduce((sum, s) => sum + (s.monthlyRevenue || 0), 0);
-  const totalStaff = stores.reduce((sum, s) => sum + (s.staffCount || 0), 0);
-  const averageRevenue = activeStores > 0 ? totalRevenue / activeStores : 0;
-  const topStore = stores.reduce(
-    (max, s) => ((s.monthlyRevenue || 0) > (max.monthlyRevenue || 0) ? s : max),
-    stores[0] || { monthlyRevenue: 0, nameVi: "" }
-  );
 
   if (loading) {
     return (
@@ -327,7 +293,7 @@ const StoreManagementPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="p-6 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background border-blue-200 dark:border-blue-900">
           <div className="flex items-center justify-between">
             <div>
@@ -349,51 +315,15 @@ const StoreManagementPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Doanh thu tháng
+                Cửa hàng đang hoạt động
               </p>
-              <h3 className="text-2xl font-bold text-foreground">
-                {(totalRevenue / 1000000000).toFixed(1)}B
-              </h3>
+              <h3 className="text-2xl font-bold text-foreground">{activeStores}</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                TB: {(averageRevenue / 1000000).toFixed(0)}M/cửa hàng
+                {stores.length - activeStores} đã tạm ngừng
               </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-background border-purple-200 dark:border-purple-900">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">
-                Tổng nhân viên
-              </p>
-              <h3 className="text-2xl font-bold text-foreground">{totalStaff}</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tất cả chi nhánh
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 bg-gradient-to-br from-orange-50 to-white dark:from-orange-950/20 dark:to-background border-orange-200 dark:border-orange-900">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">
-                Hiệu suất cao nhất
-              </p>
-              <h3 className="text-lg font-bold text-foreground">{topStore.storeName}</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {((topStore.monthlyRevenue || 0) / 1000000).toFixed(0)}M/tháng
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </Card>
@@ -466,7 +396,6 @@ const StoreManagementPage = () => {
                       </div>
                       <div>
                         <h4 className="font-semibold text-lg">{store.storeName}</h4>
-                        <p className="text-sm text-muted-foreground">{store.nameVi || store.storeName}</p>
                       </div>
                     </div>
                     {getStatusIcon(store.status || store.isActive)}
@@ -485,17 +414,11 @@ const StoreManagementPage = () => {
                         <span className="text-muted-foreground">{store.phone}</span>
                       </div>
                     )}
-                    {store.manager && (
+                    {store.createdAt && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Manager: {store.manager}</span>
-                      </div>
-                    )}
-                    {(store.openingTime || store.closingTime) && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">
-                          {store.openingTime || "08:00"} - {store.closingTime || "22:00"}
+                          Tạo: {new Date(store.createdAt).toLocaleDateString("vi-VN")}
                         </span>
                       </div>
                     )}
@@ -542,15 +465,13 @@ const StoreManagementPage = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-2">
                             <h4 className="font-semibold text-lg">{store.storeName}</h4>
-                            {store.code && <Badge variant="outline">{store.code}</Badge>}
                             {getStatusBadge(store.status || store.isActive)}
+                            {store.isDefault && (
+                              <Badge variant="secondary">Mặc định</Badge>
+                            )}
                           </div>
 
-                          {store.nameVi && (
-                            <p className="text-sm text-muted-foreground mb-3">{store.nameVi}</p>
-                          )}
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
                             {store.address && (
                               <div className="flex items-center gap-2 text-sm">
                                 <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -563,27 +484,12 @@ const StoreManagementPage = () => {
                                 <span className="text-muted-foreground">{store.phone}</span>
                               </div>
                             )}
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm">
-                            {(store.openingTime || store.closingTime) && (
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                  {store.openingTime || "08:00"} - {store.closingTime || "22:00"}
-                                </span>
-                              </div>
-                            )}
-                            {store.area && (
-                              <div className="flex items-center gap-2">
-                                <Building2 className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">{store.area}m²</span>
-                              </div>
-                            )}
-                            {store.openingDate && (
-                              <div className="flex items-center gap-2">
+                            {store.createdAt && (
+                              <div className="flex items-center gap-2 text-sm">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Since {store.openingDate}</span>
+                                <span className="text-muted-foreground">
+                                  Tạo: {new Date(store.createdAt).toLocaleDateString("vi-VN")}
+                                </span>
                               </div>
                             )}
                           </div>
