@@ -36,10 +36,10 @@ function mapClaimsToUser(claims: Claim[]): User {
     get("id") ||
     get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
   const email = get(
-    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
   );
   const role = get(
-    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
   );
 
   const name = email ? email.split("@")[0] : id;
@@ -54,7 +54,9 @@ function mapClaimsToUser(claims: Claim[]): User {
 
 export const authApi = {
   async login(payload: LoginDto): Promise<LoginResponse> {
-    const res = await identityApi.post<LoginResponse | { success: boolean; data: LoginResponse }>("identity/auth/login", payload);
+    const res = await identityApi.post<
+      LoginResponse | { success: boolean; data: LoginResponse }
+    >("identity/auth/login", payload);
     if ("success" in res.data && res.data.success && res.data.data) {
       return res.data.data;
     }
@@ -65,7 +67,10 @@ export const authApi = {
   },
 
   async register(payload: RegisterUserDto): Promise<string | void> {
-    const res = await identityApi.post<{ message?: string }>("identity/auth/register", payload);
+    const res = await identityApi.post<{ message?: string }>(
+      "identity/auth/register",
+      payload,
+    );
     return res.data?.message;
   },
 
@@ -80,7 +85,9 @@ export const authApi = {
 
   async refreshAccess(storeId?: string): Promise<LoginResponse> {
     const queryParams = storeId ? `?storeId=${storeId}` : "";
-    const res = await identityApi.post<LoginResponse | { success: boolean; data: LoginResponse }>(`identity/auth/refresh-access${queryParams}`);
+    const res = await identityApi.post<
+      LoginResponse | { success: boolean; data: LoginResponse }
+    >(`identity/auth/refresh-access${queryParams}`);
     if ("success" in res.data && res.data.success && res.data.data) {
       return res.data.data;
     }

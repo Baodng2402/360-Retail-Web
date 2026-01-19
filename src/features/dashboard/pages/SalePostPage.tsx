@@ -4,7 +4,12 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Badge } from "@/shared/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -160,7 +165,9 @@ const SalePostPage = () => {
   const [showStockModal, setShowStockModal] = useState(false);
   const [products, setProducts] = useState<ProductDisplay[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ProductDisplay | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDisplay | null>(
+    null,
+  );
   const [stockOperation, setStockOperation] = useState<"in" | "out">("in");
   const [stockAmount, setStockAmount] = useState("");
   const [addProductModalOpen, setAddProductModalOpen] = useState(false);
@@ -170,11 +177,19 @@ const SalePostPage = () => {
       try {
         setLoading(true);
         let storeId = currentStore?.id;
-        
+
         if (!storeId) {
           try {
-            const myStore = await storesApi.getMyStore();
-            storeId = myStore.id;
+            const myStores = await storesApi.getMyOwnedStores();
+            if (myStores && myStores.length > 0) {
+              storeId = myStores[0].id;
+            } else {
+              toast.error(
+                "Bạn chưa có cửa hàng nào. Vui lòng tạo cửa hàng trước!",
+              );
+              setProducts([]);
+              return;
+            }
           } catch (storeError) {
             console.error("Failed to get store:", storeError);
             toast.error("Không thể lấy thông tin cửa hàng");
@@ -183,9 +198,9 @@ const SalePostPage = () => {
           }
         }
 
-        const allProducts = await productsApi.getProducts({ 
-          storeId, 
-          includeInactive: false 
+        const allProducts = await productsApi.getProducts({
+          storeId,
+          includeInactive: false,
         });
         const transformed = transformProducts(allProducts);
         setProducts(transformed);
@@ -196,9 +211,10 @@ const SalePostPage = () => {
         }
       } catch (error: any) {
         console.error("Failed to load products:", error);
-        const errorMessage = error?.response?.data?.message || 
-                            error?.message || 
-                            "Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.";
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.";
         toast.error(errorMessage);
         setProducts([]);
         setSelectedProduct(null);
@@ -224,7 +240,11 @@ const SalePostPage = () => {
 
   const isImageUrl = (str: string): boolean => {
     if (!str || typeof str !== "string") return false;
-    return str.startsWith("http://") || str.startsWith("https://") || str.startsWith("/");
+    return (
+      str.startsWith("http://") ||
+      str.startsWith("https://") ||
+      str.startsWith("/")
+    );
   };
 
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
@@ -236,7 +256,7 @@ const SalePostPage = () => {
   const renderProductImage = (
     productId: string,
     image: string,
-    size: "sm" | "md" | "lg" = "md"
+    size: "sm" | "md" | "lg" = "md",
   ) => {
     const hasError = imageErrors.has(productId);
     const isUrl = isImageUrl(image);
@@ -274,7 +294,7 @@ const SalePostPage = () => {
     (product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.barcode.includes(searchQuery) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase())
+      product.category.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const addToCart = (product: ProductDisplay) => {
@@ -284,8 +304,8 @@ const SalePostPage = () => {
         cart.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
+            : item,
+        ),
       );
     } else {
       setCart([...cart, { product, quantity: 1 }]);
@@ -298,9 +318,9 @@ const SalePostPage = () => {
         .map((item) =>
           item.product.id === productId
             ? { ...item, quantity: Math.max(0, item.quantity + delta) }
-            : item
+            : item,
         )
-        .filter((item) => item.quantity > 0)
+        .filter((item) => item.quantity > 0),
     );
   };
 
@@ -311,7 +331,7 @@ const SalePostPage = () => {
   const calculateTotal = () => {
     return cart.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
-      0
+      0,
     );
   };
 
@@ -322,8 +342,9 @@ const SalePostPage = () => {
     }
 
     try {
-      const storeId = currentStore?.id || (await storesApi.getMyStore()).id;
-      
+      const storeId =
+        currentStore?.id || (await storesApi.getMyOwnedStores())[0]?.id;
+
       const orderItems = cart.map((item) => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -458,7 +479,11 @@ const SalePostPage = () => {
                             className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                           >
                             <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                              {renderProductImage(item.product.id, item.product.image, "sm")}
+                              {renderProductImage(
+                                item.product.id,
+                                item.product.image,
+                                "sm",
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-sm truncate">
@@ -574,7 +599,11 @@ const SalePostPage = () => {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                            {renderProductImage(product.id, product.image, "sm")}
+                            {renderProductImage(
+                              product.id,
+                              product.image,
+                              "sm",
+                            )}
                           </div>
                           <span className="font-medium">{product.name}</span>
                         </div>
@@ -689,7 +718,7 @@ const SalePostPage = () => {
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">
                         {Math.round(item.revenue / item.sold).toLocaleString(
-                          "vi-VN"
+                          "vi-VN",
                         )}{" "}
                         ₫
                       </TableCell>
@@ -718,7 +747,11 @@ const SalePostPage = () => {
             {selectedProduct && (
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 flex items-center justify-center flex-shrink-0">
-                  {renderProductImage(selectedProduct.id, selectedProduct.image, "lg")}
+                  {renderProductImage(
+                    selectedProduct.id,
+                    selectedProduct.image,
+                    "lg",
+                  )}
                 </div>
                 <div className="flex-1">
                   <p className="font-medium">{selectedProduct.name}</p>

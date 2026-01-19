@@ -31,11 +31,11 @@ const ChartBarMixed = ({
   title,
 }: ChartBarMixedProps) => (
   <div
-    className={`w-full max-w-xl rounded-md border bg-background p-4 ${
+    className={`w-full rounded-md border border-border bg-card p-4 ${
       className || ""
     }`}
   >
-    <h3 className="text-lg font-semibold pb-5">{title}</h3>
+    <h3 className="text-base md:text-lg font-semibold pb-4 md:pb-5">{title}</h3>
     <ChartContainer config={chartConfig}>
       <BarChart
         accessibilityLayer

@@ -103,29 +103,27 @@ const QuickActions = () => {
     <>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">
+          <h2 className="text-lg md:text-xl font-bold text-foreground">
             Quick Actions
           </h2>
-          <span className="text-sm text-stone-500 dark:text-stone-400">
-            Thao tác nhanh
-          </span>
+          <span className="text-sm text-muted-foreground">Thao tác nhanh</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
           {quickActions.map((action, idx) => (
             <button
               key={action.title + idx}
               onClick={() => handleActionClick(action)}
-              className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-stone-200 dark:border-gray-700 hover:shadow-lg dark:hover:shadow-gray-900/50 transition-all group"
+              className="p-3 md:p-4 bg-card border border-border rounded-xl hover:shadow-lg hover:border-primary/20 transition-all group"
             >
               <div
-                className={`w-12 h-12 mx-auto mb-3 bg-gradient-to-br ${action.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md`}
+                className={`w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 md:mb-3 bg-gradient-to-br ${action.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}
               >
-                <action.icon className="w-6 h-6 text-white" />
+                <action.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
-              <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100 mb-1">
+              <h3 className="text-xs md:text-sm font-semibold text-foreground mb-1">
                 {action.title}
               </h3>
-              <p className="text-xs text-stone-500 dark:text-stone-400">
+              <p className="text-xs text-muted-foreground">
                 {action.description}
               </p>
             </button>

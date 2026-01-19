@@ -94,7 +94,7 @@ const HomeNavbar = ({
         "bg-background text-foreground transition-colors duration-300",
         "border-b border-border",
         "sticky top-0 z-50",
-        className
+        className,
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -107,7 +107,7 @@ const HomeNavbar = ({
               >
                 <img
                   src={logo.src}
-                  className="h-12 w-auto scale-150 dark:invert transition-all duration-300"
+                  className="h-12 w-auto scale-150 transition-all duration-300"
                   alt={logo.alt}
                 />
                 <span className="text-lg font-semibold tracking-tight -ml-3">
@@ -246,4 +246,3 @@ const renderMobileMenuItem = (item: MenuItem) => {
 };
 
 export { HomeNavbar };
-
