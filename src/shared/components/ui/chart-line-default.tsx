@@ -28,7 +28,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const ChartLineDefault = () => (
-  <div className="w-full max-w-xl rounded-md border bg-background p-4">
+  <div className="w-full rounded-md border border-border bg-card p-4">
+    <h3 className="text-base md:text-lg font-semibold pb-4 md:pb-5">
+      Revenue Trend
+    </h3>
     <ChartContainer config={chartConfig}>
       <LineChart
         accessibilityLayer

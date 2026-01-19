@@ -72,9 +72,7 @@ const getTransactionIcon = (type: TransactionType) => {
         <ArrowDownLeft className="w-4 h-4 text-orange-600 dark:text-orange-400" />
       );
     case "refund":
-      return (
-        <RefreshCw className="w-4 h-4 text-red-600 dark:text-red-400" />
-      );
+      return <RefreshCw className="w-4 h-4 text-red-600 dark:text-red-400" />;
   }
 };
 
@@ -82,19 +80,19 @@ const getTransactionBadge = (type: TransactionType) => {
   switch (type) {
     case "sale":
       return (
-        <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30">
+        <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 border-green-500/20">
           Sale
         </Badge>
       );
     case "return":
       return (
-        <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30">
+        <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 border-orange-500/20">
           Return
         </Badge>
       );
     case "refund":
       return (
-        <Badge className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30">
+        <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 border-red-500/20">
           Refund
         </Badge>
       );
@@ -103,17 +101,17 @@ const getTransactionBadge = (type: TransactionType) => {
 
 const RecentTransactions = () => {
   return (
-    <div className="w-full border border-stone-200 dark:border-gray-700 rounded-md p-6 bg-background dark:bg-gray-800">
-      <div className="flex items-center justify-between mb-6">
+    <div className="w-full border border-border rounded-md p-4 md:p-6 bg-card">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div className="flex flex-col">
-          <h3 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
+          <h3 className="text-xl md:text-2xl font-bold text-foreground">
             Recent Transactions
           </h3>
-          <span className="text-sm text-stone-500 dark:text-stone-400">
+          <span className="text-sm text-muted-foreground">
             Giao dịch gần đây
           </span>
         </div>
-        <button className="px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold rounded-lg transition-all shadow-sm">
+        <button className="px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold rounded-lg transition-all shadow-sm text-sm">
           View All
         </button>
       </div>
@@ -122,31 +120,35 @@ const RecentTransactions = () => {
         {mockTransactions.map((transaction) => (
           <div
             key={transaction.id}
-            className="flex items-center justify-between p-4 rounded-xl bg-stone-50 dark:bg-gray-700/50 hover:bg-stone-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border border-stone-200 dark:border-gray-600"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 md:p-4 rounded-xl bg-accent/50 hover:bg-accent transition-colors cursor-pointer border border-border"
           >
-            <div className="flex items-center gap-4 flex-1">
-              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-stone-200 dark:border-gray-600">
+            <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+              <div className="p-2 bg-background rounded-lg border border-border flex-shrink-0">
                 {getTransactionIcon(transaction.type)}
               </div>
-              <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-stone-900 dark:text-stone-100 truncate">
+              <div className="flex flex-col min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span className="font-semibold text-foreground truncate">
                     {transaction.customer}
                   </span>
                   {getTransactionBadge(transaction.type)}
                 </div>
-                <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400">
+                <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground flex-wrap">
                   <span>{transaction.time}</span>
-                  <span>•</span>
-                  <span>{transaction.items} items</span>
-                  <span>•</span>
-                  <span className="truncate">By {transaction.staff}</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span className="hidden sm:inline">
+                    {transaction.items} items
+                  </span>
+                  <span className="hidden md:inline">•</span>
+                  <span className="hidden md:inline truncate">
+                    By {transaction.staff}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="flex flex-col items-end ml-4">
+            <div className="flex flex-col items-end">
               <span
-                className={`font-bold ${
+                className={`font-bold text-sm md:text-base ${
                   transaction.type === "sale"
                     ? "text-green-600 dark:text-green-400"
                     : "text-red-600 dark:text-red-400"
@@ -155,7 +157,7 @@ const RecentTransactions = () => {
                 {transaction.type === "sale" ? "+" : "-"}
                 {transaction.amount.toLocaleString("vi-VN")} ₫
               </span>
-              <span className="text-xs text-stone-400 dark:text-stone-500">
+              <span className="text-xs text-muted-foreground">
                 {transaction.id}
               </span>
             </div>
