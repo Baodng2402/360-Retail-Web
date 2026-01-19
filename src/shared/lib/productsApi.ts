@@ -86,6 +86,9 @@ export const productsApi = {
     formData.append("Price", data.price.toString());
     formData.append("StockQuantity", data.stockQuantity.toString());
 
+    if (data.hasVariants !== undefined) {
+      formData.append("HasVariants", data.hasVariants.toString());
+    }
     if (data.barCode) formData.append("BarCode", data.barCode);
     if (data.description) formData.append("Description", data.description);
     if (data.costPrice !== undefined) {
@@ -118,6 +121,9 @@ export const productsApi = {
     formData.append("CategoryId", data.categoryId);
     formData.append("IsActive", data.isActive.toString());
 
+    if (data.hasVariants !== undefined) {
+      formData.append("HasVariants", data.hasVariants.toString());
+    }
     if (data.barCode) formData.append("BarCode", data.barCode);
     if (data.description) formData.append("Description", data.description);
     if (data.costPrice !== undefined) {

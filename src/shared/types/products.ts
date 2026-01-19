@@ -72,5 +72,7 @@ export interface UpdateProductDto {
   categoryId: string;
   isActive: boolean;
   imageFile?: File;
+  hasVariants?: boolean;
+  variants?: ProductVariant[];
   variantsJson?: string;
 }

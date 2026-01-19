@@ -44,13 +44,13 @@ import {
 } from "lucide-react";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Switch } from "@/shared/components/ui/switch";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { categoriesApi } from "@/shared/lib/categoriesApi";
 import { productsApi } from "@/shared/lib/productsApi";
 import { useStoreStore } from "@/shared/store/storeStore";
 import type { Category } from "@/shared/types/categories";
-import type { Product } from "@/shared/types/products";
+import type { Product, ProductVariant } from "@/shared/types/products";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
 
 interface ExtendedCategory extends Category {
@@ -62,18 +62,40 @@ interface ExtendedProduct extends Product {
   status?: "in-stock" | "low-stock" | "out-of-stock";
 }
 
+type VariantForm = {
+  sku: string;
+  size: string;
+  color: string;
+  priceOverride: string;
+  stockQuantity: string;
+};
+
+type ProductFormState = {
+  productName: string;
+  categoryId: string;
+  price: string;
+  costPrice: string;
+  stockQuantity: string;
+  barCode: string;
+  description: string;
+  imageFile: File | null;
+  hasVariants: boolean;
+  variants: VariantForm[];
+  isActive: boolean;
+};
+
 const generateCategoryColor = (categoryName: string, index: number): string => {
   const colorPalette = [
-    "hsl(210, 100%, 50%)",  // Blue
-    "hsl(142, 71%, 45%)",   // Green
-    "hsl(45, 96%, 53%)",    // Yellow/Amber
-    "hsl(199, 89%, 48%)",   // Cyan
-    "hsl(0, 84%, 60%)",     // Red
-    "hsl(262, 52%, 47%)",   // Purple
-    "hsl(25, 95%, 53%)",    // Orange
-    "hsl(158, 64%, 52%)",   // Teal
-    "hsl(340, 82%, 52%)",   // Pink
-    "hsl(217, 91%, 60%)",   // Indigo
+    "hsl(210, 100%, 50%)",
+    "hsl(142, 71%, 45%)",
+    "hsl(45, 96%, 53%)",
+    "hsl(199, 89%, 48%)",
+    "hsl(0, 84%, 60%)",
+    "hsl(262, 52%, 47%)",
+    "hsl(25, 95%, 53%)",
+    "hsl(158, 64%, 52%)",
+    "hsl(340, 82%, 52%)",
+    "hsl(217, 91%, 60%)",
   ];
   
   return colorPalette[index % colorPalette.length];
@@ -97,7 +119,15 @@ export default function ProductManagementPage() {
 
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ExtendedProduct | null>(null);
-  const [productForm, setProductForm] = useState({
+  const emptyVariant: VariantForm = {
+    sku: "",
+    size: "",
+    color: "",
+    priceOverride: "",
+    stockQuantity: "",
+  };
+
+  const [productForm, setProductForm] = useState<ProductFormState>({
     productName: "",
     categoryId: "",
     price: "",
@@ -105,9 +135,9 @@ export default function ProductManagementPage() {
     stockQuantity: "",
     barCode: "",
     description: "",
-    imageFile: null as File | null,
+    imageFile: null,
     hasVariants: false,
-    variantsJson: "",
+    variants: [],
     isActive: true,
   });
   const [productFormLoading, setProductFormLoading] = useState(false);
@@ -131,6 +161,47 @@ export default function ProductManagementPage() {
   const [productToToggle, setProductToToggle] = useState<ExtendedProduct | null>(null);
   const [toggleCategoryDialogOpen, setToggleCategoryDialogOpen] = useState(false);
   const [categoryToToggle, setCategoryToToggle] = useState<ExtendedCategory | null>(null);
+
+  const ensureAtLeastOneVariant = (variants: VariantForm[]) =>
+    variants.length > 0 ? variants : [emptyVariant];
+
+  const toggleVariants = (checked: boolean) => {
+    setProductForm((prev) => ({
+      ...prev,
+      hasVariants: checked,
+      stockQuantity: checked ? "0" : prev.stockQuantity,
+      variants: checked ? ensureAtLeastOneVariant(prev.variants) : [],
+    }));
+  };
+
+  const updateVariantField = (
+    index: number,
+    field: keyof VariantForm,
+    value: string
+  ) => {
+    setProductForm((prev) => {
+      const variants = [...prev.variants];
+      variants[index] = { ...variants[index], [field]: value };
+      return { ...prev, variants };
+    });
+  };
+
+  const addVariantRow = () => {
+    setProductForm((prev) => ({
+      ...prev,
+      variants: [...prev.variants, emptyVariant],
+    }));
+  };
+
+  const removeVariantRow = (index: number) => {
+    setProductForm((prev) => {
+      const variants = prev.variants.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        variants: ensureAtLeastOneVariant(variants),
+      };
+    });
+  };
 
   useEffect(() => {
     if (storeId) {
@@ -262,7 +333,7 @@ export default function ProductManagementPage() {
       description: "",
       imageFile: null,
       hasVariants: false,
-      variantsJson: "",
+      variants: [],
       isActive: true,
     });
     setImagePreview(null);
@@ -272,17 +343,35 @@ export default function ProductManagementPage() {
   const handleEditProduct = (product: ExtendedProduct) => {
     setEditingProduct(product);
     const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
+    const variantsForForm: VariantForm[] = hasVariants
+      ? (product.variants || []).map((variant) => ({
+          sku: variant.sku || "",
+          size: variant.size || "",
+          color: variant.color || "",
+          priceOverride:
+            variant.priceOverride !== undefined && variant.priceOverride !== null
+              ? variant.priceOverride.toString()
+              : "",
+          stockQuantity:
+            variant.stockQuantity !== undefined && variant.stockQuantity !== null
+              ? variant.stockQuantity.toString()
+              : "",
+        }))
+      : [];
     setProductForm({
       productName: product.productName,
       categoryId: product.categoryId,
       price: product.price.toString(),
-      costPrice: (product.costPrice || 0).toString(),
+      costPrice:
+        product.costPrice !== undefined && product.costPrice !== null
+          ? product.costPrice.toString()
+          : "",
       stockQuantity: hasVariants ? "0" : product.stockQuantity.toString(),
       barCode: product.barCode || "",
       description: product.description || "",
       imageFile: null,
       hasVariants: hasVariants ?? false,
-      variantsJson: product.variants ? JSON.stringify(product.variants) : "",
+      variants: hasVariants ? ensureAtLeastOneVariant(variantsForForm) : [],
       isActive: product.isActive ?? true,
     });
     setImagePreview(product.imageUrl || null);
@@ -310,13 +399,49 @@ export default function ProductManagementPage() {
       return;
     }
 
-    if (!productForm.stockQuantity || parseInt(productForm.stockQuantity) < 0) {
-      toast.error("Vui lòng nhập số lượng tồn kho hợp lệ.");
-      return;
+    if (!productForm.hasVariants) {
+      if (productForm.stockQuantity === "" || parseInt(productForm.stockQuantity || "0", 10) < 0) {
+        toast.error("Vui lòng nhập số lượng tồn kho hợp lệ.");
+        return;
+      }
+    } else {
+      if (productForm.variants.length === 0) {
+        toast.error("Vui lòng thêm ít nhất 1 biến thể.");
+        return;
+      }
+
+      const hasInvalidVariant = productForm.variants.some(
+        (variant) =>
+          !variant.sku.trim() ||
+          variant.stockQuantity === "" ||
+          parseInt(variant.stockQuantity || "0", 10) < 0 ||
+          (variant.priceOverride !== "" && parseFloat(variant.priceOverride) <= 0)
+      );
+
+      if (hasInvalidVariant) {
+        toast.error("Vui lòng nhập đầy đủ thông tin biến thể (Mã biến thể, tồn kho, giá > 0).");
+        return;
+      }
     }
 
     try {
       setProductFormLoading(true);
+
+      const payloadStockQuantity = productForm.hasVariants
+        ? 0
+        : parseInt(productForm.stockQuantity || "0", 10);
+
+      const variantsPayload: ProductVariant[] | undefined = productForm.hasVariants
+        ? productForm.variants.map((variant) => ({
+            sku: variant.sku.trim(),
+            size: variant.size.trim() || undefined,
+            color: variant.color.trim() || undefined,
+            priceOverride:
+              variant.priceOverride !== "" ? parseFloat(variant.priceOverride) : undefined,
+            stockQuantity:
+              variant.stockQuantity !== "" ? parseInt(variant.stockQuantity, 10) : 0,
+          }))
+        : undefined;
 
       if (editingProduct) {
         await productsApi.updateProduct(editingProduct.id, {
@@ -327,10 +452,11 @@ export default function ProductManagementPage() {
           description: productForm.description || undefined,
           price: parseFloat(productForm.price),
           costPrice: productForm.costPrice ? parseFloat(productForm.costPrice) : undefined,
-          stockQuantity: productForm.hasVariants ? 0 : parseInt(productForm.stockQuantity || "0"),
+          stockQuantity: payloadStockQuantity,
           isActive: productForm.isActive,
           imageFile: productForm.imageFile || undefined,
-          variantsJson: productForm.hasVariants && productForm.variantsJson ? productForm.variantsJson : undefined,
+          hasVariants: productForm.hasVariants,
+          variantsJson: productForm.hasVariants && variantsPayload ? JSON.stringify(variantsPayload) : undefined,
         });
         toast.success("Cập nhật sản phẩm thành công!");
       } else {
@@ -341,11 +467,11 @@ export default function ProductManagementPage() {
           description: productForm.description || undefined,
           price: parseFloat(productForm.price),
           costPrice: productForm.costPrice ? parseFloat(productForm.costPrice) : undefined,
-          stockQuantity: productForm.hasVariants ? 0 : parseInt(productForm.stockQuantity || "0"),
+          stockQuantity: payloadStockQuantity,
           isActive: productForm.isActive,
           imageFile: productForm.imageFile || undefined,
           hasVariants: productForm.hasVariants,
-          variants: productForm.hasVariants && productForm.variantsJson ? JSON.parse(productForm.variantsJson) : undefined,
+          variants: variantsPayload,
         });
         toast.success("Thêm sản phẩm thành công!");
       }
@@ -617,7 +743,6 @@ export default function ProductManagementPage() {
     <div className="space-y-6">
       <StoreSelector pageDescription="Chuyển đổi để quản lý sản phẩm và danh mục của cửa hàng khác" />
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-6 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background border-blue-200 dark:border-blue-900">
           <div className="flex items-center justify-between">
@@ -676,9 +801,8 @@ export default function ProductManagementPage() {
             </div>
           </div>
         </Card>
-      </div>
+        </div>
 
-      {/* Main Content */}
       <Tabs defaultValue="products" className="space-y-4">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="products" className="gap-2">
@@ -691,12 +815,9 @@ export default function ProductManagementPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Products Tab */}
         <TabsContent value="products" className="space-y-4">
           <Card className="p-6">
-            {/* Filters and Actions */}
             <div className="flex flex-col lg:flex-row gap-4 mb-6">
-              {/* Search */}
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -707,7 +828,6 @@ export default function ProductManagementPage() {
                 />
               </div>
 
-              {/* Category Filter */}
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="w-full lg:w-[200px]">
                   <SelectValue placeholder="Tất cả danh mục" />
@@ -722,7 +842,6 @@ export default function ProductManagementPage() {
                 </SelectContent>
               </Select>
 
-              {/* Status Filter */}
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger className="w-full lg:w-[200px]">
                   <SelectValue placeholder="Tất cả trạng thái" />
@@ -735,7 +854,6 @@ export default function ProductManagementPage() {
                 </SelectContent>
               </Select>
 
-              {/* Active Status Filter */}
               <Select value={selectedActiveStatus} onValueChange={setSelectedActiveStatus}>
                 <SelectTrigger className="w-full lg:w-[200px]">
                   <SelectValue placeholder="Tất cả hoạt động" />
@@ -747,14 +865,12 @@ export default function ProductManagementPage() {
                 </SelectContent>
               </Select>
 
-              {/* Add Button */}
               <Button onClick={handleAddProduct} className="gap-2 whitespace-nowrap">
                 <Plus className="h-4 w-4" />
                 Thêm sản phẩm
               </Button>
             </div>
 
-            {/* Products Table */}
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -866,7 +982,7 @@ export default function ProductManagementPage() {
                                 </span>
                                 {product.hasVariants && product.variants && product.variants.length > 0 && (
                                   <span className="text-xs text-muted-foreground">
-                                    ({product.variants.length} variant)
+                                    ({product.variants.length} biến thể)
                                   </span>
                                 )}
                               </div>
@@ -918,7 +1034,6 @@ export default function ProductManagementPage() {
           </Card>
         </TabsContent>
 
-        {/* Categories Tab */}
         <TabsContent value="categories" className="space-y-4">
           <Card className="p-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
@@ -1037,7 +1152,6 @@ export default function ProductManagementPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Product Dialog */}
       <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
@@ -1050,7 +1164,6 @@ export default function ProductManagementPage() {
           </DialogHeader>
 
           <div className="grid gap-4 py-4 min-w-0">
-            {/* Product Name */}
             <div className="space-y-2 min-w-0">
               <Label htmlFor="product-name">Tên sản phẩm *</Label>
               <Input
@@ -1064,7 +1177,6 @@ export default function ProductManagementPage() {
               />
             </div>
 
-            {/* SKU & Category */}
             <div className="grid grid-cols-2 gap-4 min-w-0">
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="product-sku">Mã sản phẩm</Label>
@@ -1100,7 +1212,6 @@ export default function ProductManagementPage() {
               </div>
             </div>
 
-            {/* Price & Cost */}
             <div className="grid grid-cols-2 gap-4 min-w-0">
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="product-price">Giá bán (VND) *</Label>
@@ -1130,10 +1241,9 @@ export default function ProductManagementPage() {
               </div>
             </div>
 
-            {/* Stock */}
             <div className="space-y-2 min-w-0">
               <Label htmlFor="product-stock">
-                Tồn kho {productForm.hasVariants ? "(nếu không có variant)" : "*"}
+                Tồn kho {productForm.hasVariants ? "(nếu không có biến thể)" : "*"}
               </Label>
               <Input
                 id="product-stock"
@@ -1148,12 +1258,129 @@ export default function ProductManagementPage() {
               />
               {productForm.hasVariants && (
                 <p className="text-xs text-muted-foreground">
-                  Sản phẩm có variant sẽ quản lý tồn kho ở từng variant riêng
+                  Sản phẩm có biến thể sẽ quản lý tồn kho ở từng biến thể riêng
                 </p>
               )}
             </div>
 
-            {/* Description */}
+            <div className="space-y-3 min-w-0 rounded-md border border-dashed p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <Label>Biến thể</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Bật nếu sản phẩm có size/màu. Tồn kho sẽ trừ theo từng biến thể.
+                  </p>
+                </div>
+                <Switch checked={productForm.hasVariants} onCheckedChange={toggleVariants} />
+              </div>
+
+              {productForm.hasVariants && (
+                <div className="space-y-3">
+                  <div className="overflow-x-auto">
+                    <div className="min-w-[860px] space-y-2">
+                      <div className="grid grid-cols-12 gap-3 px-3">
+                        <div className="col-span-4 text-xs font-medium text-muted-foreground">
+                          Mã biến thể *
+                        </div>
+                        <div className="col-span-2 text-xs font-medium text-muted-foreground">
+                          Kích thước
+                        </div>
+                        <div className="col-span-2 text-xs font-medium text-muted-foreground">
+                          Màu sắc
+                        </div>
+                        <div className="col-span-2 text-xs font-medium text-muted-foreground">
+                          Giá bán (tùy chỉnh)
+                        </div>
+                        <div className="col-span-2 text-xs font-medium text-muted-foreground">
+                          Tồn kho *
+                        </div>
+                      </div>
+
+                      {productForm.variants.map((variant, index) => (
+                        <div
+                          key={index}
+                          className="grid grid-cols-12 items-center gap-3 rounded-lg border bg-muted/20 p-3"
+                        >
+                          <div className="col-span-4 min-w-0">
+                            <Input
+                              className="h-10"
+                              value={variant.sku}
+                              onChange={(e) =>
+                                updateVariantField(index, "sku", e.target.value)
+                              }
+                              placeholder="VD: POLO-M-DEN"
+                            />
+                          </div>
+                          <div className="col-span-2 min-w-0">
+                            <Input
+                              className="h-10"
+                              value={variant.size}
+                              onChange={(e) =>
+                                updateVariantField(index, "size", e.target.value)
+                              }
+                              placeholder="VD: M"
+                            />
+                          </div>
+                          <div className="col-span-2 min-w-0">
+                            <Input
+                              className="h-10"
+                              value={variant.color}
+                              onChange={(e) =>
+                                updateVariantField(index, "color", e.target.value)
+                              }
+                              placeholder="VD: Đen"
+                            />
+                          </div>
+                          <div className="col-span-2 min-w-0">
+                            <Input
+                              className="h-10"
+                              type="number"
+                              value={variant.priceOverride}
+                              onChange={(e) =>
+                                updateVariantField(index, "priceOverride", e.target.value)
+                              }
+                              placeholder="VD: 350000"
+                            />
+                          </div>
+                          <div className="col-span-2 min-w-0 flex items-center gap-2">
+                            <Input
+                              className="h-10"
+                              type="number"
+                              value={variant.stockQuantity}
+                              onChange={(e) =>
+                                updateVariantField(index, "stockQuantity", e.target.value)
+                              }
+                              placeholder="VD: 20"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="shrink-0"
+                              onClick={() => removeVariantRow(index)}
+                              title={`Xoá biến thể #${index + 1}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-dashed"
+                    onClick={addVariantRow}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Thêm biến thể
+                  </Button>
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2 min-w-0">
               <Label htmlFor="product-description">Mô tả</Label>
               <Textarea
@@ -1168,7 +1395,6 @@ export default function ProductManagementPage() {
               />
             </div>
 
-            {/* Image Upload */}
             <div className="space-y-2 min-w-0">
               <Label htmlFor="product-image">Hình ảnh</Label>
               <Input
@@ -1201,7 +1427,6 @@ export default function ProductManagementPage() {
               )}
             </div>
 
-            {/* Profit Preview */}
             {productForm.price &&
               productForm.costPrice &&
               parseFloat(productForm.price) > 0 &&
@@ -1232,7 +1457,6 @@ export default function ProductManagementPage() {
                 </Card>
               )}
 
-            {/* Active Status - Only show when editing */}
             {editingProduct && (
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="product-status">Trạng thái</Label>
@@ -1272,7 +1496,6 @@ export default function ProductManagementPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Category Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
         <DialogContent className="max-w-md overflow-x-hidden">
           <DialogHeader>
@@ -1351,7 +1574,6 @@ export default function ProductManagementPage() {
               </div>
             </div>
 
-            {/* Color Preview */}
             <Card
               className="p-4"
               style={{ borderLeftWidth: "4px", borderLeftColor: categoryForm.color }}
@@ -1371,7 +1593,6 @@ export default function ProductManagementPage() {
               </div>
             </Card>
 
-            {/* Active Status - Only show when editing */}
             {editingCategory && (
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="category-status">Trạng thái</Label>
@@ -1411,7 +1632,6 @@ export default function ProductManagementPage() {
         </DialogContent>
       </Dialog>
 
-      {/* BarCode View Dialog */}
       <Dialog open={barCodeViewDialogOpen} onOpenChange={setBarCodeViewDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -1446,7 +1666,6 @@ export default function ProductManagementPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Toggle Product Active Dialog */}
       <Dialog open={toggleProductDialogOpen} onOpenChange={setToggleProductDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -1478,7 +1697,6 @@ export default function ProductManagementPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Toggle Category Active Dialog */}
       <Dialog open={toggleCategoryDialogOpen} onOpenChange={setToggleCategoryDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
