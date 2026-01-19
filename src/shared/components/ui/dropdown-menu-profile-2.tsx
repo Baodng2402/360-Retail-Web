@@ -2,7 +2,11 @@
 
 import { LogOut, Settings, User } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -14,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { useAuthStore } from "@/shared/store/authStore";
+import { Link } from "react-router-dom";
 
 export const title = "Profile Dropdown with Status";
 const Example = () => {
@@ -51,20 +56,24 @@ const Example = () => {
                 {user?.email || "User Email"}
               </p>
               <Badge className="w-fit text-xs" variant="secondary">
-                {user?.role?.replace(/([A-Z])/g, " $1").trim() || "Store Owner"}{" "}
+                {user?.role?.replace(/([A-Z])/g, " $1").trim() || "Store Owner"}
               </Badge>
             </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User />
-          View Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings />
-          Account Settings
-        </DropdownMenuItem>
+        <Link to="/dashboard/profile" className="flex items-center gap-2">
+          <DropdownMenuItem>
+            <User />
+            Profile
+          </DropdownMenuItem>
+        </Link>
+        <Link to="/dashboard" className="flex items-center gap-2">
+          <DropdownMenuItem>
+            <Settings />
+            Dashboard
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={logout}>
           <LogOut />
