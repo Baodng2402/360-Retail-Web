@@ -4,7 +4,12 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Badge } from "@/shared/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -97,7 +102,7 @@ const generateCategoryColor = (categoryName: string, index: number): string => {
     "hsl(340, 82%, 52%)",
     "hsl(217, 91%, 60%)",
   ];
-  
+
   return colorPalette[index % colorPalette.length];
 };
 
@@ -112,13 +117,21 @@ export default function ProductManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [selectedActiveStatus, setSelectedActiveStatus] = useState<string>("active");
-  const [selectedCategoryActiveStatus, setSelectedCategoryActiveStatus] = useState<string>("active");
-  const [togglingProductIds, setTogglingProductIds] = useState<Set<string>>(new Set());
-  const [togglingCategoryIds, setTogglingCategoryIds] = useState<Set<string>>(new Set());
+  const [selectedActiveStatus, setSelectedActiveStatus] =
+    useState<string>("active");
+  const [selectedCategoryActiveStatus, setSelectedCategoryActiveStatus] =
+    useState<string>("active");
+  const [togglingProductIds, setTogglingProductIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [togglingCategoryIds, setTogglingCategoryIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const [productDialogOpen, setProductDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<ExtendedProduct | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ExtendedProduct | null>(
+    null,
+  );
   const emptyVariant: VariantForm = {
     sku: "",
     size: "",
@@ -144,7 +157,8 @@ export default function ProductManagementPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<ExtendedCategory | null>(null);
+  const [editingCategory, setEditingCategory] =
+    useState<ExtendedCategory | null>(null);
   const [categoryForm, setCategoryForm] = useState({
     categoryName: "",
     description: "",
@@ -158,9 +172,12 @@ export default function ProductManagementPage() {
   const [barCodeToView, setBarCodeToView] = useState<string>("");
 
   const [toggleProductDialogOpen, setToggleProductDialogOpen] = useState(false);
-  const [productToToggle, setProductToToggle] = useState<ExtendedProduct | null>(null);
-  const [toggleCategoryDialogOpen, setToggleCategoryDialogOpen] = useState(false);
-  const [categoryToToggle, setCategoryToToggle] = useState<ExtendedCategory | null>(null);
+  const [productToToggle, setProductToToggle] =
+    useState<ExtendedProduct | null>(null);
+  const [toggleCategoryDialogOpen, setToggleCategoryDialogOpen] =
+    useState(false);
+  const [categoryToToggle, setCategoryToToggle] =
+    useState<ExtendedCategory | null>(null);
 
   const ensureAtLeastOneVariant = (variants: VariantForm[]) =>
     variants.length > 0 ? variants : [emptyVariant];
@@ -177,7 +194,7 @@ export default function ProductManagementPage() {
   const updateVariantField = (
     index: number,
     field: keyof VariantForm,
-    value: string
+    value: string,
   ) => {
     setProductForm((prev) => {
       const variants = [...prev.variants];
@@ -213,7 +230,6 @@ export default function ProductManagementPage() {
     }
   }, [storeId, selectedCategoryActiveStatus, selectedActiveStatus]);
 
-
   const loadCategories = async () => {
     if (!storeId) {
       setCategories([]);
@@ -229,14 +245,18 @@ export default function ProductManagementPage() {
         productCount: 0,
         isActive: cat.isActive ?? true,
       }));
-      
+
       let filteredCategoriesWithColors = categoriesWithColors;
       if (selectedCategoryActiveStatus === "active") {
-        filteredCategoriesWithColors = categoriesWithColors.filter(cat => cat.isActive !== false);
+        filteredCategoriesWithColors = categoriesWithColors.filter(
+          (cat) => cat.isActive !== false,
+        );
       } else if (selectedCategoryActiveStatus === "inactive") {
-        filteredCategoriesWithColors = categoriesWithColors.filter(cat => cat.isActive === false);
+        filteredCategoriesWithColors = categoriesWithColors.filter(
+          (cat) => cat.isActive === false,
+        );
       }
-      
+
       setCategories(filteredCategoriesWithColors);
     } catch (error) {
       console.error("Error loading categories:", error);
@@ -252,12 +272,14 @@ export default function ProductManagementPage() {
       setLoading(true);
       const includeInactive = selectedActiveStatus !== "active";
       const data = await productsApi.getProducts({ storeId, includeInactive });
-      
+
       const productsWithStatus: ExtendedProduct[] = data.map((product) => {
-        const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
-        
+        const hasVariants =
+          product.hasVariants ||
+          (product.variants && product.variants.length > 0);
+
         let status: ExtendedProduct["status"] = "in-stock";
-        
+
         if (product.isInStock !== undefined) {
           if (!product.isInStock) {
             status = "out-of-stock";
@@ -283,7 +305,9 @@ export default function ProductManagementPage() {
         return {
           ...product,
           status,
-          isActive: product.isActive ?? (selectedActiveStatus === "active" ? true : false),
+          isActive:
+            product.isActive ??
+            (selectedActiveStatus === "active" ? true : false),
         };
       });
 
@@ -292,8 +316,10 @@ export default function ProductManagementPage() {
       setCategories((prev) =>
         prev.map((cat) => ({
           ...cat,
-          productCount: productsWithStatus.filter((p) => p.categoryId === cat.id).length,
-        }))
+          productCount: productsWithStatus.filter(
+            (p) => p.categoryId === cat.id,
+          ).length,
+        })),
       );
     } catch (error) {
       console.error("Error loading products:", error);
@@ -316,7 +342,7 @@ export default function ProductManagementPage() {
     const matchesActive =
       selectedActiveStatus === "all" ||
       (selectedActiveStatus === "active" && (product.isActive ?? true)) ||
-      (selectedActiveStatus === "inactive" && (product.isActive === false));
+      (selectedActiveStatus === "inactive" && product.isActive === false);
 
     return matchesSearch && matchesCategory && matchesStatus && matchesActive;
   });
@@ -342,18 +368,21 @@ export default function ProductManagementPage() {
 
   const handleEditProduct = (product: ExtendedProduct) => {
     setEditingProduct(product);
-    const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
+    const hasVariants =
+      product.hasVariants || (product.variants && product.variants.length > 0);
     const variantsForForm: VariantForm[] = hasVariants
       ? (product.variants || []).map((variant) => ({
           sku: variant.sku || "",
           size: variant.size || "",
           color: variant.color || "",
           priceOverride:
-            variant.priceOverride !== undefined && variant.priceOverride !== null
+            variant.priceOverride !== undefined &&
+            variant.priceOverride !== null
               ? variant.priceOverride.toString()
               : "",
           stockQuantity:
-            variant.stockQuantity !== undefined && variant.stockQuantity !== null
+            variant.stockQuantity !== undefined &&
+            variant.stockQuantity !== null
               ? variant.stockQuantity.toString()
               : "",
         }))
@@ -400,7 +429,10 @@ export default function ProductManagementPage() {
     }
 
     if (!productForm.hasVariants) {
-      if (productForm.stockQuantity === "" || parseInt(productForm.stockQuantity || "0", 10) < 0) {
+      if (
+        productForm.stockQuantity === "" ||
+        parseInt(productForm.stockQuantity || "0", 10) < 0
+      ) {
         toast.error("Vui lòng nhập số lượng tồn kho hợp lệ.");
         return;
       }
@@ -415,11 +447,14 @@ export default function ProductManagementPage() {
           !variant.sku.trim() ||
           variant.stockQuantity === "" ||
           parseInt(variant.stockQuantity || "0", 10) < 0 ||
-          (variant.priceOverride !== "" && parseFloat(variant.priceOverride) <= 0)
+          (variant.priceOverride !== "" &&
+            parseFloat(variant.priceOverride) <= 0),
       );
 
       if (hasInvalidVariant) {
-        toast.error("Vui lòng nhập đầy đủ thông tin biến thể (Mã biến thể, tồn kho, giá > 0).");
+        toast.error(
+          "Vui lòng nhập đầy đủ thông tin biến thể (Mã biến thể, tồn kho, giá > 0).",
+        );
         return;
       }
     }
@@ -431,17 +466,22 @@ export default function ProductManagementPage() {
         ? 0
         : parseInt(productForm.stockQuantity || "0", 10);
 
-      const variantsPayload: ProductVariant[] | undefined = productForm.hasVariants
-        ? productForm.variants.map((variant) => ({
-            sku: variant.sku.trim(),
-            size: variant.size.trim() || undefined,
-            color: variant.color.trim() || undefined,
-            priceOverride:
-              variant.priceOverride !== "" ? parseFloat(variant.priceOverride) : undefined,
-            stockQuantity:
-              variant.stockQuantity !== "" ? parseInt(variant.stockQuantity, 10) : 0,
-          }))
-        : undefined;
+      const variantsPayload: ProductVariant[] | undefined =
+        productForm.hasVariants
+          ? productForm.variants.map((variant) => ({
+              sku: variant.sku.trim(),
+              size: variant.size.trim() || undefined,
+              color: variant.color.trim() || undefined,
+              priceOverride:
+                variant.priceOverride !== ""
+                  ? parseFloat(variant.priceOverride)
+                  : undefined,
+              stockQuantity:
+                variant.stockQuantity !== ""
+                  ? parseInt(variant.stockQuantity, 10)
+                  : 0,
+            }))
+          : undefined;
 
       if (editingProduct) {
         await productsApi.updateProduct(editingProduct.id, {
@@ -451,12 +491,17 @@ export default function ProductManagementPage() {
           barCode: productForm.barCode || undefined,
           description: productForm.description || undefined,
           price: parseFloat(productForm.price),
-          costPrice: productForm.costPrice ? parseFloat(productForm.costPrice) : undefined,
+          costPrice: productForm.costPrice
+            ? parseFloat(productForm.costPrice)
+            : undefined,
           stockQuantity: payloadStockQuantity,
           isActive: productForm.isActive,
           imageFile: productForm.imageFile || undefined,
           hasVariants: productForm.hasVariants,
-          variantsJson: productForm.hasVariants && variantsPayload ? JSON.stringify(variantsPayload) : undefined,
+          variantsJson:
+            productForm.hasVariants && variantsPayload
+              ? JSON.stringify(variantsPayload)
+              : undefined,
         });
         toast.success("Cập nhật sản phẩm thành công!");
       } else {
@@ -466,7 +511,9 @@ export default function ProductManagementPage() {
           barCode: productForm.barCode || undefined,
           description: productForm.description || undefined,
           price: parseFloat(productForm.price),
-          costPrice: productForm.costPrice ? parseFloat(productForm.costPrice) : undefined,
+          costPrice: productForm.costPrice
+            ? parseFloat(productForm.costPrice)
+            : undefined,
           stockQuantity: payloadStockQuantity,
           isActive: productForm.isActive,
           imageFile: productForm.imageFile || undefined,
@@ -498,16 +545,16 @@ export default function ProductManagementPage() {
     if (!productToToggle) return;
 
     const newActiveState = !productToToggle.isActive;
-    
+
     setTogglingProductIds((prev) => new Set(prev).add(productToToggle.id));
     setToggleProductDialogOpen(false);
 
     const confirmMessage = newActiveState
       ? `Đang kích hoạt sản phẩm "${productToToggle.productName}"...`
       : `Đang tạm ngừng sản phẩm "${productToToggle.productName}"...`;
-    
+
     const loadingToast = toast.loading(confirmMessage);
-    
+
     try {
       await productsApi.updateProduct(productToToggle.id, {
         id: productToToggle.id,
@@ -528,24 +575,24 @@ export default function ProductManagementPage() {
                 ...p,
                 isActive: newActiveState,
               }
-            : p
-        )
+            : p,
+        ),
       );
 
       toast.dismiss(loadingToast);
       toast.success(
         newActiveState
           ? `Sản phẩm "${productToToggle.productName}" đã được kích hoạt`
-          : `Sản phẩm "${productToToggle.productName}" đã được tạm ngừng hoạt động`
+          : `Sản phẩm "${productToToggle.productName}" đã được tạm ngừng hoạt động`,
       );
-      
+
       await loadProducts();
     } catch (error: any) {
       console.error("Failed to toggle product active state:", error);
       const errorMessage =
         error?.response?.data?.message ||
         "Không thể cập nhật trạng thái sản phẩm";
-      
+
       toast.dismiss(loadingToast);
       toast.error(errorMessage);
     } finally {
@@ -560,13 +607,13 @@ export default function ProductManagementPage() {
 
   const handleAddCategory = () => {
     setEditingCategory(null);
-      setCategoryForm({
-        categoryName: "",
-        description: "",
-        color: generateCategoryColor("", categories.length),
-        parentId: "",
-        isActive: true,
-      });
+    setCategoryForm({
+      categoryName: "",
+      description: "",
+      color: generateCategoryColor("", categories.length),
+      parentId: "",
+      isActive: true,
+    });
     setCategoryDialogOpen(true);
   };
 
@@ -634,16 +681,16 @@ export default function ProductManagementPage() {
     if (!categoryToToggle) return;
 
     const newActiveState = !categoryToToggle.isActive;
-    
+
     setTogglingCategoryIds((prev) => new Set(prev).add(categoryToToggle.id));
     setToggleCategoryDialogOpen(false);
 
     const confirmMessage = newActiveState
       ? `Đang kích hoạt danh mục "${categoryToToggle.categoryName}"...`
       : `Đang tạm ngừng danh mục "${categoryToToggle.categoryName}"...`;
-    
+
     const loadingToast = toast.loading(confirmMessage);
-    
+
     try {
       await categoriesApi.updateCategory(categoryToToggle.id, {
         id: categoryToToggle.id,
@@ -659,24 +706,24 @@ export default function ProductManagementPage() {
                 ...c,
                 isActive: newActiveState,
               }
-            : c
-        )
+            : c,
+        ),
       );
 
       toast.dismiss(loadingToast);
       toast.success(
         newActiveState
           ? `Danh mục "${categoryToToggle.categoryName}" đã được kích hoạt`
-          : `Danh mục "${categoryToToggle.categoryName}" đã được tạm ngừng hoạt động`
+          : `Danh mục "${categoryToToggle.categoryName}" đã được tạm ngừng hoạt động`,
       );
-      
+
       await loadCategories();
     } catch (error: any) {
       console.error("Failed to toggle category active state:", error);
       const errorMessage =
         error?.response?.data?.message ||
         "Không thể cập nhật trạng thái danh mục";
-      
+
       toast.dismiss(loadingToast);
       toast.error(errorMessage);
     } finally {
@@ -712,9 +759,12 @@ export default function ProductManagementPage() {
   };
 
   const totalProducts = products.length;
-  const totalValue = products.reduce((sum, p) => sum + p.price * p.stockQuantity, 0);
+  const totalValue = products.reduce(
+    (sum, p) => sum + p.price * p.stockQuantity,
+    0,
+  );
   const lowStockProducts = products.filter(
-    (p) => p.status === "low-stock" || p.status === "out-of-stock"
+    (p) => p.status === "low-stock" || p.status === "out-of-stock",
   ).length;
   const averageMargin =
     products.length > 0
@@ -750,7 +800,9 @@ export default function ProductManagementPage() {
               <p className="text-sm text-muted-foreground mb-1">
                 Tổng sản phẩm
               </p>
-              <h3 className="text-2xl font-bold text-foreground">{totalProducts}</h3>
+              <h3 className="text-2xl font-bold text-foreground">
+                {totalProducts}
+              </h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
               <Package className="h-6 w-6 text-primary" />
@@ -761,9 +813,7 @@ export default function ProductManagementPage() {
         <Card className="p-6 bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200 dark:border-green-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">
-                Giá trị kho
-              </p>
+              <p className="text-sm text-muted-foreground mb-1">Giá trị kho</p>
               <h3 className="text-2xl font-bold text-foreground">
                 {totalValue.toLocaleString("vi-VN")}đ
               </h3>
@@ -780,7 +830,9 @@ export default function ProductManagementPage() {
               <p className="text-sm text-muted-foreground mb-1">
                 Cảnh báo tồn kho
               </p>
-              <h3 className="text-2xl font-bold text-foreground">{lowStockProducts}</h3>
+              <h3 className="text-2xl font-bold text-foreground">
+                {lowStockProducts}
+              </h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
               <AlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
@@ -794,14 +846,16 @@ export default function ProductManagementPage() {
               <p className="text-sm text-muted-foreground mb-1">
                 Lợi nhuận trung bình
               </p>
-              <h3 className="text-2xl font-bold text-foreground">{averageMargin}%</h3>
+              <h3 className="text-2xl font-bold text-foreground">
+                {averageMargin}%
+              </h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
               <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </Card>
-        </div>
+      </div>
 
       <Tabs defaultValue="products" className="space-y-4">
         <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -828,7 +882,10 @@ export default function ProductManagementPage() {
                 />
               </div>
 
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger className="w-full lg:w-[200px]">
                   <SelectValue placeholder="Tất cả danh mục" />
                 </SelectTrigger>
@@ -854,7 +911,10 @@ export default function ProductManagementPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={selectedActiveStatus} onValueChange={setSelectedActiveStatus}>
+              <Select
+                value={selectedActiveStatus}
+                onValueChange={setSelectedActiveStatus}
+              >
                 <SelectTrigger className="w-full lg:w-[200px]">
                   <SelectValue placeholder="Tất cả hoạt động" />
                 </SelectTrigger>
@@ -865,7 +925,10 @@ export default function ProductManagementPage() {
                 </SelectContent>
               </Select>
 
-              <Button onClick={handleAddProduct} className="gap-2 whitespace-nowrap">
+              <Button
+                onClick={handleAddProduct}
+                className="gap-2 whitespace-nowrap"
+              >
                 <Plus className="h-4 w-4" />
                 Thêm sản phẩm
               </Button>
@@ -876,7 +939,7 @@ export default function ProductManagementPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <ScrollArea className="h-[600px]">
+              <ScrollArea className="h-[600px] px-4">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -905,7 +968,10 @@ export default function ProductManagementPage() {
                     ) : (
                       filteredProducts.map((product) => {
                         const category = getCategoryById(product.categoryId);
-                        const { profit, margin } = getProfit(product.price, product.costPrice || undefined);
+                        const { profit, margin } = getProfit(
+                          product.price,
+                          product.costPrice || undefined,
+                        );
 
                         return (
                           <TableRow key={product.id}>
@@ -941,7 +1007,9 @@ export default function ProductManagementPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              <div className="font-medium">{product.productName}</div>
+                              <div className="font-medium">
+                                {product.productName}
+                              </div>
                             </TableCell>
                             <TableCell>
                               {category && (
@@ -967,7 +1035,9 @@ export default function ProductManagementPage() {
                                   <span className="font-medium text-green-600 dark:text-green-400">
                                     +{profit.toLocaleString("vi-VN")}đ
                                   </span>
-                                  <span className="text-xs text-muted-foreground">{margin}%</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {margin}%
+                                  </span>
                                 </div>
                               ) : (
                                 <span className="text-muted-foreground">-</span>
@@ -976,28 +1046,43 @@ export default function ProductManagementPage() {
                             <TableCell className="text-center">
                               <div className="flex flex-col items-center">
                                 <span className="font-medium">
-                                  {product.hasVariants && product.totalStock !== undefined
+                                  {product.hasVariants &&
+                                  product.totalStock !== undefined
                                     ? product.totalStock
                                     : product.stockQuantity}
                                 </span>
-                                {product.hasVariants && product.variants && product.variants.length > 0 && (
-                                  <span className="text-xs text-muted-foreground">
-                                    ({product.variants.length} biến thể)
-                                  </span>
-                                )}
+                                {product.hasVariants &&
+                                  product.variants &&
+                                  product.variants.length > 0 && (
+                                    <span className="text-xs text-muted-foreground">
+                                      ({product.variants.length} biến thể)
+                                    </span>
+                                  )}
                               </div>
                             </TableCell>
                             <TableCell className="text-center">
                               <div className="flex flex-col items-center gap-1">
                                 {getStatusBadge(product.status)}
                                 <Badge
-                                  variant={product.isActive ? "default" : "secondary"}
-                                  className={product.isActive ? "bg-green-500" : "bg-gray-500"}
+                                  variant={
+                                    product.isActive ? "default" : "secondary"
+                                  }
+                                  className={
+                                    product.isActive
+                                      ? "bg-green-500"
+                                      : "bg-gray-500"
+                                  }
                                 >
                                   {product.isActive ? (
-                                    <><CheckCircle className="h-3 w-3 mr-1" />Hoạt động</>
+                                    <>
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                      Hoạt động
+                                    </>
                                   ) : (
-                                    <><XCircle className="h-3 w-3 mr-1" />Ngừng</>
+                                    <>
+                                      <XCircle className="h-3 w-3 mr-1" />
+                                      Ngừng
+                                    </>
                                   )}
                                 </Badge>
                               </div>
@@ -1013,12 +1098,18 @@ export default function ProductManagementPage() {
                                 </Button>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                    {product.isActive ? "Hoạt động" : "Tạm dừng"}
+                                    {product.isActive
+                                      ? "Hoạt động"
+                                      : "Tạm dừng"}
                                   </span>
                                   <Switch
                                     checked={product.isActive}
-                                    onCheckedChange={() => handleToggleProductActive(product)}
-                                    disabled={togglingProductIds.has(product.id)}
+                                    onCheckedChange={() =>
+                                      handleToggleProductActive(product)
+                                    }
+                                    disabled={togglingProductIds.has(
+                                      product.id,
+                                    )}
                                   />
                                 </div>
                               </div>
@@ -1038,15 +1129,16 @@ export default function ProductManagementPage() {
           <Card className="p-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
               <div>
-                <h3 className="text-lg font-semibold">
-                  Danh mục sản phẩm
-                </h3>
+                <h3 className="text-lg font-semibold">Danh mục sản phẩm</h3>
                 <p className="text-sm text-muted-foreground">
                   Quản lý danh mục và nhóm sản phẩm
                 </p>
               </div>
               <div className="flex gap-3 items-center">
-                <Select value={selectedCategoryActiveStatus} onValueChange={setSelectedCategoryActiveStatus}>
+                <Select
+                  value={selectedCategoryActiveStatus}
+                  onValueChange={setSelectedCategoryActiveStatus}
+                >
                   <SelectTrigger className="w-full lg:w-[200px]">
                     <SelectValue placeholder="Tất cả hoạt động" />
                   </SelectTrigger>
@@ -1087,14 +1179,20 @@ export default function ProductManagementPage() {
                   <Card
                     key={category.id}
                     className="p-6 hover:shadow-lg transition-shadow"
-                    style={{ borderLeftWidth: "4px", borderLeftColor: category.color }}
+                    style={{
+                      borderLeftWidth: "4px",
+                      borderLeftColor: category.color,
+                    }}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div
                         className="w-12 h-12 rounded-xl flex items-center justify-center"
                         style={{ backgroundColor: `${category.color}20` }}
                       >
-                        <Tag className="h-6 w-6" style={{ color: category.color }} />
+                        <Tag
+                          className="h-6 w-6"
+                          style={{ color: category.color }}
+                        />
                       </div>
                       <div className="flex gap-1 items-center">
                         <Button
@@ -1110,14 +1208,18 @@ export default function ProductManagementPage() {
                           </span>
                           <Switch
                             checked={category.isActive}
-                            onCheckedChange={() => handleToggleCategoryActive(category)}
+                            onCheckedChange={() =>
+                              handleToggleCategoryActive(category)
+                            }
                             disabled={togglingCategoryIds.has(category.id)}
                           />
                         </div>
                       </div>
                     </div>
 
-                    <h4 className="font-semibold text-lg mb-1">{category.categoryName}</h4>
+                    <h4 className="font-semibold text-lg mb-1">
+                      {category.categoryName}
+                    </h4>
                     {category.parentName && (
                       <p className="text-sm text-muted-foreground mb-3">
                         Danh mục cha: {category.parentName}
@@ -1131,17 +1233,28 @@ export default function ProductManagementPage() {
                         </span>
                         <Badge
                           variant={category.isActive ? "default" : "secondary"}
-                          className={category.isActive ? "bg-green-500" : "bg-gray-500"}
+                          className={
+                            category.isActive ? "bg-green-500" : "bg-gray-500"
+                          }
                         >
                           {category.isActive ? (
-                            <><CheckCircle className="h-3 w-3 mr-1" />Hoạt động</>
+                            <>
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Hoạt động
+                            </>
                           ) : (
-                            <><XCircle className="h-3 w-3 mr-1" />Ngừng</>
+                            <>
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Ngừng
+                            </>
                           )}
                         </Badge>
                       </div>
                       <Badge variant="secondary">
-                        {products.filter((p) => p.categoryId === category.id).length}
+                        {
+                          products.filter((p) => p.categoryId === category.id)
+                            .length
+                        }
                       </Badge>
                     </div>
                   </Card>
@@ -1170,7 +1283,10 @@ export default function ProductManagementPage() {
                 id="product-name"
                 value={productForm.productName}
                 onChange={(e) =>
-                  setProductForm({ ...productForm, productName: e.target.value })
+                  setProductForm({
+                    ...productForm,
+                    productName: e.target.value,
+                  })
                 }
                 placeholder="Ví dụ: Coca Cola 330ml"
                 className="w-full"
@@ -1233,7 +1349,10 @@ export default function ProductManagementPage() {
                   type="number"
                   value={productForm.costPrice}
                   onChange={(e) =>
-                    setProductForm({ ...productForm, costPrice: e.target.value })
+                    setProductForm({
+                      ...productForm,
+                      costPrice: e.target.value,
+                    })
                   }
                   placeholder="12000"
                   className="w-full"
@@ -1243,14 +1362,18 @@ export default function ProductManagementPage() {
 
             <div className="space-y-2 min-w-0">
               <Label htmlFor="product-stock">
-                Tồn kho {productForm.hasVariants ? "(nếu không có biến thể)" : "*"}
+                Tồn kho{" "}
+                {productForm.hasVariants ? "(nếu không có biến thể)" : "*"}
               </Label>
               <Input
                 id="product-stock"
                 type="number"
                 value={productForm.stockQuantity}
                 onChange={(e) =>
-                  setProductForm({ ...productForm, stockQuantity: e.target.value })
+                  setProductForm({
+                    ...productForm,
+                    stockQuantity: e.target.value,
+                  })
                 }
                 placeholder="100"
                 disabled={productForm.hasVariants}
@@ -1268,10 +1391,14 @@ export default function ProductManagementPage() {
                 <div className="space-y-1">
                   <Label>Biến thể</Label>
                   <p className="text-xs text-muted-foreground">
-                    Bật nếu sản phẩm có size/màu. Tồn kho sẽ trừ theo từng biến thể.
+                    Bật nếu sản phẩm có size/màu. Tồn kho sẽ trừ theo từng biến
+                    thể.
                   </p>
                 </div>
-                <Switch checked={productForm.hasVariants} onCheckedChange={toggleVariants} />
+                <Switch
+                  checked={productForm.hasVariants}
+                  onCheckedChange={toggleVariants}
+                />
               </div>
 
               {productForm.hasVariants && (
@@ -1316,7 +1443,11 @@ export default function ProductManagementPage() {
                               className="h-10"
                               value={variant.size}
                               onChange={(e) =>
-                                updateVariantField(index, "size", e.target.value)
+                                updateVariantField(
+                                  index,
+                                  "size",
+                                  e.target.value,
+                                )
                               }
                               placeholder="VD: M"
                             />
@@ -1326,7 +1457,11 @@ export default function ProductManagementPage() {
                               className="h-10"
                               value={variant.color}
                               onChange={(e) =>
-                                updateVariantField(index, "color", e.target.value)
+                                updateVariantField(
+                                  index,
+                                  "color",
+                                  e.target.value,
+                                )
                               }
                               placeholder="VD: Đen"
                             />
@@ -1337,7 +1472,11 @@ export default function ProductManagementPage() {
                               type="number"
                               value={variant.priceOverride}
                               onChange={(e) =>
-                                updateVariantField(index, "priceOverride", e.target.value)
+                                updateVariantField(
+                                  index,
+                                  "priceOverride",
+                                  e.target.value,
+                                )
                               }
                               placeholder="VD: 350000"
                             />
@@ -1348,7 +1487,11 @@ export default function ProductManagementPage() {
                               type="number"
                               value={variant.stockQuantity}
                               onChange={(e) =>
-                                updateVariantField(index, "stockQuantity", e.target.value)
+                                updateVariantField(
+                                  index,
+                                  "stockQuantity",
+                                  e.target.value,
+                                )
                               }
                               placeholder="VD: 20"
                             />
@@ -1387,7 +1530,10 @@ export default function ProductManagementPage() {
                 id="product-description"
                 value={productForm.description}
                 onChange={(e) =>
-                  setProductForm({ ...productForm, description: e.target.value })
+                  setProductForm({
+                    ...productForm,
+                    description: e.target.value,
+                  })
                 }
                 placeholder="Mô tả sản phẩm..."
                 rows={3}
@@ -1440,13 +1586,15 @@ export default function ProductManagementPage() {
                       <div className="font-semibold text-green-600 dark:text-green-400">
                         +
                         {(
-                          parseFloat(productForm.price) - parseFloat(productForm.costPrice)
+                          parseFloat(productForm.price) -
+                          parseFloat(productForm.costPrice)
                         ).toLocaleString("vi-VN")}
                         đ
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {(
-                          ((parseFloat(productForm.price) - parseFloat(productForm.costPrice)) /
+                          ((parseFloat(productForm.price) -
+                            parseFloat(productForm.costPrice)) /
                             parseFloat(productForm.price)) *
                           100
                         ).toFixed(1)}
@@ -1463,7 +1611,10 @@ export default function ProductManagementPage() {
                 <Select
                   value={productForm.isActive ? "active" : "inactive"}
                   onValueChange={(value) =>
-                    setProductForm({ ...productForm, isActive: value === "active" })
+                    setProductForm({
+                      ...productForm,
+                      isActive: value === "active",
+                    })
                   }
                 >
                   <SelectTrigger id="product-status" className="w-full">
@@ -1514,7 +1665,10 @@ export default function ProductManagementPage() {
                 id="category-name"
                 value={categoryForm.categoryName}
                 onChange={(e) =>
-                  setCategoryForm({ ...categoryForm, categoryName: e.target.value })
+                  setCategoryForm({
+                    ...categoryForm,
+                    categoryName: e.target.value,
+                  })
                 }
                 placeholder="Ví dụ: Đồ uống"
                 className="w-full"
@@ -1540,7 +1694,7 @@ export default function ProductManagementPage() {
                   {categories
                     .filter(
                       (cat) =>
-                        !editingCategory || cat.id !== editingCategory.id
+                        !editingCategory || cat.id !== editingCategory.id,
                     )
                     .map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
@@ -1576,14 +1730,20 @@ export default function ProductManagementPage() {
 
             <Card
               className="p-4"
-              style={{ borderLeftWidth: "4px", borderLeftColor: categoryForm.color }}
+              style={{
+                borderLeftWidth: "4px",
+                borderLeftColor: categoryForm.color,
+              }}
             >
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: `${categoryForm.color}20` }}
                 >
-                  <Tag className="h-5 w-5" style={{ color: categoryForm.color }} />
+                  <Tag
+                    className="h-5 w-5"
+                    style={{ color: categoryForm.color }}
+                  />
                 </div>
                 <div>
                   <div className="font-medium">
@@ -1599,7 +1759,10 @@ export default function ProductManagementPage() {
                 <Select
                   value={categoryForm.isActive ? "active" : "inactive"}
                   onValueChange={(value) =>
-                    setCategoryForm({ ...categoryForm, isActive: value === "active" })
+                    setCategoryForm({
+                      ...categoryForm,
+                      isActive: value === "active",
+                    })
                   }
                 >
                   <SelectTrigger id="category-status" className="w-full">
@@ -1632,13 +1795,14 @@ export default function ProductManagementPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={barCodeViewDialogOpen} onOpenChange={setBarCodeViewDialogOpen}>
+      <Dialog
+        open={barCodeViewDialogOpen}
+        onOpenChange={setBarCodeViewDialogOpen}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Mã sản phẩm</DialogTitle>
-            <DialogDescription>
-              Mã sản phẩm của bạn
-            </DialogDescription>
+            <DialogDescription>Mã sản phẩm của bạn</DialogDescription>
           </DialogHeader>
 
           <div className="py-4">
@@ -1666,28 +1830,38 @@ export default function ProductManagementPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={toggleProductDialogOpen} onOpenChange={setToggleProductDialogOpen}>
+      <Dialog
+        open={toggleProductDialogOpen}
+        onOpenChange={setToggleProductDialogOpen}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {productToToggle?.isActive ? "Tạm ngừng hoạt động sản phẩm" : "Kích hoạt sản phẩm"}
+              {productToToggle?.isActive
+                ? "Tạm ngừng hoạt động sản phẩm"
+                : "Kích hoạt sản phẩm"}
             </DialogTitle>
             <DialogDescription>
               {productToToggle?.isActive ? (
                 <>
-                  Bạn có chắc chắn muốn tạm ngừng hoạt động sản phẩm <strong>"{productToToggle?.productName}"</strong>? 
-                  Sản phẩm sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.
+                  Bạn có chắc chắn muốn tạm ngừng hoạt động sản phẩm{" "}
+                  <strong>"{productToToggle?.productName}"</strong>? Sản phẩm sẽ
+                  không thể tiếp tục hoạt động sau khi được tạm ngừng.
                 </>
               ) : (
                 <>
-                  Bạn có chắc chắn muốn kích hoạt sản phẩm <strong>"{productToToggle?.productName}"</strong>? 
-                  Sản phẩm sẽ được kích hoạt và có thể tiếp tục hoạt động.
+                  Bạn có chắc chắn muốn kích hoạt sản phẩm{" "}
+                  <strong>"{productToToggle?.productName}"</strong>? Sản phẩm sẽ
+                  được kích hoạt và có thể tiếp tục hoạt động.
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setToggleProductDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setToggleProductDialogOpen(false)}
+            >
               Hủy
             </Button>
             <Button onClick={confirmToggleProductActive}>
@@ -1697,28 +1871,38 @@ export default function ProductManagementPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={toggleCategoryDialogOpen} onOpenChange={setToggleCategoryDialogOpen}>
+      <Dialog
+        open={toggleCategoryDialogOpen}
+        onOpenChange={setToggleCategoryDialogOpen}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {categoryToToggle?.isActive ? "Tạm ngừng hoạt động danh mục" : "Kích hoạt danh mục"}
+              {categoryToToggle?.isActive
+                ? "Tạm ngừng hoạt động danh mục"
+                : "Kích hoạt danh mục"}
             </DialogTitle>
             <DialogDescription>
               {categoryToToggle?.isActive ? (
                 <>
-                  Bạn có chắc chắn muốn tạm ngừng hoạt động danh mục <strong>"{categoryToToggle?.categoryName}"</strong>? 
-                  Danh mục sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.
+                  Bạn có chắc chắn muốn tạm ngừng hoạt động danh mục{" "}
+                  <strong>"{categoryToToggle?.categoryName}"</strong>? Danh mục
+                  sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.
                 </>
               ) : (
                 <>
-                  Bạn có chắc chắn muốn kích hoạt danh mục <strong>"{categoryToToggle?.categoryName}"</strong>? 
-                  Danh mục sẽ được kích hoạt và có thể tiếp tục hoạt động.
+                  Bạn có chắc chắn muốn kích hoạt danh mục{" "}
+                  <strong>"{categoryToToggle?.categoryName}"</strong>? Danh mục
+                  sẽ được kích hoạt và có thể tiếp tục hoạt động.
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setToggleCategoryDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setToggleCategoryDialogOpen(false)}
+            >
               Hủy
             </Button>
             <Button onClick={confirmToggleCategoryActive}>
