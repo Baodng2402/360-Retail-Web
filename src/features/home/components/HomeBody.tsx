@@ -10,6 +10,8 @@ import {
   CheckCircle,
   Sparkles,
 } from "lucide-react";
+import TrueFocus from "@/shared/components/TrueFocus";
+import { GithubGlobe } from "@/shared/components/configs/GithubGlobe";
 
 const HomeBody = () => {
   return (
@@ -36,8 +38,15 @@ const HomeBody = () => {
             >
               Quản lý bán hàng đa kênh
               <br />
-              <span className="bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">
-                cùng 360 Retail
+              <span className="bg-gradient-to-r from-teal-500 to-teal-600 bg-clip-text flex justify-start pt-3">
+                <TrueFocus
+                  sentence="Cùng 360 Retail"
+                  manualMode
+                  blurAmount={5}
+                  borderColor="#0d9488"
+                  animationDuration={0.5}
+                  pauseBetweenAnimations={1}
+                />
               </span>
             </h1>
 
@@ -51,8 +60,8 @@ const HomeBody = () => {
               }}
             >
               Đồng bộ nhân viên, đơn hàng và khách hàng từ cửa hàng tới online
-              trên một màn hình duy nhất. Không còn sổ sách rời rạc hay phần
-              mềm phức tạp.
+              trên một màn hình duy nhất. Không còn sổ sách rời rạc hay phần mềm
+              phức tạp.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -116,7 +125,10 @@ const HomeBody = () => {
                     >
                       +142%
                     </p>
-                    <p className="text-muted-foreground" style={{ fontSize: "13px" }}>
+                    <p
+                      className="text-muted-foreground"
+                      style={{ fontSize: "13px" }}
+                    >
                       Tăng trưởng trung bình
                     </p>
                   </div>
@@ -177,7 +189,8 @@ const HomeBody = () => {
                 letterSpacing: "0.01em",
               }}
             >
-              Bộ tính năng gọn nhẹ thay thế hàng giờ nhập liệu và tổng hợp thủ công
+              Bộ tính năng gọn nhẹ thay thế hàng giờ nhập liệu và tổng hợp thủ
+              công
             </p>
           </div>
 
@@ -207,7 +220,10 @@ const HomeBody = () => {
                 >
                   Chấm công & ca làm
                   <br />
-                  <span className="text-muted-foreground" style={{ fontSize: "16px" }}>
+                  <span
+                    className="text-muted-foreground"
+                    style={{ fontSize: "16px" }}
+                  >
                     (Nhân viên)
                   </span>
                 </h3>
@@ -219,8 +235,8 @@ const HomeBody = () => {
                     letterSpacing: "0.01em",
                   }}
                 >
-                  Điểm danh nhanh, lịch làm rõ ràng, không còn file excel hay
-                  sổ chấm công rời rạc.
+                  Điểm danh nhanh, lịch làm rõ ràng, không còn file excel hay sổ
+                  chấm công rời rạc.
                 </p>
               </div>
             </div>
@@ -250,7 +266,10 @@ const HomeBody = () => {
                 >
                   Bán hàng cực nhanh
                   <br />
-                  <span className="text-muted-foreground" style={{ fontSize: "16px" }}>
+                  <span
+                    className="text-muted-foreground"
+                    style={{ fontSize: "16px" }}
+                  >
                     (Tại quầy & online)
                   </span>
                 </h3>
@@ -262,8 +281,8 @@ const HomeBody = () => {
                     letterSpacing: "0.01em",
                   }}
                 >
-                  Hoàn tất đơn chỉ với vài thao tác, tự động trừ tồn kho và
-                  đồng bộ dữ liệu giữa các kênh.
+                  Hoàn tất đơn chỉ với vài thao tác, tự động trừ tồn kho và đồng
+                  bộ dữ liệu giữa các kênh.
                 </p>
               </div>
             </div>
@@ -275,10 +294,7 @@ const HomeBody = () => {
                 <div className="relative w-20 h-20 mb-8">
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-orange-500 rounded-[20px] opacity-10"></div>
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-orange-500 rounded-[20px] flex items-center justify-center">
-                    <Users
-                      className="w-10 h-10 text-white"
-                      strokeWidth={2.5}
-                    />
+                    <Users className="w-10 h-10 text-white" strokeWidth={2.5} />
                   </div>
                 </div>
 
@@ -293,7 +309,10 @@ const HomeBody = () => {
                 >
                   Tích điểm & chăm sóc tự động
                   <br />
-                  <span className="text-muted-foreground" style={{ fontSize: "16px" }}>
+                  <span
+                    className="text-muted-foreground"
+                    style={{ fontSize: "16px" }}
+                  >
                     (Khách hàng)
                   </span>
                 </h3>
@@ -305,8 +324,8 @@ const HomeBody = () => {
                     letterSpacing: "0.01em",
                   }}
                 >
-                  Khách mua là có điểm, có ưu đãi. Hệ thống tự ghi nhận, bạn
-                  chỉ việc chăm sóc và bán hàng.
+                  Khách mua là có điểm, có ưu đãi. Hệ thống tự ghi nhận, bạn chỉ
+                  việc chăm sóc và bán hàng.
                 </p>
               </div>
             </div>
@@ -369,7 +388,10 @@ const HomeBody = () => {
                 <div className="relative w-44 h-44 mx-auto mb-8 group">
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-teal-600 rounded-[32px] shadow-2xl shadow-teal-600/30 group-hover:scale-105 transition-transform duration-500"></div>
                   <div className="absolute inset-0 rounded-[32px] flex items-center justify-center">
-                    <Settings className="w-20 h-20 text-white" strokeWidth={2} />
+                    <Settings
+                      className="w-20 h-20 text-white"
+                      strokeWidth={2}
+                    />
                   </div>
                 </div>
 
@@ -407,7 +429,8 @@ const HomeBody = () => {
                     margin: "0 auto",
                   }}
                 >
-                  Nhập sản phẩm, nhân viên, ca làm theo hướng dẫn trực quan trong vài phút.
+                  Nhập sản phẩm, nhân viên, ca làm theo hướng dẫn trực quan
+                  trong vài phút.
                 </p>
               </div>
 
@@ -462,7 +485,10 @@ const HomeBody = () => {
                 <div className="relative w-44 h-44 mx-auto mb-8 group">
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-600 via-teal-500 to-orange-500 rounded-[32px] shadow-2xl shadow-teal-600/30 group-hover:scale-105 transition-transform duration-500"></div>
                   <div className="absolute inset-0 rounded-[32px] flex items-center justify-center">
-                    <TrendingUp className="w-20 h-20 text-white" strokeWidth={2} />
+                    <TrendingUp
+                      className="w-20 h-20 text-white"
+                      strokeWidth={2}
+                    />
                   </div>
                 </div>
 
@@ -530,9 +556,9 @@ const HomeBody = () => {
                 letterSpacing: "0.01em",
               }}
             >
-              Từ trung tâm thành phố đến tỉnh lẻ, 360 Retail giúp chủ shop
-              theo dõi doanh thu và khách hàng theo khu vực, từ đó tối ưu chiến
-              dịch và nguồn lực.
+              Từ trung tâm thành phố đến tỉnh lẻ, 360 Retail giúp chủ shop theo
+              dõi doanh thu và khách hàng theo khu vực, từ đó tối ưu chiến dịch
+              và nguồn lực.
             </p>
 
             <div className="grid grid-cols-2 gap-8">
@@ -572,44 +598,27 @@ const HomeBody = () => {
           </div>
 
           <div className="relative h-[360px] md:h-[420px]">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl border border-border/40 overflow-hidden flex items-center justify-center">
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_#22d3ee_0,_transparent_55%),radial-gradient(circle_at_bottom,_#fb923c_0,_transparent_55%)]" />
-              <div className="relative w-[85%] h-[80%] border border-dashed border-slate-600/70 rounded-3xl flex items-center justify-center">
-                <div className="w-40 h-40 md:w-56 md:h-56 rounded-full border border-slate-500/60 flex items-center justify-center">
-                  <div className="w-28 h-28 md:w-40 md:h-40 rounded-full border border-slate-500/40 flex items-center justify-center">
-                    <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 shadow-lg shadow-teal-500/40 flex items-center justify-center text-xs md:text-sm font-semibold text-white text-center px-2">
-                      360 Retail
-                      <br />
-                      Omnichannel
-                    </div>
-                  </div>
-                </div>
 
-                <div className="absolute top-[22%] left-[30%] group">
-                  <div className="w-3 h-3 rounded-full bg-teal-400 animate-ping absolute" />
-                  <div className="w-3 h-3 rounded-full bg-teal-500 border border-white/70 relative" />
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 bg-background text-xs font-semibold px-3 py-1 rounded-lg shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    Hà Nội · 1,200+ shop
-                  </div>
-                </div>
+            <div className="w-full py-10">
+              <div className="relative h-[360px] md:h-[420px] w-full max-w-3xl mx-auto">
 
-                <div className="absolute top-[50%] left-[60%] group">
-                  <div className="w-2.5 h-2.5 rounded-full bg-sky-400 border border-white/70 relative" />
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 bg-background text-xs font-semibold px-3 py-1 rounded-lg shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    Đà Nẵng · 500+ shop
-                  </div>
-                </div>
+                {/* Container Chính */}
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl border border-border/40 overflow-hidden flex items-center justify-center">
 
-                <div className="absolute bottom-[22%] left-[38%] group">
-                  <div className="w-3 h-3 rounded-full bg-teal-400 animate-ping absolute" />
-                  <div className="w-3 h-3 rounded-full bg-teal-500 border border-white/70 relative" />
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 bg-background text-xs font-semibold px-3 py-1 rounded-lg shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    TP.HCM · 2,000+ shop
+                  {/* 1. Hiệu ứng nền nhẹ (Background Radial) */}
+                  <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_#22d3ee_0,_transparent_55%),radial-gradient(circle_at_bottom,_#fb923c_0,_transparent_55%)] z-0" />
+
+                  {/* 2. Component Quả địa cầu */}
+                  <div className="absolute inset-0 z-10">
+                    <GithubGlobe />
                   </div>
+
+                  {/* 3. Phần trung tâm (Logo 360 Retail) */}
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </section>
 
@@ -817,26 +826,17 @@ const HomeBody = () => {
                 style={{ fontSize: "15px", opacity: 0.8 }}
               >
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-teal-400 transition-colors"
-                  >
+                  <a href="#" className="hover:text-teal-400 transition-colors">
                     Features
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-teal-400 transition-colors"
-                  >
+                  <a href="#" className="hover:text-teal-400 transition-colors">
                     Pricing
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-teal-400 transition-colors"
-                  >
+                  <a href="#" className="hover:text-teal-400 transition-colors">
                     Security
                   </a>
                 </li>
@@ -860,26 +860,17 @@ const HomeBody = () => {
                 style={{ fontSize: "15px", opacity: 0.8 }}
               >
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-teal-400 transition-colors"
-                  >
+                  <a href="#" className="hover:text-teal-400 transition-colors">
                     About
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-teal-400 transition-colors"
-                  >
+                  <a href="#" className="hover:text-teal-400 transition-colors">
                     Blog
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-teal-400 transition-colors"
-                  >
+                  <a href="#" className="hover:text-teal-400 transition-colors">
                     Contact
                   </a>
                 </li>
@@ -905,4 +896,3 @@ const HomeBody = () => {
 };
 
 export { HomeBody };
-
