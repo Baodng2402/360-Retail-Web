@@ -1,6 +1,5 @@
 import { identityApi } from "./axios-instances";
 import type { User } from "@/shared/types/auth";
-import type { Store } from "@/shared/types/stores";
 
 export interface LoginDto {
   email: string;
@@ -16,6 +15,20 @@ export interface AssignStoreDto {
   storeId: string;
   roleInStore?: string;
   isDefault?: boolean;
+}
+
+export interface SubscriptionStatus {
+  status: string;
+  hasStore: boolean;
+  storeId: string | null;
+  trialStartDate: string | null;
+  trialEndDate: string | null;
+  daysRemaining: number | null;
+  planName: string | null;
+}
+
+export interface CreateStoreTrialDto {
+  storeName: string;
 }
 
 export interface LoginResponse {
@@ -105,8 +118,14 @@ export const authApi = {
   }): Promise<void> {
     await identityApi.post("identity/auth/change-password", payload);
   },
-  async getStore(): Promise<Store[] | null> {
-    const res = await identityApi.get("identity/identity/stores-my");
+  async checkStoreTrial(): Promise<SubscriptionStatus> {
+    const res = await identityApi.get<SubscriptionStatus>(
+      "identity/subscription/status",
+    );
     return res.data;
+  },
+
+  async createStoreTrial(payload: CreateStoreTrialDto): Promise<void> {
+    await identityApi.post("identity/subscription/start-trial", payload);
   },
 };

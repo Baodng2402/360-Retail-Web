@@ -57,7 +57,7 @@ export function AuthSignupForm() {
             <div className="space-y-2">
               <Label
                 htmlFor="name"
-                className="text-sm font-medium text-graygray-700"
+                className="text-sm font-medium text-gray-700"
               >
                 Name
               </Label>
@@ -65,14 +65,14 @@ export function AuthSignupForm() {
                 id="name"
                 type="text"
                 placeholder="Your full name"
-                className="h-12 rounded-[12px] border border-graygray-200 px-4 text-sm text-graygray-700"
+                className="h-12 rounded-[12px] border border-gray-200 px-4 text-sm text-gray-700"
               />
             </div>
 
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="text-sm font-medium text-graygray-700"
+                className="text-sm font-medium text-gray-700"
               >
                 Email
               </Label>
@@ -82,7 +82,7 @@ export function AuthSignupForm() {
                   id="email"
                   type="email"
                   placeholder="Your email address"
-                  className="h-12 rounded-[12px] border border-graygray-200 pl-10 pr-4 text-sm text-graygray-700"
+                  className="h-12 rounded-[12px] border border-gray-200 pl-10 pr-4 text-sm text-gray-700"
                 />
               </div>
             </div>
@@ -90,7 +90,7 @@ export function AuthSignupForm() {
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="text-sm font-medium text-graygray-700"
+                className="text-sm font-medium text-gray-700"
               >
                 Password
               </Label>
@@ -100,7 +100,7 @@ export function AuthSignupForm() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Your password"
-                  className="h-12 rounded-[12px] border border-graygray-200 pl-10 pr-10 text-sm text-graygray-700"
+                  className="h-12 rounded-[12px] border border-gray-200 pl-10 pr-10 text-sm text-gray-700"
                 />
                 <button
                   type="button"
@@ -125,7 +125,7 @@ export function AuthSignupForm() {
               />
               <Label
                 htmlFor="remember"
-                className="cursor-pointer text-xs font-medium text-graygray-700"
+                className="cursor-pointer text-xs font-medium text-gray-700"
               >
                 Remember me
               </Label>
@@ -138,7 +138,7 @@ export function AuthSignupForm() {
               SIGN UP
             </Button>
 
-            <p className="pt-2 text-center text-xs text-graygray-400">
+            <p className="pt-2 text-center text-xs text-gray-400">
               Already have an account?{" "}
               <Link
                 to="/login"
@@ -153,4 +153,3 @@ export function AuthSignupForm() {
     </div>
   );
 }
-
