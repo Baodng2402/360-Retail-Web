@@ -1,376 +1,304 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import createGlobe from "cobe";
 
-// Marker data for Vietnam cities
-const markers = [
+// ====================
+// CONSTANTS & DATA
+// ====================
+
+// Vietnam cities with precise coordinates [latitude, longitude]
+const VIETNAM_MARKERS = [
     {
-        location: [21.0285, 105.8542] as [number, number], // Hà Nội
-        label: "Hà Nội",
+        location: [21.0285, 105.8542], // Hà Nội
+        size: 0.08,
+        city: "Hà Nội",
         shops: "1,200+",
         color: "#06b6d4", // Cyan
     },
     {
-        location: [16.0544, 108.2022] as [number, number], // Đà Nẵng  
-        label: "Đà Nẵng",
-        shops: "500+",
-        color: "#10b981", // Emerald
+        location: [16.0544, 108.2022], // Đà Nẵng
+        size: 0.08,
+        city: "Đà Nẵng",
+        shops: "800+",
+        color: "#10b981", // Green
     },
     {
-        location: [10.8231, 106.6297] as [number, number], // TP.HCM
-        label: "TP.HCM",
+        location: [10.8231, 106.6297], // TP. Hồ Chí Minh
+        size: 0.08,
+        city: "TP.HCM",
         shops: "2,000+",
         color: "#f97316", // Orange
     },
 ];
 
-interface TooltipState {
-    visible: boolean;
-    x: number;
-    y: number;
-    label: string;
-    shops: string;
-    color: string;
-}
+// Vietnam centered position - focus on Vietnam center (latitude ~16°N, longitude ~106°E)
+const VIETNAM_PHI = 1.83; // Longitude rotation
+const INITIAL_THETA = 0.45; // Latitude tilt - adjusted to center Vietnam better
 
-// Project lat/lng to screen position based on globe state
-function projectToScreen(
-    lat: number,
-    lng: number,
-    phi: number,
-    theta: number,
-    centerX: number,
-    centerY: number,
-    radius: number
-): { x: number; y: number; visible: boolean } {
-    // Convert degrees to radians
-    const latRad = (lat * Math.PI) / 180;
-    const lngRad = (lng * Math.PI) / 180;
+// Globe size
+const GLOBE_SIZE = 500;
 
-    // Calculate 3D position on unit sphere
-    // X: left-right, Y: up-down, Z: front-back
-    const cosLat = Math.cos(latRad);
-    const sinLat = Math.sin(latRad);
-    const cosLng = Math.cos(lngRad);
-    const sinLng = Math.sin(lngRad);
+// Convert hex to RGB array for cobe
+const hexToRgb = (hex: string): [number, number, number] => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+        ? [
+            parseInt(result[1], 16) / 255,
+            parseInt(result[2], 16) / 255,
+            parseInt(result[3], 16) / 255,
+        ]
+        : [1, 1, 1];
+};
 
-    // Position on sphere before any rotation
-    let x = cosLat * sinLng;
-    let y = sinLat;
-    let z = cosLat * cosLng;
-
-    // Apply horizontal rotation (phi) - rotate around Y axis
-    const cosPhi = Math.cos(phi);
-    const sinPhi = Math.sin(phi);
-    const x1 = x * cosPhi - z * sinPhi;
-    const z1 = x * sinPhi + z * cosPhi;
-    x = x1;
-    z = z1;
-
-    // Apply vertical tilt (theta) - rotate around X axis
-    const cosTheta = Math.cos(-theta);
-    const sinTheta = Math.sin(-theta);
-    const y1 = y * cosTheta - z * sinTheta;
-    const z2 = y * sinTheta + z * cosTheta;
-    y = y1;
-    z = z2;
-
-    // Point is visible if z > 0 (in front of globe)
-    const visible = z > 0.15;
-
-    // Project to 2D screen coordinates
-    const screenX = centerX + x * radius;
-    const screenY = centerY - y * radius;
-
-    return { x: screenX, y: screenY, visible };
-}
+// ====================
+// COMPONENT
+// ====================
 
 export const GithubGlobe = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const pointerInteracting = useRef<{ x: number; y: number } | null>(null);
-    const phiRef = useRef(0);
-    const thetaRef = useRef(0.2);
-    const animationRef = useRef<number>();
+    const globeRef = useRef<any>(null);
 
-    const [markerScreenPositions, setMarkerScreenPositions] = useState<
-        { x: number; y: number; visible: boolean; marker: (typeof markers)[0] }[]
-    >([]);
-    const [tooltip, setTooltip] = useState<TooltipState>({
-        visible: false,
-        x: 0,
-        y: 0,
-        label: "",
-        shops: "",
-        color: "#06b6d4",
-    });
+    // Interaction state
+    const pointerInteracting = useRef<{ x: number; y: number; id: number } | null>(null);
+
+    // Globe state
+    const [currentMarkerIndex, setCurrentMarkerIndex] = useState<number>(-1);
     const [zoom, setZoom] = useState(1);
     const zoomRef = useRef(1);
 
-    const baseSize = 500;
-    const minZoom = 0.7;
-    const maxZoom = 2;
+    const phiRef = useRef(VIETNAM_PHI);
+    const thetaRef = useRef(INITIAL_THETA);
+
+    // ====================
+    // GLOBE SETUP
+    // ====================
 
     useEffect(() => {
-        if (!canvasRef.current || !containerRef.current) return;
+        if (!canvasRef.current) return;
 
-        let phi = 0; // Will auto-rotate to show Vietnam
-        let theta = 0.2;
-        let targetPhi = phi;
-        let targetTheta = theta;
+        let phi = phiRef.current;
+        let theta = thetaRef.current;
+        let width = GLOBE_SIZE * 2;
 
+        // Initialize globe with Vietnam markers
         const globe = createGlobe(canvasRef.current, {
             devicePixelRatio: 2,
-            width: baseSize * 2,
-            height: baseSize * 2,
+            width: width,
+            height: width,
             phi: phi,
             theta: theta,
             dark: 1,
             diffuse: 1.2,
             mapSamples: 16000,
             mapBrightness: 6,
-            baseColor: [0.1, 0.1, 0.15],
-            markerColor: [0.1, 0.1, 0.15], // Hide cobe's markers
-            glowColor: [0.05, 0.05, 0.1],
-            markers: [],
+            baseColor: [0.15, 0.15, 0.2],
+            markerColor: [0.1, 0.8, 1],
+            glowColor: [0.1, 0.1, 0.15],
+            markers: VIETNAM_MARKERS.map((m) => ({
+                location: m.location,
+                size: m.size,
+                color: hexToRgb(m.color),
+            })),
             onRender: (state) => {
-                // Auto-rotate when not dragging
-                if (pointerInteracting.current === null) {
-                    targetPhi += 0.002;
-                }
+                phi = phiRef.current;
+                theta = thetaRef.current;
 
-                // Smooth interpolation
-                phi += (targetPhi - phi) * 0.05;
-                theta += (targetTheta - theta) * 0.05;
+                // Auto-rotate slowly when not interacting
+                if (!pointerInteracting.current) {
+                    phi += 0.002;
+                }
 
                 state.phi = phi;
                 state.theta = theta;
+
                 phiRef.current = phi;
                 thetaRef.current = theta;
             },
         });
 
-        // Update marker positions in a separate animation loop
-        const updateMarkerPositions = () => {
-            const container = containerRef.current;
-            if (!container) return;
+        globeRef.current = globe;
 
-            const currentZoom = zoomRef.current;
-            const displaySize = baseSize * currentZoom;
-            const containerRect = container.getBoundingClientRect();
-
-            // Center of the container (where globe is centered)
-            const centerX = containerRect.width / 2;
-            const centerY = containerRect.height / 2;
-
-            // Globe radius on screen
-            const radius = displaySize / 2;
-
-            const positions = markers.map((marker) => {
-                const pos = projectToScreen(
-                    marker.location[0],
-                    marker.location[1],
-                    phiRef.current,
-                    thetaRef.current,
-                    centerX,
-                    centerY,
-                    radius
-                );
-                return {
-                    x: pos.x,
-                    y: pos.y,
-                    visible: pos.visible,
-                    marker,
-                };
-            });
-
-            setMarkerScreenPositions(positions);
-            animationRef.current = requestAnimationFrame(updateMarkerPositions);
-        };
-
-        animationRef.current = requestAnimationFrame(updateMarkerPositions);
-
-        // Pointer events
-        const handlePointerDown = (e: PointerEvent) => {
-            pointerInteracting.current = { x: e.clientX, y: e.clientY };
-            if (containerRef.current) containerRef.current.style.cursor = "grabbing";
-        };
-
-        const handlePointerUp = () => {
-            pointerInteracting.current = null;
-            if (containerRef.current) containerRef.current.style.cursor = "grab";
-        };
-
-        const handlePointerMove = (e: PointerEvent) => {
-            if (pointerInteracting.current) {
-                const dx = e.clientX - pointerInteracting.current.x;
-                const dy = e.clientY - pointerInteracting.current.y;
-                targetPhi += dx * 0.005;
-                targetTheta = Math.max(-0.8, Math.min(0.8, targetTheta - dy * 0.005));
-                pointerInteracting.current = { x: e.clientX, y: e.clientY };
+        // Fade in animation
+        setTimeout(() => {
+            if (canvasRef.current) {
+                canvasRef.current.style.opacity = "1";
             }
-        };
-
-        const handleWheel = (e: WheelEvent) => {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? -0.1 : 0.1;
-            const newZoom = Math.max(minZoom, Math.min(maxZoom, zoomRef.current + delta));
-            zoomRef.current = newZoom;
-            setZoom(newZoom);
-        };
-
-        const container = containerRef.current;
-        container.addEventListener("pointerdown", handlePointerDown);
-        container.addEventListener("pointerup", handlePointerUp);
-        container.addEventListener("pointerleave", handlePointerUp);
-        container.addEventListener("pointermove", handlePointerMove);
-        container.addEventListener("wheel", handleWheel, { passive: false });
-        container.style.cursor = "grab";
+        }, 100);
 
         return () => {
             globe.destroy();
-            if (animationRef.current) cancelAnimationFrame(animationRef.current);
-            container.removeEventListener("pointerdown", handlePointerDown);
-            container.removeEventListener("pointerup", handlePointerUp);
-            container.removeEventListener("pointerleave", handlePointerUp);
-            container.removeEventListener("pointermove", handlePointerMove);
-            container.removeEventListener("wheel", handleWheel);
+            globeRef.current = null;
         };
     }, []);
 
-    const handleZoom = (delta: number) => {
-        const newZoom = Math.max(minZoom, Math.min(maxZoom, zoomRef.current + delta));
-        zoomRef.current = newZoom;
-        setZoom(newZoom);
-    };
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
 
-    const displaySize = baseSize * zoom;
+        const onWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            const newZoom = Math.max(0.8, Math.min(1.5, zoomRef.current + delta));
+            zoomRef.current = newZoom;
+            setZoom(newZoom);
+
+            thetaRef.current = Math.max(-0.5, Math.min(0.5, thetaRef.current - delta * 0.1));
+        };
+
+        el.addEventListener("wheel", onWheel, { passive: false });
+
+        return () => {
+            el.removeEventListener("wheel", onWheel);
+        };
+    }, []);
+
+    // ====================
+    // EVENT HANDLERS
+    // ====================
+
+    const handlePointerDown = useCallback((e: React.PointerEvent) => {
+        pointerInteracting.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
+        e.currentTarget.setPointerCapture(e.pointerId);
+        if (canvasRef.current) {
+            canvasRef.current.style.cursor = "grabbing";
+        }
+        e.preventDefault();
+    }, []);
+
+    const handlePointerUp = useCallback((e: React.PointerEvent) => {
+        if (pointerInteracting.current?.id === e.pointerId) {
+            pointerInteracting.current = null;
+            e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+        if (canvasRef.current) {
+            canvasRef.current.style.cursor = "grab";
+        }
+    }, []);
+
+    const handlePointerMove = useCallback((e: React.PointerEvent) => {
+        if (pointerInteracting.current?.id === e.pointerId) {
+            const deltaX = e.clientX - pointerInteracting.current.x;
+            const deltaY = e.clientY - pointerInteracting.current.y;
+
+            phiRef.current += deltaX * 0.008;
+            thetaRef.current = Math.max(-1.1, Math.min(1.1, thetaRef.current + deltaY * 0.008));
+
+            pointerInteracting.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
+        }
+    }, []);
+
+    // ====================
+    // RENDER
+    // ====================
 
     return (
         <div
             ref={containerRef}
-            className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
+            className="relative w-full h-full flex items-center justify-center"
+            style={{ touchAction: "none", userSelect: "none" }}
         >
-            {/* Globe */}
-            <canvas
-                ref={canvasRef}
-                style={{
-                    width: displaySize,
-                    height: displaySize,
-                    maxWidth: "100%",
-                    aspectRatio: "1",
-                }}
-                className="opacity-95"
-            />
-
-            {/* Markers */}
-            {markerScreenPositions.map(({ x, y, visible, marker }) => (
-                <div
-                    key={marker.label}
-                    className="absolute"
+            {/* Globe Canvas */}
+            <div
+                className="relative"
+                style={{ width: GLOBE_SIZE, height: GLOBE_SIZE }}
+            >
+                <canvas
+                    ref={canvasRef}
+                    onPointerDown={handlePointerDown}
+                    onPointerUp={handlePointerUp}
+                    onPointerOut={handlePointerUp}
+                    onPointerCancel={handlePointerUp}
+                    onPointerMove={handlePointerMove}
+                    className="opacity-0 transition-opacity duration-500 cursor-grab active:cursor-grabbing select-none"
                     style={{
-                        left: x,
-                        top: y,
-                        transform: "translate(-50%, -50%)",
-                        opacity: visible ? 1 : 0,
-                        pointerEvents: visible ? "auto" : "none",
-                        zIndex: visible ? 25 : -1,
-                        transition: "opacity 0.1s",
+                        width: GLOBE_SIZE,
+                        height: GLOBE_SIZE,
+                        transform: `scale(${zoom})`,
+                        transition: "transform 0.2s ease-out",
+                        transformOrigin: "center center",
+                        touchAction: "none",
                     }}
-                    onMouseEnter={(e) =>
-                        visible &&
-                        setTooltip({
-                            visible: true,
-                            x: e.clientX,
-                            y: e.clientY,
-                            label: marker.label,
-                            shops: marker.shops,
-                            color: marker.color,
-                        })
-                    }
-                    onMouseLeave={() => setTooltip((p) => ({ ...p, visible: false }))}
-                    onMouseMove={(e) =>
-                        setTooltip((p) => ({ ...p, x: e.clientX, y: e.clientY }))
-                    }
-                >
-                    <div
-                        className="relative cursor-pointer"
-                        style={{ width: 16 * zoom, height: 16 * zoom, minWidth: 12, minHeight: 12 }}
-                    >
-                        <div
-                            className="absolute inset-0 rounded-full animate-ping"
-                            style={{ backgroundColor: marker.color, opacity: 0.4, animationDuration: "1.5s" }}
-                        />
-                        <div
-                            className="absolute inset-0 rounded-full border-2 border-white/70"
-                            style={{
-                                backgroundColor: marker.color,
-                                boxShadow: `0 0 12px ${marker.color}, 0 0 24px ${marker.color}60`,
-                            }}
-                        />
-                    </div>
-                </div>
-            ))}
+                />
+            </div>
 
-            {/* Tooltip */}
-            {tooltip.visible && (
-                <div
-                    className="fixed z-50 pointer-events-none"
-                    style={{ left: tooltip.x + 18, top: tooltip.y - 12 }}
-                >
-                    <div
-                        className="backdrop-blur-md rounded-lg px-3 py-2 shadow-xl"
-                        style={{
-                            backgroundColor: "rgba(15, 23, 42, 0.95)",
-                            border: `2px solid ${tooltip.color}`,
-                            boxShadow: `0 4px 20px ${tooltip.color}40`,
-                        }}
-                    >
-                        <p className="text-sm font-bold text-white">{tooltip.label}</p>
-                        <p className="text-xs flex items-center gap-1" style={{ color: tooltip.color }}>
-                            <span
-                                className="w-2 h-2 rounded-full"
-                                style={{ backgroundColor: tooltip.color }}
-                            />
-                            {tooltip.shops} shop
-                        </p>
+            {/* Legend - Location Info */}
+            <div className="absolute bottom-4 left-4 z-20 pointer-events-auto">
+                <div className="flex flex-col gap-2 text-xs bg-slate-900/90 backdrop-blur-md rounded-xl px-4 py-3 border border-slate-700/50 shadow-xl">
+                    <div className="text-slate-400 font-semibold mb-1 text-[10px] uppercase tracking-wide">
+                        📍 Phạm vi hoạt động
                     </div>
-                </div>
-            )}
-
-            {/* Legend */}
-            <div className="absolute bottom-3 left-3 z-20">
-                <div className="flex flex-col gap-1.5 text-xs bg-slate-900/80 backdrop-blur-md rounded-lg px-3 py-2 border border-slate-700/50">
-                    {markers.map((m) => (
-                        <div key={m.label} className="flex items-center gap-2 text-slate-200">
+                    {VIETNAM_MARKERS.map((marker, idx) => (
+                        <div
+                            key={idx}
+                            className="flex items-center gap-2 text-slate-200 hover:text-white transition-all duration-200 cursor-pointer hover:scale-105"
+                            onMouseEnter={() => setCurrentMarkerIndex(idx)}
+                            onMouseLeave={() => setCurrentMarkerIndex(-1)}
+                        >
                             <span
-                                className="w-2 h-2 rounded-full"
-                                style={{ backgroundColor: m.color, boxShadow: `0 0 4px ${m.color}` }}
+                                className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-lg animate-pulse"
+                                style={{
+                                    backgroundColor: marker.color,
+                                    boxShadow: `0 0 8px ${marker.color}`,
+                                    animationDuration: "2s",
+                                }}
                             />
-                            {m.label}: {m.shops}
+                            <span className="font-medium">{marker.city}</span>
+                            <span className="text-slate-400">•</span>
+                            <span className="font-semibold" style={{ color: marker.color }}>
+                                {marker.shops}
+                            </span>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Zoom Controls */}
-            <div className="absolute bottom-3 right-3 z-30 flex flex-col gap-1">
-                <button
-                    onClick={() => handleZoom(0.2)}
-                    className="w-8 h-8 bg-slate-800/90 hover:bg-slate-700 border border-slate-600/50 rounded-lg flex items-center justify-center text-white text-lg font-bold"
-                >
-                    +
-                </button>
-                <button
-                    onClick={() => handleZoom(-0.2)}
-                    className="w-8 h-8 bg-slate-800/90 hover:bg-slate-700 border border-slate-600/50 rounded-lg flex items-center justify-center text-white text-lg font-bold"
-                >
-                    −
-                </button>
+            {/* Hover Tooltip - displays when hovering legend items */}
+            {currentMarkerIndex >= 0 && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-none">
+                    <div
+                        className="backdrop-blur-md rounded-xl px-5 py-3 shadow-2xl border-2"
+                        style={{
+                            backgroundColor: "rgba(15, 23, 42, 0.95)",
+                            borderColor: VIETNAM_MARKERS[currentMarkerIndex].color,
+                            boxShadow: `0 8px 32px ${VIETNAM_MARKERS[currentMarkerIndex].color}40`,
+                        }}
+                    >
+                        <p className="text-base font-bold text-white mb-1">
+                            {VIETNAM_MARKERS[currentMarkerIndex].city}
+                        </p>
+                        <p
+                            className="text-sm font-semibold flex items-center gap-2"
+                            style={{ color: VIETNAM_MARKERS[currentMarkerIndex].color }}
+                        >
+                            <span
+                                className="w-2 h-2 rounded-full animate-pulse"
+                                style={{
+                                    backgroundColor: VIETNAM_MARKERS[currentMarkerIndex].color,
+                                }}
+                            />
+                            {VIETNAM_MARKERS[currentMarkerIndex].shops} cửa hàng
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Controls Instructions */}
+            <div className="absolute top-4 right-4 z-20 text-[10px] text-slate-400 bg-slate-900/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-slate-700/50 shadow-lg pointer-events-none">
+                <p className="flex items-center gap-1.5 mb-1">
+                    <span>🖱️</span>
+                    <span className="font-medium">Kéo để xoay</span>
+                </p>
+                <p className="flex items-center gap-1.5">
+                    <span>🔍</span>
+                    <span className="font-medium">Scroll để zoom</span>
+                </p>
             </div>
 
-            {/* Zoom indicator */}
-            <div className="absolute top-3 right-3 z-20 text-xs text-slate-400 bg-slate-900/60 rounded px-2 py-1">
+            {/* Zoom Indicator */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 text-xs text-slate-300 bg-slate-900/70 backdrop-blur-sm rounded-full px-3 py-1 border border-slate-700/50 pointer-events-none">
                 {Math.round(zoom * 100)}%
             </div>
         </div>

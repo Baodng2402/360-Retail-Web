@@ -597,23 +597,17 @@ const HomeBody = () => {
             </div>
           </div>
 
-          <div className="relative h-[360px] md:h-[420px]">
+          <div className="relative w-full">
+            <div className="relative h-[500px] md:h-[600px] w-full max-w-3xl mx-auto">
+              {/* Container Chính */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl border border-border/40 overflow-hidden">
 
-            <div className="w-full py-10">
-              <div className="relative h-[360px] md:h-[420px] w-full max-w-3xl mx-auto">
+                {/* 1. Hiệu ứng nền nhẹ (Background Radial) */}
+                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_#22d3ee_0,_transparent_55%),radial-gradient(circle_at_bottom,_#fb923c_0,_transparent_55%)] z-0" />
 
-                {/* Container Chính */}
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl border border-border/40 overflow-hidden flex items-center justify-center">
-
-                  {/* 1. Hiệu ứng nền nhẹ (Background Radial) */}
-                  <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_#22d3ee_0,_transparent_55%),radial-gradient(circle_at_bottom,_#fb923c_0,_transparent_55%)] z-0" />
-
-                  {/* 2. Component Quả địa cầu */}
-                  <div className="absolute inset-0 z-10">
-                    <GithubGlobe />
-                  </div>
-
-                  {/* 3. Phần trung tâm (Logo 360 Retail) */}
+                {/* 2. Component Quả địa cầu */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
+                  <GithubGlobe />
                 </div>
               </div>
             </div>
