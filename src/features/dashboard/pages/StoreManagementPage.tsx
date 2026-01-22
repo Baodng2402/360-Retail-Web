@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import { Badge } from "@/shared/components/ui/badge";
 import {
   Dialog,
@@ -31,11 +30,11 @@ import {
   CheckCircle,
   XCircle,
   Calendar,
-  Loader2,
 } from "lucide-react";
 import { storesApi } from "@/shared/lib/storesApi";
 import type { Store } from "@/shared/types/stores";
 import toast from "react-hot-toast";
+import { StoreFormDialog } from "../components/StoreFormDialog";
 
 interface StoreData extends Store {
   status?: "active" | "inactive";
@@ -47,7 +46,9 @@ const StoreManagementPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("active");
   const [selectedView, setSelectedView] = useState<"grid" | "list">("grid");
-  const [togglingStoreIds, setTogglingStoreIds] = useState<Set<string>>(new Set());
+  const [togglingStoreIds, setTogglingStoreIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const [storeDialogOpen, setStoreDialogOpen] = useState(false);
   const [editingStore, setEditingStore] = useState<StoreData | null>(null);
@@ -71,7 +72,7 @@ const StoreManagementPage = () => {
       setLoading(true);
       const includeInactive = selectedStatus !== "active";
       const fetchedStores = await storesApi.getMyOwnedStores(includeInactive);
-      
+
       const mappedStores: StoreData[] = fetchedStores.map((store) => ({
         ...store,
         status: store.isActive ? "active" : "inactive",
@@ -81,8 +82,8 @@ const StoreManagementPage = () => {
     } catch (error) {
       console.error("Failed to fetch stores:", error);
       const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        "Không thể tải danh sách cửa hàng";
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Không thể tải danh sách cửa hàng";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -92,8 +93,10 @@ const StoreManagementPage = () => {
   const filteredStores = stores.filter((store) => {
     const matchesSearch =
       store.storeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (store.address && store.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (store.phone && store.phone.toLowerCase().includes(searchQuery.toLowerCase()));
+      (store.address &&
+        store.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (store.phone &&
+        store.phone.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesStatus =
       selectedStatus === "all" ||
@@ -152,8 +155,8 @@ const StoreManagementPage = () => {
                   ...updatedStore,
                   status: updatedStore.isActive ? "active" : "inactive",
                 }
-              : s
-          )
+              : s,
+          ),
         );
         toast.success("Cập nhật cửa hàng thành công!");
       } else {
@@ -171,8 +174,8 @@ const StoreManagementPage = () => {
     } catch (error) {
       console.error("Failed to save store:", error);
       const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        editingStore
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || editingStore
           ? "Không thể cập nhật cửa hàng"
           : "Không thể tạo cửa hàng";
       toast.error(errorMessage);
@@ -190,16 +193,16 @@ const StoreManagementPage = () => {
     if (!storeToToggle) return;
 
     const newActiveState = !storeToToggle.isActive;
-    
+
     setTogglingStoreIds((prev) => new Set(prev).add(storeToToggle.id));
     setToggleDialogOpen(false);
 
     const confirmMessage = newActiveState
       ? `Đang kích hoạt cửa hàng "${storeToToggle.storeName}"...`
       : `Đang tạm ngừng cửa hàng "${storeToToggle.storeName}"...`;
-    
+
     const loadingToast = toast.loading(confirmMessage);
-    
+
     try {
       await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -218,22 +221,22 @@ const StoreManagementPage = () => {
                 isActive: newActiveState,
                 status: newActiveState ? "active" : "inactive",
               }
-            : s
-        )
+            : s,
+        ),
       );
 
       toast.dismiss(loadingToast);
       toast.success(
         newActiveState
           ? `Cửa hàng "${storeToToggle.storeName}" đã được kích hoạt`
-          : `Cửa hàng "${storeToToggle.storeName}" đã được tạm ngừng hoạt động`
+          : `Cửa hàng "${storeToToggle.storeName}" đã được tạm ngừng hoạt động`,
       );
     } catch (error) {
       console.error("Failed to toggle store active state:", error);
       const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        "Không thể cập nhật trạng thái cửa hàng";
-      
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Không thể cập nhật trạng thái cửa hàng";
+
       toast.dismiss(loadingToast);
       toast.error(errorMessage);
     } finally {
@@ -296,7 +299,9 @@ const StoreManagementPage = () => {
               <p className="text-sm text-muted-foreground mb-1">
                 Tổng cửa hàng
               </p>
-              <h3 className="text-2xl font-bold text-foreground">{totalStores}</h3>
+              <h3 className="text-2xl font-bold text-foreground">
+                {totalStores}
+              </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 {activeStores} đang hoạt động
               </p>
@@ -313,7 +318,9 @@ const StoreManagementPage = () => {
               <p className="text-sm text-muted-foreground mb-1">
                 Cửa hàng đang hoạt động
               </p>
-              <h3 className="text-2xl font-bold text-foreground">{activeStores}</h3>
+              <h3 className="text-2xl font-bold text-foreground">
+                {activeStores}
+              </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 {stores.length - activeStores} đã tạm ngừng
               </p>
@@ -391,7 +398,9 @@ const StoreManagementPage = () => {
                         <StoreIcon className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-lg">{store.storeName}</h4>
+                        <h4 className="font-semibold text-lg">
+                          {store.storeName}
+                        </h4>
                       </div>
                     </div>
                     {getStatusIcon(store.status || store.isActive)}
@@ -401,20 +410,27 @@ const StoreManagementPage = () => {
                     {store.address && (
                       <div className="flex items-start gap-2 text-sm">
                         <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">{store.address}</span>
+                        <span className="text-muted-foreground">
+                          {store.address}
+                        </span>
                       </div>
                     )}
                     {store.phone && (
                       <div className="flex items-center gap-2 text-sm">
                         <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">{store.phone}</span>
+                        <span className="text-muted-foreground">
+                          {store.phone}
+                        </span>
                       </div>
                     )}
                     {store.createdAt && (
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">
-                          Tạo: {new Date(store.createdAt).toLocaleDateString("vi-VN")}
+                          Tạo:{" "}
+                          {new Date(store.createdAt).toLocaleDateString(
+                            "vi-VN",
+                          )}
                         </span>
                       </div>
                     )}
@@ -423,7 +439,11 @@ const StoreManagementPage = () => {
                   <div className="flex items-center justify-between pt-3 border-t">
                     {getStatusBadge(store.status || store.isActive)}
                     <div className="flex items-center gap-3">
-                      <Button variant="ghost" size="icon" onClick={() => handleEditStore(store)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditStore(store)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <div className="flex items-center gap-2">
@@ -451,7 +471,10 @@ const StoreManagementPage = () => {
                 </div>
               ) : (
                 filteredStores.map((store) => (
-                  <Card key={store.id} className="p-6 hover:shadow-md transition-shadow">
+                  <Card
+                    key={store.id}
+                    className="p-6 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex gap-4 flex-1">
                         <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -460,7 +483,9 @@ const StoreManagementPage = () => {
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-lg">{store.storeName}</h4>
+                            <h4 className="font-semibold text-lg">
+                              {store.storeName}
+                            </h4>
                             {getStatusBadge(store.status || store.isActive)}
                             {store.isDefault && (
                               <Badge variant="secondary">Mặc định</Badge>
@@ -471,20 +496,27 @@ const StoreManagementPage = () => {
                             {store.address && (
                               <div className="flex items-center gap-2 text-sm">
                                 <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                <span className="text-muted-foreground truncate">{store.address}</span>
+                                <span className="text-muted-foreground truncate">
+                                  {store.address}
+                                </span>
                               </div>
                             )}
                             {store.phone && (
                               <div className="flex items-center gap-2 text-sm">
                                 <Phone className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">{store.phone}</span>
+                                <span className="text-muted-foreground">
+                                  {store.phone}
+                                </span>
                               </div>
                             )}
                             {store.createdAt && (
                               <div className="flex items-center gap-2 text-sm">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-muted-foreground">
-                                  Tạo: {new Date(store.createdAt).toLocaleDateString("vi-VN")}
+                                  Tạo:{" "}
+                                  {new Date(store.createdAt).toLocaleDateString(
+                                    "vi-VN",
+                                  )}
                                 </span>
                               </div>
                             )}
@@ -493,7 +525,11 @@ const StoreManagementPage = () => {
                       </div>
 
                       <div className="flex items-center gap-3 ml-4">
-                        <Button variant="ghost" size="icon" onClick={() => handleEditStore(store)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditStore(store)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <div className="flex items-center gap-2">
@@ -502,7 +538,9 @@ const StoreManagementPage = () => {
                           </span>
                           <Switch
                             checked={store.isActive}
-                            onCheckedChange={() => handleToggleStoreActive(store)}
+                            onCheckedChange={() =>
+                              handleToggleStoreActive(store)
+                            }
                           />
                         </div>
                       </div>
@@ -515,113 +553,45 @@ const StoreManagementPage = () => {
         )}
       </Card>
 
-      <Dialog open={storeDialogOpen} onOpenChange={setStoreDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingStore ? "Sửa cửa hàng" : "Thêm cửa hàng"}
-            </DialogTitle>
-            <DialogDescription>
-              Điền thông tin cửa hàng bên dưới
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-6 py-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="store-name">Tên cửa hàng *</Label>
-                <Input
-                  id="store-name"
-                  value={storeForm.storeName}
-                  onChange={(e) => setStoreForm({ ...storeForm, storeName: e.target.value })}
-                  placeholder="Ví dụ: VIPP"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="store-address">Địa chỉ</Label>
-                <Input
-                  id="store-address"
-                  value={storeForm.address}
-                  onChange={(e) => setStoreForm({ ...storeForm, address: e.target.value })}
-                  placeholder="Ví dụ: S5.03"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="store-phone">Số điện thoại</Label>
-                <Input
-                  id="store-phone"
-                  value={storeForm.phone}
-                  onChange={(e) => setStoreForm({ ...storeForm, phone: e.target.value })}
-                  placeholder="Ví dụ: 0789357788"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="store-status">Trạng thái</Label>
-                <Select
-                  value={storeForm.isActive ? "active" : "inactive"}
-                  onValueChange={(value) =>
-                    setStoreForm({ ...storeForm, isActive: value === "active" })
-                  }
-                >
-                  <SelectTrigger id="store-status" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Hoạt động</SelectItem>
-                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setStoreDialogOpen(false)}
-              disabled={savingStore}
-            >
-              Hủy
-            </Button>
-            <Button onClick={handleSaveStore} disabled={savingStore}>
-              {savingStore ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Đang xử lý...
-                </>
-              ) : (
-                editingStore ? "Cập nhật" : "Thêm"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <StoreFormDialog
+        open={storeDialogOpen}
+        onOpenChange={setStoreDialogOpen}
+        isEditing={!!editingStore}
+        formData={storeForm}
+        onFormChange={setStoreForm}
+        onSave={handleSaveStore}
+        isSaving={savingStore}
+      />
 
       <Dialog open={toggleDialogOpen} onOpenChange={setToggleDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {storeToToggle?.isActive ? "Tạm ngừng hoạt động cửa hàng" : "Kích hoạt cửa hàng"}
+              {storeToToggle?.isActive
+                ? "Tạm ngừng hoạt động cửa hàng"
+                : "Kích hoạt cửa hàng"}
             </DialogTitle>
             <DialogDescription>
               {storeToToggle?.isActive ? (
                 <>
-                  Bạn có chắc chắn muốn tạm ngừng hoạt động cửa hàng <strong>"{storeToToggle?.storeName}"</strong>? 
-                  Cửa hàng sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.
+                  Bạn có chắc chắn muốn tạm ngừng hoạt động cửa hàng{" "}
+                  <strong>"{storeToToggle?.storeName}"</strong>? Cửa hàng sẽ
+                  không thể tiếp tục hoạt động sau khi được tạm ngừng.
                 </>
               ) : (
                 <>
-                  Bạn có chắc chắn muốn kích hoạt cửa hàng <strong>"{storeToToggle?.storeName}"</strong>? 
-                  Cửa hàng sẽ được kích hoạt và có thể tiếp tục hoạt động.
+                  Bạn có chắc chắn muốn kích hoạt cửa hàng{" "}
+                  <strong>"{storeToToggle?.storeName}"</strong>? Cửa hàng sẽ
+                  được kích hoạt và có thể tiếp tục hoạt động.
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setToggleDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setToggleDialogOpen(false)}
+            >
               Hủy
             </Button>
             <Button onClick={confirmToggleStoreActive}>

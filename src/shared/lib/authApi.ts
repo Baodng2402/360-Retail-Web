@@ -1,5 +1,6 @@
 import { identityApi } from "./axios-instances";
 import type { User } from "@/shared/types/auth";
+import type { Store } from "@/shared/types/stores";
 
 export interface LoginDto {
   email: string;
@@ -103,5 +104,9 @@ export const authApi = {
     confirmNewPassword?: string;
   }): Promise<void> {
     await identityApi.post("identity/auth/change-password", payload);
+  },
+  async getStore(): Promise<Store[] | null> {
+    const res = await identityApi.get("identity/identity/stores-my");
+    return res.data;
   },
 };

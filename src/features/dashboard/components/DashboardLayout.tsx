@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardSideBar } from "./DashboardSideBar";
+import { StoreSetupGuard } from "./StoreSetupGuard";
 
 export const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -15,7 +16,9 @@ export const DashboardLayout = () => {
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <Outlet />
+          <StoreSetupGuard>
+            <Outlet />
+          </StoreSetupGuard>
         </main>
       </div>
     </div>
