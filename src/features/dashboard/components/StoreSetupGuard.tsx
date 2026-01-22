@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { authApi } from "@/shared/lib/authApi";
-import { storesApi } from "@/shared/lib/storesApi";
 import { StoreFormDialog } from "./StoreFormDialog";
 import toast from "react-hot-toast";
 
@@ -26,15 +25,10 @@ export const StoreSetupGuard = ({ children }: StoreSetupGuardProps) => {
   const checkUserStores = async () => {
     try {
       setChecking(true);
-      const stores = await authApi.getStore();
+      const subscriptionStatus = await authApi.checkStoreTrial();
 
-      // Check if user has no stores (null, empty array, or empty object)
-      const hasNoStores =
-        !stores ||
-        (Array.isArray(stores) && stores.length === 0) ||
-        (typeof stores === "object" && Object.keys(stores).length === 0);
-
-      setNeedsStore(hasNoStores);
+      // Check if user has no stores based on hasStore field
+      setNeedsStore(!subscriptionStatus.hasStore);
     } catch (error) {
       console.error("Failed to check user stores:", error);
       toast.error("Không thể kiểm tra cửa hàng. Vui lòng thử lại.");
@@ -57,13 +51,16 @@ export const StoreSetupGuard = ({ children }: StoreSetupGuardProps) => {
 
     try {
       setSavingStore(true);
-      await storesApi.createStore({
+      await authApi.createStoreTrial({
         storeName: storeForm.storeName,
-        address: storeForm.address || undefined,
-        phone: storeForm.phone || undefined,
       });
 
       toast.success("Tạo cửa hàng thành công!");
+
+      // Refresh access token to include new store permissions
+      const refreshRes = await authApi.refreshAccess();
+      localStorage.setItem("token", refreshRes.accessToken);
+
       setNeedsStore(false);
     } catch (error) {
       console.error("Failed to create store:", error);
