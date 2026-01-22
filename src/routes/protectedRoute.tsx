@@ -11,7 +11,7 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
   const normalizedAllowedRoles = (allowedRoles ?? []).map((role) =>
-    role.toLowerCase()
+    role.toLowerCase(),
   );
   if (
     normalizedAllowedRoles.length > 0 &&

@@ -30,7 +30,9 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route
             element={
-              <ProtectedRoute allowedRoles={["StoreOwner", "Manager"]} />
+              <ProtectedRoute
+                allowedRoles={["StoreOwner", "Manager", "PotentialOwner"]}
+              />
             }
           >
             <Route element={<DashboardLayout />}>
