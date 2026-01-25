@@ -27,12 +27,10 @@ export const StoreSetupGuard = ({ children }: StoreSetupGuardProps) => {
       setChecking(true);
       const subscriptionStatus = await authApi.checkStoreTrial();
 
-      // Check if user has no stores based on hasStore field
       setNeedsStore(!subscriptionStatus.hasStore);
     } catch (error) {
       console.error("Failed to check user stores:", error);
       toast.error("Không thể kiểm tra cửa hàng. Vui lòng thử lại.");
-      // On error, assume user needs to create a store
       setNeedsStore(true);
     } finally {
       setChecking(false);
@@ -56,9 +54,6 @@ export const StoreSetupGuard = ({ children }: StoreSetupGuardProps) => {
       });
 
       toast.success("Tạo cửa hàng thành công!");
-
-      // Refresh access token to include new store permissions
-      const refreshRes = await authApi.refreshAccess();
       localStorage.setItem("token", refreshRes.accessToken);
 
       setNeedsStore(false);
@@ -73,7 +68,6 @@ export const StoreSetupGuard = ({ children }: StoreSetupGuardProps) => {
     }
   };
 
-  // Show loading state while checking
   if (checking) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -85,12 +79,11 @@ export const StoreSetupGuard = ({ children }: StoreSetupGuardProps) => {
     );
   }
 
-  // Show mandatory store creation dialog if user has no stores
   if (needsStore) {
     return (
       <StoreFormDialog
         open={true}
-        onOpenChange={() => {}} // Prevent closing
+        onOpenChange={() => {}}
         isEditing={false}
         formData={storeForm}
         onFormChange={setStoreForm}
@@ -101,6 +94,5 @@ export const StoreSetupGuard = ({ children }: StoreSetupGuardProps) => {
     );
   }
 
-  // User has stores, render dashboard normally
   return <>{children}</>;
 };

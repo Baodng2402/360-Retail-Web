@@ -127,7 +127,7 @@ export const storesApi = {
           return storeRes.data.data;
         }
         return storeRes.data as Store;
-      } catch (error) {
+      } catch {
         return {
           id,
           storeName: data.storeName || "",

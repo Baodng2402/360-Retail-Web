@@ -5,19 +5,19 @@ import { DashboardSideBar } from "./DashboardSideBar";
 import { StoreSetupGuard } from "./StoreSetupGuard";
 
 export const DashboardLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground">
       <DashboardSideBar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <DashboardHeader isSidebarCollapsed={isSidebarCollapsed} />
+        <main className="flex-1 overflow-y-auto p-8">
           <StoreSetupGuard>
-            <Outlet />
+          <Outlet />
           </StoreSetupGuard>
         </main>
       </div>
