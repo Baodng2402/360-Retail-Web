@@ -12,10 +12,14 @@ export const storesApi = {
     if (includeInactive !== undefined) {
       queryParams.append("includeInactive", includeInactive.toString());
     }
-    const url = `saas/saas/stores${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const url = `saas/stores${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
     const res = await saasApi.get<ApiResponse<Store[]> | Store[]>(url);
-    
-    if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
+
+    if (
+      "success" in res.data &&
+      res.data.success &&
+      Array.isArray(res.data.data)
+    ) {
       return res.data.data;
     }
     if (Array.isArray(res.data)) {
@@ -29,10 +33,14 @@ export const storesApi = {
     if (includeInactive !== undefined) {
       queryParams.append("includeInactive", includeInactive.toString());
     }
-    const url = `saas/saas/stores/my-owned-stores${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const url = `saas/stores/my-owned-stores${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
     const res = await saasApi.get<ApiResponse<Store[]> | Store[]>(url);
-    
-    if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
+
+    if (
+      "success" in res.data &&
+      res.data.success &&
+      Array.isArray(res.data.data)
+    ) {
       return res.data.data;
     }
     if (Array.isArray(res.data)) {
@@ -42,8 +50,10 @@ export const storesApi = {
   },
 
   async getMyStore(): Promise<Store> {
-    const res = await saasApi.get<ApiResponse<Store> | Store>("saas/saas/stores/my-store");
-    
+    const res = await saasApi.get<ApiResponse<Store> | Store>(
+      "saas/stores/my-store",
+    );
+
     if ("success" in res.data && res.data.success && res.data.data) {
       return res.data.data;
     }
@@ -51,8 +61,10 @@ export const storesApi = {
   },
 
   async getStoreById(id: string): Promise<Store> {
-    const res = await saasApi.get<Store[] | ApiResponse<Store> | Store>(`saas/saas/stores/${id}`);
-    
+    const res = await saasApi.get<Store[] | ApiResponse<Store> | Store>(
+      `saas/stores/${id}`,
+    );
+
     if (Array.isArray(res.data)) {
       return res.data[0];
     }
@@ -63,30 +75,33 @@ export const storesApi = {
   },
 
   async createStore(data: CreateStoreDto): Promise<Store> {
-    const res = await saasApi.post<Store | ApiResponse<Store>>("saas/saas/stores", {
+    const res = await saasApi.post<Store | ApiResponse<Store>>("saas/stores", {
       storeName: data.storeName,
       address: data.address,
       phone: data.phone,
     });
-    
+
     let newStore: Store;
     if ("success" in res.data && res.data.success && res.data.data) {
       newStore = res.data.data;
     } else {
       newStore = res.data as Store;
     }
-    
+
     return newStore;
   },
 
   async updateStore(id: string, data: UpdateStoreDto): Promise<Store> {
-    const res = await saasApi.put<ApiResponse<Store> | Store>(`saas/saas/stores/${id}`, {
-      storeName: data.storeName,
-      address: data.address,
-      phone: data.phone,
-      isActive: data.isActive,
-    });
-    
+    const res = await saasApi.put<ApiResponse<Store> | Store>(
+      `saas/stores/${id}`,
+      {
+        storeName: data.storeName,
+        address: data.address,
+        phone: data.phone,
+        isActive: data.isActive,
+      },
+    );
+
     if (res.data) {
       if ("success" in res.data && res.data.success && res.data.data) {
         return res.data.data;
@@ -95,18 +110,24 @@ export const storesApi = {
         return res.data as Store;
       }
     }
-    
+
     const getStoreById = async (storeId: string): Promise<Store> => {
       try {
-        const storeRes = await saasApi.get<Store[] | ApiResponse<Store> | Store>(`saas/saas/stores/${storeId}`);
+        const storeRes = await saasApi.get<
+          Store[] | ApiResponse<Store> | Store
+        >(`saas/stores/${storeId}`);
         if (Array.isArray(storeRes.data)) {
           return storeRes.data[0];
         }
-        if ("success" in storeRes.data && storeRes.data.success && storeRes.data.data) {
+        if (
+          "success" in storeRes.data &&
+          storeRes.data.success &&
+          storeRes.data.data
+        ) {
           return storeRes.data.data;
         }
         return storeRes.data as Store;
-      } catch (error) {
+      } catch {
         return {
           id,
           storeName: data.storeName || "",
@@ -118,23 +139,29 @@ export const storesApi = {
         } as Store;
       }
     };
-    
+
     const updatedStore = await getStoreById(id);
     return updatedStore;
   },
 
   async deleteStore(id: string): Promise<void> {
-    const getStoreByIdRes = await saasApi.get<Store[] | ApiResponse<Store> | Store>(`saas/saas/stores/${id}`);
+    const getStoreByIdRes = await saasApi.get<
+      Store[] | ApiResponse<Store> | Store
+    >(`saas/stores/${id}`);
     let currentStore: Store;
     if (Array.isArray(getStoreByIdRes.data)) {
       currentStore = getStoreByIdRes.data[0];
-    } else if ("success" in getStoreByIdRes.data && getStoreByIdRes.data.success && getStoreByIdRes.data.data) {
+    } else if (
+      "success" in getStoreByIdRes.data &&
+      getStoreByIdRes.data.success &&
+      getStoreByIdRes.data.data
+    ) {
       currentStore = getStoreByIdRes.data.data;
     } else {
       currentStore = getStoreByIdRes.data as Store;
     }
-    
-    await saasApi.put(`saas/saas/stores/${id}`, {
+
+    await saasApi.put(`saas/stores/${id}`, {
       storeName: currentStore.storeName,
       address: currentStore.address || "",
       phone: currentStore.phone || "",

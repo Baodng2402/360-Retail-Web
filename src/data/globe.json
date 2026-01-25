@@ -1,0 +1,287 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Vietnam" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [102.170436, 22.464753],
+            [105.199915, 23.169311],
+            [106.24967, 22.009393],
+            [108.339699, 21.503937],
+            [109.200136, 21.430439],
+            [107.998849, 16.331528],
+            [106.501, 14.570584],
+            [105.5, 11.85],
+            [106.72, 10.6],
+            [107.220929, 10.364484],
+            [108.2, 10.8],
+            [108.5, 11.6],
+            [109.2, 12.0],
+            [109.4, 13.904459],
+            [109.160003, 15.6],
+            [107.564535, 15.202173],
+            [106.7512, 16.3581],
+            [107.3, 17.5],
+            [107.1, 18.5],
+            [105.6, 19.0],
+            [105.3, 19.9],
+            [103.9734, 19.8838],
+            [103.1, 20.75],
+            [102.170436, 22.464753]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "China" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [110, 22],
+            [120, 25],
+            [125, 30],
+            [125, 40],
+            [120, 45],
+            [110, 45],
+            [100, 40],
+            [90, 35],
+            [85, 30],
+            [90, 25],
+            [100, 22],
+            [110, 22]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Thailand" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [100, 6],
+            [102, 6],
+            [105, 8],
+            [105, 15],
+            [103, 18],
+            [100, 20],
+            [98, 18],
+            [98, 10],
+            [100, 6]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Cambodia" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [103, 10],
+            [106, 10],
+            [107, 12],
+            [107, 14],
+            [105, 14],
+            [103, 12],
+            [103, 10]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Laos" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [100, 14],
+            [105, 14],
+            [106, 18],
+            [105, 22],
+            [102, 22],
+            [100, 20],
+            [100, 14]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Japan" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [130, 32],
+            [140, 35],
+            [145, 42],
+            [142, 45],
+            [138, 38],
+            [132, 34],
+            [130, 32]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "South Korea" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [126, 34],
+            [130, 36],
+            [130, 38],
+            [126, 38],
+            [126, 34]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Philippines" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [117, 5],
+            [127, 8],
+            [127, 18],
+            [120, 20],
+            [117, 14],
+            [117, 5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Malaysia" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [100, 1],
+            [117, 4],
+            [119, 6],
+            [119, 7],
+            [110, 7],
+            [100, 6],
+            [100, 1]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Singapore" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [103.6, 1.2],
+            [104.1, 1.2],
+            [104.1, 1.5],
+            [103.6, 1.5],
+            [103.6, 1.2]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Indonesia" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [95, -5],
+            [141, -5],
+            [141, 5],
+            [95, 5],
+            [95, -5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Australia" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [113, -25],
+            [153, -25],
+            [153, -10],
+            [130, -10],
+            [113, -20],
+            [113, -25]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "India" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [68, 8],
+            [97, 8],
+            [97, 28],
+            [80, 35],
+            [68, 28],
+            [68, 8]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Taiwan" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [120, 22],
+            [122, 23],
+            [122, 25],
+            [120, 25],
+            [120, 22]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Myanmar" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [92, 10],
+            [100, 10],
+            [100, 25],
+            [96, 28],
+            [92, 25],
+            [92, 10]
+          ]
+        ]
+      }
+    }
+  ]
+}
