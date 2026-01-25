@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardSideBar } from "./DashboardSideBar";
-import { StoreSetupGuard } from "./StoreSetupGuard";
+import { SetupStoreBanner } from "@/shared/components/ui/SetupStoreBanner";
 
 export const DashboardLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -15,10 +15,9 @@ export const DashboardLayout = () => {
       />
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader isSidebarCollapsed={isSidebarCollapsed} />
-        <main className="flex-1 overflow-y-auto p-8">
-          <StoreSetupGuard>
+        <main className="flex-1 overflow-y-auto p-6">
+          <SetupStoreBanner />
           <Outlet />
-          </StoreSetupGuard>
         </main>
       </div>
     </div>

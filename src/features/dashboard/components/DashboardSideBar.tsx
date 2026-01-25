@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Store as StoreIcon,
   Package,
+  CreditCard,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
@@ -21,6 +22,7 @@ import {
   StaffCheckInModal,
 } from "@/features/dashboard/components/modals/QuickActionModals";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
+import { SetupStoreBadge } from "@/shared/components/ui/SetupStoreBanner";
 
 interface DashboardSideBarProps {
   isCollapsed: boolean;
@@ -92,6 +94,13 @@ export const DashboardSideBar = ({
       end: false,
     },
     {
+      icon: CreditCard,
+      label: "Subscription",
+      subLabel: "Gói dịch vụ",
+      path: "/dashboard/subscription",
+      end: false,
+    },
+    {
       icon: Settings,
       label: "Settings",
       subLabel: "Cài đặt",
@@ -140,20 +149,20 @@ export const DashboardSideBar = ({
         </div>
       )}
       <aside
-        className={`relative flex h-screen flex-col bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-[width] duration-300 ease-in-out ${
+        className={`relative flex h-screen flex-col border-r bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-[width] duration-300 ease-in-out ${
           isCollapsed ? "w-20" : "w-64"
         }`}
         style={{
           willChange: "width",
         }}
       >
-        <div className="border-b border-gray-200 dark:border-gray-700 h-[73px] flex items-center px-4">
+        <div className={`h-[73px] flex items-center px-4 flex-shrink-0 border-b border-gray-200 dark:border-gray-800`}>
           <div
             className={`flex items-center gap-3 w-full ${
               isCollapsed ? "justify-center" : ""
             }`}
           >
-            <div className="flex w-10 h-10 items-center justify-center border rounded-full text-white flex-shrink-0">
+            <div className="flex w-10 h-10 items-center justify-center flex-shrink-0">
               <img src={logo} alt="logo" className="w-full h-full object-contain" />
             </div>
             <div
@@ -167,10 +176,10 @@ export const DashboardSideBar = ({
               }}
             >
               <div className="whitespace-nowrap">
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-teal-500 to-blue-500 bg-clip-text text-transparent">
                   Retail 360
                 </h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
+                <p className="text-xs text-muted-foreground">
                   SME Platform
                 </p>
               </div>
@@ -178,7 +187,7 @@ export const DashboardSideBar = ({
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden p-3 scrollbar-hide">
+        <nav className={`flex-1 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent ${isCollapsed ? "scrollbar-hide" : ""}`}>
           <ul className="space-y-1">
             {mainNavItems.map((item) => (
               <li key={item.path} className="relative">
@@ -206,8 +215,8 @@ export const DashboardSideBar = ({
                       isCollapsed ? "justify-center px-3 py-2.5" : "gap-3 px-3 py-2.5"
                     } ${
                       isActive
-                        ? "from-teal-500 to-teal-600 bg-gradient-to-r text-white shadow-md"
-                        : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                        ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-md"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                     }`;
                     return baseClasses;
                   }}
@@ -223,9 +232,10 @@ export const DashboardSideBar = ({
                       transitionDelay: isCollapsed ? "0ms" : "100ms",
                     }}
                   >
-                    <div className="flex flex-col whitespace-nowrap">
+                    <div className="flex flex-col whitespace-nowrap relative">
                       <span className="text-sm font-medium">{item.label}</span>
-                      <span className="text-xs opacity-90">{item.subLabel}</span>
+                      <span className="text-xs opacity-70">{item.subLabel}</span>
+                      {item.path === "/dashboard/settings" && <SetupStoreBadge />}
                     </div>
                   </div>
                 </NavLink>
@@ -234,7 +244,7 @@ export const DashboardSideBar = ({
             {isCollapsed && (
               <>
                 <li className="py-2">
-                  <div className="border-t border-gray-300 dark:border-gray-600 mx-3"></div>
+                  <div className="border-t border-gray-200 dark:border-gray-700 mx-3"></div>
                 </li>
                 {quickActions.map((action) => (
                   <li key={action.label} className="relative">
@@ -252,7 +262,7 @@ export const DashboardSideBar = ({
                       onMouseLeave={() => {
                         setHoveredItem(null);
                       }}
-                      className="flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-gray-700 dark:text-gray-300 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      className="flex w-full items-center justify-center rounded-lg px-3 py-2.5 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                     >
                       <action.icon className="h-5 w-5 flex-shrink-0" />
                     </button>
@@ -263,28 +273,23 @@ export const DashboardSideBar = ({
           </ul>
 
           {!isCollapsed && (
-            <div
-              className="mt-2 overflow-hidden transition-all duration-300 ease-in-out"
-              style={{
-                transitionDelay: "150ms",
-              }}
-            >
-              <h3 className="mb-2 px-3 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
-                Quick Actions / Thao tác nhanh
+            <div className="mt-4">
+              <h3 className="mb-2 px-3 text-xs font-semibold uppercase text-muted-foreground whitespace-nowrap">
+                Quick Actions
               </h3>
               <ul className="space-y-1">
                 {quickActions.map((action) => (
                   <li key={action.label}>
                     <button
                       onClick={action.action}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-gray-700 dark:text-gray-300 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                     >
                       <action.icon className="h-5 w-5 flex-shrink-0" />
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">
                           {action.label}
                         </span>
-                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                        <span className="text-xs opacity-70">
                           {action.subLabel}
                         </span>
                       </div>
@@ -296,20 +301,16 @@ export const DashboardSideBar = ({
           )}
         </nav>
 
-        <div className="p-3 flex items-center justify-end">
+        <div className="p-3 flex items-center justify-end flex-shrink-0 border-t border-gray-200 dark:border-gray-800">
           <button
             onClick={onToggle}
-            className={`flex items-center justify-center rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 ${
-              isCollapsed
-                ? "w-10 h-10"
-                : "w-10 h-10"
-            }`}
+            className="flex items-center justify-center rounded-full transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 w-10 h-10"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? (
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
             ) : (
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 text-muted-foreground" />
             )}
           </button>
         </div>

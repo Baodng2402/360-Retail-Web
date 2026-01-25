@@ -16,6 +16,8 @@ import CustomerPage from "@/features/dashboard/pages/CustomerPage";
 import StoreManagementPage from "@/features/dashboard/pages/StoreManagementPage";
 import ProductManagementPage from "@/features/dashboard/pages/ProductManagementPage";
 import { ProfilePage } from "@/features/dashboard/pages/ProfilePage";
+import SubscriptionPlansPage from "@/features/subscription/pages/SubscriptionPlansPage";
+import PaymentSuccessPage from "@/features/payment/pages/PaymentSuccessPage";
 
 function App() {
   return (
@@ -28,6 +30,7 @@ function App() {
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route
             element={
               <ProtectedRoute
@@ -54,6 +57,10 @@ function App() {
                 element={<ProductManagementPage />}
               />
               <Route path="/dashboard/profile" element={<ProfilePage />} />
+              <Route
+                path="/dashboard/subscription"
+                element={<SubscriptionPlansPage />}
+              />
             </Route>
           </Route>
           {/* </Route> */}

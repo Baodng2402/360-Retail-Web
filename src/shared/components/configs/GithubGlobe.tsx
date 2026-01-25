@@ -6,8 +6,16 @@ import createGlobe from "cobe";
 // CONSTANTS & DATA
 // ====================
 
+interface Marker {
+  location: [number, number];
+  size: number;
+  city: string;
+  shops: string;
+  color: string;
+}
+
 // Vietnam cities with precise coordinates [latitude, longitude]
-const VIETNAM_MARKERS = [
+const VIETNAM_MARKERS: Marker[] = [
     {
         location: [21.0285, 105.8542], // Hà Nội
         size: 0.08,

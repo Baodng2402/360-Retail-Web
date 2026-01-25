@@ -89,7 +89,7 @@ type ProductFormState = {
   isActive: boolean;
 };
 
-const generateCategoryColor = (categoryName: string, index: number): string => {
+const generateCategoryColor = (_categoryName: string, index: number): string => {
   const colorPalette = [
     "hsl(210, 100%, 50%)",
     "hsl(142, 71%, 45%)",
@@ -104,6 +104,45 @@ const generateCategoryColor = (categoryName: string, index: number): string => {
   ];
 
   return colorPalette[index % colorPalette.length];
+};
+
+// Helper function to add opacity to any color format
+const addOpacityToColor = (color: string | undefined, opacity: number): string => {
+  if (!color) return "transparent";
+  
+  // Handle HSL format: hsl(h, s%, l%)
+  const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
+  if (hslMatch) {
+    const h = hslMatch[1];
+    const s = hslMatch[2];
+    const l = hslMatch[3];
+    return `hsla(${h}, ${s}%, ${l}%, ${opacity})`;
+  }
+  
+  // Handle RGB format: rgb(r, g, b)
+  const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (rgbMatch) {
+    const r = rgbMatch[1];
+    const g = rgbMatch[2];
+    const b = rgbMatch[3];
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+  
+  // Handle Hex format: #RRGGBB
+  const hexMatch = color.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
+  if (hexMatch) {
+    let hex = color.replace("#", "");
+    if (hex.length === 3) {
+      hex = hex.split("").map(c => c + c).join("");
+    }
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+  
+  // Return original color if format not recognized
+  return color;
 };
 
 export default function ProductManagementPage() {
@@ -1187,7 +1226,7 @@ export default function ProductManagementPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div
                         className="w-12 h-12 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: `${category.color}20` }}
+                        style={{ backgroundColor: addOpacityToColor(category.color, 0.15) }}
                       >
                         <Tag
                           className="h-6 w-6"
@@ -1738,7 +1777,7 @@ export default function ProductManagementPage() {
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: `${categoryForm.color}20` }}
+                  style={{ backgroundColor: addOpacityToColor(categoryForm.color, 0.15) }}
                 >
                   <Tag
                     className="h-5 w-5"
