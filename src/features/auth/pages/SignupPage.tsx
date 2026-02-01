@@ -156,9 +156,11 @@ const SignupPage = () => {
                       id="name"
                       type="text"
                       placeholder="Your full name"
-                      className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-blackampwhitewhite px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400"
+                      className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      autoComplete="off"
+                      data-form-type="other"
                     />
                   </div>
 
@@ -174,9 +176,11 @@ const SignupPage = () => {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Your password"
-                        className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-blackampwhitewhite pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400"
+                        className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        autoComplete="off"
+                        data-form-type="other"
                       />
                       <button
                         type="button"
@@ -204,9 +208,11 @@ const SignupPage = () => {
                       id="email"
                       type="email"
                       placeholder="Your email address"
-                      className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-blackampwhitewhite px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400"
+                      className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="off"
+                      data-form-type="other"
                     />
                   </div>
 
@@ -222,9 +228,11 @@ const SignupPage = () => {
                         id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your password"
-                        className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-blackampwhitewhite pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400"
+                        className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
+                        autoComplete="off"
+                        data-form-type="other"
                       />
                       <button
                         type="button"
@@ -277,5 +285,3 @@ const SignupPage = () => {
 };
 
 export default SignupPage;
-
-

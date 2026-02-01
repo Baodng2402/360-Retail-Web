@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -15,6 +15,8 @@ import {
   Store as StoreIcon,
   Package,
   CreditCard,
+  Lock,
+  AlertCircle,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
@@ -22,7 +24,17 @@ import {
   StaffCheckInModal,
 } from "@/features/dashboard/components/modals/QuickActionModals";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
-import { SetupStoreBadge } from "@/shared/components/ui/SetupStoreBanner";
+import { authApi } from "@/shared/lib/authApi";
+import { UserStatus } from "@/shared/types/jwt-claims";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/shared/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface DashboardSideBarProps {
   isCollapsed: boolean;
@@ -42,6 +54,41 @@ export const DashboardSideBar = ({
     x: number;
     y: number;
   } | null>(null);
+  const [userStatus, setUserStatus] = useState<"loading" | "hasStore" | "noStore">("loading");
+  const [showSetupDialog, setShowSetupDialog] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    checkUserStoreStatus();
+  }, []);
+
+  const checkUserStoreStatus = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setUserStatus("noStore");
+        return;
+      }
+
+      const userInfo = await authApi.meWithSubscription();
+      if (userInfo.status === UserStatus.Registered || !userInfo.storeId) {
+        setUserStatus("noStore");
+      } else {
+        setUserStatus("hasStore");
+      }
+    } catch {
+      setUserStatus("noStore");
+    }
+  };
+
+  const handleNavClick = (item: typeof mainNavItems[0]) => {
+    if (userStatus === "noStore" && item.requiresStore) {
+      setShowSetupDialog(true);
+      return;
+    }
+    navigate(item.path);
+  };
 
   const mainNavItems = [
     {
@@ -50,6 +97,7 @@ export const DashboardSideBar = ({
       subLabel: "Tổng quan 360°",
       path: "/dashboard",
       end: true,
+      requiresStore: false,
     },
     {
       icon: Users,
@@ -57,6 +105,7 @@ export const DashboardSideBar = ({
       subLabel: "Nhân viên",
       path: "/dashboard/staff",
       end: false,
+      requiresStore: true,
     },
     {
       icon: StoreIcon,
@@ -64,6 +113,7 @@ export const DashboardSideBar = ({
       subLabel: "Cửa hàng",
       path: "/dashboard/stores",
       end: false,
+      requiresStore: true,
     },
     {
       icon: Package,
@@ -71,6 +121,7 @@ export const DashboardSideBar = ({
       subLabel: "Sản phẩm",
       path: "/dashboard/products",
       end: false,
+      requiresStore: true,
     },
     {
       icon: ShoppingCart,
@@ -78,6 +129,7 @@ export const DashboardSideBar = ({
       subLabel: "Bán hàng",
       path: "/dashboard/sales",
       end: false,
+      requiresStore: true,
     },
     {
       icon: UserCircle,
@@ -85,6 +137,7 @@ export const DashboardSideBar = ({
       subLabel: "Khách hàng",
       path: "/dashboard/customers",
       end: false,
+      requiresStore: true,
     },
     {
       icon: FileText,
@@ -92,6 +145,7 @@ export const DashboardSideBar = ({
       subLabel: "Báo cáo",
       path: "/dashboard/reports",
       end: false,
+      requiresStore: true,
     },
     {
       icon: CreditCard,
@@ -99,6 +153,7 @@ export const DashboardSideBar = ({
       subLabel: "Gói dịch vụ",
       path: "/dashboard/subscription",
       end: false,
+      requiresStore: true,
     },
     {
       icon: Settings,
@@ -106,6 +161,7 @@ export const DashboardSideBar = ({
       subLabel: "Cài đặt",
       path: "/dashboard/settings",
       end: false,
+      requiresStore: true,
     },
   ];
 
@@ -189,58 +245,70 @@ export const DashboardSideBar = ({
 
         <nav className={`flex-1 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent ${isCollapsed ? "scrollbar-hide" : ""}`}>
           <ul className="space-y-1">
-            {mainNavItems.map((item) => (
-              <li key={item.path} className="relative">
-                <NavLink
-                  to={item.path}
-                  end={item.end}
-                  onMouseEnter={(e) => {
-                    if (isCollapsed) {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setHoveredItem({
-                        label: item.label,
-                        subLabel: item.subLabel,
-                        x: rect.right + 8,
-                        y: rect.top + rect.height / 2,
-                      });
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (isCollapsed) {
-                      setHoveredItem(null);
-                    }
-                  }}
-                  className={({ isActive }) => {
-                    const baseClasses = `flex items-center rounded-lg transition-all duration-200 ${
-                      isCollapsed ? "justify-center px-3 py-2.5" : "gap-3 px-3 py-2.5"
-                    } ${
+            {mainNavItems.map((item) => {
+              const isLocked = item.requiresStore && userStatus === "noStore";
+              const isActive = location.pathname === item.path ||
+                (item.end === false && location.pathname.startsWith(item.path));
+
+              return (
+                <li key={item.path} className="relative">
+                  <div
+                    onClick={() => handleNavClick(item)}
+                    onMouseEnter={(e) => {
+                      if (isCollapsed) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredItem({
+                          label: item.label,
+                          subLabel: item.subLabel,
+                          x: rect.right + 8,
+                          y: rect.top + rect.height / 2,
+                        });
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (isCollapsed) {
+                        setHoveredItem(null);
+                      }
+                    }}
+                    className={cn(
+                      "flex items-center rounded-lg transition-all duration-200 cursor-pointer",
+                      isCollapsed ? "justify-center px-3 py-2.5" : "gap-3 px-3 py-2.5",
                       isActive
                         ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-md"
+                        : isLocked
+                        ? "opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
                         : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-                    }`;
-                    return baseClasses;
-                  }}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      isCollapsed
-                        ? "w-0 opacity-0 scale-95"
-                        : "w-auto opacity-100 scale-100 ml-0"
-                    }`}
-                    style={{
-                      transitionDelay: isCollapsed ? "0ms" : "100ms",
-                    }}
+                    )}
                   >
-                    <div className="flex flex-col whitespace-nowrap relative">
-                      <span className="text-sm font-medium">{item.label}</span>
-                      <span className="text-xs opacity-70">{item.subLabel}</span>
-                      {item.path === "/dashboard/settings" && <SetupStoreBadge />}
+                    <div className="relative">
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      {isLocked && (
+                        <Lock className="h-3 w-3 absolute -top-1 -right-1 text-red-500" />
+                      )}
+                    </div>
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        isCollapsed
+                          ? "w-0 opacity-0 scale-95"
+                          : "w-auto opacity-100 scale-100 ml-0"
+                      }`}
+                      style={{
+                        transitionDelay: isCollapsed ? "0ms" : "100ms",
+                      }}
+                    >
+                      <div className="flex flex-col whitespace-nowrap relative">
+                        <span className={cn("text-sm font-medium", isLocked && "text-gray-400")}>
+                          {item.label}
+                        </span>
+                        <span className={cn("text-xs opacity-70", isLocked && "text-gray-300")}>
+                          {item.subLabel}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </NavLink>
-              </li>
-            ))}
+                </li>
+              );
+            })}
             {isCollapsed && (
               <>
                 <li className="py-2">
@@ -249,7 +317,13 @@ export const DashboardSideBar = ({
                 {quickActions.map((action) => (
                   <li key={action.label} className="relative">
                     <button
-                      onClick={action.action}
+                      onClick={() => {
+                        if (userStatus === "noStore") {
+                          setShowSetupDialog(true);
+                        } else {
+                          setNewSaleOpen(true);
+                        }
+                      }}
                       onMouseEnter={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         setHoveredItem({
@@ -262,7 +336,12 @@ export const DashboardSideBar = ({
                       onMouseLeave={() => {
                         setHoveredItem(null);
                       }}
-                      className="flex w-full items-center justify-center rounded-lg px-3 py-2.5 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                      className={cn(
+                        "flex w-full items-center justify-center rounded-lg px-3 py-2.5 transition-all duration-200",
+                        userStatus === "noStore"
+                          ? "opacity-50 cursor-not-allowed text-gray-400"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                      )}
                     >
                       <action.icon className="h-5 w-5 flex-shrink-0" />
                     </button>
@@ -281,8 +360,19 @@ export const DashboardSideBar = ({
                 {quickActions.map((action) => (
                   <li key={action.label}>
                     <button
-                      onClick={action.action}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                      onClick={() => {
+                        if (userStatus === "noStore") {
+                          setShowSetupDialog(true);
+                        } else {
+                          action.action();
+                        }
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200",
+                        userStatus === "noStore"
+                          ? "opacity-50 cursor-not-allowed text-gray-400"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                      )}
                     >
                       <action.icon className="h-5 w-5 flex-shrink-0" />
                       <div className="flex flex-col">
@@ -323,6 +413,43 @@ export const DashboardSideBar = ({
         onOpenChange={setFeedbackOpen}
         feedbackData={undefined}
       />
+
+      <Dialog open={showSetupDialog} onOpenChange={setShowSetupDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+              Thiết lập cửa hàng
+            </DialogTitle>
+            <DialogDescription>
+              Bạn cần hoàn thành thiết lập cửa hàng trước khi sử dụng tính năng này.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 mt-4">
+            <p className="text-sm text-muted-foreground">
+              Vui lòng hoàn thành thiết lập cửa hàng của bạn để bắt đầu quản lý doanh nghiệp.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowSetupDialog(false)}
+              >
+                Để sau
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+                onClick={() => {
+                  setShowSetupDialog(false);
+                  navigate("/dashboard");
+                }}
+              >
+                Thiết lập ngay
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

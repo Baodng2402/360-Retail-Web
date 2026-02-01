@@ -155,6 +155,8 @@ export const authApi = {
     const email =
       getStandardClaim("emailaddress") || getClaim("email") || "";
     const role = getStandardClaim("role") || getClaim("role") || "";
+
+    // Generate name from email if not available
     const name = email ? email.split("@")[0] : id;
 
     const statusValue = getClaim(JwtClaimTypes.Status);
@@ -173,13 +175,16 @@ export const authApi = {
       ? parseInt(trialDaysRemaining, 10)
       : null;
 
+    const storeId = getClaim(JwtClaimTypes.StoreId) || undefined;
+    const storeRole = getClaim(JwtClaimTypes.StoreRole) || undefined;
+
     return {
       id,
       email,
       role,
       name,
-      storeId: getClaim(JwtClaimTypes.StoreId) || undefined,
-      storeRole: getClaim(JwtClaimTypes.StoreRole) || undefined,
+      storeId,
+      storeRole,
       status,
       trialExpired,
       trialEndDate: getClaim(JwtClaimTypes.TrialEndDate) || undefined,

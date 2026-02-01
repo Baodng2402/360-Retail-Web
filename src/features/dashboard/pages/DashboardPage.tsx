@@ -7,12 +7,16 @@ import ChartBar, {
 import type { ChartConfig } from "@/shared/components/ui/chart";
 import ChartLineDefault from "@/shared/components/ui/chart-line-default";
 import { Box } from "lucide-react";
-import DateTimeClock from "@/features/dashboard/components/DateTimeClock";
 import QuickActions from "@/features/dashboard/components/QuickActions";
 import RecentTransactions from "@/features/dashboard/components/RecentTransactions";
 import RestockModal from "@/features/dashboard/components/modals/RestockModal";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
-import { useState } from "react";
+import { StoreSetupDialog } from "@/shared/components/ui/SetupStoreBanner";
+import { useState, useEffect } from "react";
+import { authApi } from "@/shared/lib/authApi";
+import { UserStatus } from "@/shared/types/jwt-claims";
+import { Button } from "@/shared/components/ui/button";
+import { Store, ArrowRight, Gift } from "lucide-react";
 
 const metrics: StatItem[] = [
   {
@@ -50,92 +54,129 @@ const metrics: StatItem[] = [
 ] as const;
 
 const chartData: ChartDataItem[] = [
-  {
-    items: "Quần jeans",
-    values: 12,
-    fill: "#14b8a6", // Teal
-  },
-  {
-    items: "Áo thun nam",
-    values: 20,
-    fill: "#3b82f6", // Blue
-  },
-  {
-    items: "Giày Sneaker",
-    values: 15,
-    fill: "#a855f7", // Purple
-  },
-  {
-    items: "Phụ kiện",
-    values: 25,
-    fill: "#f97316", // Orange
-  },
+  { items: "Quần jeans", values: 12, fill: "#14b8a6" },
+  { items: "Áo thun nam", values: 20, fill: "#3b82f6" },
+  { items: "Giày Sneaker", values: 15, fill: "#a855f7" },
+  { items: "Phụ kiện", values: 25, fill: "#f97316" },
 ];
 
 const chartConfig = {
-  values: {
-    label: "Products Sold",
-  },
+  values: { label: "Products Sold" },
 } satisfies ChartConfig;
 
 const DashboardPage = () => {
   const [restockModalOpen, setRestockModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState({
-    name: "",
-    image: "",
-    stock: 0,
-  });
-  const [selectedFeedback, setSelectedFeedback] = useState({
-    customer: "",
-    issue: "",
-  });
+  const [selectedProduct, setSelectedProduct] = useState({ name: "", image: "", stock: 0 });
+  const [selectedFeedback, setSelectedFeedback] = useState({ customer: "", issue: "" });
+  const [userStatus, setUserStatus] = useState<"loading" | "hasStore" | "noStore">("loading");
+  const [showCreateStoreDialog, setShowCreateStoreDialog] = useState(false);
 
-  const handleRestockClick = (product: {
-    name: string;
-    image: string;
-    stock: number;
-  }) => {
+  const checkUserStoreStatus = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setUserStatus("noStore");
+        return;
+      }
+
+      const userInfo = await authApi.meWithSubscription();
+      if (userInfo.status === UserStatus.Registered || !userInfo.storeId) {
+        setUserStatus("noStore");
+      } else {
+        setUserStatus("hasStore");
+      }
+    } catch {
+      setUserStatus("noStore");
+    }
+  };
+
+  useEffect(() => {
+    checkUserStoreStatus();
+  }, []);
+
+  const handleCreateStore = () => {
+    setShowCreateStoreDialog(true);
+  };
+
+  const handleRestockClick = (product: { name: string; image: string; stock: number }) => {
     setSelectedProduct(product);
     setRestockModalOpen(true);
   };
 
-  const handleCreateTaskClick = (feedback: {
-    customer: string;
-    issue: string;
-  }) => {
+  const handleCreateTaskClick = (feedback: { customer: string; issue: string }) => {
     setSelectedFeedback(feedback);
     setCreateTaskModalOpen(true);
   };
 
-  return (
-    <div className="space-y-10">
-      {/* Welcome Header */}
-      <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-[clamp(24px,4vw,36px)] font-extrabold text-foreground tracking-[-0.02em] mb-2">
-            Welcome Back! 👋
+  if (userStatus === "noStore") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center">
+        <div className="w-full max-w-lg">
+          <div className="mb-8 flex justify-center">
+            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center shadow-lg">
+              <Store className="h-10 w-10 text-white" />
+            </div>
+          </div>
+
+          <h1 className="text-3xl font-bold text-foreground mb-4">
+            Chào mừng bạn đến với 360 Retail!
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground tracking-[0.01em]">
-            Chào mừng trở lại · Here's what's happening with your shop today
+
+          <p className="text-muted-foreground text-lg mb-8">
+            Bạn cần tạo cửa hàng trước để bắt đầu quản lý doanh nghiệp của mình.
+            <br />
+            Đăng ký ngay để nhận <strong>7 ngày dùng thử miễn phí</strong>!
+          </p>
+
+          <div className="bg-muted/50 rounded-xl p-6 mb-8 text-left">
+            <h3 className="font-semibold mb-4">Bạn sẽ được:</h3>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3">
+                <Gift className="h-5 w-5 text-teal-500" />
+                <span>7 ngày dùng thử miễn phí - Không cần thẻ tín dụng</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Store className="h-5 w-5 text-blue-500" />
+                <span>Tạo cửa hàng và quản lý sản phẩm ngay lập tức</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <ArrowRight className="h-5 w-5 text-purple-500" />
+                <span>Truy cập tất cả tính năng quản lý bán hàng</span>
+              </li>
+            </ul>
+          </div>
+
+          <Button
+            onClick={handleCreateStore}
+            className="h-12 w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-lg font-semibold"
+          >
+            <>
+              <Gift className="mr-2 h-5 w-5" />
+              Tạo cửa hàng ngay (Miễn phí 7 ngày)
+            </>
+          </Button>
+
+          <p className="text-xs text-muted-foreground mt-4">
+            Sau 7 ngày, bạn có thể nâng cấp lên gói trả phí để tiếp tục sử dụng
           </p>
         </div>
-        <DateTimeClock />
-      </section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-10">
       <section>
         <DashboardStats stats={metrics} />
       </section>
 
-      {/* Quick Actions Section */}
       <section>
         <QuickActions />
       </section>
 
-      {/* Grid Layout: Charts Left, Alerts Right */}
       <section className="grid grid-cols-1 xl:grid-cols-3 gap-6 w-full items-start">
-        {/* Left Side - Charts (2/3 width) */}
         <div className="xl:col-span-2 flex flex-col gap-6">
-          {/* Charts Row - Side by Side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ChartBar
               chartData={chartData}
@@ -148,10 +189,8 @@ const DashboardPage = () => {
           <RecentTransactions />
         </div>
 
-        {/* Right Side - Alerts (1/3 width) */}
         <div className="xl:col-span-1">
           <div className="w-full border border-border rounded-md p-4 md:p-6 bg-card xl:sticky xl:top-6">
-            {/* Header with Alert Icon */}
             <div className="flex justify-between items-start mb-6">
               <div className="flex flex-col">
                 <h3 className="text-xl md:text-2xl font-bold text-foreground">
@@ -178,7 +217,6 @@ const DashboardPage = () => {
               </div>
             </div>
 
-            {/* Low Stock Section */}
             <div className="flex flex-col gap-4 mb-8">
               <div className="flex items-center gap-2 font-semibold text-foreground">
                 <Box className="w-5 h-5" />
@@ -256,7 +294,6 @@ const DashboardPage = () => {
               </ul>
             </div>
 
-            {/* Negative Feedback Section */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2 font-semibold text-foreground">
                 <svg
@@ -371,7 +408,6 @@ const DashboardPage = () => {
         </div>
       </section>
 
-      {/* Modals */}
       <RestockModal
         open={restockModalOpen}
         onOpenChange={setRestockModalOpen}
@@ -381,6 +417,11 @@ const DashboardPage = () => {
         open={createTaskModalOpen}
         onOpenChange={setCreateTaskModalOpen}
         feedbackData={selectedFeedback}
+      />
+
+      <StoreSetupDialog
+        open={showCreateStoreDialog}
+        onOpenChange={setShowCreateStoreDialog}
       />
     </div>
   );

@@ -148,9 +148,11 @@ const LoginBody = () => {
                     id="email"
                     type="email"
                     placeholder="Your email address"
-                    className="h-12 bg-white border-gray-200 pl-11"
+                    className="h-12 bg-white border-gray-200 pl-11 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="off"
+                    data-form-type="other"
                   />
                 </div>
               </div>
@@ -168,9 +170,11 @@ const LoginBody = () => {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Your password"
-                    className="h-12 bg-white border-gray-200 pl-11 pr-11"
+                    className="h-12 bg-white border-gray-200 pl-11 pr-11 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="off"
+                    data-form-type="other"
                   />
                   <button
                     type="button"
