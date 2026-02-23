@@ -170,8 +170,10 @@ interface StoreSetupDialogProps {
 }
 
 export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) {
-  const navigate = useNavigate();
-  const { currentStore } = useStoreStore();
+  const _navigate = useNavigate();
+  const { currentStore: _currentStore } = useStoreStore();
+  void _navigate;
+  void _currentStore;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     storeName: "",

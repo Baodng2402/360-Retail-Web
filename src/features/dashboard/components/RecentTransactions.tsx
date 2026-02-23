@@ -1,105 +1,83 @@
+import { useNavigate } from "react-router-dom";
 import { ArrowUpRight, ArrowDownLeft, RefreshCw } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
+import type { Order } from "@/shared/types/orders";
+import { formatVnd } from "@/shared/utils/formatMoney";
 
-type TransactionType = "sale" | "return" | "refund";
-
-interface Transaction {
-  id: string;
-  type: TransactionType;
-  customer: string;
-  amount: number;
-  time: string;
-  staff: string;
-  items: number;
-}
-
-const mockTransactions: Transaction[] = [
-  {
-    id: "TXN-001",
-    type: "sale",
-    customer: "Nguyễn Văn A",
-    amount: 450000,
-    time: "10 phút trước",
-    staff: "Trần Thị B",
-    items: 3,
-  },
-  {
-    id: "TXN-002",
-    type: "sale",
-    customer: "Lê Thị C",
-    amount: 890000,
-    time: "25 phút trước",
-    staff: "Phạm Văn D",
-    items: 2,
-  },
-  {
-    id: "TXN-003",
-    type: "return",
-    customer: "Hoàng Văn E",
-    amount: 250000,
-    time: "1 giờ trước",
-    staff: "Trần Thị B",
-    items: 1,
-  },
-  {
-    id: "TXN-004",
-    type: "sale",
-    customer: "Vũ Thị F",
-    amount: 1250000,
-    time: "2 giờ trước",
-    staff: "Nguyễn Văn G",
-    items: 5,
-  },
-  {
-    id: "TXN-005",
-    type: "refund",
-    customer: "Đinh Văn H",
-    amount: 180000,
-    time: "3 giờ trước",
-    staff: "Phạm Văn D",
-    items: 1,
-  },
-];
-
-const getTransactionIcon = (type: TransactionType) => {
-  switch (type) {
-    case "sale":
+const getOrderIcon = (status: string) => {
+  switch (status) {
+    case "Refunded":
       return (
-        <ArrowUpRight className="w-4 h-4 text-green-600 dark:text-green-400" />
+        <RefreshCw className="w-4 h-4 text-red-600 dark:text-red-400" />
       );
-    case "return":
+    case "Cancelled":
       return (
         <ArrowDownLeft className="w-4 h-4 text-orange-600 dark:text-orange-400" />
       );
-    case "refund":
-      return <RefreshCw className="w-4 h-4 text-red-600 dark:text-red-400" />;
+    default:
+      return (
+        <ArrowUpRight className="w-4 h-4 text-green-600 dark:text-green-400" />
+      );
   }
 };
 
-const getTransactionBadge = (type: TransactionType) => {
-  switch (type) {
-    case "sale":
-      return (
-        <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 border-green-500/20">
-          Sale
-        </Badge>
-      );
-    case "return":
-      return (
-        <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 border-orange-500/20">
-          Return
-        </Badge>
-      );
-    case "refund":
+const getOrderBadge = (status: string) => {
+  switch (status) {
+    case "Refunded":
       return (
         <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 border-red-500/20">
           Refund
         </Badge>
       );
+    case "Cancelled":
+      return (
+        <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 border-orange-500/20">
+          Hủy
+        </Badge>
+      );
+    case "Completed":
+      return (
+        <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 border-green-500/20">
+          Hoàn thành
+        </Badge>
+      );
+    case "Processing":
+      return (
+        <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 border-blue-500/20">
+          Đang xử lý
+        </Badge>
+      );
+    default:
+      return (
+        <Badge className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/20 border-yellow-500/20">
+          Chờ xử lý
+        </Badge>
+      );
   }
 };
 
-const RecentTransactions = () => {
+const formatTimeAgo = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffMins < 60) return `${diffMins} phút trước`;
+  if (diffHours < 24) return `${diffHours} giờ trước`;
+  if (diffDays === 1) return "Hôm qua";
+  if (diffDays < 7) return `${diffDays} ngày trước`;
+  return date.toLocaleDateString("vi-VN");
+};
+
+interface RecentTransactionsProps {
+  orders: Order[];
+  isLoading?: boolean;
+}
+
+const RecentTransactions = ({ orders, isLoading }: RecentTransactionsProps) => {
+  const navigate = useNavigate();
+
   return (
     <div className="w-full border border-border rounded-md p-4 md:p-6 bg-card">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
@@ -111,59 +89,80 @@ const RecentTransactions = () => {
             Giao dịch gần đây
           </span>
         </div>
-        <button className="px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold rounded-lg transition-all shadow-sm text-sm">
+        <button
+          onClick={() => navigate("/dashboard/sales")}
+          className="px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold rounded-lg transition-all shadow-sm text-sm"
+        >
           View All
         </button>
       </div>
 
-      <div className="space-y-3">
-        {mockTransactions.map((transaction) => (
-          <div
-            key={transaction.id}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 md:p-4 rounded-xl bg-accent/50 hover:bg-accent transition-colors cursor-pointer border border-border"
-          >
-            <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-              <div className="p-2 bg-background rounded-lg border border-border flex-shrink-0">
-                {getTransactionIcon(transaction.type)}
-              </div>
-              <div className="flex flex-col min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="font-semibold text-foreground truncate">
-                    {transaction.customer}
-                  </span>
-                  {getTransactionBadge(transaction.type)}
-                </div>
-                <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground flex-wrap">
-                  <span>{transaction.time}</span>
-                  <span className="hidden sm:inline">•</span>
-                  <span className="hidden sm:inline">
-                    {transaction.items} items
-                  </span>
-                  <span className="hidden md:inline">•</span>
-                  <span className="hidden md:inline truncate">
-                    By {transaction.staff}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <span
-                className={`font-bold text-sm md:text-base ${
-                  transaction.type === "sale"
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-20 rounded-xl bg-muted/50 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="py-12 text-center text-muted-foreground">
+          Chưa có giao dịch nào
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {orders.slice(0, 8).map((order) => {
+            const itemCount =
+              order.orderItems?.reduce((s, i) => s + i.quantity, 0) ?? 0;
+            return (
+              <div
+                key={order.id}
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 md:p-4 rounded-xl bg-accent/50 hover:bg-accent transition-colors cursor-pointer border border-border"
+                onClick={() => navigate("/dashboard/sales")}
               >
-                {transaction.type === "sale" ? "+" : "-"}
-                {transaction.amount.toLocaleString("vi-VN")} ₫
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {transaction.id}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+                <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                  <div className="p-2 bg-background rounded-lg border border-border flex-shrink-0">
+                    {getOrderIcon(order.status)}
+                  </div>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="font-semibold text-foreground truncate">
+                        {order.customerName || `Đơn #${order.code || order.id.slice(0, 8)}`}
+                      </span>
+                      {getOrderBadge(order.status)}
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground flex-wrap">
+                      <span>{formatTimeAgo(order.createdAt)}</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="hidden sm:inline">{itemCount} items</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span
+                    className={`font-bold text-sm md:text-base ${
+                      order.status === "Completed"
+                        ? "text-green-600 dark:text-green-400"
+                        : order.status === "Refunded" || order.status === "Cancelled"
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-foreground"
+                    }`}
+                  >
+                    {order.status === "Refunded" || order.status === "Cancelled"
+                      ? "-"
+                      : "+"}
+                    {formatVnd(order.totalAmount)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {order.code || order.id.slice(0, 8)}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

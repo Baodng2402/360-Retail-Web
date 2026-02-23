@@ -33,8 +33,7 @@ const createAxiosInstance = (baseURL: string) => {
 const baseURL = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") || "http://localhost:5001";
 const apiBaseURL = baseURL + "/";
 
-console.log("API Base URL:", apiBaseURL);
-
 export const identityApi = createAxiosInstance(apiBaseURL);
 export const saasApi = createAxiosInstance(apiBaseURL);
 export const salesApi = createAxiosInstance(apiBaseURL);
+export const hrApi = createAxiosInstance(apiBaseURL);

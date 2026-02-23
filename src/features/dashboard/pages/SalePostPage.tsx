@@ -58,81 +58,6 @@ import type { Product } from "@/shared/types/products";
 import AddProductModal from "@/features/dashboard/components/modals/AddProductModal";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
 
-const mockProducts = [
-  {
-    id: "1",
-    name: "Áo thun nam cổ tròn",
-    category: "Apparel",
-    price: 250000,
-    stock: 45,
-    barcode: "8934567890123",
-    image: "👕",
-  },
-  {
-    id: "2",
-    name: "Quần jean nam slim fit",
-    category: "Apparel",
-    price: 450000,
-    stock: 28,
-    barcode: "8934567890124",
-    image: "👖",
-  },
-  {
-    id: "3",
-    name: "Giày sneaker trắng",
-    category: "Footwear",
-    price: 680000,
-    stock: 15,
-    barcode: "8934567890125",
-    image: "👟",
-  },
-  {
-    id: "4",
-    name: "Áo khoác hoodie",
-    category: "Apparel",
-    price: 550000,
-    stock: 32,
-    barcode: "8934567890126",
-    image: "🧥",
-  },
-  {
-    id: "5",
-    name: "Túi xách nữ",
-    category: "Accessories",
-    price: 380000,
-    stock: 22,
-    barcode: "8934567890127",
-    image: "👜",
-  },
-  {
-    id: "6",
-    name: "Đồng hồ đeo tay",
-    category: "Accessories",
-    price: 890000,
-    stock: 8,
-    barcode: "8934567890128",
-    image: "⌚",
-  },
-  {
-    id: "7",
-    name: "Mũ lưỡi trai",
-    category: "Accessories",
-    price: 150000,
-    stock: 58,
-    barcode: "8934567890129",
-    image: "🧢",
-  },
-  {
-    id: "8",
-    name: "Kính mát",
-    category: "Accessories",
-    price: 320000,
-    stock: 19,
-    barcode: "8934567890130",
-    image: "🕶️",
-  },
-];
-
 const salesReportData = [
   { product: "Áo thun", sold: 120, revenue: 30000000 },
   { product: "Quần jean", sold: 98, revenue: 44100000 },
@@ -342,8 +267,9 @@ const SalePostPage = () => {
     }
 
     try {
-      const storeId =
+      const _storeId =
         currentStore?.id || (await storesApi.getMyOwnedStores())[0]?.id;
+      void _storeId;
 
       const orderItems = cart.map((item) => ({
         productId: item.product.id,
@@ -408,6 +334,11 @@ const SalePostPage = () => {
                 </div>
 
                 <ScrollArea className="h-[600px]">
+                  {loading ? (
+                    <div className="flex items-center justify-center h-48 text-muted-foreground">
+                      Đang tải sản phẩm...
+                    </div>
+                  ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {filteredProducts.map((product) => (
                       <Card
@@ -448,6 +379,7 @@ const SalePostPage = () => {
                       </Card>
                     ))}
                   </div>
+                  )}
                 </ScrollArea>
               </Card>
             </div>

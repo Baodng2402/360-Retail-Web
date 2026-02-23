@@ -1,5 +1,6 @@
 import { type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
 
 export interface StatItem {
   label: string;
@@ -13,8 +14,15 @@ export interface StatItem {
 
 export const DashboardStats = ({ stats }: { stats: StatItem[] }) => (
   <div className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-    {stats.map((stat) => (
-      <StatCard key={stat.label} {...stat} />
+    {stats.map((stat, i) => (
+      <motion.div
+        key={stat.label}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: i * 0.05 }}
+      >
+        <StatCard {...stat} />
+      </motion.div>
     ))}
   </div>
 );

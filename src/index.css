@@ -171,7 +171,6 @@
     animation-play-state: paused;
   }
 
-  /* Custom scrollbar styling - thin and subtle */
   .scrollbar-hide {
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
@@ -198,7 +197,6 @@
     background-color: rgba(255, 255, 255, 0.2);
   }
 
-  /* Hide scrollbar when not needed */
   .scrollbar-hide:not(:hover) {
     scrollbar-width: none;
   }
@@ -207,7 +205,26 @@
     display: none;
   }
 
-  /* Fix browser autofill white text issue */
+  .login-form .login-password-input,
+  .login-form .login-password-input:-webkit-autofill,
+  .login-form .login-password-input:-webkit-autofill:hover,
+  .login-form .login-password-input:-webkit-autofill:focus,
+  .login-form .login-password-input:-webkit-autofill:active {
+    background-color: white !important;
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+
+  .dark .login-form .login-password-input,
+  .dark .login-form .login-password-input:-webkit-autofill,
+  .dark .login-form .login-password-input:-webkit-autofill:hover,
+  .dark .login-form .login-password-input:-webkit-autofill:focus,
+  .dark .login-form .login-password-input:-webkit-autofill:active {
+    background-color: white !important;
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,

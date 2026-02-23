@@ -103,9 +103,9 @@ const LoginBody = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-white">
+    <div className="flex min-h-screen w-full bg-white text-gray-900">
       <div className="mx-auto flex w-full max-w-[1920px]">
-        <div className="relative flex w-[45%] flex-col items-center justify-center bg-white px-16 py-14">
+        <div className="relative flex w-[45%] flex-col items-center justify-center bg-white dark:bg-white px-16 py-14 text-gray-900 dark:text-gray-900">
           <div className="pointer-events-none absolute left-0 top-0 h-[531.85px] w-[531.85px] -ml-[121.8px] -mt-[124.6px] rounded-full bg-gradient-to-br from-[rgba(13,148,136,0.18)] to-[rgba(13,148,136,0)] blur-[32px] rotate-[36.47deg]" />
 
           <div className="absolute left-16 top-10 z-20">
@@ -134,7 +134,7 @@ const LoginBody = () => {
               </Link>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="login-form space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label
                   htmlFor="email"
@@ -148,7 +148,7 @@ const LoginBody = () => {
                     id="email"
                     type="email"
                     placeholder="Your email address"
-                    className="h-12 bg-white border-gray-200 pl-11 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                    className="h-12 bg-white text-gray-900 placeholder:text-gray-500 border-gray-200 pl-11 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#111827] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="off"
@@ -170,7 +170,7 @@ const LoginBody = () => {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Your password"
-                    className="h-12 bg-white border-gray-200 pl-11 pr-11 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                    className="login-password-input h-12 !bg-white text-gray-900 placeholder:text-gray-500 border-gray-200 pl-11 pr-11 dark:!bg-white"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="off"

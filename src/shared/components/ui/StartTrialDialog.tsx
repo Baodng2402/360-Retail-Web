@@ -6,7 +6,6 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import {
   Store,
-  ArrowRight,
   CheckCircle2,
   Loader2,
   Gift,
@@ -15,7 +14,6 @@ import {
 import { authApi } from "@/shared/lib/authApi";
 import { UserStatus } from "@/shared/types/jwt-claims";
 import toast from "react-hot-toast";
-import { cn } from "@/lib/utils";
 
 interface StartTrialDialogProps {
   open: boolean;

@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { Badge } from "@/shared/components/ui/badge"; // Optional: Nếu bạn muốn hiển thị Role đẹp hơn
+import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
@@ -24,7 +24,6 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 
-// 1. Định nghĩa Interface chuẩn
 export interface Staff {
   avatar: string;
   name: string;
@@ -35,7 +34,6 @@ export interface Staff {
   task: string;
 }
 
-// 2. Helper function để tạo Initials (ví dụ: "Hayden Bleasel" -> "HB")
 const getInitials = (name: string) => {
   return name
     .split(" ")
@@ -45,7 +43,6 @@ const getInitials = (name: string) => {
     .toUpperCase();
 };
 
-// 3. Định nghĩa Props cho Component
 interface StaffTableProps {
   data: Staff[];
 }
@@ -66,7 +63,6 @@ export const StaffTable = ({ data }: StaffTableProps) => {
         <TableBody>
           {data.map((staff) => (
             <TableRow key={staff.email}>
-              {/* Cột 1: Avatar + Name + Role */}
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
@@ -82,7 +78,6 @@ export const StaffTable = ({ data }: StaffTableProps) => {
                 </div>
               </TableCell>
 
-              {/* Cột 2: Email + Phone */}
               <TableCell>
                 <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
@@ -94,7 +89,6 @@ export const StaffTable = ({ data }: StaffTableProps) => {
                 </div>
               </TableCell>
 
-              {/* Cột 3: Task */}
               <TableCell>
                 <div className="flex items-center gap-2">
                   <ListTodo className="h-4 w-4 text-muted-foreground" />
@@ -102,7 +96,6 @@ export const StaffTable = ({ data }: StaffTableProps) => {
                 </div>
               </TableCell>
 
-              {/* Cột 4: Check-in Time */}
               <TableCell>
                 {staff.checkin ? (
                   <Badge
@@ -122,7 +115,6 @@ export const StaffTable = ({ data }: StaffTableProps) => {
                 )}
               </TableCell>
 
-              {/* Cột 5: Action Menu (Edit/Delete) */}
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

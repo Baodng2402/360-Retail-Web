@@ -138,7 +138,7 @@ export function TrialBanner({
 
   if (variant === "card") {
     return (
-      <Alert className={content.className}>
+      <Alert className={`${content.className} ${className}`.trim()}>
         <Icon className="h-5 w-5" />
         <div className="flex-1 ml-3">
           <AlertTitle>{content.title}</AlertTitle>
@@ -174,7 +174,7 @@ export function TrialBanner({
   // Banner variant
   return (
     <div
-      className={`sticky top-0 z-50 w-full border-b ${content.className}`}
+      className={`sticky top-0 z-50 w-full border-b ${content.className} ${className}`.trim()}
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">

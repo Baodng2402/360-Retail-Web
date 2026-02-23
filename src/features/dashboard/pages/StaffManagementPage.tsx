@@ -1,116 +1,129 @@
 import { Button } from "@/shared/components/ui/button";
 import { UserPlus } from "lucide-react";
-import { Users, CalendarCheck, ListChecks, BadgeAlert } from "lucide-react";
+import {
+  Users,
+  CalendarCheck,
+  ListChecks,
+  BadgeAlert,
+} from "lucide-react";
 import { DashboardStats } from "@/features/dashboard/components/DashboardStats";
 import type { StatItem } from "@/features/dashboard/components/DashboardStats";
 import DataTable, { type Staff } from "@/shared/components/ui/table-standard-2";
 import { SearchInput } from "@/shared/components/ui/input-search";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
-import { useState, useMemo } from "react";
+import InviteStaffModal from "@/features/dashboard/components/modals/InviteStaffModal";
+import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
+import { useState, useEffect, useMemo } from "react";
+import { employeesApi } from "@/shared/lib/employeesApi";
+import { tasksApi } from "@/shared/lib/tasksApi";
+import type { Employee } from "@/shared/types/employee";
+import type { Task } from "@/shared/types/task";
 
 const BUTTON_GRADIENT =
   "from-teal-500 to-teal-600 bg-gradient-to-r hover:from-teal-600 hover:to-teal-700 text-white shadow-sm transition-all";
 
-const MOCK_STAFF_DATA: Staff[] = [
-  {
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-    name: "John Doe",
-    role: "Manager",
-    email: "john.doe@example.com",
-    phone: "+84 123 456 789",
-    checkin: new Date(2026, 0, 16, 8, 30),
-    task: "Review monthly reports",
-  },
-  {
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane",
-    name: "Jane Smith",
-    role: "Sales Staff",
-    email: "jane.smith@example.com",
-    phone: "+84 987 654 321",
-    checkin: new Date(2026, 0, 16, 9, 0),
-    task: "Customer support",
-  },
-  {
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-    name: "Mike Johnson",
-    role: "Warehouse Staff",
-    email: "mike.j@example.com",
-    phone: "+84 555 123 456",
-    checkin: new Date(2026, 0, 16, 8, 45),
-    task: "Inventory check",
-  },
-  {
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-    name: "Sarah Williams",
-    role: "Sales Staff",
-    email: "sarah.w@example.com",
-    phone: "+84 444 789 012",
-    checkin: new Date(2026, 0, 16, 9, 15),
-    task: "Process orders",
-  },
-  {
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tom",
-    name: "Tom Brown",
-    role: "Warehouse Staff",
-    email: "tom.brown@example.com",
-    phone: "+84 333 456 789",
-    checkin: null,
-    task: "Prepare shipments",
-  },
-];
-
-const MOCK_STATS: StatItem[] = [
-  {
-    label: "Total Staff",
-    subLabel: "Tổng nhân viên",
-    value: 12,
-    icon: Users,
-    color: "bg-teal-50 text-teal-600",
-  },
-  {
-    label: "Checked In Today",
-    subLabel: "Đã điểm danh",
-    value: 4,
-    icon: CalendarCheck,
-    change: "+2 hôm nay",
-    trend: "up",
-    color: "bg-blue-50 text-blue-600",
-  },
-  {
-    label: "Active Task",
-    subLabel: "Công việc",
-    value: 12,
-    icon: ListChecks,
-    color: "bg-orange-50 text-orange-600",
-  },
-  {
-    label: "Not Checked In",
-    subLabel: "Chưa điểm danh",
-    value: 1,
-    icon: BadgeAlert,
-    trend: "down",
-    color: "bg-red-50 text-red-600",
-  },
-];
-
-const StaffManagement = () => {
+const StaffManagementPage = () => {
   const [query, setQuery] = useState("");
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+
+  const loadData = () => {
+    setLoading(true);
+    Promise.all([
+      employeesApi.getEmployees(true),
+      tasksApi.getTasks(true),
+    ])
+      .then(([empRes, taskRes]) => {
+        setEmployees(empRes);
+        setTasks(taskRes);
+      })
+      .catch((err) => {
+        console.error("Failed to load staff/tasks:", err);
+        setEmployees([]);
+        setTasks([]);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const taskByAssignee = useMemo(() => {
+    const map = new Map<string, Task>();
+    for (const t of tasks.filter((x) => x.status !== "Completed" && x.status !== "Cancelled")) {
+      if (!map.has(t.assigneeId)) map.set(t.assigneeId, t);
+    }
+    return map;
+  }, [tasks]);
+
+  const staffTableData: Staff[] = useMemo(
+    () =>
+      employees.map((emp) => {
+        const task = taskByAssignee.get(emp.id);
+        return {
+          avatar: emp.avatarUrl || "",
+          name: emp.fullName,
+          role: emp.position,
+          email: emp.email,
+          phone: emp.phoneNumber || "-",
+          checkin: null,
+          task: task?.title ?? "Không có",
+        };
+      }),
+    [employees, taskByAssignee]
+  );
 
   const filteredStaff = useMemo(() => {
-    if (!query.trim()) return MOCK_STAFF_DATA;
+    if (!query.trim()) return staffTableData;
+    const q = query.toLowerCase().trim();
+    return staffTableData.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)
+    );
+  }, [staffTableData, query]);
 
-    const searchTerm = query.toLowerCase().trim();
-    return MOCK_STAFF_DATA.filter((staff) => {
-      return (
-        staff.name.toLowerCase().includes(searchTerm) ||
-        staff.email.toLowerCase().includes(searchTerm)
-      );
-    });
-  }, [query]);
+  const activeCount = employees.filter((e) => e.isActive).length;
+  const pendingTasks = tasks.filter(
+    (t) => t.status !== "Completed" && t.status !== "Cancelled" && t.isActive
+  ).length;
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-  };
+  const stats: StatItem[] = [
+    {
+      label: "Total Staff",
+      subLabel: "Tổng nhân viên",
+      value: employees.length,
+      icon: Users,
+      color: "bg-teal-50 text-teal-600",
+    },
+    {
+      label: "Active Staff",
+      subLabel: "Đang hoạt động",
+      value: activeCount,
+      change: employees.length > 0 ? `${activeCount}/${employees.length}` : null,
+      trend: "up",
+      icon: CalendarCheck,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      label: "Active Tasks",
+      subLabel: "Công việc đang làm",
+      value: pendingTasks,
+      icon: ListChecks,
+      color: "bg-orange-50 text-orange-600",
+    },
+    {
+      label: "Inactive",
+      subLabel: "Tạm ngừng",
+      value: employees.length - activeCount,
+      icon: BadgeAlert,
+      trend: employees.length - activeCount > 0 ? "down" : undefined,
+      color: "bg-red-50 text-red-600",
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -119,36 +132,58 @@ const StaffManagement = () => {
         <Button
           variant="outline"
           className="border-teal-600 text-teal-600 hover:bg-teal-50"
+          onClick={() => setCreateTaskModalOpen(true)}
         >
           Create Task / Tạo công việc
         </Button>
-        <Button className={BUTTON_GRADIENT}>
+        <Button
+          className={BUTTON_GRADIENT}
+          onClick={() => setInviteModalOpen(true)}
+        >
           <UserPlus className="mr-2 h-4 w-4" />
           Add staff / Thêm nhân viên
         </Button>
       </div>
 
-      <DashboardStats stats={MOCK_STATS} />
+      <DashboardStats stats={stats} />
       <div className="border pb-10 px-5 rounded-2xl">
-        <div className="flex items-center justify-between pt-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-5">
           <span className="text-md font-bold">
             Staff List / Danh sách nhân viên
           </span>
-          <div className="relative ml-auto w-64">
+          <div className="relative w-full sm:w-64">
             <SearchInput
               placeholder="Search staff / Tìm kiếm..."
-              wrapperClassName="w-64 ml-auto"
+              wrapperClassName="w-full sm:w-64"
               className="from-gray-50 to-gray-100 bg-gradient-to-r"
               value={query}
-              onChange={handleSearch}
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
         </div>
-        <div className="flex justify-center pt-10 min-w-full">
-          <DataTable data={filteredStaff} />
-        </div>
+        {loading ? (
+          <div className="py-12 text-center text-muted-foreground">
+            Đang tải...
+          </div>
+        ) : (
+          <div className="flex justify-center pt-10 min-w-full">
+            <DataTable data={filteredStaff} />
+          </div>
+        )}
       </div>
+
+      <InviteStaffModal
+        open={inviteModalOpen}
+        onOpenChange={setInviteModalOpen}
+        onSuccess={loadData}
+      />
+      <CreateTaskModal
+        open={createTaskModalOpen}
+        onOpenChange={setCreateTaskModalOpen}
+        onSuccess={loadData}
+      />
     </div>
   );
 };
-export default StaffManagement;
+
+export default StaffManagementPage;

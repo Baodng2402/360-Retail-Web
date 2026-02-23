@@ -11,31 +11,46 @@ import {
 
 export const title = "A line chart";
 
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
+const defaultChartData = [
+  { month: "T1", desktop: 0 },
+  { month: "T2", desktop: 0 },
+  { month: "T3", desktop: 0 },
+  { month: "T4", desktop: 0 },
+  { month: "T5", desktop: 0 },
+  { month: "T6", desktop: 0 },
 ];
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Doanh thu (VNĐ)",
     color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
-const ChartLineDefault = () => (
+export interface ChartLineDataItem {
+  month: string;
+  desktop: number;
+}
+
+interface ChartLineDefaultProps {
+  data?: ChartLineDataItem[];
+  isLoading?: boolean;
+}
+
+const ChartLineDefault = ({ data = defaultChartData, isLoading }: ChartLineDefaultProps) => (
   <div className="w-full rounded-md border border-border bg-card p-4">
     <h3 className="text-base md:text-lg font-semibold pb-4 md:pb-5">
-      Revenue Trend
+      Revenue Trend / Xu hướng doanh thu
     </h3>
+    {isLoading ? (
+      <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+        Đang tải...
+      </div>
+    ) : (
     <ChartContainer config={chartConfig}>
       <LineChart
         accessibilityLayer
-        data={chartData}
+        data={data}
         margin={{
           left: 12,
           right: 12,
@@ -62,6 +77,7 @@ const ChartLineDefault = () => (
         />
       </LineChart>
     </ChartContainer>
+    )}
   </div>
 );
 

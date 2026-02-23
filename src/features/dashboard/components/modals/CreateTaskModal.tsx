@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -19,6 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { employeesApi } from "@/shared/lib/employeesApi";
+import { tasksApi } from "@/shared/lib/tasksApi";
+import type { Employee } from "@/shared/types/employee";
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -27,48 +30,65 @@ interface CreateTaskModalProps {
     customer: string;
     issue: string;
   };
+  onSuccess?: () => void;
 }
 
 const CreateTaskModal = ({
   open,
   onOpenChange,
   feedbackData,
+  onSuccess,
 }: CreateTaskModalProps) => {
-  const [title, setTitle] = useState(feedbackData?.issue || "");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [assignee, setAssignee] = useState("");
-  const [priority, setPriority] = useState("medium");
+  const [assigneeId, setAssigneeId] = useState("");
+  const [priority, setPriority] = useState<"Low" | "Medium" | "High">("Medium");
   const [dueDate, setDueDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
-  const handleSubmit = () => {
-    if (!title || !assignee || !dueDate) {
+  useEffect(() => {
+    if (feedbackData?.issue) setTitle(feedbackData.issue);
+  }, [feedbackData?.issue]);
+
+  useEffect(() => {
+    if (open) {
+      employeesApi
+        .getEmployees(true)
+        .then(setEmployees)
+        .catch(() => setEmployees([]));
+    }
+  }, [open]);
+
+  const handleSubmit = async () => {
+    if (!title.trim() || !assigneeId || !dueDate) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
 
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      console.log("Task created:", {
-        title,
-        description,
-        assignee,
+    try {
+      await tasksApi.createTask({
+        title: title.trim(),
+        assigneeId,
         priority,
-        dueDate,
-        relatedCustomer: feedbackData?.customer,
+        description: description.trim() || undefined,
+        deadline: new Date(dueDate).toISOString(),
       });
-
       toast.success("Đã tạo task thành công!");
-
-      setIsSubmitting(false);
       setTitle("");
       setDescription("");
-      setAssignee("");
-      setPriority("medium");
+      setAssigneeId("");
+      setPriority("Medium");
       setDueDate("");
       onOpenChange(false);
-    }, 1000);
+      onSuccess?.();
+    } catch (err) {
+      console.error("Create task failed:", err);
+      toast.error("Không thể tạo task. Vui lòng thử lại.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -77,14 +97,14 @@ const CreateTaskModal = ({
         <DialogHeader>
           <DialogTitle>Create Task / Tạo nhiệm vụ</DialogTitle>
           <DialogDescription>
-            Tạo nhiệm vụ mới để xử lý vấn đề khách hàng
+            Tạo nhiệm vụ mới và giao cho nhân viên
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {feedbackData && (
-            <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-              <p className="text-sm font-medium text-orange-900">
+            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+              <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
                 Related to feedback from: {feedbackData.customer}
               </p>
             </div>
@@ -96,7 +116,7 @@ const CreateTaskModal = ({
             </Label>
             <Input
               id="title"
-              placeholder="Ví dụ: Xử lý khiếu nại sản phẩm..."
+              placeholder="Ví dụ: Kiểm kê hàng tồn kho..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -119,29 +139,33 @@ const CreateTaskModal = ({
                 Assignee / Người thực hiện{" "}
                 <span className="text-red-500">*</span>
               </Label>
-              <Select value={assignee} onValueChange={setAssignee}>
+              <Select value={assigneeId} onValueChange={setAssigneeId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn nhân viên" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="tran_thi_b">Trần Thị B</SelectItem>
-                  <SelectItem value="pham_van_d">Phạm Văn D</SelectItem>
-                  <SelectItem value="nguyen_van_g">Nguyễn Văn G</SelectItem>
-                  <SelectItem value="le_thi_h">Lê Thị H</SelectItem>
+                  {employees.map((emp) => (
+                    <SelectItem key={emp.id} value={emp.id}>
+                      {emp.fullName} ({emp.position})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="priority">Priority / Độ ưu tiên</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select
+                value={priority}
+                onValueChange={(v) => setPriority(v as "Low" | "Medium" | "High")}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">🟢 Low / Thấp</SelectItem>
-                  <SelectItem value="medium">🟡 Medium / Trung bình</SelectItem>
-                  <SelectItem value="high">🔴 High / Cao</SelectItem>
+                  <SelectItem value="Low">🟢 Low / Thấp</SelectItem>
+                  <SelectItem value="Medium">🟡 Medium / Trung bình</SelectItem>
+                  <SelectItem value="High">🔴 High / Cao</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -153,7 +177,7 @@ const CreateTaskModal = ({
             </Label>
             <Input
               id="dueDate"
-              type="date"
+              type="datetime-local"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
             />

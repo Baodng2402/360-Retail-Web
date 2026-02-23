@@ -8,7 +8,6 @@ import {
   TrendingUp,
   ArrowRight,
   CheckCircle,
-  Sparkles,
 } from "lucide-react";
 import TrueFocus from "@/shared/components/TrueFocus";
 import { GithubGlobe } from "@/shared/components/configs/GithubGlobe";

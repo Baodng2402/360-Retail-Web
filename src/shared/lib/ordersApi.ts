@@ -26,25 +26,59 @@ export const ordersApi = {
   },
 
   async getOrders(params?: GetOrdersParams): Promise<Order[]> {
-    const queryParams = new URLSearchParams();
+    const paged = await this.getOrdersPaged(params);
+    return paged.items;
+  },
 
+  async getOrdersPaged(params?: GetOrdersParams): Promise<{
+    items: Order[];
+    totalCount: number;
+    pageNumber: number;
+    pageSize: number;
+    totalPages: number;
+  }> {
+    const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append("status", params.status);
     if (params?.fromDate) queryParams.append("fromDate", params.fromDate);
     if (params?.toDate) queryParams.append("toDate", params.toDate);
-    if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    queryParams.append("page", (params?.page ?? 1).toString());
+    queryParams.append("pageSize", (params?.pageSize ?? 20).toString());
 
-    const res = await salesApi.get<ApiResponse<Order[]> | Order[]>(
-      `sales/sales/orders?${queryParams.toString()}`
-    );
+    const res = await salesApi.get<
+      ApiResponse<{ items: Order[]; totalCount: number; pageNumber: number; pageSize: number; totalPages: number }> | Order[]
+    >(`sales/sales/orders?${queryParams.toString()}`);
 
-    if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
-      return res.data.data;
+    if ("success" in res.data && res.data.success && res.data.data) {
+      const data = res.data.data;
+      if (typeof data === "object" && "items" in data && Array.isArray(data.items)) {
+        return {
+          items: data.items,
+          totalCount: data.totalCount ?? data.items.length,
+          pageNumber: data.pageNumber ?? 1,
+          pageSize: data.pageSize ?? 20,
+          totalPages: data.totalPages ?? 1,
+        };
+      }
+      if (Array.isArray(data)) {
+        return {
+          items: data,
+          totalCount: data.length,
+          pageNumber: 1,
+          pageSize: data.length,
+          totalPages: 1,
+        };
+      }
     }
     if (Array.isArray(res.data)) {
-      return res.data;
+      return {
+        items: res.data,
+        totalCount: res.data.length,
+        pageNumber: 1,
+        pageSize: res.data.length,
+        totalPages: 1,
+      };
     }
-    return [];
+    return { items: [], totalCount: 0, pageNumber: 1, pageSize: 20, totalPages: 0 };
   },
 
   async getOrderById(id: string): Promise<Order> {
