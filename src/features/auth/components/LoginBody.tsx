@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { z } from "zod";
 import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
 
 import logo from "@/assets/logo.png";
 import facebookIcon from "@/assets/icon/facebook-icon.svg";
@@ -38,6 +39,52 @@ const LoginBody = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  const handleGoogleButtonClick = (e: React.MouseEvent) => {
+    const iframe = googleButtonRef.current?.querySelector("iframe");
+    if (iframe) {
+      e.preventDefault();
+      iframe.click();
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    const idToken = credentialResponse.credential;
+    if (!idToken) {
+      toast.error("Không thể lấy thông tin từ Google.");
+      return;
+    }
+    try {
+      setError(null);
+      const res = await authApi.loginWithGoogle(idToken);
+      if (!res.accessToken) {
+        throw new Error("Access token không hợp lệ từ server");
+      }
+      localStorage.setItem("token", res.accessToken);
+      const user = await authApi.me();
+      const userWithAvatar = res.profilePictureUrl
+        ? { ...user, avatar: res.profilePictureUrl }
+        : user;
+      setAuth(userWithAvatar, res.accessToken);
+      if (res.isNewUser) {
+        sessionStorage.setItem("pendingGoogleNewUser", "1");
+      }
+      toast.success("Đăng nhập thành công!");
+      navigate("/dashboard", { replace: true });
+    } catch (err: unknown) {
+      console.error("Google login error", err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Đăng nhập Google thất bại. Vui lòng thử lại.";
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Đăng nhập Google bị hủy hoặc có lỗi.");
+  };
 
   useEffect(() => {
     const storedRemember = localStorage.getItem("loginRememberMe");
@@ -246,20 +293,54 @@ const LoginBody = () => {
                 </div>
 
                 <div className="flex items-center justify-center gap-3 sm:gap-4">
-                  {socialButtons.map((social) => (
-                    <Button
-                      key={social.alt}
-                      type="button"
-                      variant="outline"
-                      className="flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] items-center justify-center rounded-[22px] border border-gray-200 bg-white hover:bg-gray-50 shadow-sm p-1.5"
-                    >
-                      <img
-                        src={social.src}
-                        alt={social.alt}
-                        className="h-9 w-9 sm:h-11 sm:w-11 object-contain"
-                      />
-                    </Button>
-                  ))}
+                  {socialButtons.map((social) =>
+                    social.alt === "Google" ? (
+                      <div
+                        key={social.alt}
+                        ref={googleButtonRef}
+                        role="button"
+                        tabIndex={0}
+                        onClick={handleGoogleButtonClick}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            (e.currentTarget.querySelector("iframe") as HTMLElement)?.click();
+                          }
+                        }}
+                        className="relative flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] cursor-pointer items-center justify-center rounded-[22px] border border-gray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
+                      >
+                        <div className="absolute inset-0 z-0 flex items-center justify-center [&>div]:!min-h-[40px] [&>div]:!min-w-[40px]">
+                          <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
+                            theme="outline"
+                            size="large"
+                            type="icon"
+                            shape="rectangular"
+                            containerProps={{ style: { border: "none", outline: "none" } }}
+                          />
+                        </div>
+                        <img
+                          src={googleIcon}
+                          alt="Google"
+                          className="pointer-events-none absolute inset-0 z-10 m-auto h-9 w-9 object-contain sm:h-11 sm:w-11"
+                        />
+                      </div>
+                    ) : (
+                      <Button
+                        key={social.alt}
+                        type="button"
+                        variant="outline"
+                        className="flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] items-center justify-center rounded-[22px] border border-gray-200 bg-white hover:bg-gray-50 shadow-sm p-1.5"
+                      >
+                        <img
+                          src={social.src}
+                          alt={social.alt}
+                          className="h-9 w-9 sm:h-11 sm:w-11 object-contain"
+                        />
+                      </Button>
+                    )
+                  )}
                 </div>
               </div>
             </form>

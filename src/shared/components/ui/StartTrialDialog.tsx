@@ -28,7 +28,6 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
 
   useEffect(() => {
     if (open && userEmail) {
-      // Set default store name based on email
       setStoreName(`Cửa hàng của ${userEmail.split("@")[0]}`);
     }
   }, [open, userEmail]);
@@ -39,18 +38,18 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
     try {
       setLoading(true);
 
-      // Step 1: Start trial - create store
       await authApi.createStoreTrial({
         storeName: storeName.trim() || `Cửa hàng của ${userEmail}`,
       });
 
       toast.success("Tạo cửa hàng dùng thử thành công!");
 
-      // Step 2: Refresh token to get store_id in claims
       const refreshRes = await authApi.refreshAccess();
       if (refreshRes.accessToken) {
         localStorage.setItem("token", refreshRes.accessToken);
       }
+
+      sessionStorage.removeItem("pendingGoogleNewUser");
 
       onOpenChange(false);
       window.location.reload();
@@ -67,7 +66,6 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
 
   const handleSkip = () => {
     onOpenChange(false);
-    // Redirect to subscription page where they can see plans
     navigate("/dashboard/subscription");
   };
 
@@ -75,10 +73,8 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
 
-      {/* Dialog */}
       <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-lg mx-4 animate-in fade-in-0 zoom-in-95">
         <Card className="border-0 shadow-none">
           <CardHeader className="text-center pb-2">
@@ -92,7 +88,6 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
           </CardHeader>
 
           <CardContent>
-            {/* Benefits */}
             <div className="mb-6 space-y-3">
               <div className="flex items-center gap-3 text-sm">
                 <div className="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0">
@@ -165,7 +160,6 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
           </CardContent>
         </Card>
 
-        {/* Close button */}
         <button
           onClick={() => onOpenChange(false)}
           className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
@@ -180,10 +174,6 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
   );
 }
 
-/**
- * Hook to check if user needs to start trial
- * Returns: { needsTrial, loading, checkStatus }
- */
 export function useNeedsTrial() {
   const [needsTrial, setNeedsTrial] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -197,12 +187,7 @@ export function useNeedsTrial() {
         return false;
       }
 
-      // Decode token to check status
       const userInfo = await authApi.meWithSubscription();
-      
-      // User needs trial if:
-      // 1. Status is "Registered" (new user who hasn't started trial)
-      // 2. No storeId
       const needs = userInfo.status === UserStatus.Registered || !userInfo.storeId;
       setNeedsTrial(needs);
       return needs;

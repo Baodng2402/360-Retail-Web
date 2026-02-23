@@ -55,12 +55,15 @@ const DashboardPage = () => {
         return;
       }
       const userInfo = await authApi.meWithSubscription();
-      if (
+      const pendingGoogleNewUser = sessionStorage.getItem("pendingGoogleNewUser");
+      const needsOnboarding =
+        pendingGoogleNewUser ||
         userInfo.status === UserStatus.Registered ||
-        !userInfo.storeId
-      ) {
+        !userInfo.storeId;
+      if (needsOnboarding) {
         setUserStatus("noStore");
       } else {
+        sessionStorage.removeItem("pendingGoogleNewUser");
         setUserStatus("hasStore");
       }
     } catch {

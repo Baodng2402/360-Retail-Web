@@ -29,6 +29,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         localStorage.removeItem("token");
+        sessionStorage.removeItem("pendingGoogleNewUser");
         set({ user: null, token: null, isAuthenticated: false });
       },
     }),

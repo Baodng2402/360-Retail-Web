@@ -29,6 +29,14 @@ export interface LoginResponse {
   mustChangePassword: boolean;
 }
 
+export interface ExternalAuthResponse {
+  accessToken: string;
+  expiresAt: string;
+  isNewUser: boolean;
+  email: string;
+  profilePictureUrl?: string;
+}
+
 export interface Claim {
   type: string;
   value: string;
@@ -240,6 +248,19 @@ export const authApi = {
 
   async assignStore(payload: AssignStoreDto): Promise<void> {
     await identityApi.post("identity/auth/assign-store", payload);
+  },
+
+  async loginWithGoogle(idToken: string): Promise<ExternalAuthResponse> {
+    const res = await identityApi.post<
+      ExternalAuthResponse | { success: boolean; data: ExternalAuthResponse }
+    >("identity/auth/external", { provider: "Google", idToken });
+    if ("success" in res.data && res.data.success && res.data.data) {
+      return res.data.data;
+    }
+    if ("accessToken" in res.data) {
+      return res.data as ExternalAuthResponse;
+    }
+    throw new Error("Invalid external auth response format");
   },
 
   async refreshAccess(storeId?: string): Promise<LoginResponse> {

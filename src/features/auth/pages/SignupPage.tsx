@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
 
 import logo from "@/assets/logo.png";
 import facebookIcon from "@/assets/icon/facebook-icon.svg";
@@ -12,6 +13,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { authApi } from "@/shared/lib/authApi";
+import { useAuthStore } from "@/shared/store/authStore";
 
 const signupSchema = z
   .object({
@@ -44,6 +46,53 @@ const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  const handleGoogleButtonClick = (e: React.MouseEvent) => {
+    const iframe = googleButtonRef.current?.querySelector("iframe");
+    if (iframe) {
+      e.preventDefault();
+      (iframe as HTMLElement).click();
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    const idToken = credentialResponse.credential;
+    if (!idToken) {
+      toast.error("Không thể lấy thông tin từ Google.");
+      return;
+    }
+    try {
+      setError(null);
+      const res = await authApi.loginWithGoogle(idToken);
+      if (!res.accessToken) {
+        throw new Error("Access token không hợp lệ từ server");
+      }
+      localStorage.setItem("token", res.accessToken);
+      const user = await authApi.me();
+      const userWithAvatar = res.profilePictureUrl
+        ? { ...user, avatar: res.profilePictureUrl }
+        : user;
+      setAuth(userWithAvatar, res.accessToken);
+      if (res.isNewUser) {
+        sessionStorage.setItem("pendingGoogleNewUser", "1");
+      }
+      toast.success("Đăng nhập thành công!");
+      navigate("/dashboard", { replace: true });
+    } catch (err: unknown) {
+      console.error("Google signup/login error", err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Đăng nhập Google thất bại. Vui lòng thử lại.";
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Đăng nhập Google bị hủy hoặc có lỗi.");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,19 +172,53 @@ const SignupPage = () => {
                 </h2>
 
                 <div className="flex items-center justify-center gap-3 sm:gap-[15px]">
-                  {socialButtons.map((social, index) => (
-                    <Button
-                      key={social.alt + index}
-                      variant="outline"
-                      className="flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] items-center justify-center rounded-[24px] border border-graygray-200 bg-blackampwhitewhite hover:bg-gray-50 transition-all shadow-sm p-1.5"
-                    >
-                      <img
-                        src={social.src}
-                        alt={social.alt}
-                        className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
-                      />
-                    </Button>
-                  ))}
+                  {socialButtons.map((social, index) =>
+                    social.alt === "Google" ? (
+                      <div
+                        key={social.alt + index}
+                        ref={googleButtonRef}
+                        role="button"
+                        tabIndex={0}
+                        onClick={handleGoogleButtonClick}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            (e.currentTarget.querySelector("iframe") as HTMLElement)?.click();
+                          }
+                        }}
+                        className="relative flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] cursor-pointer items-center justify-center rounded-[24px] border border-graygray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
+                      >
+                        <div className="absolute inset-0 z-0 flex items-center justify-center [&>div]:!min-h-[40px] [&>div]:!min-w-[40px]">
+                          <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
+                            theme="outline"
+                            size="large"
+                            type="icon"
+                            shape="rectangular"
+                            containerProps={{ style: { border: "none", outline: "none" } }}
+                          />
+                        </div>
+                        <img
+                          src={googleIcon}
+                          alt="Google"
+                          className="pointer-events-none absolute inset-0 z-10 m-auto h-10 w-10 object-contain sm:h-12 sm:w-12"
+                        />
+                      </div>
+                    ) : (
+                      <Button
+                        key={social.alt + index}
+                        variant="outline"
+                        className="flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] items-center justify-center rounded-[24px] border border-graygray-200 bg-blackampwhitewhite hover:bg-gray-50 transition-all shadow-sm p-1.5"
+                      >
+                        <img
+                          src={social.src}
+                          alt={social.alt}
+                          className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
+                        />
+                      </Button>
+                    )
+                  )}
                 </div>
 
                 <div className="text-center text-lg font-bold leading-[25.2px] text-graygray-400">
