@@ -11,12 +11,13 @@ import QuickActions from "@/features/dashboard/components/QuickActions";
 import RecentTransactions from "@/features/dashboard/components/RecentTransactions";
 import RestockModal from "@/features/dashboard/components/modals/RestockModal";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
-import { StoreSetupDialog } from "@/shared/components/ui/SetupStoreBanner";
+import { StartTrialDialog } from "@/shared/components/ui/StartTrialDialog";
 import { useState, useEffect } from "react";
 import { authApi } from "@/shared/lib/authApi";
 import { UserStatus } from "@/shared/types/jwt-claims";
 import { Button } from "@/shared/components/ui/button";
 import { Store, ArrowRight, Gift } from "lucide-react";
+import { useAuthStore } from "@/shared/store/authStore";
 
 const metrics: StatItem[] = [
   {
@@ -70,7 +71,8 @@ const DashboardPage = () => {
   const [selectedProduct, setSelectedProduct] = useState({ name: "", image: "", stock: 0 });
   const [selectedFeedback, setSelectedFeedback] = useState({ customer: "", issue: "" });
   const [userStatus, setUserStatus] = useState<"loading" | "hasStore" | "noStore">("loading");
-  const [showCreateStoreDialog, setShowCreateStoreDialog] = useState(false);
+  const [showStartTrialDialog, setShowStartTrialDialog] = useState(false);
+  const { user } = useAuthStore();
 
   const checkUserStoreStatus = async () => {
     try {
@@ -96,7 +98,7 @@ const DashboardPage = () => {
   }, []);
 
   const handleCreateStore = () => {
-    setShowCreateStoreDialog(true);
+    setShowStartTrialDialog(true);
   };
 
   const handleRestockClick = (product: { name: string; image: string; stock: number }) => {
@@ -151,15 +153,20 @@ const DashboardPage = () => {
             onClick={handleCreateStore}
             className="h-12 w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-lg font-semibold"
           >
-            <>
-              <Gift className="mr-2 h-5 w-5" />
-              Tạo cửa hàng ngay (Miễn phí 7 ngày)
-            </>
+            <Gift className="mr-2 h-5 w-5" />
+            Tạo cửa hàng ngay (Miễn phí 7 ngày)
           </Button>
 
           <p className="text-xs text-muted-foreground mt-4">
             Sau 7 ngày, bạn có thể nâng cấp lên gói trả phí để tiếp tục sử dụng
           </p>
+
+          {/* Modal tạo cửa hàng dùng thử - phải render trong noStore view để hiển thị khi bấm CTA */}
+          <StartTrialDialog
+            open={showStartTrialDialog}
+            onOpenChange={setShowStartTrialDialog}
+            userEmail={user?.email}
+          />
         </div>
       </div>
     );
@@ -419,10 +426,6 @@ const DashboardPage = () => {
         feedbackData={selectedFeedback}
       />
 
-      <StoreSetupDialog
-        open={showCreateStoreDialog}
-        onOpenChange={setShowCreateStoreDialog}
-      />
     </div>
   );
 };
