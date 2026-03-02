@@ -2,10 +2,21 @@ import { identityApi } from "./axios-instances";
 import type { User } from "@/shared/types/auth";
 import { JwtClaimTypes, UserStatus, type UserStatusType } from "@/shared/types/jwt-claims";
 import type { SubscriptionStatus } from "@/shared/types/subscription";
+import type { ApiResponse } from "@/shared/types/api-response";
 
 export interface LoginDto {
   email: string;
   password: string;
+}
+
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  email: string;
+  code: string;
+  newPassword: string;
 }
 
 export interface RegisterUserDto {
@@ -124,6 +135,40 @@ export const authApi = {
       return res.data as LoginResponse;
     }
     throw new Error("Invalid login response format");
+  },
+
+  /**
+   * Request a password reset code to be sent to user's email
+   * POST /identity/auth/forgot-password
+   */
+  async requestPasswordReset(payload: ForgotPasswordDto): Promise<string | undefined> {
+    const res = await identityApi.post<{ message?: string } | ApiResponse<unknown>>(
+      "identity/auth/forgot-password",
+      payload,
+    );
+
+    if ("success" in res.data) {
+      return res.data.message;
+    }
+
+    return res.data?.message;
+  },
+
+  /**
+   * Reset password using email + 6-digit code + new password
+   * POST /identity/auth/reset-password
+   */
+  async resetPassword(payload: ResetPasswordDto): Promise<string | undefined> {
+    const res = await identityApi.post<{ message?: string } | ApiResponse<unknown>>(
+      "identity/auth/reset-password",
+      payload,
+    );
+
+    if ("success" in res.data) {
+      return res.data.message;
+    }
+
+    return res.data?.message;
   },
 
   async register(payload: RegisterUserDto): Promise<string | void> {

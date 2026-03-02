@@ -267,12 +267,12 @@ const LoginBody = () => {
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between text-xs sm:text-sm">
-                  <button
-                    type="button"
+                  <Link
+                    to="/forgot-password"
                     className="text-gray-500 hover:text-teal-600 underline-offset-4 hover:underline"
                   >
                     Forgot password
-                  </button>
+                  </Link>
                   <div className="text-right">
                     <span className="text-gray-600 mr-1">
                       Don&apos;t have an account?
