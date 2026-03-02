@@ -32,6 +32,7 @@ function App() {
     <GoogleOAuthProvider clientId={googleClientId}>
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
         <BrowserRouter>
+          <SubscriptionUpgradeDialog />
           <Routes>
             <Route element={<HomeLayout />}>
               <Route path="/" element={<HomePage />} />
@@ -78,7 +79,6 @@ function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-        <SubscriptionUpgradeDialog />
         <Toaster position="top-right" />
       </div>
     </GoogleOAuthProvider>
