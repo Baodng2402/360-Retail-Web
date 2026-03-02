@@ -8,6 +8,7 @@ import SignupPage from "@/features/auth/pages/SignupPage";
 import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage";
 import ForgotPasswordRequestPage from "@/features/auth/pages/ForgotPasswordRequestPage";
 import ForgotPasswordResetPage from "@/features/auth/pages/ForgotPasswordResetPage";
+import { SubscriptionUpgradeDialog } from "@/shared/components/ui/SubscriptionUpgradeDialog";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
@@ -31,53 +32,53 @@ function App() {
     <GoogleOAuthProvider clientId={googleClientId}>
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
         <BrowserRouter>
-        <Routes>
-          <Route element={<HomeLayout />}>
-            <Route path="/" element={<HomePage />} />
-          </Route>
-
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordRequestPage />} />
-          <Route path="/reset-password" element={<ForgotPasswordResetPage />} />
-          <Route path="/payment/success" element={<PaymentSuccessPage />} />
-          <Route path="/payment/failed" element={<PaymentFailedPage />} />
-          <Route
-            element={
-              <ProtectedRoute
-                allowedRoles={["StoreOwner", "Manager", "PotentialOwner"]}
-              />
-            }
-          >
-            <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route
-                path="/dashboard/staff"
-                element={<StaffManagementPage />}
-              />
-              <Route path="/dashboard/sales" element={<SalePostPage />} />
-              <Route path="/dashboard/reports" element={<ReportPage />} />
-              <Route path="/dashboard/settings" element={<SettingPage />} />
-              <Route path="/dashboard/customers" element={<CustomerPage />} />
-              <Route
-                path="/dashboard/stores"
-                element={<StoreManagementPage />}
-              />
-              <Route
-                path="/dashboard/products"
-                element={<ProductManagementPage />}
-              />
-              <Route path="/dashboard/profile" element={<ProfilePage />} />
-              <Route
-                path="/dashboard/subscription"
-                element={<SubscriptionPlansPage />}
-              />
+          <Routes>
+            <Route element={<HomeLayout />}>
+              <Route path="/" element={<HomePage />} />
             </Route>
-          </Route>
-          {/* </Route> */}
-        </Routes>
+
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordRequestPage />} />
+            <Route path="/reset-password" element={<ForgotPasswordResetPage />} />
+            <Route path="/payment/success" element={<PaymentSuccessPage />} />
+            <Route path="/payment/failed" element={<PaymentFailedPage />} />
+            <Route
+              element={
+                <ProtectedRoute
+                  allowedRoles={["StoreOwner", "Manager", "PotentialOwner"]}
+                />
+              }
+            >
+              <Route element={<DashboardLayout />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route
+                  path="/dashboard/staff"
+                  element={<StaffManagementPage />}
+                />
+                <Route path="/dashboard/sales" element={<SalePostPage />} />
+                <Route path="/dashboard/reports" element={<ReportPage />} />
+                <Route path="/dashboard/settings" element={<SettingPage />} />
+                <Route path="/dashboard/customers" element={<CustomerPage />} />
+                <Route
+                  path="/dashboard/stores"
+                  element={<StoreManagementPage />}
+                />
+                <Route
+                  path="/dashboard/products"
+                  element={<ProductManagementPage />}
+                />
+                <Route path="/dashboard/profile" element={<ProfilePage />} />
+                <Route
+                  path="/dashboard/subscription"
+                  element={<SubscriptionPlansPage />}
+                />
+              </Route>
+            </Route>
+          </Routes>
         </BrowserRouter>
+        <SubscriptionUpgradeDialog />
         <Toaster position="top-right" />
       </div>
     </GoogleOAuthProvider>
