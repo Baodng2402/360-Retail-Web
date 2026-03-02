@@ -115,8 +115,8 @@ const SignupPage = () => {
       setLoading(true);
       await authApi.register({ email, password });
 
-      toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-      navigate("/login", { replace: true });
+      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để nhập mã xác nhận.");
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`, { replace: true });
     } catch (err: unknown) {
       console.error("Register error", err);
       const message =

@@ -19,6 +19,15 @@ export interface ResetPasswordDto {
   newPassword: string;
 }
 
+export interface VerifyEmailDto {
+  email: string;
+  otpCode: string;
+}
+
+export interface ResendOtpDto {
+  email: string;
+}
+
 export interface RegisterUserDto {
   email: string;
   password: string;
@@ -161,6 +170,40 @@ export const authApi = {
   async resetPassword(payload: ResetPasswordDto): Promise<string | undefined> {
     const res = await identityApi.post<{ message?: string } | ApiResponse<unknown>>(
       "identity/auth/reset-password",
+      payload,
+    );
+
+    if ("success" in res.data) {
+      return res.data.message;
+    }
+
+    return res.data?.message;
+  },
+
+  /**
+   * Verify email with 6-digit OTP code
+   * POST /identity/auth/verify-email
+   */
+  async verifyEmail(payload: VerifyEmailDto): Promise<string | undefined> {
+    const res = await identityApi.post<{ message?: string } | ApiResponse<unknown>>(
+      "identity/auth/verify-email",
+      payload,
+    );
+
+    if ("success" in res.data) {
+      return res.data.message;
+    }
+
+    return res.data?.message;
+  },
+
+  /**
+   * Resend verification OTP code to email
+   * POST /identity/auth/resend-otp
+   */
+  async resendOtp(payload: ResendOtpDto): Promise<string | undefined> {
+    const res = await identityApi.post<{ message?: string } | ApiResponse<unknown>>(
+      "identity/auth/resend-otp",
       payload,
     );
 

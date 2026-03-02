@@ -4,11 +4,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./routes/protectedRoute";
 import "./App.css";
 import LoginPage from "@/features/auth/pages/LoginPage";
+import SignupPage from "@/features/auth/pages/SignupPage";
+import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage";
 import ForgotPasswordRequestPage from "@/features/auth/pages/ForgotPasswordRequestPage";
 import ForgotPasswordResetPage from "@/features/auth/pages/ForgotPasswordResetPage";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
-import SignupPage from "@/features/auth/pages/SignupPage";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import { HomeLayout } from "@/features/home/components/HomeLayout";
 import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
@@ -37,6 +38,7 @@ function App() {
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordRequestPage />} />
           <Route path="/reset-password" element={<ForgotPasswordResetPage />} />
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
