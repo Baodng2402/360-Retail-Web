@@ -82,3 +82,4 @@ export const identityApi = createAxiosInstance(apiBaseURL);
 export const saasApi = createAxiosInstance(apiBaseURL);
 export const salesApi = createAxiosInstance(apiBaseURL);
 export const hrApi = createAxiosInstance(apiBaseURL);
+export const crmApi = createAxiosInstance(apiBaseURL);

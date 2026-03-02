@@ -9,6 +9,7 @@ import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage";
 import ForgotPasswordRequestPage from "@/features/auth/pages/ForgotPasswordRequestPage";
 import ForgotPasswordResetPage from "@/features/auth/pages/ForgotPasswordResetPage";
 import { SubscriptionUpgradeDialog } from "@/shared/components/ui/SubscriptionUpgradeDialog";
+import FeedbackPage from "@/features/feedback/pages/FeedbackPage";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
@@ -43,6 +44,7 @@ function App() {
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordRequestPage />} />
             <Route path="/reset-password" element={<ForgotPasswordResetPage />} />
+            <Route path="/feedback/:orderId" element={<FeedbackPage />} />
             <Route path="/payment/success" element={<PaymentSuccessPage />} />
             <Route path="/payment/failed" element={<PaymentFailedPage />} />
             <Route
