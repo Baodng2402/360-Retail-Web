@@ -10,6 +10,7 @@ import ForgotPasswordRequestPage from "@/features/auth/pages/ForgotPasswordReque
 import ForgotPasswordResetPage from "@/features/auth/pages/ForgotPasswordResetPage";
 import { SubscriptionUpgradeDialog } from "@/shared/components/ui/SubscriptionUpgradeDialog";
 import FeedbackPage from "@/features/feedback/pages/FeedbackPage";
+import TimekeepingPage from "@/features/dashboard/pages/TimekeepingPage";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
@@ -76,6 +77,10 @@ function App() {
                 <Route
                   path="/dashboard/subscription"
                   element={<SubscriptionPlansPage />}
+                />
+                <Route
+                  path="/dashboard/timekeeping"
+                  element={<TimekeepingPage />}
                 />
               </Route>
             </Route>

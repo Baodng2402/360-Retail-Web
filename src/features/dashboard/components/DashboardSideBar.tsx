@@ -17,6 +17,7 @@ import {
   CreditCard,
   Lock,
   AlertCircle,
+  MapPin,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
@@ -98,6 +99,14 @@ export const DashboardSideBar = ({
       path: "/dashboard",
       end: true,
       requiresStore: false,
+    },
+    {
+      icon: MapPin,
+      label: "Timekeeping",
+      subLabel: "Chấm công GPS",
+      path: "/dashboard/timekeeping",
+      end: false,
+      requiresStore: true,
     },
     {
       icon: Users,
