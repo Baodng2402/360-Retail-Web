@@ -4,20 +4,71 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
-import { Store, Bell, Shield } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Store, Bell, Shield, MapPin, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import type { LatLngExpression } from "leaflet";
 import toast from "react-hot-toast";
 import { storesApi } from "@/shared/lib/storesApi";
 import { authApi } from "@/shared/lib/authApi";
+
+const toRad = (value: number) => (value * Math.PI) / 180;
+
+const getDistanceMeters = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) => {
+  const R = 6371; // km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c * 1000;
+};
 const SettingPage = () => {
   const [storeId, setStoreId] = useState<string | null>(null);
   const [storeName, setStoreName] = useState("");
   const [storeAddress, setStoreAddress] = useState("");
   const [storePhone, setStorePhone] = useState("");
+  const [storeLatitude, setStoreLatitude] = useState<string>("");
+  const [storeLongitude, setStoreLongitude] = useState<string>("");
   const [storeLoading, setStoreLoading] = useState(true);
   const [storeSaving, setStoreSaving] = useState(false);
 
   const NOTIFICATION_KEY = "360retail-notification-settings";
+  const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
+  const addressInputRef = useRef<HTMLInputElement | null>(null);
+  const [addressSuggestions, setAddressSuggestions] = useState<
+    { displayName: string; lat: string; lon: string }[]
+  >([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [addressSearchEnabled, setAddressSearchEnabled] = useState(false);
+  const [usingCurrentLocation, setUsingCurrentLocation] = useState(false);
+  const parsedLatitude = Number(storeLatitude.trim());
+  const parsedLongitude = Number(storeLongitude.trim());
+  const hasValidCoords =
+    !Number.isNaN(parsedLatitude) && !Number.isNaN(parsedLongitude);
+  const currentPosition: LatLngExpression = hasValidCoords
+    ? [parsedLatitude, parsedLongitude]
+    : [21.0278, 105.8342]; // Hà Nội mặc định
+
+  const LocationSelector = () => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setStoreLatitude(String(lat));
+        setStoreLongitude(String(lng));
+      },
+    });
+    return hasValidCoords ? <Marker position={currentPosition} /> : null;
+  };
 
   const loadNotificationsFromStorage = () => {
     try {
@@ -75,6 +126,36 @@ const SettingPage = () => {
         setStoreName(store.storeName || "");
         setStoreAddress(store.address || "");
         setStorePhone(store.phone || "");
+        const hasGpsFromApi =
+          store.latitude !== undefined &&
+          store.latitude !== null &&
+          store.longitude !== undefined &&
+          store.longitude !== null;
+
+        if (hasGpsFromApi) {
+          setStoreLatitude(String(store.latitude));
+          setStoreLongitude(String(store.longitude));
+        } else {
+          try {
+            const cachedGps = localStorage.getItem(
+              `${STORE_GPS_KEY_PREFIX}${store.id}`,
+            );
+            if (cachedGps) {
+              const parsed = JSON.parse(cachedGps) as {
+                latitude?: string;
+                longitude?: string;
+              };
+              setStoreLatitude(parsed.latitude || "");
+              setStoreLongitude(parsed.longitude || "");
+            } else {
+              setStoreLatitude("");
+              setStoreLongitude("");
+            }
+          } catch {
+            setStoreLatitude("");
+            setStoreLongitude("");
+          }
+        }
       } catch (err) {
         console.error("Failed to load store:", err);
         toast.error("Không thể tải thông tin cửa hàng");
@@ -84,9 +165,81 @@ const SettingPage = () => {
     };
     loadStore();
   }, []);
+  useEffect(() => {
+    if (!addressSearchEnabled) {
+      setAddressSuggestions([]);
+      setAddressLoading(false);
+      return;
+    }
+
+    if (!storeAddress.trim() || storeAddress.trim().length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setAddressLoading(true);
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=vn&q=${encodeURIComponent(
+          storeAddress.trim(),
+        )}`;
+        const res = await fetch(url, {
+          signal: controller.signal,
+          headers: {
+            Accept: "application/json",
+          },
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          display_name: string;
+          lat: string;
+          lon: string;
+        }[];
+        setAddressSuggestions(
+          data.map((item) => ({
+            displayName: item.display_name,
+            lat: item.lat,
+            lon: item.lon,
+          })),
+        );
+      } catch {
+        // ignore
+      } finally {
+        setAddressLoading(false);
+      }
+    }, 400);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [storeAddress, addressSearchEnabled]);
 
   const handleSaveStore = async () => {
     if (!storeId) return;
+
+    let latitude: number | null | undefined = undefined;
+    let longitude: number | null | undefined = undefined;
+
+    if (storeLatitude.trim()) {
+      const parsed = Number(storeLatitude.trim());
+      if (Number.isNaN(parsed)) {
+        toast.error("Latitude không hợp lệ");
+        return;
+      }
+      latitude = parsed;
+    }
+
+    if (storeLongitude.trim()) {
+      const parsed = Number(storeLongitude.trim());
+      if (Number.isNaN(parsed)) {
+        toast.error("Longitude không hợp lệ");
+        return;
+      }
+      longitude = parsed;
+    }
+
     setStoreSaving(true);
     try {
       await storesApi.updateStore(storeId, {
@@ -94,7 +247,20 @@ const SettingPage = () => {
         address: storeAddress || undefined,
         phone: storePhone || undefined,
         isActive: true,
+        latitude,
+        longitude,
       });
+      try {
+        localStorage.setItem(
+          `${STORE_GPS_KEY_PREFIX}${storeId}`,
+          JSON.stringify({
+            latitude: storeLatitude.trim(),
+            longitude: storeLongitude.trim(),
+          }),
+        );
+      } catch {
+        // ignore
+      }
       toast.success("Đã lưu thông tin cửa hàng!");
     } catch (err) {
       console.error("Failed to save store:", err);
@@ -131,6 +297,93 @@ const SettingPage = () => {
     } finally {
       setPasswordSaving(false);
     }
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Trình duyệt không hỗ trợ GPS/location.");
+      return;
+    }
+    const prevLat = Number(storeLatitude.trim());
+    const prevLon = Number(storeLongitude.trim());
+    const hasPrevCoords =
+      !Number.isNaN(prevLat) && !Number.isNaN(prevLon) && storeAddress.trim();
+    setUsingCurrentLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+
+        const applyLocation = () => {
+          setStoreLatitude(String(latitude));
+          setStoreLongitude(String(longitude));
+          setAddressSuggestions([]);
+          setAddressSearchEnabled(false);
+          addressInputRef.current?.blur();
+          toast.success("Đã lấy tọa độ hiện tại cho cửa hàng.");
+        };
+
+        if (hasPrevCoords) {
+          const distance = getDistanceMeters(
+            prevLat,
+            prevLon,
+            latitude,
+            longitude,
+          );
+          if (distance > 2000) {
+            const distanceText =
+              distance < 1000
+                ? `${distance.toFixed(0)} m`
+                : `${(distance / 1000).toFixed(1)} km`;
+            toast.custom((t) => (
+              <div className="max-w-sm rounded-md bg-background border shadow-lg p-3 text-sm">
+                <p className="font-medium mb-1">
+                  Vị trí hiện tại cách xa cửa hàng
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Vị trí hiện tại của bạn đang cách vị trí cửa hàng khoảng{" "}
+                  <span className="font-semibold">{distanceText}</span>. Bạn có
+                  chắc muốn cập nhật GPS cửa hàng theo vị trí hiện tại?
+                </p>
+                <div className="mt-2 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    className="px-2 py-1 rounded border text-xs"
+                    onClick={() => {
+                      toast.dismiss(t.id);
+                      toast("Đã giữ nguyên toạ độ cửa hàng.");
+                    }}
+                  >
+                    Giữ nguyên
+                  </button>
+                  <button
+                    type="button"
+                    className="px-2 py-1 rounded bg-teal-600 text-xs text-white hover:bg-teal-700"
+                    onClick={() => {
+                      applyLocation();
+                      toast.dismiss(t.id);
+                    }}
+                  >
+                    Dùng vị trí hiện tại
+                  </button>
+                </div>
+              </div>
+            ));
+            setUsingCurrentLocation(false);
+            return;
+          }
+        }
+
+        applyLocation();
+        setUsingCurrentLocation(false);
+      },
+      () => {
+        toast.error(
+          "Không thể lấy vị trí hiện tại. Vui lòng bật Location cho trình duyệt.",
+        );
+        setUsingCurrentLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000 },
+    );
   };
 
   return (
@@ -208,9 +461,61 @@ const SettingPage = () => {
                     <Input
                       id="store-address"
                       placeholder="Enter address..."
+                      ref={addressInputRef}
                       value={storeAddress}
-                      onChange={(e) => setStoreAddress(e.target.value)}
+                      onChange={(e) => {
+                        setAddressSearchEnabled(true);
+                        setStoreAddress(e.target.value);
+                      }}
                     />
+                    {addressLoading && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Đang gợi ý địa chỉ...
+                      </p>
+                    )}
+                    {addressSuggestions.length > 0 && (
+                      <div className="mt-1 max-h-48 overflow-y-auto rounded-md border bg-popover text-popover-foreground text-sm shadow-md">
+                        {addressSuggestions.map((s) => (
+                          <button
+                            key={`${s.lat}-${s.lon}-${s.displayName}`}
+                            type="button"
+                            className="block w-full px-3 py-2 text-left hover:bg-muted"
+                            onClick={() => {
+                              setStoreAddress(s.displayName);
+                              setStoreLatitude(s.lat);
+                              setStoreLongitude(s.lon);
+                              setAddressSuggestions([]);
+                              setAddressSearchEnabled(false);
+                              addressInputRef.current?.blur();
+                            }}
+                          >
+                            {s.displayName}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>GPS Location (map preview)</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Bạn có thể bấm trực tiếp trên bản đồ để chọn tọa độ cho cửa hàng. Marker
+                      sẽ tự động di chuyển và cập nhật Latitude/Longitude phía trên.
+                    </p>
+                    <div className="h-56 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                      <MapContainer
+                        center={currentPosition}
+                        zoom={hasValidCoords ? 17 : 13}
+                        scrollWheelZoom={false}
+                        className="h-full w-full"
+                      >
+                        <TileLayer
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        />
+                        <LocationSelector />
+                      </MapContainer>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -221,6 +526,60 @@ const SettingPage = () => {
                       value={storePhone}
                       onChange={(e) => setStorePhone(e.target.value)}
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>GPS Location (tùy chọn)</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs gap-1"
+                        onClick={handleUseCurrentLocation}
+                        disabled={usingCurrentLocation}
+                      >
+                        {usingCurrentLocation ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Đang lấy vị trí...
+                          </>
+                        ) : (
+                          <>
+                            <MapPin className="h-3 w-3" />
+                            Dùng vị trí hiện tại
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Nếu bạn nhập tọa độ GPS, hệ thống sẽ dùng để kiểm tra khoảng cách khi
+                      nhân viên chấm công.
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="store-latitude" className="text-xs">
+                          Latitude
+                        </Label>
+                        <Input
+                          id="store-latitude"
+                          placeholder="10.7769"
+                          value={storeLatitude}
+                          onChange={(e) => setStoreLatitude(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="store-longitude" className="text-xs">
+                          Longitude
+                        </Label>
+                        <Input
+                          id="store-longitude"
+                          placeholder="106.7009"
+                          value={storeLongitude}
+                          onChange={(e) => setStoreLongitude(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <Separator />

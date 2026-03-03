@@ -1,13 +1,36 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
-import { Loader2, Check, CreditCard, AlertCircle, Star } from "lucide-react";
+import {
+  Loader2,
+  Check,
+  CreditCard,
+  AlertCircle,
+  Star,
+} from "lucide-react";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
+import { planReviewsApi } from "@/shared/lib/planReviewsApi";
 import { formatPriceVnd } from "@/shared/types/subscription";
 import type { Plan, MySubscription } from "@/shared/types/subscription";
+import type { PlanReviewSummary } from "@/shared/lib/planReviewsApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Textarea } from "@/shared/components/ui/textarea";
 import toast from "react-hot-toast";
 
 const containerVariants = {
@@ -47,17 +70,25 @@ export default function SubscriptionPlansPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchasingPlanId, setPurchasingPlanId] = useState<string | null>(null);
+   const [reviewSummaries, setReviewSummaries] = useState<PlanReviewSummary[]>([]);
+   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+   const [selectedPlanForReview, setSelectedPlanForReview] = useState<Plan | null>(null);
+   const [reviewRating, setReviewRating] = useState(5);
+   const [reviewContent, setReviewContent] = useState("");
+   const [submittingReview, setSubmittingReview] = useState(false);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const [plansData, mySubData] = await Promise.all([
+      const [plansData, mySubData, summaries] = await Promise.all([
         subscriptionApi.getPlans(),
         subscriptionApi.getMySubscription(),
+        planReviewsApi.getSummaries(),
       ]);
       setPlans(plansData);
       setMySubscription(mySubData);
+      setReviewSummaries(summaries);
     } catch (err) {
       console.error("Failed to load data:", err);
       setError("Không thể tải dữ liệu. Vui lòng thử lại.");
@@ -87,6 +118,40 @@ export default function SubscriptionPlansPage() {
   const isCurrentPlan = (plan: Plan) => {
     if (!mySubscription?.planName) return false;
     return plan.planName.toLowerCase() === mySubscription.planName.toLowerCase();
+  };
+
+  const getSummaryForPlan = (plan: Plan) =>
+    reviewSummaries.find((s) => s.planId === plan.id);
+
+  const openReviewDialog = (plan: Plan) => {
+    setSelectedPlanForReview(plan);
+    setReviewRating(5);
+    setReviewContent("");
+    setReviewDialogOpen(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!selectedPlanForReview) return;
+    try {
+      setSubmittingReview(true);
+      await planReviewsApi.createReview({
+        planId: selectedPlanForReview.id,
+        rating: reviewRating,
+        content: reviewContent.trim() || undefined,
+      });
+      toast.success("Đã gửi đánh giá gói dịch vụ. Cảm ơn bạn!");
+      setReviewDialogOpen(false);
+      const summaries = await planReviewsApi.getSummaries();
+      setReviewSummaries(summaries);
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Không thể gửi đánh giá. Vui lòng thử lại.";
+      toast.error(message);
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   const formatDate = (dateString: string | null | undefined) => {
@@ -209,6 +274,8 @@ export default function SubscriptionPlansPage() {
               isCurrentPlan={isCurrentPlan(plan)} 
               isLoading={purchasingPlanId === plan.id} 
               onPurchase={() => handlePurchase(plan)} 
+              reviewSummary={getSummaryForPlan(plan)}
+              onOpenReview={() => openReviewDialog(plan)}
             />
           </motion.div>
         ))}
@@ -245,11 +312,104 @@ export default function SubscriptionPlansPage() {
           </div>
         </Card>
       </motion.div>
+
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Đánh giá gói {selectedPlanForReview?.planName}</DialogTitle>
+            <DialogDescription>
+              Chia sẻ trải nghiệm sử dụng gói SaaS để giúp những chủ shop khác tham khảo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                Mức độ hài lòng
+              </p>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((value) => {
+                  const active = reviewRating === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setReviewRating(value)}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
+                        active
+                          ? "border-amber-400 bg-amber-50 text-amber-500"
+                          : "border-border bg-background text-muted-foreground hover:border-amber-300 hover:text-amber-400"
+                      }`}
+                      aria-label={`${value} sao`}
+                    >
+                      <Star
+                        className={`h-4 w-4 ${
+                          active ? "fill-amber-400" : "fill-none"
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                Nhận xét (không bắt buộc)
+              </p>
+              <Textarea
+                rows={4}
+                value={reviewContent}
+                onChange={(e) => setReviewContent(e.target.value)}
+                placeholder="Bạn thấy gói này phù hợp với cửa hàng nào? Ưu điểm và hạn chế là gì?"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setReviewDialogOpen(false)}
+              disabled={submittingReview}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleSubmitReview}
+              disabled={submittingReview}
+              className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+            >
+              {submittingReview ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Đang gửi...
+                </>
+              ) : (
+                "Gửi đánh giá"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function PlanCard({ plan, isPopular, isCurrentPlan, isLoading, onPurchase }: { plan: Plan; isPopular?: boolean; isCurrentPlan: boolean; isLoading: boolean; onPurchase: () => void }) {
+function PlanCard({
+  plan,
+  isPopular,
+  isCurrentPlan,
+  isLoading,
+  onPurchase,
+  reviewSummary,
+  onOpenReview,
+}: {
+  plan: Plan;
+  isPopular?: boolean;
+  isCurrentPlan: boolean;
+  isLoading: boolean;
+  onPurchase: () => void;
+  reviewSummary?: PlanReviewSummary;
+  onOpenReview: () => void;
+}) {
   const features = parseFeatures(plan.features ?? null);
 
   return (
@@ -300,11 +460,31 @@ function PlanCard({ plan, isPopular, isCurrentPlan, isLoading, onPurchase }: { p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-center mb-6"
+            className="text-center mb-4"
           >
             <span className="text-4xl font-bold text-foreground">{formatPriceVnd(plan.price)}</span>
             <span className="text-muted-foreground ml-2">/tháng</span>
           </motion.div>
+
+          <div className="mb-4 flex items-center justify-center gap-2 text-sm">
+            {reviewSummary ? (
+              <>
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                  <span className="font-semibold">
+                    {reviewSummary.avgRating.toFixed(1)}
+                  </span>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  ({reviewSummary.totalReviews} đánh giá)
+                </span>
+              </>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                Chưa có đánh giá
+              </span>
+            )}
+          </div>
 
           {features.length > 0 && (
             <ul className="space-y-3">
@@ -333,14 +513,24 @@ function PlanCard({ plan, isPopular, isCurrentPlan, isLoading, onPurchase }: { p
         <CardFooter className="pt-4 px-6 pb-6">
           {isCurrentPlan ? (
             <motion.div whileTap={{ scale: 0.95 }} className="w-full">
-              <Button 
-                className="w-full h-12 text-base font-medium" 
-                disabled 
-                variant="outline"
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Bạn đang sở hữu gói này
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  className="w-full h-12 text-base font-medium"
+                  disabled
+                  variant="outline"
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Bạn đang sở hữu gói này
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full h-8 text-xs font-medium text-teal-600 hover:text-teal-700"
+                  onClick={onOpenReview}
+                >
+                  Viết đánh giá cho gói này
+                </Button>
+              </div>
             </motion.div>
           ) : (
             <motion.div whileTap={{ scale: 0.95 }} className="w-full">

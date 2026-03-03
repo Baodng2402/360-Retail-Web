@@ -1,11 +1,51 @@
-import { useEffect, useState } from "react";
-import { AlertCircle, Camera, MapPin, CheckCircle2, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  CircleMarker,
+  useMap,
+} from "react-leaflet";
+import type { LatLngExpression } from "leaflet";
+import L from "leaflet";
+import { motion } from "motion/react";
+import {
+  AlertCircle,
+  Camera,
+  MapPin,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { timekeepingApi } from "@/shared/lib/timekeepingApi";
+import { storesApi } from "@/shared/lib/storesApi";
+
+const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
+
+const toRad = (value: number) => (value * Math.PI) / 180;
+
+const getDistanceMeters = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) => {
+  const R = 6371; // km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c * 1000;
+};
 
 const TimekeepingPage = () => {
   const [loading, setLoading] = useState(true);
@@ -16,12 +56,111 @@ const TimekeepingPage = () => {
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
   const [processingCheckIn, setProcessingCheckIn] = useState(false);
   const [processingCheckOut, setProcessingCheckOut] = useState(false);
+  const [storeLatitude, setStoreLatitude] = useState<number | null>(null);
+  const [storeLongitude, setStoreLongitude] = useState<number | null>(null);
+  const [userLatitude, setUserLatitude] = useState<number | null>(null);
+  const [userLongitude, setUserLongitude] = useState<number | null>(null);
+  const storePosition = useMemo<LatLngExpression | null>(() => {
+    if (storeLatitude === null || storeLongitude === null) return null;
+    return [storeLatitude, storeLongitude];
+  }, [storeLatitude, storeLongitude]);
+  const userPosition = useMemo<LatLngExpression | null>(() => {
+    if (userLatitude === null || userLongitude === null) return null;
+    return [userLatitude, userLongitude];
+  }, [userLatitude, userLongitude]);
+  const distanceMeters = useMemo(() => {
+    if (
+      storeLatitude === null ||
+      storeLongitude === null ||
+      userLatitude === null ||
+      userLongitude === null
+    ) {
+      return null;
+    }
+    return getDistanceMeters(
+      storeLatitude,
+      storeLongitude,
+      userLatitude,
+      userLongitude,
+    );
+  }, [storeLatitude, storeLongitude, userLatitude, userLongitude]);
+
+  const FitBoundsToPositions = ({
+    storePos,
+    userPos,
+    distance,
+  }: {
+    storePos: LatLngExpression;
+    userPos: LatLngExpression;
+    distance: number | null;
+  }) => {
+    const map = useMap();
+    useEffect(() => {
+      if (!distance || distance < 100) return;
+      const bounds = L.latLngBounds(
+        storePos as [number, number],
+        userPos as [number, number],
+      );
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }, [storePos, userPos, distance, map]);
+    return null;
+  };
 
   const loadToday = async () => {
     try {
       setLoading(true);
-      const data = await timekeepingApi.getToday();
-      setToday(data);
+      const [todayData, store] = await Promise.all([
+        timekeepingApi.getToday(),
+        storesApi.getMyStore().catch(() => null),
+      ]);
+      setToday(todayData);
+      if (store) {
+        const hasGpsFromApi =
+          store.latitude !== undefined &&
+          store.latitude !== null &&
+          store.longitude !== undefined &&
+          store.longitude !== null;
+
+        if (hasGpsFromApi) {
+          setStoreLatitude(store.latitude);
+          setStoreLongitude(store.longitude);
+        } else {
+          try {
+            const cachedGps = localStorage.getItem(
+              `${STORE_GPS_KEY_PREFIX}${store.id}`,
+            );
+            if (cachedGps) {
+              const parsed = JSON.parse(cachedGps) as {
+                latitude?: string;
+                longitude?: string;
+              };
+              const lat = parsed.latitude ? Number(parsed.latitude) : null;
+              const lon = parsed.longitude ? Number(parsed.longitude) : null;
+              if (
+                lat !== null &&
+                !Number.isNaN(lat) &&
+                lon !== null &&
+                !Number.isNaN(lon)
+              ) {
+                setStoreLatitude(lat);
+                setStoreLongitude(lon);
+              } else {
+                setStoreLatitude(null);
+                setStoreLongitude(null);
+              }
+            } else {
+              setStoreLatitude(null);
+              setStoreLongitude(null);
+            }
+          } catch {
+            setStoreLatitude(null);
+            setStoreLongitude(null);
+          }
+        }
+      } else {
+        setStoreLatitude(null);
+        setStoreLongitude(null);
+      }
     } catch (err) {
       console.error("Failed to load timekeeping today:", err);
       toast.error("Không thể tải trạng thái chấm công hôm nay.");
@@ -32,6 +171,9 @@ const TimekeepingPage = () => {
 
   useEffect(() => {
     void loadToday();
+    void getCurrentLocation().catch(() => {
+      // ignore initial location error
+    });
   }, []);
 
   const getCurrentLocation = (): Promise<string> => {
@@ -43,6 +185,8 @@ const TimekeepingPage = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
+          setUserLatitude(latitude);
+          setUserLongitude(longitude);
           resolve(`${latitude},${longitude}`);
         },
         (error) => {
@@ -78,6 +222,28 @@ const TimekeepingPage = () => {
     try {
       setProcessingCheckIn(true);
       const locationGps = await getCurrentLocation();
+      const [latStr, lonStr] = locationGps.split(",");
+      const currentLat = Number(latStr);
+      const currentLon = Number(lonStr);
+      if (
+        storeLatitude !== null &&
+        storeLongitude !== null &&
+        !Number.isNaN(currentLat) &&
+        !Number.isNaN(currentLon)
+      ) {
+        const distance = getDistanceMeters(
+          storeLatitude,
+          storeLongitude,
+          currentLat,
+          currentLon,
+        );
+        if (distance > 3000) {
+          toast.error(
+            "Bạn đang cách cửa hàng quá xa, không thể check-in bằng GPS. Vui lòng kiểm tra lại.",
+          );
+          return;
+        }
+      }
 
       let checkInImageUrl: string | undefined;
       if (selfieFile) {
@@ -107,6 +273,28 @@ const TimekeepingPage = () => {
     try {
       setProcessingCheckOut(true);
       const locationGps = await getCurrentLocation();
+      const [latStr, lonStr] = locationGps.split(",");
+      const currentLat = Number(latStr);
+      const currentLon = Number(lonStr);
+      if (
+        storeLatitude !== null &&
+        storeLongitude !== null &&
+        !Number.isNaN(currentLat) &&
+        !Number.isNaN(currentLon)
+      ) {
+        const distance = getDistanceMeters(
+          storeLatitude,
+          storeLongitude,
+          currentLat,
+          currentLon,
+        );
+        if (distance > 3000) {
+          toast.error(
+            "Bạn đang cách cửa hàng quá xa, không thể check-out bằng GPS. Vui lòng kiểm tra lại.",
+          );
+          return;
+        }
+      }
 
       await timekeepingApi.checkOut({ locationGps });
       toast.success("Check-out thành công!");
@@ -125,25 +313,16 @@ const TimekeepingPage = () => {
     }
   };
 
-  if (loading && !today) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Đang tải trạng thái chấm công...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">
-        Chấm công GPS & Selfie
-      </h1>
-      <p className="text-sm text-muted-foreground">
-        Sử dụng vị trí hiện tại và ảnh selfie để check-in/check-out ca làm việc.
-      </p>
+    <div className="space-y-6">
+      {loading && !today ? (
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Đang tải trạng thái chấm công...</span>
+          </div>
+        </div>
+      ) : null}
 
       {today?.warning && (
         <Card className="border-amber-200 bg-amber-50 px-4 py-3 flex gap-3 items-start">
@@ -152,99 +331,195 @@ const TimekeepingPage = () => {
         </Card>
       )}
 
-      <Card className="p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="h-5 w-5 text-teal-600" />
-          <h2 className="text-base font-semibold text-foreground">
-            Trạng thái hôm nay
-          </h2>
-        </div>
-        <div className="text-sm text-muted-foreground space-y-1">
-          <p>
-            Check-in:{" "}
-            <span className="font-medium text-foreground">
-              {today?.hasCheckedIn ? "Đã check-in" : "Chưa check-in"}
-            </span>
-          </p>
-          <p>
-            Check-out:{" "}
-            <span className="font-medium text-foreground">
-              {today?.hasCheckedOut ? "Đã check-out" : "Chưa check-out"}
-            </span>
-          </p>
-          {today?.record && (
-            <p>
-              Giờ check-in:{" "}
-              <span className="font-medium text-foreground">
-                {new Date(today.record.checkInTime).toLocaleString("vi-VN")}
-              </span>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="lg:col-span-1"
+        >
+          <Card className="p-4 space-y-3 h-full">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-teal-600" />
+              <h2 className="text-base font-semibold text-foreground">
+                Trạng thái hôm nay
+              </h2>
+            </div>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>
+                Check-in:{" "}
+                <span className="font-medium text-foreground">
+                  {today?.hasCheckedIn ? "Đã check-in" : "Chưa check-in"}
+                </span>
+              </p>
+              <p>
+                Check-out:{" "}
+                <span className="font-medium text-foreground">
+                  {today?.hasCheckedOut ? "Đã check-out" : "Chưa check-out"}
+                </span>
+              </p>
+              {today?.record && (
+                <p>
+                  Giờ check-in:{" "}
+                  <span className="font-medium text-foreground">
+                    {new Date(today.record.checkInTime).toLocaleString("vi-VN")}
+                  </span>
+                </p>
+              )}
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="lg:col-span-2"
+        >
+          <Card className="relative overflow-hidden p-4 h-full">
+            <div className="relative flex flex-col gap-2 mb-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-teal-700 shadow-sm">
+                <MapPin className="h-3.5 w-3.5" />
+                Bản đồ cửa hàng (OpenStreetMap)
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Vị trí cửa hàng được dùng để kiểm tra khoảng cách khi bạn chấm công
+                bằng GPS. Bạn có thể cập nhật tọa độ trong phần Cài đặt cửa hàng.
+              </p>
+            </div>
+            {storePosition ? (
+              <div className="relative mt-2 h-56 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                <MapContainer
+                  center={storePosition}
+                  zoom={17}
+                  scrollWheelZoom={false}
+                  className="h-full w-full"
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker position={storePosition} />
+                  {userPosition && (
+                    <CircleMarker
+                      center={userPosition}
+                      radius={8}
+                      pathOptions={{
+                        color: "#0ea5e9",
+                        fillColor: "#0ea5e9",
+                        fillOpacity: 0.9,
+                      }}
+                    />
+                  )}
+                  {userPosition && distanceMeters !== null && (
+                    <FitBoundsToPositions
+                      storePos={storePosition}
+                      userPos={userPosition}
+                      distance={distanceMeters}
+                    />
+                  )}
+                </MapContainer>
+              </div>
+            ) : (
+              <div className="mt-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-6 text-sm text-muted-foreground">
+                Chưa có tọa độ GPS cho cửa hàng. Vui lòng vào{" "}
+                <span className="font-semibold">Dashboard &gt; Settings</span> và
+                cập nhật mục <span className="font-semibold">GPS Location</span> để
+                xem bản đồ tại đây và bật kiểm tra khoảng cách khi chấm công.
+              </div>
+            )}
+            {distanceMeters !== null && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Khoảng cách hiện tại từ bạn tới cửa hàng:{" "}
+                <span className="font-medium text-foreground">
+                  {distanceMeters < 1000
+                    ? `${distanceMeters.toFixed(0)} m`
+                    : `${(distanceMeters / 1000).toFixed(2)} km`}
+                </span>
+              </p>
+            )}
+          </Card>
+        </motion.div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="p-4 space-y-4 h-full">
+            <div className="flex items-center gap-2">
+              <Camera className="h-5 w-5 text-teal-600" />
+              <h2 className="text-base font-semibold text-foreground">
+                Ảnh selfie chấm công
+              </h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Chọn ảnh khuôn mặt của bạn (JPEG/PNG/WebP, tối đa 5MB). Ảnh sẽ được gửi
+              kèm khi check-in để đảm bảo đúng người, đúng ca làm.
             </p>
-          )}
-        </div>
-      </Card>
+            <div className="flex items-center gap-3">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleSelfieChange}
+                className="text-sm"
+              />
+              {selfiePreview && (
+                <img
+                  src={selfiePreview}
+                  alt="Selfie preview"
+                  className="h-16 w-16 rounded-md object-cover border"
+                />
+              )}
+            </div>
+          </Card>
+        </motion.div>
 
-      <Card className="p-4 space-y-4">
-        <div className="flex items-center gap-2">
-          <Camera className="h-5 w-5 text-teal-600" />
-          <h2 className="text-base font-semibold text-foreground">
-            Ảnh selfie chấm công
-          </h2>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Chọn ảnh khuôn mặt của bạn (JPEG/PNG/WebP, tối đa 5MB). Ảnh sẽ được gửi
-          kèm khi check-in.
-        </p>
-        <div className="flex items-center gap-3">
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={handleSelfieChange}
-            className="text-sm"
-          />
-          {selfiePreview && (
-            <img
-              src={selfiePreview}
-              alt="Selfie preview"
-              className="h-16 w-16 rounded-md object-cover border"
-            />
-          )}
-        </div>
-      </Card>
-
-      <Card className="p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-teal-600" />
-          <h2 className="text-base font-semibold text-foreground">
-            Thao tác chấm công
-          </h2>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Hệ thống sẽ sử dụng vị trí GPS hiện tại của bạn. Vui lòng cho phép trình
-          duyệt truy cập Location.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Button
-            onClick={handleCheckIn}
-            disabled={processingCheckIn || today?.hasCheckedIn}
-            className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
-          >
-            {processingCheckIn && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Check-in
-          </Button>
-          <Button
-            onClick={handleCheckOut}
-            disabled={processingCheckOut || !today?.hasCheckedIn || today?.hasCheckedOut}
-            variant="outline"
-          >
-            {processingCheckOut && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Check-out
-          </Button>
-        </div>
-      </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="p-4 space-y-3 h-full">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-teal-600" />
+              <h2 className="text-base font-semibold text-foreground">
+                Thao tác chấm công
+              </h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Hệ thống sẽ sử dụng vị trí GPS hiện tại của bạn. Vui lòng cho phép trình
+              duyệt truy cập Location khi được hỏi.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-1">
+              <Button
+                onClick={handleCheckIn}
+                disabled={processingCheckIn || today?.hasCheckedIn}
+                className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+              >
+                {processingCheckIn && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Check-in
+              </Button>
+              <Button
+                onClick={handleCheckOut}
+                disabled={
+                  processingCheckOut || !today?.hasCheckedIn || today?.hasCheckedOut
+                }
+                variant="outline"
+              >
+                {processingCheckOut && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Check-out
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   );
 };

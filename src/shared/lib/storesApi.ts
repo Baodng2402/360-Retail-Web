@@ -99,6 +99,8 @@ export const storesApi = {
         address: data.address,
         phone: data.phone,
         isActive: data.isActive,
+        latitude: data.latitude,
+        longitude: data.longitude,
       },
     );
 
