@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import {
   AlertCircle,
@@ -26,6 +26,17 @@ const TimekeepingPage = () => {
   const [processingCheckOut, setProcessingCheckOut] = useState(false);
   const [storeLatitude, setStoreLatitude] = useState<number | null>(null);
   const [storeLongitude, setStoreLongitude] = useState<number | null>(null);
+  const osmEmbedUrl = useMemo(() => {
+    if (storeLatitude === null || storeLongitude === null) return null;
+    const lat = storeLatitude;
+    const lon = storeLongitude;
+    const delta = 0.01;
+    const left = lon - delta;
+    const right = lon + delta;
+    const top = lat + delta;
+    const bottom = lat - delta;
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${left},${bottom},${right},${top}&layer=mapnik&marker=${lat},${lon}`;
+  }, [storeLatitude, storeLongitude]);
 
   const loadToday = async () => {
     try {
@@ -218,18 +229,18 @@ const TimekeepingPage = () => {
             <div className="relative flex flex-col gap-2 mb-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-teal-700 shadow-sm">
                 <MapPin className="h-3.5 w-3.5" />
-                Bản đồ cửa hàng (Google Maps)
+                Bản đồ cửa hàng (OpenStreetMap)
               </div>
               <p className="text-sm text-muted-foreground">
                 Vị trí cửa hàng được dùng để kiểm tra khoảng cách khi bạn chấm công
                 bằng GPS. Bạn có thể cập nhật tọa độ trong phần Cài đặt cửa hàng.
               </p>
             </div>
-            {storeLatitude !== null && storeLongitude !== null ? (
+            {osmEmbedUrl ? (
               <div className="relative mt-2 h-56 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
                 <iframe
                   title="Store location"
-                  src={`https://www.google.com/maps?q=${storeLatitude},${storeLongitude}&z=17&output=embed`}
+                  src={osmEmbedUrl}
                   className="h-full w-full border-0"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"

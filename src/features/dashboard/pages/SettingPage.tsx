@@ -9,7 +9,6 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { storesApi } from "@/shared/lib/storesApi";
 import { authApi } from "@/shared/lib/authApi";
-import { loadGoogleMapsPlaces } from "@/shared/lib/googleMapsLoader";
 const SettingPage = () => {
   const [storeId, setStoreId] = useState<string | null>(null);
   const [storeName, setStoreName] = useState("");
@@ -23,6 +22,10 @@ const SettingPage = () => {
   const NOTIFICATION_KEY = "360retail-notification-settings";
   const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
   const addressInputRef = useRef<HTMLInputElement | null>(null);
+  const [addressSuggestions, setAddressSuggestions] = useState<
+    { displayName: string; lat: string; lon: string }[]
+  >([]);
+  const [addressLoading, setAddressLoading] = useState(false);
 
   const loadNotificationsFromStorage = () => {
     try {
@@ -119,47 +122,50 @@ const SettingPage = () => {
     };
     loadStore();
   }, []);
-
   useEffect(() => {
-    let isMounted = true;
+    if (!storeAddress.trim() || storeAddress.trim().length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
 
-    loadGoogleMapsPlaces()
-      .then((google) => {
-        if (!isMounted || !addressInputRef.current) return;
-
-        const autocomplete = new google.maps.places.Autocomplete(
-          addressInputRef.current,
-          {
-            types: ["geocode"],
-            componentRestrictions: { country: "vn" },
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setAddressLoading(true);
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=vn&q=${encodeURIComponent(
+          storeAddress.trim(),
+        )}`;
+        const res = await fetch(url, {
+          signal: controller.signal,
+          headers: {
+            Accept: "application/json",
           },
-        );
-
-        autocomplete.addListener("place_changed", () => {
-          const place = autocomplete.getPlace();
-          if (!place || !isMounted) return;
-
-          const formattedAddress =
-            place.formatted_address || addressInputRef.current?.value || "";
-          setStoreAddress(formattedAddress);
-
-          const location = place.geometry?.location;
-          if (location) {
-            const lat = location.lat();
-            const lng = location.lng();
-            setStoreLatitude(String(lat));
-            setStoreLongitude(String(lng));
-          }
         });
-      })
-      .catch((err) => {
-        console.error("Failed to load Google Places:", err);
-      });
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          display_name: string;
+          lat: string;
+          lon: string;
+        }[];
+        setAddressSuggestions(
+          data.map((item) => ({
+            displayName: item.display_name,
+            lat: item.lat,
+            lon: item.lon,
+          })),
+        );
+      } catch {
+        // ignore
+      } finally {
+        setAddressLoading(false);
+      }
+    }, 400);
 
     return () => {
-      isMounted = false;
+      controller.abort();
+      window.clearTimeout(timeoutId);
     };
-  }, []);
+  }, [storeAddress]);
 
   const handleSaveStore = async () => {
     if (!storeId) return;
@@ -343,6 +349,30 @@ const SettingPage = () => {
                       value={storeAddress}
                       onChange={(e) => setStoreAddress(e.target.value)}
                     />
+                    {addressLoading && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Đang gợi ý địa chỉ...
+                      </p>
+                    )}
+                    {addressSuggestions.length > 0 && (
+                      <div className="mt-1 max-h-48 overflow-y-auto rounded-md border bg-popover text-popover-foreground text-sm shadow-md">
+                        {addressSuggestions.map((s) => (
+                          <button
+                            key={`${s.lat}-${s.lon}-${s.displayName}`}
+                            type="button"
+                            className="block w-full px-3 py-2 text-left hover:bg-muted"
+                            onClick={() => {
+                              setStoreAddress(s.displayName);
+                              setStoreLatitude(s.lat);
+                              setStoreLongitude(s.lon);
+                              setAddressSuggestions([]);
+                            }}
+                          >
+                            {s.displayName}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
