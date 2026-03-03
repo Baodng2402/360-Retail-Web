@@ -13,6 +13,7 @@ import {
   StaffCheckInModal,
   GenerateReportModal,
 } from "./modals/QuickActionModals";
+import { useAuthStore } from "@/shared/store/authStore";
 
 interface QuickAction {
   icon: React.ElementType;
@@ -22,6 +23,7 @@ interface QuickAction {
   modalType?: "newSale" | "checkIn" | "report";
   path?: string;
   gradient: string;
+  visibleFor?: ("StoreOwner" | "Manager" | "Staff")[];
 }
 
 const quickActions: QuickAction[] = [
@@ -32,6 +34,7 @@ const quickActions: QuickAction[] = [
     action: "modal",
     modalType: "newSale",
     gradient: "from-teal-500 to-teal-600",
+    visibleFor: ["StoreOwner", "Manager", "Staff"],
   },
   {
     icon: Package,
@@ -40,6 +43,7 @@ const quickActions: QuickAction[] = [
     action: "navigate",
     path: "/dashboard/sales",
     gradient: "from-teal-500 to-teal-600",
+    visibleFor: ["StoreOwner", "Manager", "Staff"],
   },
   {
     icon: Users,
@@ -48,6 +52,7 @@ const quickActions: QuickAction[] = [
     action: "modal",
     modalType: "checkIn",
     gradient: "from-teal-500 to-teal-600",
+    visibleFor: ["StoreOwner", "Manager", "Staff"],
   },
   {
     icon: FileText,
@@ -56,6 +61,7 @@ const quickActions: QuickAction[] = [
     action: "modal",
     modalType: "report",
     gradient: "from-teal-500 to-teal-600",
+    visibleFor: ["StoreOwner", "Manager"],
   },
   {
     icon: TrendingUp,
@@ -64,6 +70,7 @@ const quickActions: QuickAction[] = [
     action: "navigate",
     path: "/dashboard/reports",
     gradient: "from-teal-500 to-teal-600",
+    visibleFor: ["StoreOwner", "Manager"],
   },
   {
     icon: Settings,
@@ -72,6 +79,7 @@ const quickActions: QuickAction[] = [
     action: "navigate",
     path: "/dashboard/settings",
     gradient: "from-teal-500 to-teal-600",
+    visibleFor: ["StoreOwner"],
   },
 ];
 
@@ -80,6 +88,17 @@ const QuickActions = () => {
   const [newSaleOpen, setNewSaleOpen] = useState(false);
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const { user } = useAuthStore();
+  const role = user?.role ?? "";
+
+  const filteredActions = quickActions.filter((action) => {
+    if (!action.visibleFor) return true;
+    return action.visibleFor.includes(role as any);
+  });
+
+  if (!filteredActions.length) {
+    return null;
+  }
 
   const handleActionClick = (action: QuickAction) => {
     if (action.action === "navigate" && action.path) {
@@ -90,7 +109,12 @@ const QuickActions = () => {
           setNewSaleOpen(true);
           break;
         case "checkIn":
-          setCheckInOpen(true);
+          // Staff chỉ được tự chấm công => dẫn về trang Timekeeping
+          if (role === "Staff") {
+            navigate("/dashboard/timekeeping");
+          } else {
+            setCheckInOpen(true);
+          }
           break;
         case "report":
           setReportOpen(true);
@@ -109,7 +133,7 @@ const QuickActions = () => {
           <span className="text-sm text-muted-foreground">Thao tác nhanh</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
-          {quickActions.map((action, idx) => (
+          {filteredActions.map((action, idx) => (
             <button
               key={action.title + idx}
               onClick={() => handleActionClick(action)}

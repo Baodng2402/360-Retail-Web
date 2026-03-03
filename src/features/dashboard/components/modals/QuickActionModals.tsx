@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -19,6 +19,12 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { Search, ShoppingCart, Users, FileText } from "lucide-react";
+import { productsApi } from "@/shared/lib/productsApi";
+import { ordersApi } from "@/shared/lib/ordersApi";
+import { storesApi } from "@/shared/lib/storesApi";
+import { useStoreStore } from "@/shared/store/storeStore";
+import type { Product } from "@/shared/types/products";
+import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
 
 interface NewSaleModalProps {
   open: boolean;
@@ -27,18 +33,83 @@ interface NewSaleModalProps {
 
 export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState("");
   const [quantity, setQuantity] = useState("1");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { currentStore } = useStoreStore();
+  const emitOrderCreated = useDashboardEventsStore(
+    (state) => state.emitOrderCreated,
+  );
+
+  useEffect(() => {
+    if (!open) return;
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        let storeId = currentStore?.id;
+        if (!storeId) {
+          try {
+            const myStore = await storesApi.getMyStore();
+            storeId = myStore.id;
+          } catch {
+            toast.error("Không thể lấy thông tin cửa hàng hiện tại. Vui lòng liên hệ chủ cửa hàng.");
+            return;
+          }
+        }
+        const list = await productsApi.getProducts({
+          storeId,
+          includeInactive: false,
+          page: 1,
+          pageSize: 50,
+        });
+        setProducts(list);
+        if (list.length > 0) {
+          setSelectedProductId(list[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to load products for quick sale:", err);
+        toast.error("Không thể tải danh sách sản phẩm cho bán nhanh.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadProducts();
+  }, [open, currentStore?.id]);
 
   const handleQuickSale = () => {
-    if (!selectedProduct) {
-      toast.error("Vui lòng chọn sản phẩm");
-      return;
-    }
-
-    console.log("Quick sale:", { product: selectedProduct, quantity });
-    toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
-    onOpenChange(false);
+    void (async () => {
+      if (!selectedProductId) {
+        toast.error("Vui lòng chọn sản phẩm");
+        return;
+      }
+      const qty = Number(quantity) || 1;
+      if (qty <= 0) {
+        toast.error("Số lượng phải lớn hơn 0");
+        return;
+      }
+      try {
+        const orderId = await ordersApi.createOrder({
+          customerId: undefined,
+          paymentMethod: "Cash",
+          discountAmount: 0,
+          items: [
+            {
+              productId: selectedProductId,
+              quantity: qty,
+              productVariantId: undefined,
+            },
+          ],
+        });
+        emitOrderCreated(orderId);
+        toast.success("Đã tạo đơn hàng nhanh thành công!");
+        onOpenChange(false);
+        setQuantity("1");
+      } catch (err) {
+        console.error("Quick sale failed:", err);
+        toast.error("Không thể tạo đơn hàng nhanh. Vui lòng thử lại.");
+      }
+    })();
   };
 
   return (
@@ -70,23 +141,31 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
 
           <div className="space-y-2">
             <Label>Product / Sản phẩm</Label>
-            <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+            <Select
+              value={selectedProductId}
+              onValueChange={setSelectedProductId}
+              disabled={loading || products.length === 0}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Chọn sản phẩm" />
+                <SelectValue
+                  placeholder={
+                    loading
+                      ? "Đang tải sản phẩm..."
+                      : products.length === 0
+                      ? "Không có sản phẩm khả dụng"
+                      : "Chọn sản phẩm"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ao-thun">
-                  👕 Áo thun nam cổ tròn - 250,000₫
-                </SelectItem>
-                <SelectItem value="quan-jean">
-                  👖 Quần jean nam slim fit - 450,000₫
-                </SelectItem>
-                <SelectItem value="giay-sneaker">
-                  👟 Giày sneaker trắng - 680,000₫
-                </SelectItem>
-                <SelectItem value="ao-khoac">
-                  🧥 Áo khoác hoodie - 550,000₫
-                </SelectItem>
+                {products.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.productName}{" "}
+                    {typeof p.price === "number"
+                      ? `- ${p.price.toLocaleString("vi-VN")}₫`
+                      : ""}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -6,6 +6,7 @@ import type {
   SubscriptionStatus,
   MySubscription,
   PaymentInitiation,
+  SePayPaymentData,
 } from "@/shared/types/subscription";
 import type { ApiResponse } from "@/shared/types/api-response";
 
@@ -81,17 +82,62 @@ export const subscriptionApi = {
 
   /**
    * Initiate payment for a payment ID
-   * GET /saas/payments/initiate?paymentId=xxx
+   * GET /saas/payments/initiate?paymentId=xxx&provider={vnpay|sepay}
    */
-  async initiatePayment(paymentId: string): Promise<PaymentInitiation> {
-    const res = await saasApi.get<ApiResponse<PaymentInitiation>>(
-      `saas/payments/initiate?paymentId=${paymentId}`,
+  async initiatePayment(
+    paymentId: string,
+    provider: "vnpay" | "sepay",
+  ): Promise<PaymentInitiation | SePayPaymentData> {
+    const res = await saasApi.get<unknown>(
+      `saas/payments/initiate?paymentId=${paymentId}&provider=${provider}`,
     );
 
-    if ("success" in res.data && res.data.success && res.data.data) {
-      return res.data.data;
+    const raw = res.data as
+      | ApiResponse<PaymentInitiation | SePayPaymentData>
+      | (PaymentInitiation & { success?: boolean; planName?: string | null })
+      | ({ success: boolean } & { data?: SePayPaymentData })
+      | SePayPaymentData;
+
+    // Case 1: Gateway-style ApiResponse { success, data }
+    if ("success" in raw && "data" in raw) {
+      if (!raw.success || !raw.data) {
+        throw new Error("Invalid payment initiation response");
+      }
+      return raw.data as PaymentInitiation | SePayPaymentData;
     }
-    throw new Error("Invalid payment initiation response");
+
+    // Case 2: VNPay initiate response { success, paymentUrl, ... }
+    if ("success" in raw && "paymentUrl" in raw) {
+      if (!raw.success) {
+        throw new Error("Payment initiation failed");
+      }
+      const { paymentId: id, paymentUrl, amount, planName } = raw as {
+        paymentId: string;
+        paymentUrl: string;
+        amount: number;
+        planName?: string | null;
+      };
+      const mapped: PaymentInitiation = {
+        paymentId: id,
+        paymentUrl,
+        amount,
+        description: planName ?? undefined,
+      };
+      return mapped;
+    }
+
+    // Case 3: Raw SePay data object
+    if (
+      typeof raw === "object" &&
+      raw !== null &&
+      "provider" in raw &&
+      (raw as { provider?: string }).provider === "sepay"
+    ) {
+      return raw as SePayPaymentData;
+    }
+
+    // Case 4: Fallback assume it's already PaymentInitiation
+    return raw as PaymentInitiation;
   },
 
   /**

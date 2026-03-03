@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowUpRight, ArrowDownLeft, RefreshCw } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { formatVnd } from "@/shared/utils/formatMoney";
 import type { RecentActivityItem } from "@/shared/lib/salesDashboardApi";

@@ -53,18 +53,14 @@ import toast from "react-hot-toast";
 import { productsApi } from "@/shared/lib/productsApi";
 import { ordersApi } from "@/shared/lib/ordersApi";
 import { storesApi } from "@/shared/lib/storesApi";
+import { salesDashboardApi } from "@/shared/lib/salesDashboardApi";
+import type { TopProduct } from "@/shared/lib/salesDashboardApi";
 import { useStoreStore } from "@/shared/store/storeStore";
 import type { Product } from "@/shared/types/products";
 import AddProductModal from "@/features/dashboard/components/modals/AddProductModal";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
-
-const salesReportData = [
-  { product: "Áo thun", sold: 120, revenue: 30000000 },
-  { product: "Quần jean", sold: 98, revenue: 44100000 },
-  { product: "Giày sneaker", sold: 85, revenue: 57800000 },
-  { product: "Áo khoác", sold: 72, revenue: 39600000 },
-  { product: "Túi xách", sold: 55, revenue: 20900000 },
-];
+import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
+import { useNavigate } from "react-router-dom";
 
 type ProductDisplay = {
   id: string;
@@ -83,6 +79,10 @@ interface CartItem {
 
 const SalePostPage = () => {
   const { currentStore } = useStoreStore();
+  const navigate = useNavigate();
+  const emitOrderCreated = useDashboardEventsStore(
+    (state) => state.emitOrderCreated,
+  );
   const [activeTab, setActiveTab] = useState("pos");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -96,6 +96,10 @@ const SalePostPage = () => {
   const [stockOperation, setStockOperation] = useState<"in" | "out">("in");
   const [stockAmount, setStockAmount] = useState("");
   const [addProductModalOpen, setAddProductModalOpen] = useState(false);
+  const [reportProducts, setReportProducts] = useState<
+    { product: string; sold: number; revenue: number }[]
+  >([]);
+  const [reportLoading, setReportLoading] = useState(false);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -105,19 +109,13 @@ const SalePostPage = () => {
 
         if (!storeId) {
           try {
-            const myStores = await storesApi.getMyOwnedStores();
-            if (myStores && myStores.length > 0) {
-              storeId = myStores[0].id;
-            } else {
-              toast.error(
-                "Bạn chưa có cửa hàng nào. Vui lòng tạo cửa hàng trước!",
-              );
-              setProducts([]);
-              return;
-            }
+            const myStore = await storesApi.getMyStore();
+            storeId = myStore.id;
           } catch (storeError) {
             console.error("Failed to get store:", storeError);
-            toast.error("Không thể lấy thông tin cửa hàng");
+            toast.error(
+              "Không thể lấy thông tin cửa hàng hiện tại. Vui lòng liên hệ chủ cửa hàng.",
+            );
             setProducts([]);
             return;
           }
@@ -150,6 +148,27 @@ const SalePostPage = () => {
 
     loadProducts();
   }, [currentStore?.id]);
+
+  useEffect(() => {
+    const loadReports = async () => {
+      try {
+        setReportLoading(true);
+        const top = await salesDashboardApi.getTopProducts({ top: 10 });
+        const mapped = top.map((p: TopProduct) => ({
+          product: p.productName,
+          sold: p.quantitySold,
+          revenue: p.revenue,
+        }));
+        setReportProducts(mapped);
+      } catch (err) {
+        console.error("Failed to load top products for reports tab:", err);
+        setReportProducts([]);
+      } finally {
+        setReportLoading(false);
+      }
+    };
+    void loadReports();
+  }, []);
 
   const transformProducts = (apiProducts: Product[]): ProductDisplay[] => {
     return apiProducts.map((p) => ({
@@ -277,16 +296,20 @@ const SalePostPage = () => {
         productVariantId: undefined as string | undefined,
       }));
 
-      await ordersApi.createOrder({
+      const orderId = await ordersApi.createOrder({
         customerId: selectedCustomer || undefined,
         paymentMethod: "Cash",
         discountAmount: 0,
         items: orderItems,
       });
 
+      emitOrderCreated(orderId);
       toast.success("Đơn hàng đã được tạo thành công!");
       setCart([]);
       setSelectedCustomer("");
+      if (orderId) {
+        navigate(`/dashboard/orders/${orderId}`);
+      }
     } catch (error) {
       console.error("Failed to create order:", error);
       toast.error("Không thể tạo đơn hàng. Vui lòng thử lại!");
@@ -602,63 +625,77 @@ const SalePostPage = () => {
               </h3>
             </div>
 
-            <div className="mb-6">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={salesReportData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="product" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number, name: string) =>
-                      name === "sold"
-                        ? [value, "Sold"]
-                        : [`${value.toLocaleString("vi-VN")} ₫`, "Revenue"]
-                    }
-                  />
-                  <Legend />
-                  <Bar dataKey="sold" fill="#007BFF" name="Quantity" />
-                  <Bar dataKey="revenue" fill="#28a745" name="Revenue" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {reportLoading ? (
+              <div className="flex items-center justify-center h-64 text-muted-foreground">
+                Đang tải báo cáo bán chạy...
+              </div>
+            ) : reportProducts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Chưa có dữ liệu bán hàng đủ để hiển thị báo cáo.
+              </p>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={reportProducts}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="product" />
+                      <YAxis />
+                      <Tooltip
+                        formatter={(value: number, name: string) =>
+                          name === "sold"
+                            ? [value, "Sold"]
+                            : [`${value.toLocaleString("vi-VN")} ₫`, "Revenue"]
+                        }
+                      />
+                      <Legend />
+                      <Bar dataKey="sold" fill="#007BFF" name="Quantity" />
+                      <Bar dataKey="revenue" fill="#28a745" name="Revenue" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
 
-            <div className="rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product / Sản phẩm</TableHead>
-                    <TableHead className="text-right">
-                      Quantity Sold / Số lượng
-                    </TableHead>
-                    <TableHead className="text-right">
-                      Revenue / Doanh thu
-                    </TableHead>
-                    <TableHead className="text-right">
-                      Avg Price / Giá TB
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {salesReportData.map((item) => (
-                    <TableRow key={item.product}>
-                      <TableCell className="font-medium">
-                        {item.product}
-                      </TableCell>
-                      <TableCell className="text-right">{item.sold}</TableCell>
-                      <TableCell className="text-right font-medium">
-                        {item.revenue.toLocaleString("vi-VN")} ₫
-                      </TableCell>
-                      <TableCell className="text-right text-muted-foreground">
-                        {Math.round(item.revenue / item.sold).toLocaleString(
-                          "vi-VN",
-                        )}{" "}
-                        ₫
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                <div className="rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product / Sản phẩm</TableHead>
+                        <TableHead className="text-right">
+                          Quantity Sold / Số lượng
+                        </TableHead>
+                        <TableHead className="text-right">
+                          Revenue / Doanh thu
+                        </TableHead>
+                        <TableHead className="text-right">
+                          Avg Price / Giá TB
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {reportProducts.map((item) => (
+                        <TableRow key={item.product}>
+                          <TableCell className="font-medium">
+                            {item.product}
+                          </TableCell>
+                          <TableCell className="text-right">{item.sold}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            {item.revenue.toLocaleString("vi-VN")} ₫
+                          </TableCell>
+                          <TableCell className="text-right text-muted-foreground">
+                            {item.sold > 0
+                              ? Math.round(item.revenue / item.sold).toLocaleString(
+                                  "vi-VN",
+                                )
+                              : "-"}{" "}
+                            ₫
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
+            )}
           </Card>
         </TabsContent>
       </Tabs>

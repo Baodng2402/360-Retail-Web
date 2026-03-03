@@ -24,6 +24,10 @@ import { employeesApi } from "@/shared/lib/employeesApi";
 import { salesDashboardApi } from "@/shared/lib/salesDashboardApi";
 import { formatVnd } from "@/shared/utils/formatMoney";
 import { motion } from "motion/react";
+import { ordersApi } from "@/shared/lib/ordersApi";
+import type { Order } from "@/shared/types/orders";
+import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
+import { Card } from "@/shared/components/ui/card";
 
 const chartConfig = {
   values: { label: "Products Sold" },
@@ -57,6 +61,14 @@ const DashboardPage = () => {
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [chartBarData, setChartBarData] = useState<ChartDataItem[]>([]);
   const [chartLineData, setChartLineData] = useState<ChartLineDataItem[]>([]);
+  const [todayOverview, setTodayOverview] = useState<
+    Awaited<ReturnType<typeof salesDashboardApi.getOverview>> | null
+  >(null);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [dateRange, setDateRange] = useState<"7d" | "30d" | "today">("30d");
+  const lastOrderCreatedAt = useDashboardEventsStore(
+    (state) => state.lastOrderCreatedAt,
+  );
 
   const checkUserStoreStatus = async () => {
     try {
@@ -92,41 +104,67 @@ const DashboardPage = () => {
     const loadDashboardData = async () => {
       setDashboardLoading(true);
       try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        const now = new Date();
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        let rangeFrom: Date;
+        switch (dateRange) {
+          case "today":
+            rangeFrom = todayStart;
+            break;
+          case "7d":
+            rangeFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          case "30d":
+          default:
+            rangeFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            break;
+        }
 
         const [
           overviewRes,
+          todayOverviewRes,
           revenueChart,
           topProducts,
           activityRes,
           employeesRes,
           productsRes,
+          recentOrdersRes,
         ] = await Promise.all([
           salesDashboardApi.getOverview({
-            from: monthStart.toISOString(),
-            to: new Date().toISOString(),
+            from: rangeFrom.toISOString(),
+            to: now.toISOString(),
+          }),
+          salesDashboardApi.getOverview({
+            from: todayStart.toISOString(),
+            to: now.toISOString(),
           }),
           salesDashboardApi.getRevenueChart({
-            from: monthStart.toISOString(),
-            to: new Date().toISOString(),
+            from: rangeFrom.toISOString(),
+            to: now.toISOString(),
             groupBy: "month",
           }),
           salesDashboardApi.getTopProducts({
-            from: monthStart.toISOString(),
-            to: new Date().toISOString(),
+            from: rangeFrom.toISOString(),
+            to: now.toISOString(),
             top: 5,
           }),
           salesDashboardApi.getRecentActivity(20),
           employeesApi.getEmployees(true).catch(() => []),
           productsApi.getProducts({ pageSize: 100, includeInactive: false }),
+          ordersApi
+            .getOrdersPaged({ page: 1, pageSize: 5 })
+            .then((res) => res.items)
+            .catch(() => []),
         ]);
 
         setOverview(overviewRes);
+        setTodayOverview(todayOverviewRes);
         setOrders(activityRes.activities || []);
         setEmployees(employeesRes);
         setProducts(productsRes);
+        setRecentOrders(recentOrdersRes);
 
         const barData: ChartDataItem[] = topProducts.map((p, index) => ({
           items: p.productName,
@@ -151,20 +189,34 @@ const DashboardPage = () => {
       }
     };
 
-    loadDashboardData();
-  }, [userStatus]);
+    void loadDashboardData();
+  }, [userStatus, dateRange, lastOrderCreatedAt]);
 
   const stats: StatItem[] = useMemo(() => {
     if (!overview) return [];
     const activeEmployees = employees.filter((e) => e.isActive);
 
-    return [
+    const hasRevenueGrowth =
+      typeof overview.revenueGrowth === "number" &&
+      !Number.isNaN(overview.revenueGrowth);
+    const hasOrderGrowth =
+      typeof overview.orderGrowth === "number" &&
+      !Number.isNaN(overview.orderGrowth);
+
+    const rangeLabel =
+      dateRange === "today"
+        ? "Hôm nay"
+        : dateRange === "7d"
+          ? "7 ngày gần đây"
+          : "30 ngày gần đây";
+
+    const items: StatItem[] = [
       {
         label: "Total Revenue",
-        subLabel: "Doanh thu (30 ngày)",
+        subLabel: `Doanh thu (${rangeLabel})`,
         value: formatVnd(overview.totalRevenue),
         change:
-          overview.revenueGrowth !== undefined
+          hasRevenueGrowth && dateRange !== "today"
             ? `${overview.revenueGrowth.toFixed(1)}%`
             : null,
         icon: DollarSign,
@@ -172,10 +224,10 @@ const DashboardPage = () => {
       },
       {
         label: "Total Orders",
-        subLabel: "Đơn hàng (30 ngày)",
+        subLabel: `Đơn hàng (${rangeLabel})`,
         value: String(overview.totalOrders),
         change:
-          overview.orderGrowth !== undefined
+          hasOrderGrowth && dateRange !== "today"
             ? `${overview.orderGrowth.toFixed(1)}%`
             : null,
         icon: ShoppingBag,
@@ -198,7 +250,37 @@ const DashboardPage = () => {
         color: "bg-orange-100 text-black",
       },
     ];
-  }, [overview, employees]);
+
+    if (todayOverview) {
+      items.unshift({
+        label: "Today Revenue",
+        subLabel: "Doanh thu hôm nay",
+        value: formatVnd(todayOverview.totalRevenue),
+        change: null,
+        icon: DollarSign,
+        color: "bg-emerald-100 text-black",
+      });
+    }
+
+    return items;
+  }, [overview, employees, dateRange, todayOverview]);
+
+  const formatOrderTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+
+    if (diffSec < 60) return "Vừa xong";
+    if (diffMin < 60) return `${diffMin} phút trước`;
+    if (diffHour < 24) return `${diffHour} giờ trước`;
+    if (diffDay === 1) return "Hôm qua";
+    if (diffDay < 7) return `${diffDay} ngày trước`;
+    return date.toLocaleString("vi-VN");
+  };
 
   const lowStockProducts = useMemo(
     () =>
@@ -290,7 +372,47 @@ const DashboardPage = () => {
       transition={{ duration: 0.3 }}
       className="space-y-10"
     >
-      <section>
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-foreground">
+            Tổng quan bán hàng
+          </h2>
+          <div className="inline-flex rounded-md border bg-background p-1 text-xs sm:text-sm">
+            <button
+              type="button"
+              className={`px-3 py-1 rounded-md ${
+                dateRange === "today"
+                  ? "bg-teal-500 text-white"
+                  : "text-muted-foreground"
+              }`}
+              onClick={() => setDateRange("today")}
+            >
+              Hôm nay
+            </button>
+            <button
+              type="button"
+              className={`px-3 py-1 rounded-md ${
+                dateRange === "7d"
+                  ? "bg-teal-500 text-white"
+                  : "text-muted-foreground"
+              }`}
+              onClick={() => setDateRange("7d")}
+            >
+              7 ngày
+            </button>
+            <button
+              type="button"
+              className={`px-3 py-1 rounded-md ${
+                dateRange === "30d"
+                  ? "bg-teal-500 text-white"
+                  : "text-muted-foreground"
+              }`}
+              onClick={() => setDateRange("30d")}
+            >
+              30 ngày
+            </button>
+          </div>
+        </div>
         <DashboardStats stats={stats} />
       </section>
 
@@ -308,7 +430,90 @@ const DashboardPage = () => {
             />
             <ChartLineDefault data={chartLineData} isLoading={dashboardLoading} />
           </div>
-          <RecentTransactions orders={orders} isLoading={dashboardLoading} />
+          <RecentTransactions activities={orders} isLoading={dashboardLoading} />
+
+          <Card className="border border-border rounded-md p-4 md:p-6 bg-card">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Đơn hàng gần đây
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  5 đơn mới nhất trong hệ thống
+                </p>
+              </div>
+            </div>
+            {dashboardLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="h-10 rounded-md bg-muted/50 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : recentOrders.length === 0 ? (
+              <div className="py-6 text-center text-muted-foreground text-sm">
+                Chưa có đơn hàng nào.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-xs text-muted-foreground">
+                      <th className="py-2 pr-3 text-left font-medium">
+                        Mã đơn
+                      </th>
+                      <th className="py-2 px-3 text-left font-medium">
+                        Khách hàng
+                      </th>
+                      <th className="py-2 px-3 text-left font-medium">
+                        Tổng tiền
+                      </th>
+                      <th className="py-2 px-3 text-left font-medium">
+                        Trạng thái
+                      </th>
+                      <th className="py-2 pl-3 text-right font-medium">
+                        Thời gian
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order) => (
+                      <tr
+                        key={order.id}
+                        className="border-b border-border/60 last:border-0"
+                      >
+                        <td className="py-2 pr-3">
+                          <span className="font-medium text-foreground">
+                            {order.code || order.id.slice(0, 8)}
+                          </span>
+                        </td>
+                        <td className="py-2 px-3">
+                          <span className="text-foreground">
+                            {order.customerName || "Khách lẻ"}
+                          </span>
+                        </td>
+                        <td className="py-2 px-3">
+                          <span className="font-semibold text-foreground">
+                            {formatVnd(order.totalAmount)}
+                          </span>
+                        </td>
+                        <td className="py-2 px-3">
+                          <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="py-2 pl-3 text-right text-muted-foreground">
+                          {formatOrderTime(order.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
         </div>
 
         <div className="xl:col-span-1">

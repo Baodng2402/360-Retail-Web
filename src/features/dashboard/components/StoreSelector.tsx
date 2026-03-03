@@ -28,16 +28,42 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
   const [switchingStore, setSwitchingStore] = useState(false);
 
   useEffect(() => {
-    loadStores();
+    void loadStores();
   }, []);
 
   const loadStores = async () => {
     try {
       setStoresLoading(true);
-      const data = await storesApi.getMyOwnedStores(true);
+      let source: Store[] = [];
 
-      // Sort stores: default first, then active, then inactive
-      const sortedStores = [...data].sort((a, b) => {
+      try {
+        source = await storesApi.getMyOwnedStores(true);
+      } catch (err) {
+        const status = (err as { response?: { status?: number } }).response
+          ?.status;
+        // Nếu không phải Owner (403) thì bỏ qua, sẽ fallback sang my-store
+        if (status !== 403) {
+          throw err;
+        }
+      }
+
+      // Nếu không có store owned (hoặc Manager/Staff), fallback dùng my-store
+      if (!Array.isArray(source) || source.length === 0) {
+        try {
+          const myStore = await storesApi.getMyStore();
+          source = myStore ? [myStore] : [];
+        } catch (err) {
+          console.error("Error loading my-store:", err);
+          source = [];
+        }
+      }
+
+      if (!Array.isArray(source) || source.length === 0) {
+        setStores([]);
+        return;
+      }
+
+      const sortedStores = [...source].sort((a, b) => {
         if (a.isDefault) return -1;
         if (b.isDefault) return 1;
         if (a.isActive && !b.isActive) return -1;
@@ -47,16 +73,12 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
 
       setStores(sortedStores);
 
-      // Get the current store from token (store with isDefault = true)
-      const defaultStore = data.find((s) => s.isDefault);
+      const defaultStore =
+        sortedStores.find((s) => s.isDefault) ?? sortedStores[0];
 
-      // Sync currentStore with the actual default store from token
       if (defaultStore) {
-        // If currentStore doesn't match the default store, sync it
+        const storeStore = useStoreStore.getState();
         if (!currentStore || currentStore.id !== defaultStore.id) {
-          // Use setCurrentStore instead of switchStore to avoid unnecessary token refresh
-          // since token is already for this store
-          const storeStore = useStoreStore.getState();
           storeStore.setCurrentStore(defaultStore);
         }
       }

@@ -71,7 +71,25 @@ const StoreManagementPage = () => {
     try {
       setLoading(true);
       const includeInactive = selectedStatus !== "active";
-      const fetchedStores = await storesApi.getMyOwnedStores(includeInactive);
+      let fetchedStores: Store[] = [];
+
+      try {
+        fetchedStores = await storesApi.getMyOwnedStores(includeInactive);
+      } catch (err) {
+        const status = (err as { response?: { status?: number } }).response
+          ?.status;
+        // Nếu không phải Owner (403), fallback: chỉ lấy store hiện tại
+        if (status === 403) {
+          try {
+            const myStore = await storesApi.getMyStore();
+            fetchedStores = myStore ? [myStore] : [];
+          } catch {
+            fetchedStores = [];
+          }
+        } else {
+          throw err;
+        }
+      }
 
       const mappedStores: StoreData[] = fetchedStores.map((store) => ({
         ...store,

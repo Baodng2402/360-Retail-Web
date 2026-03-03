@@ -68,6 +68,24 @@ export interface PaymentInitiation {
   description?: string;
 }
 
+export interface SePayBankInfo {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  amount: number;
+  content: string;
+}
+
+export interface SePayPaymentData {
+  provider: "sepay";
+  paymentId: string;
+  paymentCode: string;
+  qrCodeUrl: string;
+  bankInfo: SePayBankInfo;
+  planName: string | null;
+  instruction: string;
+}
+
 /**
  * VNPay Return Query params (parsed)
  */

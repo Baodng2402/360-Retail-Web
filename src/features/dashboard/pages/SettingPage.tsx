@@ -21,6 +21,7 @@ import { storesApi } from "@/shared/lib/storesApi";
 import { authApi } from "@/shared/lib/authApi";
 import { loyaltyApi } from "@/shared/lib/loyaltyApi";
 import type { LoyaltyRule } from "@/shared/types/loyalty";
+import { useAuthStore } from "@/shared/store/authStore";
 
 const toRad = (value: number) => (value * Math.PI) / 180;
 
@@ -51,6 +52,10 @@ const SettingPage = () => {
   const [storeLongitude, setStoreLongitude] = useState<string>("");
   const [storeLoading, setStoreLoading] = useState(true);
   const [storeSaving, setStoreSaving] = useState(false);
+  const { user } = useAuthStore();
+  const userRole = user?.role ?? "";
+  const canEditStoreInfo =
+    userRole === "StoreOwner" || userRole === "Manager";
 
   const NOTIFICATION_KEY = "360retail-notification-settings";
   const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
@@ -72,6 +77,7 @@ const SettingPage = () => {
   const LocationSelector = () => {
     useMapEvents({
       click(e) {
+        if (!canEditStoreInfo) return;
         const { lat, lng } = e.latlng;
         setStoreLatitude(String(lat));
         setStoreLongitude(String(lng));
@@ -486,6 +492,7 @@ const SettingPage = () => {
                       placeholder="Enter store name..."
                       value={storeName}
                       onChange={(e) => setStoreName(e.target.value)}
+                      disabled={!canEditStoreInfo}
                     />
                   </div>
 
@@ -500,6 +507,7 @@ const SettingPage = () => {
                         setAddressSearchEnabled(true);
                         setStoreAddress(e.target.value);
                       }}
+                      disabled={!canEditStoreInfo}
                     />
                     {addressLoading && (
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -558,6 +566,7 @@ const SettingPage = () => {
                       placeholder="0901234567"
                       value={storePhone}
                       onChange={(e) => setStorePhone(e.target.value)}
+                      disabled={!canEditStoreInfo}
                     />
                   </div>
 
@@ -570,7 +579,7 @@ const SettingPage = () => {
                         size="sm"
                         className="h-8 text-xs gap-1"
                         onClick={handleUseCurrentLocation}
-                        disabled={usingCurrentLocation}
+                        disabled={usingCurrentLocation || !canEditStoreInfo}
                       >
                         {usingCurrentLocation ? (
                           <>
@@ -599,6 +608,7 @@ const SettingPage = () => {
                           placeholder="10.7769"
                           value={storeLatitude}
                           onChange={(e) => setStoreLatitude(e.target.value)}
+                          disabled={!canEditStoreInfo}
                         />
                       </div>
                       <div className="space-y-1">
@@ -610,6 +620,7 @@ const SettingPage = () => {
                           placeholder="106.7009"
                           value={storeLongitude}
                           onChange={(e) => setStoreLongitude(e.target.value)}
+                          disabled={!canEditStoreInfo}
                         />
                       </div>
                     </div>
@@ -680,7 +691,7 @@ const SettingPage = () => {
                     <Button
                       className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
                       onClick={handleSaveStore}
-                      disabled={storeSaving}
+                      disabled={storeSaving || !canEditStoreInfo}
                     >
                       {storeSaving ? "Đang lưu..." : "Save Changes / Lưu thay đổi"}
                     </Button>

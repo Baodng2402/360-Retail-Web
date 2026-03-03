@@ -25,6 +25,7 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 
 export interface Staff {
+  id: string;
   avatar: string;
   name: string;
   role: string;
@@ -45,9 +46,17 @@ const getInitials = (name: string) => {
 
 interface StaffTableProps {
   data: Staff[];
+  onViewStaff?: (staff: Staff) => void;
+  onEditStaff?: (staff: Staff) => void;
+  onDeleteStaff?: (staff: Staff) => void;
 }
 
-export const StaffTable = ({ data }: StaffTableProps) => {
+export const StaffTable = ({
+  data,
+  onViewStaff,
+  onEditStaff,
+  onDeleteStaff,
+}: StaffTableProps) => {
   return (
     <div className="w-full rounded-md border bg-background shadow-sm">
       <Table>
@@ -62,7 +71,7 @@ export const StaffTable = ({ data }: StaffTableProps) => {
         </TableHeader>
         <TableBody>
           {data.map((staff) => (
-            <TableRow key={staff.email}>
+          <TableRow key={staff.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
@@ -125,9 +134,16 @@ export const StaffTable = ({ data }: StaffTableProps) => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem>View details</DropdownMenuItem>
-                    <DropdownMenuItem>Edit staff</DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem onClick={() => onViewStaff?.(staff)}>
+                      View details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onEditStaff?.(staff)}>
+                      Edit staff
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => onDeleteStaff?.(staff)}
+                    >
                       Delete staff
                     </DropdownMenuItem>
                   </DropdownMenuContent>

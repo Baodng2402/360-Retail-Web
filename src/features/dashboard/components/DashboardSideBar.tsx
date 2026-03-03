@@ -10,6 +10,7 @@ import {
   Plus,
   ClipboardCheck,
   MessageSquare,
+  ListChecks,
   ChevronLeft,
   ChevronRight,
   Store as StoreIcon,
@@ -113,6 +114,15 @@ export const DashboardSideBar = ({
       visibleFor: ["StoreOwner", "Manager", "Staff"],
     },
     {
+      icon: ListChecks,
+      label: "My Tasks",
+      subLabel: "Công việc của tôi",
+      path: "/dashboard/my-tasks",
+      end: false,
+      requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager", "Staff"],
+    },
+    {
       icon: Users,
       label: "Staff",
       subLabel: "Nhân viên",
@@ -149,10 +159,28 @@ export const DashboardSideBar = ({
       visibleFor: ["StoreOwner", "Manager", "Staff"],
     },
     {
+      icon: ClipboardCheck,
+      label: "Orders",
+      subLabel: "Đơn hàng",
+      path: "/dashboard/orders",
+      end: false,
+      requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager", "Staff"],
+    },
+    {
       icon: UserCircle,
       label: "Customers",
       subLabel: "Khách hàng",
       path: "/dashboard/customers",
+      end: false,
+      requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager", "Staff"],
+    },
+    {
+      icon: MessageSquare,
+      label: "CRM & Loyalty",
+      subLabel: "Điểm thưởng & Feedback",
+      path: "/dashboard/crm",
       end: false,
       requiresStore: true,
       visibleFor: ["StoreOwner", "Manager", "Staff"],
@@ -205,6 +233,8 @@ export const DashboardSideBar = ({
       action: () => setFeedbackOpen(true),
     },
   ];
+  const canUseQuickActions =
+    userRole === "StoreOwner" || userRole === "Manager" || userRole === "Staff";
 
   return (
     <>
@@ -266,10 +296,21 @@ export const DashboardSideBar = ({
         <nav className={`flex-1 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent ${isCollapsed ? "scrollbar-hide" : ""}`}>
           <ul className="space-y-1">
             {mainNavItems.map((item) => {
+              let normalizedRoles: string[] = [];
+              if (typeof userRole === "string") {
+                normalizedRoles = userRole
+                  .split(",")
+                  .map((r: string) => r.trim())
+                  .filter((r) => r.length > 0);
+              } else if (Array.isArray(userRole)) {
+                normalizedRoles = (userRole as unknown[])
+                  .map((r) => String(r).trim())
+                  .filter((r) => r.length > 0);
+              }
               if (
                 item.visibleFor &&
-                userRole &&
-                !item.visibleFor.includes(userRole)
+                normalizedRoles.length > 0 &&
+                !item.visibleFor.some((r) => normalizedRoles.includes(r))
               ) {
                 return null;
               }
@@ -336,7 +377,7 @@ export const DashboardSideBar = ({
                 </li>
               );
             })}
-            {isCollapsed && (
+            {isCollapsed && canUseQuickActions && (
               <>
                 <li className="py-2">
                   <div className="border-t border-gray-200 dark:border-gray-700 mx-3"></div>
@@ -348,7 +389,11 @@ export const DashboardSideBar = ({
                         if (userStatus === "noStore") {
                           setShowSetupDialog(true);
                         } else {
-                          setNewSaleOpen(true);
+                          if (action.label === "Staff Check-in" && userRole === "Staff") {
+                            navigate("/dashboard/timekeeping");
+                          } else {
+                            action.action();
+                          }
                         }
                       }}
                       onMouseEnter={(e) => {
@@ -378,7 +423,7 @@ export const DashboardSideBar = ({
             )}
           </ul>
 
-          {!isCollapsed && (
+          {!isCollapsed && canUseQuickActions && (
             <div className="mt-4">
               <h3 className="mb-2 px-3 text-xs font-semibold uppercase text-muted-foreground whitespace-nowrap">
                 Quick Actions
@@ -391,7 +436,11 @@ export const DashboardSideBar = ({
                         if (userStatus === "noStore") {
                           setShowSetupDialog(true);
                         } else {
-                          action.action();
+                          if (action.label === "Staff Check-in" && userRole === "Staff") {
+                            navigate("/dashboard/timekeeping");
+                          } else {
+                            action.action();
+                          }
                         }
                       }}
                       className={cn(

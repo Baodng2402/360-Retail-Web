@@ -138,7 +138,21 @@ export function ProfilePage() {
   const loadStoresData = async () => {
     try {
       setStoresLoading(true);
-      const stores = await storesApi.getMyOwnedStores(true);
+      const stores = await storesApi
+        .getMyOwnedStores(true)
+        .catch(async (err: unknown) => {
+          const status = (err as { response?: { status?: number } }).response
+            ?.status;
+          if (status === 403) {
+            try {
+              const myStore = await storesApi.getMyStore();
+              return myStore ? [myStore] : [];
+            } catch {
+              return [];
+            }
+          }
+          throw err;
+        });
       
       const storesWithSub = await Promise.all(
         stores.map(async (store) => {
@@ -226,6 +240,14 @@ export function ProfilePage() {
     return { days, hours, late };
   }, [timeHistory]);
 
+  const role = user?.role ?? "";
+  const isOwner = role === "StoreOwner";
+  const isPotentialOwner = role === "PotentialOwner";
+  const isManager = role === "Manager";
+  const isStaff = role === "Staff";
+  const canManageSubscription = isOwner || isPotentialOwner;
+  const shouldShowSubscriptionInfo = isOwner || isManager || isStaff || isPotentialOwner;
+
   return (
     <div className="container mx-auto py-8 px-4 space-y-6">
       <motion.div
@@ -280,93 +302,111 @@ export function ProfilePage() {
         </Card>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
-      >
-        <Card className="p-6 bg-gradient-to-br from-white via-blue-50/30 to-teal-50/30 dark:from-gray-900 dark:via-gray-800/50 dark:to-teal-950/20 border-blue-100 dark:border-blue-900/30">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-primary" />
-              Thông tin gói dịch vụ
-            </h3>
-            {subscriptionLoading && (
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            )}
-          </div>
-
-          {subscriptionError ? (
-            <div className="text-center py-4">
-              <p className="text-muted-foreground mb-2">{subscriptionError}</p>
-              <Button variant="outline" size="sm" onClick={loadSubscriptionData}>
-                Thử lại
-              </Button>
+      {shouldShowSubscriptionInfo && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <Card className="p-6 bg-gradient-to-br from-white via-blue-50/30 to-teal-50/30 dark:from-gray-900 dark:via-gray-800/50 dark:to-teal-950/20 border-blue-100 dark:border-blue-900/30">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                Thông tin gói dịch vụ
+              </h3>
+              {subscriptionLoading && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
             </div>
-          ) : subscriptionInfo?.planName ? (
-            <div className="space-y-6">
-              <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-teal-50/80 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-teal-950/20 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-sm">
-                      <CheckCircle className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground text-lg">{subscriptionInfo.planName}</p>
-                      <p className="text-sm text-muted-foreground">Gói đang hoạt động</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm">
-                    Còn {subscriptionInfo.daysRemaining} ngày
-                  </Badge>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tiến trình sử dụng</span>
-                    <span className="font-medium">{progress}%</span>
-                  </div>
-                  <Progress value={progress} className="h-2 bg-blue-100 dark:bg-blue-900/30" />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{formatDateShort(subscriptionInfo.startDate)}</span>
-                    <span>{formatDateShort(subscriptionInfo.endDate)}</span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-800/30">
-                  <Calendar className="h-5 w-5 text-blue-500" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ngày bắt đầu</p>
-                    <p className="font-medium">{formatDate(subscriptionInfo.startDate)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-teal-50/50 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-800/30">
-                  <Clock className="h-5 w-5 text-teal-500" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ngày hết hạn</p>
-                    <p className="font-medium">{formatDate(subscriptionInfo.endDate)}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-amber-500" />
-              <p className="text-muted-foreground mb-4">Bạn chưa có gói dịch vụ</p>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button 
-                  onClick={() => navigate("/dashboard/subscription")}
-                  className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 border-0"
-                >
-                  Mua gói dịch vụ
+            {subscriptionError ? (
+              <div className="text-center py-4">
+                <p className="text-muted-foreground mb-2">{subscriptionError}</p>
+                <Button variant="outline" size="sm" onClick={loadSubscriptionData}>
+                  Thử lại
                 </Button>
-              </motion.div>
-            </div>
-          )}
-        </Card>
-      </motion.div>
+              </div>
+            ) : subscriptionInfo?.planName ? (
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-teal-50/80 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-teal-950/20 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-sm">
+                        <CheckCircle className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground text-lg">
+                          {subscriptionInfo.planName}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Gói cửa hàng hiện đang sử dụng
+                        </p>
+                      </div>
+                    </div>
+                    {typeof subscriptionInfo.daysRemaining === "number" && (
+                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm">
+                        Còn {subscriptionInfo.daysRemaining} ngày
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 text-xs text-muted-foreground">
+                    <p>
+                      Bắt đầu:{" "}
+                      <span className="font-medium text-foreground">
+                        {formatDateShort(subscriptionInfo.startDate)}
+                      </span>
+                    </p>
+                    <p>
+                      Hết hạn:{" "}
+                      <span className="font-medium text-foreground">
+                        {formatDateShort(subscriptionInfo.endDate)}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {canManageSubscription && (
+                  <div className="flex justify-end">
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button
+                        onClick={() => navigate("/dashboard/subscription")}
+                        className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 border-0 gap-2"
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Quản lý / nâng cấp gói
+                      </Button>
+                    </motion.div>
+                  </div>
+                )}
+              </div>
+            ) : canManageSubscription ? (
+              <div className="text-center py-8">
+                <AlertCircle className="h-12 w-12 mx-auto mb-4 text-amber-500" />
+                <p className="text-muted-foreground mb-4">
+                  Bạn chưa có gói dịch vụ cho cửa hàng.
+                </p>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={() => navigate("/dashboard/subscription")}
+                    className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 border-0"
+                  >
+                    Mua gói dịch vụ
+                  </Button>
+                </motion.div>
+              </div>
+            ) : (
+              <div className="py-4 text-sm text-muted-foreground">
+                <p>
+                  Gói dịch vụ được quản lý bởi{" "}
+                  <span className="font-semibold">chủ cửa hàng</span>. Bạn vẫn có
+                  thể tiếp tục làm việc bình thường theo phân quyền hiện tại.
+                </p>
+              </div>
+            )}
+          </Card>
+        </motion.div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

@@ -116,10 +116,10 @@ export const customersApi = {
       ApiResponse<LoyaltySummary | null> | LoyaltySummary | null
     >(`crm/customers/${customerId}/loyalty-summary`);
 
-    if ("success" in res.data) {
+    if (res.data && "success" in res.data) {
       return res.data.data ?? null;
     }
-    return (res.data as LoyaltySummary) ?? null;
+    return (res.data as LoyaltySummary | null) ?? null;
   },
 
   async getLoyaltyTransactions(

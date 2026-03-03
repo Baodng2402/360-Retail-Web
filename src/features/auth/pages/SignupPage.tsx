@@ -6,8 +6,6 @@ import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";
 
 import logo from "@/assets/logo.png";
-import facebookIcon from "@/assets/icon/facebook-icon.svg";
-import appleIcon from "@/assets/icon/apple-icon.svg";
 import googleIcon from "@/assets/icon/google-icon.svg";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -30,11 +28,7 @@ const signupSchema = z
     message: "Mật khẩu xác nhận không khớp.",
   });
 
-const socialButtons = [
-  { src: facebookIcon, alt: "Facebook" },
-  { src: appleIcon, alt: "Apple" },
-  { src: googleIcon, alt: "Google" },
-] as const;
+const socialButtons = [{ src: googleIcon, alt: "Google" }] as const;
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -167,7 +161,7 @@ const SignupPage = () => {
               </div>
 
               <div className="flex flex-col gap-6 sm:gap-[30px]">
-                <h2 className="text-center text-lg font-extrabold leading-[25.2px] text-graygray-700">
+                <h2 className="text-center text-lg font-extrabold leading-[25.2px] text-gray-700">
                   Sign in with
                 </h2>
 
@@ -186,7 +180,7 @@ const SignupPage = () => {
                             (e.currentTarget.querySelector("iframe") as HTMLElement)?.click();
                           }
                         }}
-                        className="relative flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] cursor-pointer items-center justify-center rounded-[24px] border border-graygray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
+                        className="relative flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] cursor-pointer items-center justify-center rounded-[24px] border border-gray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
                       >
                         <div className="absolute inset-0 z-0 flex items-center justify-center [&>div]:!min-h-[40px] [&>div]:!min-w-[40px]">
                           <GoogleLogin
@@ -209,7 +203,7 @@ const SignupPage = () => {
                       <Button
                         key={social.alt + index}
                         variant="outline"
-                        className="flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] items-center justify-center rounded-[24px] border border-graygray-200 bg-blackampwhitewhite hover:bg-gray-50 transition-all shadow-sm p-1.5"
+                        className="flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] items-center justify-center rounded-[24px] border border-gray-200 bg-white hover:bg-gray-50 transition-all shadow-sm p-1.5"
                       >
                         <img
                           src={social.src}
@@ -221,7 +215,7 @@ const SignupPage = () => {
                   )}
                 </div>
 
-                <div className="text-center text-lg font-bold leading-[25.2px] text-graygray-400">
+                <div className="text-center text-lg font-bold leading-[25.2px] text-gray-400">
                   or
                 </div>
               </div>
@@ -231,26 +225,26 @@ const SignupPage = () => {
                   <div className="flex flex-col gap-2.5">
                     <Label
                       htmlFor="name"
-                      className="text-sm font-normal leading-[19.6px] text-graygray-700"
+                      className="text-sm font-normal leading-[19.6px] text-gray-700"
                     >
                       Name
                     </Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Your full name"
-                      className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      autoComplete="off"
-                      data-form-type="other"
-                    />
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="Your full name"
+                        className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        autoComplete="off"
+                        data-form-type="other"
+                      />
                   </div>
 
                   <div className="flex flex-col gap-2.5">
                     <Label
                       htmlFor="password"
-                      className="text-sm font-normal leading-[19.6px] text-graygray-700"
+                      className="text-sm font-normal leading-[19.6px] text-gray-700"
                     >
                       Password
                     </Label>
@@ -259,7 +253,7 @@ const SignupPage = () => {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Your password"
-                        className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                        className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete="off"
@@ -283,7 +277,7 @@ const SignupPage = () => {
                   <div className="flex flex-col gap-2.5">
                     <Label
                       htmlFor="email"
-                      className="text-sm font-normal leading-[19.6px] text-graygray-700"
+                      className="text-sm font-normal leading-[19.6px] text-gray-700"
                     >
                       Email
                     </Label>
@@ -291,7 +285,7 @@ const SignupPage = () => {
                       id="email"
                       type="email"
                       placeholder="Your email address"
-                      className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                      className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       autoComplete="off"
@@ -302,7 +296,7 @@ const SignupPage = () => {
                   <div className="flex flex-col gap-2.5">
                     <Label
                       htmlFor="confirm-password"
-                      className="text-sm font-normal leading-[19.6px] text-graygray-700"
+                      className="text-sm font-normal leading-[19.6px] text-gray-700"
                     >
                       Confirm Password
                     </Label>
@@ -311,7 +305,7 @@ const SignupPage = () => {
                         id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your password"
-                        className="h-12 sm:h-[50px] rounded-[15px] border border-graygray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-graygray-400 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                        className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         autoComplete="off"
@@ -349,7 +343,7 @@ const SignupPage = () => {
                   {loading ? "ĐANG ĐĂNG KÝ..." : "SIGN UP"}
                 </Button>
 
-                <p className="text-center text-xs font-normal leading-[18px] text-graygray-400">
+                <p className="text-center text-xs font-normal leading-[18px] text-gray-400">
                   Already have an account?{" "}
                   <Link
                     to="/login"

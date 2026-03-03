@@ -20,7 +20,9 @@ import {
 } from "lucide-react";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { planReviewsApi } from "@/shared/lib/planReviewsApi";
-import { formatPriceVnd } from "@/shared/types/subscription";
+import { authApi } from "@/shared/lib/authApi";
+import { useAuthStore } from "@/shared/store/authStore";
+import { formatPriceVnd, type SePayPaymentData } from "@/shared/types/subscription";
 import type { Plan, MySubscription } from "@/shared/types/subscription";
 import type { PlanReviewSummary } from "@/shared/lib/planReviewsApi";
 import {
@@ -47,18 +49,49 @@ const parseFeatures = (featuresJson: string | null | undefined | string[]): stri
   if (!featuresJson) return [];
   if (Array.isArray(featuresJson)) return featuresJson;
   try {
-    const parsed = JSON.parse(featuresJson);
-    return Object.entries(parsed).map(([key, value]) => {
-      const labels: Record<string, string> = {
-        max_orders: "Đơn hàng",
-        max_products: "Sản phẩm",
-        max_employees: "Nhân viên",
-      };
-      const label = labels[key] || key;
-      const val = value as number;
-      if (val === -1) return `Không giới hạn ${label.toLowerCase()}`;
-      return `Tối đa ${val.toLocaleString()} ${label.toLowerCase()}`;
-    });
+    const parsed = JSON.parse(featuresJson) as Record<string, unknown>;
+    const result: string[] = [];
+
+    const capacityLabels: Record<string, string> = {
+      max_orders: "đơn hàng",
+      max_products: "sản phẩm",
+      max_employees: "nhân viên",
+    };
+
+    const featureLabels: Record<string, string> = {
+      has_tasks: "Quản lý công việc nhân viên",
+      has_loyalty: "Chương trình tích điểm khách hàng",
+      has_variants: "Sản phẩm có phân loại (size/màu...)",
+      has_dashboard: "Dashboard bán hàng nâng cao",
+      has_feedback_qr: "Feedback qua QR trên hóa đơn",
+      has_gps_checkin: "Chấm công GPS & cảnh báo khoảng cách",
+      has_multi_store: "Quản lý nhiều chi nhánh",
+      has_export_excel: "Xuất báo cáo Excel",
+      has_invite_staff: "Mời nhân viên bằng email",
+      has_inventory_tickets: "Phiếu nhập / xuất kho",
+      has_realtime_notifications: "Thông báo realtime",
+    };
+
+    for (const [key, value] of Object.entries(parsed)) {
+      if (key in capacityLabels && typeof value === "number") {
+        const label = capacityLabels[key];
+        if (value === -1) {
+          result.push(`Không giới hạn ${label}`);
+        } else {
+          result.push(`Tối đa ${value.toLocaleString("vi-VN")} ${label}`);
+        }
+        continue;
+      }
+
+      if (key in featureLabels && typeof value === "boolean") {
+        if (value) {
+          result.push(featureLabels[key]);
+        }
+        continue;
+      }
+    }
+
+    return result;
   } catch {
     return [];
   }
@@ -70,12 +103,16 @@ export default function SubscriptionPlansPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchasingPlanId, setPurchasingPlanId] = useState<string | null>(null);
-   const [reviewSummaries, setReviewSummaries] = useState<PlanReviewSummary[]>([]);
-   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-   const [selectedPlanForReview, setSelectedPlanForReview] = useState<Plan | null>(null);
-   const [reviewRating, setReviewRating] = useState(5);
-   const [reviewContent, setReviewContent] = useState("");
-   const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewSummaries, setReviewSummaries] = useState<PlanReviewSummary[]>([]);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedPlanForReview, setSelectedPlanForReview] = useState<Plan | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [sepayDialogOpen, setSepayDialogOpen] = useState(false);
+  const [sepayData, setSepayData] = useState<SePayPaymentData | null>(null);
+  const [refreshingAccess, setRefreshingAccess] = useState(false);
+  const { setAuth } = useAuthStore();
 
   const loadData = async () => {
     try {
@@ -97,19 +134,78 @@ export default function SubscriptionPlansPage() {
     }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const handlePurchase = async (plan: Plan) => {
+  const handleRefreshAccess = async () => {
+    try {
+      setRefreshingAccess(true);
+      const refreshRes = await authApi.refreshAccess();
+      if (!refreshRes.accessToken) {
+        throw new Error("Không nhận được token mới từ server");
+      }
+
+      localStorage.setItem("token", refreshRes.accessToken);
+      const userWithSub = await authApi.meWithSubscription();
+      setAuth(userWithSub, refreshRes.accessToken);
+
+      toast.success("Đã làm mới quyền và gói dịch vụ.");
+      setSepayDialogOpen(false);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to refresh access after payment:", err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Không thể làm mới quyền. Vui lòng thử đăng nhập lại.";
+      toast.error(message);
+    } finally {
+      setRefreshingAccess(false);
+    }
+  };
+
+  const startPayment = async (plan: Plan, provider: "sepay" | "vnpay") => {
     try {
       setPurchasingPlanId(plan.id);
-      const response = await subscriptionApi.purchasePlan({ planId: plan.id });
-      if (response.paymentUrl) {
-        window.open(response.paymentUrl, "_blank");
-        toast.success("Đã mở trang thanh toán");
+      const purchaseRes = await subscriptionApi.purchasePlan({ planId: plan.id });
+      if (!purchaseRes.paymentId) {
+        throw new Error("Không nhận được paymentId từ server");
+      }
+
+      const payment = await subscriptionApi.initiatePayment(
+        purchaseRes.paymentId,
+        provider,
+      );
+
+      if (provider === "sepay") {
+        if (
+          typeof payment === "object" &&
+          "provider" in payment &&
+          payment.provider === "sepay"
+        ) {
+          setSepayData(payment as SePayPaymentData);
+          setSepayDialogOpen(true);
+        } else {
+          throw new Error("Phản hồi thanh toán SePay không hợp lệ");
+        }
+      } else {
+        if (
+          typeof payment === "object" &&
+          "paymentUrl" in payment &&
+          payment.paymentUrl
+        ) {
+          window.open(payment.paymentUrl, "_blank");
+          toast.success("Đã mở trang thanh toán VNPay demo");
+        } else {
+          throw new Error("Phản hồi thanh toán VNPay không hợp lệ");
+        }
       }
     } catch (err) {
-      console.error("Failed to purchase:", err);
-      toast.error("Không thể khởi tạo thanh toán");
+      console.error("Failed to initiate payment:", err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Không thể khởi tạo thanh toán. Vui lòng thử lại.";
+      toast.error(message);
     } finally {
       setPurchasingPlanId(null);
     }
@@ -273,7 +369,8 @@ export default function SubscriptionPlansPage() {
               isPopular={plan.isPopular} 
               isCurrentPlan={isCurrentPlan(plan)} 
               isLoading={purchasingPlanId === plan.id} 
-              onPurchase={() => handlePurchase(plan)} 
+              onPaySepay={() => startPayment(plan, "sepay")}
+              onPayVnpay={() => startPayment(plan, "vnpay")}
               reviewSummary={getSummaryForPlan(plan)}
               onOpenReview={() => openReviewDialog(plan)}
             />
@@ -312,6 +409,102 @@ export default function SubscriptionPlansPage() {
           </div>
         </Card>
       </motion.div>
+
+      <Dialog open={sepayDialogOpen} onOpenChange={setSepayDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Thanh toán QR (SePay)</DialogTitle>
+            <DialogDescription>
+              Quét mã QR hoặc chuyển khoản theo thông tin bên dưới. Sau khi thanh toán
+              vài phút, hãy tải lại trang hoặc đăng nhập lại để cập nhật trạng thái gói.
+            </DialogDescription>
+          </DialogHeader>
+          {sepayData ? (
+            <div className="space-y-4">
+              <div className="w-full flex justify-center">
+                <img
+                  src={sepayData.qrCodeUrl}
+                  alt="QR thanh toán SePay"
+                  className="w-56 h-56 rounded-lg border bg-white object-contain"
+                />
+              </div>
+              <div className="space-y-2 text-sm">
+                <p className="font-semibold text-foreground">
+                  Mã thanh toán:{" "}
+                  <span className="font-mono">{sepayData.paymentCode}</span>
+                </p>
+                <div className="rounded-md border bg-muted/40 p-3 space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Thông tin chuyển khoản
+                  </p>
+                  <p>
+                    Ngân hàng:{" "}
+                    <span className="font-medium">
+                      {sepayData.bankInfo.bankName}
+                    </span>
+                  </p>
+                  <p>
+                    Số tài khoản:{" "}
+                    <span className="font-medium">
+                      {sepayData.bankInfo.accountNumber}
+                    </span>
+                  </p>
+                  <p>
+                    Tên tài khoản:{" "}
+                    <span className="font-medium">
+                      {sepayData.bankInfo.accountName}
+                    </span>
+                  </p>
+                  <p>
+                    Số tiền:{" "}
+                    <span className="font-medium">
+                      {formatPriceVnd(sepayData.bankInfo.amount)}
+                    </span>
+                  </p>
+                  <p>
+                    Nội dung:{" "}
+                    <span className="font-medium">
+                      {sepayData.bankInfo.content}
+                    </span>
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground whitespace-pre-line">
+                  {sepayData.instruction}
+                </p>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => setSepayDialogOpen(false)}
+                    disabled={refreshingAccess}
+                  >
+                    Đóng
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleRefreshAccess}
+                    disabled={refreshingAccess}
+                    className="bg-teal-600 hover:bg-teal-700 text-white"
+                  >
+                    {refreshingAccess ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Đang làm mới quyền...
+                      </>
+                    ) : (
+                      "Đã thanh toán, làm mới quyền"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
         <DialogContent className="sm:max-w-lg">
@@ -398,7 +591,8 @@ function PlanCard({
   isPopular,
   isCurrentPlan,
   isLoading,
-  onPurchase,
+  onPaySepay,
+  onPayVnpay,
   reviewSummary,
   onOpenReview,
 }: {
@@ -406,7 +600,8 @@ function PlanCard({
   isPopular?: boolean;
   isCurrentPlan: boolean;
   isLoading: boolean;
-  onPurchase: () => void;
+  onPaySepay: () => void;
+  onPayVnpay: () => void;
   reviewSummary?: PlanReviewSummary;
   onOpenReview: () => void;
 }) {
@@ -536,7 +731,7 @@ function PlanCard({
             <motion.div whileTap={{ scale: 0.95 }} className="w-full">
               <Button
                 className="w-full h-12 text-base font-medium bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 border-0"
-                onClick={onPurchase}
+                onClick={onPaySepay}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -547,10 +742,18 @@ function PlanCard({
                 ) : (
                   <>
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Mua gói ngay
+                    Thanh toán QR (SePay)
                   </>
                 )}
               </Button>
+              <button
+                type="button"
+                className="mt-2 w-full text-xs text-muted-foreground hover:text-teal-600 underline-offset-2 hover:underline text-center"
+                onClick={onPayVnpay}
+                disabled={isLoading}
+              >
+                Hoặc thanh toán VNPay demo
+              </button>
             </motion.div>
           )}
         </CardFooter>

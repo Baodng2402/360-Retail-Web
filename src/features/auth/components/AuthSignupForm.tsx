@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Apple, Chrome, Facebook, Mail, Lock } from "lucide-react";
+import { Chrome, Mail, Lock } from "lucide-react";
 
 import logo from "@/assets/logo.png";
 import { Button } from "@/shared/components/ui/button";
@@ -8,11 +8,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 
-const socialButtons = [
-  { icon: Facebook, label: "Facebook" },
-  { icon: Apple, label: "Apple" },
-  { icon: Chrome, label: "Google" },
-] as const;
+const socialButtons = [{ icon: Chrome, label: "Google" }] as const;
 
 export function AuthSignupForm() {
   const [showPassword, setShowPassword] = useState(false);

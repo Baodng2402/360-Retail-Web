@@ -6,8 +6,6 @@ import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";
 
 import logo from "@/assets/logo.png";
-import facebookIcon from "@/assets/icon/facebook-icon.svg";
-import appleIcon from "@/assets/icon/apple-icon.svg";
 import googleIcon from "@/assets/icon/google-icon.svg";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -16,11 +14,7 @@ import { Switch } from "@/shared/components/ui/switch";
 import { authApi } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
 
-const socialButtons = [
-  { src: facebookIcon, alt: "Facebook" },
-  { src: appleIcon, alt: "Apple" },
-  { src: googleIcon, alt: "Google" },
-] as const;
+const socialButtons = [{ src: googleIcon, alt: "Google" }] as const;
 
 const loginSchema = z.object({
   email: z.string().min(1, "Vui lòng nhập email.").email("Email không hợp lệ."),
@@ -195,7 +189,7 @@ const LoginBody = () => {
                     id="email"
                     type="email"
                     placeholder="Your email address"
-                    className="h-12 bg-white text-gray-900 placeholder:text-gray-500 border-gray-200 pl-11 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#111827] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                    className="h-12 !bg-white text-gray-900 placeholder:text-gray-500 border-gray-200 pl-11 dark:!bg-white [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#111827] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="off"

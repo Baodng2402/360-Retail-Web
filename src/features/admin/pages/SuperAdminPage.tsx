@@ -193,7 +193,7 @@ const SuperAdminPage = () => {
               <li key={p.id} className="flex items-center justify-between">
                 <span className="font-medium">{p.planName}</span>
                 <span className="text-muted-foreground text-[11px]">
-                  {p.billingPeriod}
+                  {p.durationDays} ngày
                 </span>
               </li>
             ))}

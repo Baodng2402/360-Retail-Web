@@ -11,6 +11,8 @@ import ForgotPasswordResetPage from "@/features/auth/pages/ForgotPasswordResetPa
 import { SubscriptionUpgradeDialog } from "@/shared/components/ui/SubscriptionUpgradeDialog";
 import FeedbackPage from "@/features/feedback/pages/FeedbackPage";
 import TimekeepingPage from "@/features/dashboard/pages/TimekeepingPage";
+import OrdersPage from "@/features/dashboard/pages/OrdersPage";
+import OrderDetailPage from "@/features/dashboard/pages/OrderDetailPage";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
@@ -31,6 +33,9 @@ import PaymentFailedPage from "@/features/payment/pages/PaymentFailedPage";
 import CustomerDashboardPage from "@/features/customer/pages/CustomerDashboardPage";
 import CustomerOrderDetailPage from "@/features/customer/pages/CustomerOrderDetailPage";
 import SuperAdminPage from "@/features/admin/pages/SuperAdminPage";
+import EmployeeDetailPage from "@/features/dashboard/pages/EmployeeDetailPage";
+import MyTasksPage from "@/features/dashboard/pages/MyTasksPage";
+import CrmDashboardPage from "@/features/dashboard/pages/CrmDashboardPage";
 
 function App() {
   return (
@@ -64,10 +69,21 @@ function App() {
                   path="/dashboard/staff"
                   element={<StaffManagementPage />}
                 />
+                <Route
+                  path="/dashboard/staff/:id"
+                  element={<EmployeeDetailPage />}
+                />
                 <Route path="/dashboard/sales" element={<SalePostPage />} />
+                <Route path="/dashboard/my-tasks" element={<MyTasksPage />} />
+                <Route path="/dashboard/orders" element={<OrdersPage />} />
+                <Route
+                  path="/dashboard/orders/:id"
+                  element={<OrderDetailPage />}
+                />
                 <Route path="/dashboard/reports" element={<ReportPage />} />
                 <Route path="/dashboard/settings" element={<SettingPage />} />
                 <Route path="/dashboard/customers" element={<CustomerPage />} />
+                <Route path="/dashboard/crm" element={<CrmDashboardPage />} />
                 <Route
                   path="/dashboard/stores"
                   element={<StoreManagementPage />}

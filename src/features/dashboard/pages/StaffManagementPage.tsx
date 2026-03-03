@@ -14,6 +14,7 @@ import StoreSelector from "@/features/dashboard/components/StoreSelector";
 import InviteStaffModal from "@/features/dashboard/components/modals/InviteStaffModal";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { employeesApi } from "@/shared/lib/employeesApi";
 import { tasksApi } from "@/shared/lib/tasksApi";
 import type { Employee } from "@/shared/types/employee";
@@ -29,6 +30,7 @@ const StaffManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const loadData = () => {
     setLoading(true);
@@ -65,6 +67,7 @@ const StaffManagementPage = () => {
       employees.map((emp) => {
         const task = taskByAssignee.get(emp.id);
         return {
+          id: emp.id,
           avatar: emp.avatarUrl || "",
           name: emp.fullName,
           role: emp.position,
@@ -125,6 +128,13 @@ const StaffManagementPage = () => {
     },
   ];
 
+  const handleViewStaff = (staff: Staff) => {
+    const employee = employees.find((e) => e.id === staff.id || e.email === staff.email);
+    if (employee) {
+      navigate(`/dashboard/staff/${employee.id}`);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <StoreSelector pageDescription="Chuyển đổi để quản lý nhân viên của cửa hàng khác" />
@@ -167,7 +177,11 @@ const StaffManagementPage = () => {
           </div>
         ) : (
           <div className="flex justify-center pt-10 min-w-full">
-            <DataTable data={filteredStaff} />
+            <DataTable
+              data={filteredStaff}
+              onViewStaff={handleViewStaff}
+              onEditStaff={handleViewStaff}
+            />
           </div>
         )}
       </div>

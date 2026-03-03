@@ -21,7 +21,10 @@ import toast from "react-hot-toast";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { timekeepingApi } from "@/shared/lib/timekeepingApi";
+import {
+  timekeepingApi,
+  type TimekeepingHistoryRecord,
+} from "@/shared/lib/timekeepingApi";
 import { storesApi } from "@/shared/lib/storesApi";
 
 const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
@@ -52,6 +55,8 @@ const TimekeepingPage = () => {
   const [today, setToday] = useState<
     Awaited<ReturnType<typeof timekeepingApi.getToday>> | null
   >(null);
+  const [history, setHistory] = useState<TimekeepingHistoryRecord[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
   const [processingCheckIn, setProcessingCheckIn] = useState(false);
@@ -106,6 +111,18 @@ const TimekeepingPage = () => {
     return null;
   };
 
+  const loadHistory = async () => {
+    try {
+      setHistoryLoading(true);
+      const records = await timekeepingApi.getHistory();
+      setHistory(records);
+    } catch (err) {
+      console.error("Failed to load timekeeping history:", err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   const loadToday = async () => {
     try {
       setLoading(true);
@@ -122,8 +139,8 @@ const TimekeepingPage = () => {
           store.longitude !== null;
 
         if (hasGpsFromApi) {
-          setStoreLatitude(store.latitude);
-          setStoreLongitude(store.longitude);
+          setStoreLatitude(store.latitude ?? null);
+          setStoreLongitude(store.longitude ?? null);
         } else {
           try {
             const cachedGps = localStorage.getItem(
@@ -171,6 +188,7 @@ const TimekeepingPage = () => {
 
   useEffect(() => {
     void loadToday();
+    void loadHistory();
     void getCurrentLocation().catch(() => {
       // ignore initial location error
     });
@@ -254,6 +272,7 @@ const TimekeepingPage = () => {
       await timekeepingApi.checkIn({ locationGps, checkInImageUrl });
       toast.success("Check-in thành công!");
       void loadToday();
+      void loadHistory();
     } catch (err) {
       console.error("Check-in failed", err);
       const message =
@@ -299,6 +318,7 @@ const TimekeepingPage = () => {
       await timekeepingApi.checkOut({ locationGps });
       toast.success("Check-out thành công!");
       void loadToday();
+      void loadHistory();
     } catch (err) {
       console.error("Check-out failed", err);
       const message =
@@ -310,6 +330,39 @@ const TimekeepingPage = () => {
       toast.error(message);
     } finally {
       setProcessingCheckOut(false);
+    }
+  };
+
+  const historySummary = useMemo(() => {
+    if (!history.length) {
+      return { days: 0, hours: 0, late: 0 };
+    }
+    let days = history.length;
+    let hours = 0;
+    let late = 0;
+    for (const r of history) {
+      if (typeof r.workHours === "number") {
+        hours += r.workHours;
+      }
+      if (r.isLate) {
+        late += 1;
+      }
+    }
+    return { days, hours, late };
+  }, [history]);
+
+  const formatDateTime = (value?: string | null) => {
+    if (!value) return "-";
+    try {
+      return new Date(value).toLocaleString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return value;
     }
   };
 
@@ -520,6 +573,118 @@ const TimekeepingPage = () => {
           </Card>
         </motion.div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+      >
+        <Card className="p-4 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-teal-600" />
+                <h2 className="text-base font-semibold text-foreground">
+                  Lịch sử &amp; tổng quan chấm công
+                </h2>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Dữ liệu chấm công của riêng bạn trong thời gian gần đây.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 text-xs sm:text-sm">
+              <div className="rounded-lg border px-3 py-1.5 bg-muted/60">
+                <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Số ngày có dữ liệu
+                </span>
+                <span className="font-semibold text-foreground">
+                  {historySummary.days}
+                </span>
+              </div>
+              <div className="rounded-lg border px-3 py-1.5 bg-muted/60">
+                <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Tổng giờ làm (ước tính)
+                </span>
+                <span className="font-semibold text-foreground">
+                  {historySummary.hours.toFixed(1)}h
+                </span>
+              </div>
+              <div className="rounded-lg border px-3 py-1.5 bg-muted/60">
+                <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Số buổi đi trễ
+                </span>
+                <span className="font-semibold text-foreground">
+                  {historySummary.late}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {historyLoading ? (
+            <div className="py-6 text-sm text-muted-foreground">
+              Đang tải lịch sử chấm công...
+            </div>
+          ) : !history.length ? (
+            <div className="py-6 text-sm text-muted-foreground">
+              Chưa có dữ liệu chấm công lịch sử.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
+                    <th className="text-left py-2 pr-3 font-medium">Ngày</th>
+                    <th className="text-left py-2 px-3 font-medium">
+                      Check-in
+                    </th>
+                    <th className="text-left py-2 px-3 font-medium">
+                      Check-out
+                    </th>
+                    <th className="text-right py-2 px-3 font-medium">
+                      Giờ làm
+                    </th>
+                    <th className="text-right py-2 pl-3 font-medium">Trễ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.slice(0, 30).map((r) => (
+                    <tr
+                      key={r.id}
+                      className="border-b last:border-0 text-foreground/90"
+                    >
+                      <td className="py-2 pr-3">
+                        {formatDateTime(r.checkInTime).slice(0, 10)}
+                      </td>
+                      <td className="py-2 px-3">
+                        {formatDateTime(r.checkInTime).slice(11)}
+                      </td>
+                      <td className="py-2 px-3">
+                        {formatDateTime(r.checkOutTime).slice(11)}
+                      </td>
+                      <td className="py-2 px-3 text-right">
+                        {typeof r.workHours === "number"
+                          ? `${r.workHours.toFixed(1)}h`
+                          : "-"}
+                      </td>
+                      <td className="py-2 pl-3 text-right">
+                        {r.isLate ? (
+                          <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 text-[11px]">
+                            Trễ
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">
+                            Đúng giờ
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+      </motion.div>
     </div>
   );
 };
