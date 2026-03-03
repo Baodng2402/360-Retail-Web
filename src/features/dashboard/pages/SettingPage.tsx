@@ -4,7 +4,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
-import { Store, Bell, Shield, MapPin } from "lucide-react";
+import { Store, Bell, Shield, MapPin, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
@@ -50,6 +50,7 @@ const SettingPage = () => {
   >([]);
   const [addressLoading, setAddressLoading] = useState(false);
   const [addressSearchEnabled, setAddressSearchEnabled] = useState(true);
+  const [usingCurrentLocation, setUsingCurrentLocation] = useState(false);
   const parsedLatitude = Number(storeLatitude.trim());
   const parsedLongitude = Number(storeLongitude.trim());
   const hasValidCoords =
@@ -305,13 +306,10 @@ const SettingPage = () => {
     const prevLon = Number(storeLongitude.trim());
     const hasPrevCoords =
       !Number.isNaN(prevLat) && !Number.isNaN(prevLon) && storeAddress.trim();
+    setUsingCurrentLocation(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        setStoreLatitude(String(latitude));
-        setStoreLongitude(String(longitude));
-        toast.success("Đã lấy tọa độ hiện tại.");
-
         if (hasPrevCoords) {
           const distance = getDistanceMeters(
             prevLat,
@@ -324,16 +322,31 @@ const SettingPage = () => {
               distance < 1000
                 ? `${distance.toFixed(0)} m`
                 : `${(distance / 1000).toFixed(1)} km`;
-            toast(
-              `Vị trí hiện tại (${distanceText}) cách xa vị trí cửa hàng. Vui lòng kiểm tra lại trước khi lưu GPS.`,
+            const confirmChange = window.confirm(
+              `Vị trí hiện tại (${distanceText}) cách xa vị trí cửa hàng đang cấu hình.\n\nOK: Cập nhật lại GPS cửa hàng theo vị trí hiện tại.\nCancel: Giữ nguyên toạ độ cửa hàng.`,
             );
+            if (!confirmChange) {
+              toast(
+                "Đã giữ nguyên toạ độ cửa hàng, không dùng vị trí hiện tại để cập nhật.",
+              );
+              setUsingCurrentLocation(false);
+              return;
+            }
           }
         }
+        setStoreLatitude(String(latitude));
+        setStoreLongitude(String(longitude));
+        setAddressSuggestions([]);
+        setAddressSearchEnabled(false);
+        addressInputRef.current?.blur();
+        toast.success("Đã lấy tọa độ hiện tại cho cửa hàng.");
+        setUsingCurrentLocation(false);
       },
       () => {
         toast.error(
           "Không thể lấy vị trí hiện tại. Vui lòng bật Location cho trình duyệt.",
         );
+        setUsingCurrentLocation(false);
       },
       { enableHighAccuracy: true, timeout: 15000 },
     );
@@ -490,9 +503,19 @@ const SettingPage = () => {
                         size="sm"
                         className="h-8 text-xs gap-1"
                         onClick={handleUseCurrentLocation}
+                        disabled={usingCurrentLocation}
                       >
-                        <MapPin className="h-3 w-3" />
-                        Dùng vị trí hiện tại
+                        {usingCurrentLocation ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Đang lấy vị trí...
+                          </>
+                        ) : (
+                          <>
+                            <MapPin className="h-3 w-3" />
+                            Dùng vị trí hiện tại
+                          </>
+                        )}
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
