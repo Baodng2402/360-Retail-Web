@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import type { LatLngExpression } from "leaflet";
 import { motion } from "motion/react";
 import {
   AlertCircle,
@@ -26,16 +28,9 @@ const TimekeepingPage = () => {
   const [processingCheckOut, setProcessingCheckOut] = useState(false);
   const [storeLatitude, setStoreLatitude] = useState<number | null>(null);
   const [storeLongitude, setStoreLongitude] = useState<number | null>(null);
-  const osmEmbedUrl = useMemo(() => {
+  const storePosition = useMemo<LatLngExpression | null>(() => {
     if (storeLatitude === null || storeLongitude === null) return null;
-    const lat = storeLatitude;
-    const lon = storeLongitude;
-    const delta = 0.01;
-    const left = lon - delta;
-    const right = lon + delta;
-    const top = lat + delta;
-    const bottom = lat - delta;
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${left},${bottom},${right},${top}&layer=mapnik&marker=${lat},${lon}`;
+    return [storeLatitude, storeLongitude];
   }, [storeLatitude, storeLongitude]);
 
   const loadToday = async () => {
@@ -236,15 +231,20 @@ const TimekeepingPage = () => {
                 bằng GPS. Bạn có thể cập nhật tọa độ trong phần Cài đặt cửa hàng.
               </p>
             </div>
-            {osmEmbedUrl ? (
+            {storePosition ? (
               <div className="relative mt-2 h-56 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                <iframe
-                  title="Store location"
-                  src={osmEmbedUrl}
-                  className="h-full w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
+                <MapContainer
+                  center={storePosition}
+                  zoom={17}
+                  scrollWheelZoom={false}
+                  className="h-full w-full"
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker position={storePosition} />
+                </MapContainer>
               </div>
             ) : (
               <div className="mt-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-6 text-sm text-muted-foreground">

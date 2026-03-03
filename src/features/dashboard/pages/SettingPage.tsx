@@ -6,6 +6,8 @@ import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
 import { Store, Bell, Shield, MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import type { LatLngExpression } from "leaflet";
 import toast from "react-hot-toast";
 import { storesApi } from "@/shared/lib/storesApi";
 import { authApi } from "@/shared/lib/authApi";
@@ -26,6 +28,24 @@ const SettingPage = () => {
     { displayName: string; lat: string; lon: string }[]
   >([]);
   const [addressLoading, setAddressLoading] = useState(false);
+  const parsedLatitude = Number(storeLatitude.trim());
+  const parsedLongitude = Number(storeLongitude.trim());
+  const hasValidCoords =
+    !Number.isNaN(parsedLatitude) && !Number.isNaN(parsedLongitude);
+  const currentPosition: LatLngExpression = hasValidCoords
+    ? [parsedLatitude, parsedLongitude]
+    : [21.0278, 105.8342]; // Hà Nội mặc định
+
+  const LocationSelector = () => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setStoreLatitude(String(lat));
+        setStoreLongitude(String(lng));
+      },
+    });
+    return hasValidCoords ? <Marker position={currentPosition} /> : null;
+  };
 
   const loadNotificationsFromStorage = () => {
     try {
@@ -373,6 +393,28 @@ const SettingPage = () => {
                         ))}
                       </div>
                     )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>GPS Location (map preview)</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Bạn có thể bấm trực tiếp trên bản đồ để chọn tọa độ cho cửa hàng. Marker
+                      sẽ tự động di chuyển và cập nhật Latitude/Longitude phía trên.
+                    </p>
+                    <div className="h-56 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                      <MapContainer
+                        center={currentPosition}
+                        zoom={hasValidCoords ? 17 : 13}
+                        scrollWheelZoom={false}
+                        className="h-full w-full"
+                      >
+                        <TileLayer
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        />
+                        <LocationSelector />
+                      </MapContainer>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
