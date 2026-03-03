@@ -312,6 +312,16 @@ const SettingPage = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
+
+        const applyLocation = () => {
+          setStoreLatitude(String(latitude));
+          setStoreLongitude(String(longitude));
+          setAddressSuggestions([]);
+          setAddressSearchEnabled(false);
+          addressInputRef.current?.blur();
+          toast.success("Đã lấy tọa độ hiện tại cho cửa hàng.");
+        };
+
         if (hasPrevCoords) {
           const distance = getDistanceMeters(
             prevLat,
@@ -324,17 +334,46 @@ const SettingPage = () => {
               distance < 1000
                 ? `${distance.toFixed(0)} m`
                 : `${(distance / 1000).toFixed(1)} km`;
-            toast(
-              `Vị trí hiện tại (${distanceText}) cách xa vị trí cửa hàng đang cấu hình. Vui lòng kiểm tra lại trước khi lưu GPS.`,
-            );
+            toast.custom((t) => (
+              <div className="max-w-sm rounded-md bg-background border shadow-lg p-3 text-sm">
+                <p className="font-medium mb-1">
+                  Vị trí hiện tại cách xa cửa hàng
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Vị trí hiện tại của bạn đang cách vị trí cửa hàng khoảng{" "}
+                  <span className="font-semibold">{distanceText}</span>. Bạn có
+                  chắc muốn cập nhật GPS cửa hàng theo vị trí hiện tại?
+                </p>
+                <div className="mt-2 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    className="px-2 py-1 rounded border text-xs"
+                    onClick={() => {
+                      toast.dismiss(t.id);
+                      toast("Đã giữ nguyên toạ độ cửa hàng.");
+                    }}
+                  >
+                    Giữ nguyên
+                  </button>
+                  <button
+                    type="button"
+                    className="px-2 py-1 rounded bg-teal-600 text-xs text-white hover:bg-teal-700"
+                    onClick={() => {
+                      applyLocation();
+                      toast.dismiss(t.id);
+                    }}
+                  >
+                    Dùng vị trí hiện tại
+                  </button>
+                </div>
+              </div>
+            ));
+            setUsingCurrentLocation(false);
+            return;
           }
         }
-        setStoreLatitude(String(latitude));
-        setStoreLongitude(String(longitude));
-        setAddressSuggestions([]);
-        setAddressSearchEnabled(false);
-        addressInputRef.current?.blur();
-        toast.success("Đã lấy tọa độ hiện tại cho cửa hàng.");
+
+        applyLocation();
         setUsingCurrentLocation(false);
       },
       () => {
