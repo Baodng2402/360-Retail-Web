@@ -5,10 +5,11 @@ import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
 import { Store, Bell, Shield, MapPin } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { storesApi } from "@/shared/lib/storesApi";
 import { authApi } from "@/shared/lib/authApi";
+import { loadGoogleMapsPlaces } from "@/shared/lib/googleMapsLoader";
 const SettingPage = () => {
   const [storeId, setStoreId] = useState<string | null>(null);
   const [storeName, setStoreName] = useState("");
@@ -21,6 +22,7 @@ const SettingPage = () => {
 
   const NOTIFICATION_KEY = "360retail-notification-settings";
   const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
+  const addressInputRef = useRef<HTMLInputElement | null>(null);
 
   const loadNotificationsFromStorage = () => {
     try {
@@ -116,6 +118,47 @@ const SettingPage = () => {
       }
     };
     loadStore();
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    loadGoogleMapsPlaces()
+      .then((google) => {
+        if (!isMounted || !addressInputRef.current) return;
+
+        const autocomplete = new google.maps.places.Autocomplete(
+          addressInputRef.current,
+          {
+            types: ["geocode"],
+            componentRestrictions: { country: "vn" },
+          },
+        );
+
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete.getPlace();
+          if (!place || !isMounted) return;
+
+          const formattedAddress =
+            place.formatted_address || addressInputRef.current?.value || "";
+          setStoreAddress(formattedAddress);
+
+          const location = place.geometry?.location;
+          if (location) {
+            const lat = location.lat();
+            const lng = location.lng();
+            setStoreLatitude(String(lat));
+            setStoreLongitude(String(lng));
+          }
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to load Google Places:", err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSaveStore = async () => {
@@ -296,6 +339,7 @@ const SettingPage = () => {
                     <Input
                       id="store-address"
                       placeholder="Enter address..."
+                      ref={addressInputRef}
                       value={storeAddress}
                       onChange={(e) => setStoreAddress(e.target.value)}
                     />
