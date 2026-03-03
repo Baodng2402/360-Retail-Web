@@ -13,6 +13,7 @@ import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { timekeepingApi } from "@/shared/lib/timekeepingApi";
+import { storesApi } from "@/shared/lib/storesApi";
 
 const TimekeepingPage = () => {
   const [loading, setLoading] = useState(true);
@@ -23,12 +24,30 @@ const TimekeepingPage = () => {
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
   const [processingCheckIn, setProcessingCheckIn] = useState(false);
   const [processingCheckOut, setProcessingCheckOut] = useState(false);
+  const [storeLatitude, setStoreLatitude] = useState<number | null>(null);
+  const [storeLongitude, setStoreLongitude] = useState<number | null>(null);
 
   const loadToday = async () => {
     try {
       setLoading(true);
-      const data = await timekeepingApi.getToday();
-      setToday(data);
+      const [todayData, store] = await Promise.all([
+        timekeepingApi.getToday(),
+        storesApi.getMyStore().catch(() => null),
+      ]);
+      setToday(todayData);
+      if (
+        store &&
+        store.latitude !== undefined &&
+        store.latitude !== null &&
+        store.longitude !== undefined &&
+        store.longitude !== null
+      ) {
+        setStoreLatitude(store.latitude);
+        setStoreLongitude(store.longitude);
+      } else {
+        setStoreLatitude(null);
+        setStoreLongitude(null);
+      }
     } catch (err) {
       console.error("Failed to load timekeeping today:", err);
       toast.error("Không thể tải trạng thái chấm công hôm nay.");
@@ -196,41 +215,34 @@ const TimekeepingPage = () => {
           className="lg:col-span-2"
         >
           <Card className="relative overflow-hidden p-4 h-full">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(45,212,191,0.25)_0,_transparent_60%),radial-gradient(circle_at_bottom,_rgba(59,130,246,0.25)_0,_transparent_60%)]" />
             <div className="relative flex flex-col gap-2 mb-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-teal-700 shadow-sm">
                 <MapPin className="h-3.5 w-3.5" />
-                Bản đồ check-in (minh họa)
+                Bản đồ cửa hàng (Google Maps)
               </div>
               <p className="text-sm text-muted-foreground">
-                Vị trí của bạn được lấy tự động từ GPS trình duyệt và so sánh với
-                tọa độ cửa hàng để đảm bảo chấm công đúng vị trí.
+                Vị trí cửa hàng được dùng để kiểm tra khoảng cách khi bạn chấm công
+                bằng GPS. Bạn có thể cập nhật tọa độ trong phần Cài đặt cửa hàng.
               </p>
             </div>
-            <div className="relative mt-2 h-40 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden border border-slate-800/70">
-              <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_20%_20%,rgba(45,212,191,0.6),transparent_55%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.6),transparent_55%)]" />
-              <div className="relative h-full w-full">
-                <div className="absolute inset-6 border border-white/10 rounded-2xl" />
-                <motion.div
-                  className="absolute left-1/4 top-1/3 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(34,197,94,0.4)]"
-                  initial={{ scale: 0.9, opacity: 0.8 }}
-                  animate={{ scale: [0.9, 1.15, 0.9], opacity: [0.7, 1, 0.7] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+            {storeLatitude !== null && storeLongitude !== null ? (
+              <div className="relative mt-2 h-56 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                <iframe
+                  title="Store location"
+                  src={`https://www.google.com/maps?q=${storeLatitude},${storeLongitude}&z=17&output=embed`}
+                  className="h-full w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
                 />
-                <span className="absolute left-1/4 top-[45%] -translate-x-1/2 text-[10px] text-emerald-100">
-                  Cửa hàng
-                </span>
-                <motion.div
-                  className="absolute right-1/4 bottom-1/3 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-400 shadow-[0_0_0_4px_rgba(56,189,248,0.4)]"
-                  initial={{ scale: 0.9, opacity: 0.8 }}
-                  animate={{ scale: [0.9, 1.15, 0.9], opacity: [0.7, 1, 0.7] }}
-                  transition={{ duration: 2.4, repeat: Infinity }}
-                />
-                <span className="absolute right-1/4 bottom-[45%] translate-x-1/2 text-[10px] text-sky-100">
-                  Vị trí bạn
-                </span>
               </div>
-            </div>
+            ) : (
+              <div className="mt-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-6 text-sm text-muted-foreground">
+                Chưa có tọa độ GPS cho cửa hàng. Vui lòng vào{" "}
+                <span className="font-semibold">Dashboard &gt; Settings</span> và
+                cập nhật mục <span className="font-semibold">GPS Location</span> để
+                xem bản đồ tại đây và bật kiểm tra khoảng cách khi chấm công.
+              </div>
+            )}
           </Card>
         </motion.div>
       </div>
