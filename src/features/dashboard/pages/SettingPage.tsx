@@ -324,16 +324,9 @@ const SettingPage = () => {
               distance < 1000
                 ? `${distance.toFixed(0)} m`
                 : `${(distance / 1000).toFixed(1)} km`;
-            const confirmChange = window.confirm(
-              `Vị trí hiện tại (${distanceText}) cách xa vị trí cửa hàng đang cấu hình.\n\nOK: Cập nhật lại GPS cửa hàng theo vị trí hiện tại.\nCancel: Giữ nguyên toạ độ cửa hàng.`,
+            toast(
+              `Vị trí hiện tại (${distanceText}) cách xa vị trí cửa hàng đang cấu hình. Vui lòng kiểm tra lại trước khi lưu GPS.`,
             );
-            if (!confirmChange) {
-              toast(
-                "Đã giữ nguyên toạ độ cửa hàng, không dùng vị trí hiện tại để cập nhật.",
-              );
-              setUsingCurrentLocation(false);
-              return;
-            }
           }
         }
         setStoreLatitude(String(latitude));
