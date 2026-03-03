@@ -20,6 +20,7 @@ const SettingPage = () => {
   const [storeSaving, setStoreSaving] = useState(false);
 
   const NOTIFICATION_KEY = "360retail-notification-settings";
+  const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
 
   const loadNotificationsFromStorage = () => {
     try {
@@ -77,16 +78,36 @@ const SettingPage = () => {
         setStoreName(store.storeName || "");
         setStoreAddress(store.address || "");
         setStorePhone(store.phone || "");
-        setStoreLatitude(
-          store.latitude !== undefined && store.latitude !== null
-            ? String(store.latitude)
-            : "",
-        );
-        setStoreLongitude(
-          store.longitude !== undefined && store.longitude !== null
-            ? String(store.longitude)
-            : "",
-        );
+        const hasGpsFromApi =
+          store.latitude !== undefined &&
+          store.latitude !== null &&
+          store.longitude !== undefined &&
+          store.longitude !== null;
+
+        if (hasGpsFromApi) {
+          setStoreLatitude(String(store.latitude));
+          setStoreLongitude(String(store.longitude));
+        } else {
+          try {
+            const cachedGps = localStorage.getItem(
+              `${STORE_GPS_KEY_PREFIX}${store.id}`,
+            );
+            if (cachedGps) {
+              const parsed = JSON.parse(cachedGps) as {
+                latitude?: string;
+                longitude?: string;
+              };
+              setStoreLatitude(parsed.latitude || "");
+              setStoreLongitude(parsed.longitude || "");
+            } else {
+              setStoreLatitude("");
+              setStoreLongitude("");
+            }
+          } catch {
+            setStoreLatitude("");
+            setStoreLongitude("");
+          }
+        }
       } catch (err) {
         console.error("Failed to load store:", err);
         toast.error("Không thể tải thông tin cửa hàng");
@@ -131,6 +152,17 @@ const SettingPage = () => {
         latitude,
         longitude,
       });
+      try {
+        localStorage.setItem(
+          `${STORE_GPS_KEY_PREFIX}${storeId}`,
+          JSON.stringify({
+            latitude: storeLatitude.trim(),
+            longitude: storeLongitude.trim(),
+          }),
+        );
+      } catch {
+        // ignore
+      }
       toast.success("Đã lưu thông tin cửa hàng!");
     } catch (err) {
       console.error("Failed to save store:", err);
