@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, CircleMarker } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import { motion } from "motion/react";
 import {
@@ -19,6 +19,27 @@ import { storesApi } from "@/shared/lib/storesApi";
 
 const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
 
+const toRad = (value: number) => (value * Math.PI) / 180;
+
+const getDistanceMeters = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) => {
+  const R = 6371; // km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c * 1000;
+};
+
 const TimekeepingPage = () => {
   const [loading, setLoading] = useState(true);
   const [today, setToday] = useState<
@@ -30,10 +51,32 @@ const TimekeepingPage = () => {
   const [processingCheckOut, setProcessingCheckOut] = useState(false);
   const [storeLatitude, setStoreLatitude] = useState<number | null>(null);
   const [storeLongitude, setStoreLongitude] = useState<number | null>(null);
+  const [userLatitude, setUserLatitude] = useState<number | null>(null);
+  const [userLongitude, setUserLongitude] = useState<number | null>(null);
   const storePosition = useMemo<LatLngExpression | null>(() => {
     if (storeLatitude === null || storeLongitude === null) return null;
     return [storeLatitude, storeLongitude];
   }, [storeLatitude, storeLongitude]);
+  const userPosition = useMemo<LatLngExpression | null>(() => {
+    if (userLatitude === null || userLongitude === null) return null;
+    return [userLatitude, userLongitude];
+  }, [userLatitude, userLongitude]);
+  const distanceMeters = useMemo(() => {
+    if (
+      storeLatitude === null ||
+      storeLongitude === null ||
+      userLatitude === null ||
+      userLongitude === null
+    ) {
+      return null;
+    }
+    return getDistanceMeters(
+      storeLatitude,
+      storeLongitude,
+      userLatitude,
+      userLongitude,
+    );
+  }, [storeLatitude, storeLongitude, userLatitude, userLongitude]);
 
   const loadToday = async () => {
     try {
@@ -100,6 +143,9 @@ const TimekeepingPage = () => {
 
   useEffect(() => {
     void loadToday();
+    void getCurrentLocation().catch(() => {
+      // ignore initial location error
+    });
   }, []);
 
   const getCurrentLocation = (): Promise<string> => {
@@ -111,6 +157,8 @@ const TimekeepingPage = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
+          setUserLatitude(latitude);
+          setUserLongitude(longitude);
           resolve(`${latitude},${longitude}`);
         },
         (error) => {
@@ -280,6 +328,17 @@ const TimekeepingPage = () => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
                   <Marker position={storePosition} />
+                  {userPosition && (
+                    <CircleMarker
+                      center={userPosition}
+                      radius={8}
+                      pathOptions={{
+                        color: "#0ea5e9",
+                        fillColor: "#0ea5e9",
+                        fillOpacity: 0.9,
+                      }}
+                    />
+                  )}
                 </MapContainer>
               </div>
             ) : (
@@ -289,6 +348,16 @@ const TimekeepingPage = () => {
                 cập nhật mục <span className="font-semibold">GPS Location</span> để
                 xem bản đồ tại đây và bật kiểm tra khoảng cách khi chấm công.
               </div>
+            )}
+            {distanceMeters !== null && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Khoảng cách hiện tại từ bạn tới cửa hàng:{" "}
+                <span className="font-medium text-foreground">
+                  {distanceMeters < 1000
+                    ? `${distanceMeters.toFixed(0)} m`
+                    : `${(distanceMeters / 1000).toFixed(2)} km`}
+                </span>
+              </p>
             )}
           </Card>
         </motion.div>
