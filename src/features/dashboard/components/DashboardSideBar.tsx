@@ -25,7 +25,7 @@ import {
   StaffCheckInModal,
 } from "@/features/dashboard/components/modals/QuickActionModals";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
-import { authApi } from "@/shared.lib/authApi";
+import { authApi } from "@/shared/lib/authApi";
 import { UserStatus } from "@/shared/types/jwt-claims";
 import { Button } from "@/shared/components/ui/button";
 import {

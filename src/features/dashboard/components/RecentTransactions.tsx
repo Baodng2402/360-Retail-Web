@@ -1,19 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowUpRight, ArrowDownLeft, RefreshCw } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
-import type { Order } from "@/shared/types/orders";
 import { formatVnd } from "@/shared/utils/formatMoney";
+import type { RecentActivityItem } from "@/shared/lib/salesDashboardApi";
 
-const getOrderIcon = (status: string) => {
-  switch (status) {
-    case "Refunded":
+const getActivityIcon = (type: string) => {
+  switch (type) {
+    case "Import":
       return (
-        <RefreshCw className="w-4 h-4 text-red-600 dark:text-red-400" />
+        <ArrowDownLeft className="w-4 h-4 text-blue-600 dark:text-blue-400" />
       );
-    case "Cancelled":
+    case "Export":
       return (
-        <ArrowDownLeft className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+        <ArrowUpRight className="w-4 h-4 text-orange-600 dark:text-orange-400" />
       );
+    case "Order":
     default:
       return (
         <ArrowUpRight className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -21,24 +22,18 @@ const getOrderIcon = (status: string) => {
   }
 };
 
-const getOrderBadge = (status: string) => {
+const getActivityBadge = (status: string) => {
   switch (status) {
-    case "Refunded":
+    case "Completed":
       return (
-        <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 border-red-500/20">
-          Refund
+        <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 border-green-500/20">
+          Hoàn thành
         </Badge>
       );
     case "Cancelled":
       return (
         <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 border-orange-500/20">
           Hủy
-        </Badge>
-      );
-    case "Completed":
-      return (
-        <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 border-green-500/20">
-          Hoàn thành
         </Badge>
       );
     case "Processing":
@@ -50,7 +45,7 @@ const getOrderBadge = (status: string) => {
     default:
       return (
         <Badge className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/20 border-yellow-500/20">
-          Chờ xử lý
+          {status}
         </Badge>
       );
   }
@@ -71,11 +66,11 @@ const formatTimeAgo = (dateStr: string) => {
 };
 
 interface RecentTransactionsProps {
-  orders: Order[];
+  activities: RecentActivityItem[];
   isLoading?: boolean;
 }
 
-const RecentTransactions = ({ orders, isLoading }: RecentTransactionsProps) => {
+const RecentTransactions = ({ activities, isLoading }: RecentTransactionsProps) => {
   const navigate = useNavigate();
 
   return (
@@ -106,61 +101,54 @@ const RecentTransactions = ({ orders, isLoading }: RecentTransactionsProps) => {
             />
           ))}
         </div>
-      ) : orders.length === 0 ? (
+      ) : activities.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">
           Chưa có giao dịch nào
         </div>
       ) : (
         <div className="space-y-3">
-          {orders.slice(0, 8).map((order) => {
-            const itemCount =
-              order.orderItems?.reduce((s, i) => s + i.quantity, 0) ?? 0;
-            return (
-              <div
-                key={order.id}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 md:p-4 rounded-xl bg-accent/50 hover:bg-accent transition-colors cursor-pointer border border-border"
-                onClick={() => navigate("/dashboard/sales")}
-              >
-                <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                  <div className="p-2 bg-background rounded-lg border border-border flex-shrink-0">
-                    {getOrderIcon(order.status)}
-                  </div>
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-semibold text-foreground truncate">
-                        {order.customerName || `Đơn #${order.code || order.id.slice(0, 8)}`}
-                      </span>
-                      {getOrderBadge(order.status)}
-                    </div>
-                    <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground flex-wrap">
-                      <span>{formatTimeAgo(order.createdAt)}</span>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="hidden sm:inline">{itemCount} items</span>
-                    </div>
-                  </div>
+          {activities.slice(0, 8).map((activity) => (
+            <div
+              key={`${activity.type}-${activity.code}-${activity.createdAt}`}
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 md:p-4 rounded-xl bg-accent/50 hover:bg-accent transition-colors cursor-pointer border border-border"
+              onClick={() => navigate("/dashboard/sales")}
+            >
+              <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                <div className="p-2 bg-background rounded-lg border border-border flex-shrink-0">
+                  {getActivityIcon(activity.type)}
                 </div>
-                <div className="flex flex-col items-end">
-                  <span
-                    className={`font-bold text-sm md:text-base ${
-                      order.status === "Completed"
-                        ? "text-green-600 dark:text-green-400"
-                        : order.status === "Refunded" || order.status === "Cancelled"
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-foreground"
-                    }`}
-                  >
-                    {order.status === "Refunded" || order.status === "Cancelled"
-                      ? "-"
-                      : "+"}
-                    {formatVnd(order.totalAmount)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {order.code || order.id.slice(0, 8)}
-                  </span>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-semibold text-foreground truncate">
+                      {activity.description || activity.code}
+                    </span>
+                    {getActivityBadge(activity.status)}
+                  </div>
+                  <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground flex-wrap">
+                    <span>{formatTimeAgo(activity.createdAt)}</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="hidden sm:inline">{activity.type}</span>
+                  </div>
                 </div>
               </div>
-            );
-          })}
+              <div className="flex flex-col items-end">
+                <span
+                  className={`font-bold text-sm md:text-base ${
+                    activity.amount && activity.amount > 0
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-foreground"
+                  }`}
+                >
+                  {activity.amount
+                    ? `+${formatVnd(activity.amount)}`
+                    : "-"}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {activity.code}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/components/ui/card";
-import { Button } from "@/shared.components.ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { ShoppingBag, Clock, ArrowRight } from "lucide-react";
 import { ordersApi } from "@/shared/lib/ordersApi";
 import type { Order } from "@/shared/types/orders";
@@ -9,6 +10,7 @@ import { formatVnd } from "@/shared/utils/formatMoney";
 const CustomerDashboardPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -78,6 +80,9 @@ const CustomerDashboardPage = () => {
                     size="sm"
                     variant="outline"
                     className="h-7 px-2 text-[11px] gap-1"
+                    onClick={() =>
+                      navigate(`/customer/orders/${order.id}`)
+                    }
                   >
                     <span>Chi tiết</span>
                     <ArrowRight className="h-3 w-3" />

@@ -29,6 +29,7 @@ import SubscriptionPlansPage from "@/features/subscription/pages/SubscriptionPla
 import PaymentSuccessPage from "@/features/payment/pages/PaymentSuccessPage";
 import PaymentFailedPage from "@/features/payment/pages/PaymentFailedPage";
 import CustomerDashboardPage from "@/features/customer/pages/CustomerDashboardPage";
+import CustomerOrderDetailPage from "@/features/customer/pages/CustomerOrderDetailPage";
 import SuperAdminPage from "@/features/admin/pages/SuperAdminPage";
 
 function App() {
@@ -88,11 +89,10 @@ function App() {
             </Route>
             <Route
               path="/customer"
-              element={
-                <ProtectedRoute allowedRoles={["Customer"]} />
-              }
+              element={<ProtectedRoute allowedRoles={["Customer"]} />}
             >
               <Route index element={<CustomerDashboardPage />} />
+              <Route path="orders/:orderId" element={<CustomerOrderDetailPage />} />
             </Route>
             <Route
               path="/admin"
