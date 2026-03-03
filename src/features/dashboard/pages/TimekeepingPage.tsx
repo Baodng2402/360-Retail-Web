@@ -17,6 +17,8 @@ import { Input } from "@/shared/components/ui/input";
 import { timekeepingApi } from "@/shared/lib/timekeepingApi";
 import { storesApi } from "@/shared/lib/storesApi";
 
+const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
+
 const TimekeepingPage = () => {
   const [loading, setLoading] = useState(true);
   const [today, setToday] = useState<
@@ -41,15 +43,49 @@ const TimekeepingPage = () => {
         storesApi.getMyStore().catch(() => null),
       ]);
       setToday(todayData);
-      if (
-        store &&
-        store.latitude !== undefined &&
-        store.latitude !== null &&
-        store.longitude !== undefined &&
-        store.longitude !== null
-      ) {
-        setStoreLatitude(store.latitude);
-        setStoreLongitude(store.longitude);
+      if (store) {
+        const hasGpsFromApi =
+          store.latitude !== undefined &&
+          store.latitude !== null &&
+          store.longitude !== undefined &&
+          store.longitude !== null;
+
+        if (hasGpsFromApi) {
+          setStoreLatitude(store.latitude);
+          setStoreLongitude(store.longitude);
+        } else {
+          try {
+            const cachedGps = localStorage.getItem(
+              `${STORE_GPS_KEY_PREFIX}${store.id}`,
+            );
+            if (cachedGps) {
+              const parsed = JSON.parse(cachedGps) as {
+                latitude?: string;
+                longitude?: string;
+              };
+              const lat = parsed.latitude ? Number(parsed.latitude) : null;
+              const lon = parsed.longitude ? Number(parsed.longitude) : null;
+              if (
+                lat !== null &&
+                !Number.isNaN(lat) &&
+                lon !== null &&
+                !Number.isNaN(lon)
+              ) {
+                setStoreLatitude(lat);
+                setStoreLongitude(lon);
+              } else {
+                setStoreLatitude(null);
+                setStoreLongitude(null);
+              }
+            } else {
+              setStoreLatitude(null);
+              setStoreLongitude(null);
+            }
+          } catch {
+            setStoreLatitude(null);
+            setStoreLongitude(null);
+          }
+        }
       } else {
         setStoreLatitude(null);
         setStoreLongitude(null);

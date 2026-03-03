@@ -28,6 +28,7 @@ const SettingPage = () => {
     { displayName: string; lat: string; lon: string }[]
   >([]);
   const [addressLoading, setAddressLoading] = useState(false);
+  const [addressSearchEnabled, setAddressSearchEnabled] = useState(true);
   const parsedLatitude = Number(storeLatitude.trim());
   const parsedLongitude = Number(storeLongitude.trim());
   const hasValidCoords =
@@ -143,6 +144,10 @@ const SettingPage = () => {
     loadStore();
   }, []);
   useEffect(() => {
+    if (!addressSearchEnabled) {
+      return;
+    }
+
     if (!storeAddress.trim() || storeAddress.trim().length < 3) {
       setAddressSuggestions([]);
       return;
@@ -367,7 +372,10 @@ const SettingPage = () => {
                       placeholder="Enter address..."
                       ref={addressInputRef}
                       value={storeAddress}
-                      onChange={(e) => setStoreAddress(e.target.value)}
+                      onChange={(e) => {
+                        setAddressSearchEnabled(true);
+                        setStoreAddress(e.target.value);
+                      }}
                     />
                     {addressLoading && (
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -386,6 +394,8 @@ const SettingPage = () => {
                               setStoreLatitude(s.lat);
                               setStoreLongitude(s.lon);
                               setAddressSuggestions([]);
+                              setAddressSearchEnabled(false);
+                              addressInputRef.current?.blur();
                             }}
                           >
                             {s.displayName}
