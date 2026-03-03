@@ -11,6 +11,10 @@ const PAGE_NAME: Record<string, { name: string; title: string }> = {
   "/dashboard/customers": { name: "Customers", title: "Quản lý Khách hàng" },
   "/dashboard/reports": { name: "Reports", title: "Báo cáo" },
   "/dashboard/settings": { name: "Settings", title: "Cài đặt" },
+  "/dashboard/timekeeping": {
+    name: "Timekeeping",
+    title: "Chấm công GPS & Selfie",
+  },
 };
 
 interface DashboardHeaderProps {
