@@ -4,13 +4,23 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
-import { Store, Bell, Shield, MapPin, Loader2 } from "lucide-react";
+import {
+  Store,
+  Bell,
+  Shield,
+  MapPin,
+  Loader2,
+  Star,
+  Percent,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import toast from "react-hot-toast";
 import { storesApi } from "@/shared/lib/storesApi";
 import { authApi } from "@/shared/lib/authApi";
+import { loyaltyApi } from "@/shared/lib/loyaltyApi";
+import type { LoyaltyRule } from "@/shared/types/loyalty";
 
 const toRad = (value: number) => (value * Math.PI) / 180;
 
@@ -116,6 +126,18 @@ const SettingPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
+
+  const [loyaltyRules, setLoyaltyRules] = useState<LoyaltyRule[]>([]);
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+  const [editingRule, setEditingRule] = useState<LoyaltyRule | null>(null);
+  const [ruleForm, setRuleForm] = useState({
+    name: "",
+    type: 0,
+    earningRate: 1,
+    minSpend: 10000,
+    status: 0,
+  });
+  const [ruleSaving, setRuleSaving] = useState(false);
 
   useEffect(() => {
     const loadStore = async () => {
@@ -412,6 +434,17 @@ const SettingPage = () => {
             >
               <Bell className="h-4 w-4" />
               Notifications / Thông báo
+            </button>
+            <button
+              onClick={() => setActiveTab("loyalty")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "loyalty"
+                  ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm"
+                  : "hover:bg-teal-50 dark:hover:bg-teal-900/20 text-foreground"
+              }`}
+            >
+              <Percent className="h-4 w-4" />
+              Loyalty Rules / Tích điểm
             </button>
             <button
               onClick={() => setActiveTab("security")}
@@ -736,6 +769,266 @@ const SettingPage = () => {
                     onCheckedChange={(v) => updateNotification("weeklyReport", v)}
                     className="data-[state=checked]:bg-teal-600"
                   />
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === "loyalty" && (
+            <>
+              <div className="flex items-center gap-2 mb-6">
+                <Star className="h-5 w-5 text-teal-600" />
+                <h3 className="text-lg font-bold">
+                  Loyalty Rules / Cấu hình tích điểm
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Thiết lập quy tắc tích điểm cho khách hàng. Mỗi quy tắc định nghĩa
+                cách quy đổi doanh thu sang điểm thưởng.
+              </p>
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    Các quy tắc sẽ được áp dụng theo thứ tự ưu tiên do backend quy định.
+                  </p>
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
+                    onClick={async () => {
+                      setEditingRule(null);
+                      setRuleForm({
+                        name: "",
+                        type: 0,
+                        earningRate: 1,
+                        minSpend: 10000,
+                        status: 0,
+                      });
+                      if (!loyaltyRules.length) {
+                        setLoyaltyLoading(true);
+                        try {
+                          const rules = await loyaltyApi.getRules();
+                          setLoyaltyRules(rules);
+                        } catch (err) {
+                          console.error("Failed to load loyalty rules:", err);
+                          toast.error("Không thể tải danh sách loyalty rules.");
+                        } finally {
+                          setLoyaltyLoading(false);
+                        }
+                      }
+                    }}
+                  >
+                    Thêm quy tắc
+                  </Button>
+                </div>
+
+                <div className="grid gap-4">
+                  {loyaltyLoading ? (
+                    <div className="py-6 text-center text-muted-foreground text-sm">
+                      Đang tải loyalty rules...
+                    </div>
+                  ) : loyaltyRules.length === 0 ? (
+                    <div className="py-6 text-center text-muted-foreground text-sm border rounded-lg">
+                      Chưa có loyalty rule nào. Bạn có thể thêm quy tắc đầu tiên.
+                    </div>
+                  ) : (
+                    loyaltyRules.map((rule) => (
+                      <div
+                        key={rule.id}
+                        className="border rounded-lg p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-foreground">
+                              {rule.name}
+                            </span>
+                            {rule.status === 0 ? (
+                              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                                Đang áp dụng
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                                Tạm tắt
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Tích {rule.earningRate} điểm mỗi{" "}
+                            {rule.minSpend.toLocaleString("vi-VN")}₫ chi tiêu.
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingRule(rule);
+                              setRuleForm({
+                                name: rule.name,
+                                type: rule.type,
+                                earningRate: rule.earningRate,
+                                minSpend: rule.minSpend,
+                                status: rule.status,
+                              });
+                            }}
+                          >
+                            Chỉnh sửa
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className={
+                              rule.status === 0
+                                ? "border-red-500 text-red-600 hover:bg-red-50"
+                                : "border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                            }
+                            onClick={async () => {
+                              const newStatus = rule.status === 0 ? 1 : 0;
+                              try {
+                                const updated = await loyaltyApi.updateRule(rule.id, {
+                                  name: rule.name,
+                                  type: rule.type,
+                                  earningRate: rule.earningRate,
+                                  minSpend: rule.minSpend,
+                                  status: newStatus,
+                                });
+                                setLoyaltyRules((prev) =>
+                                  prev.map((r) => (r.id === rule.id ? updated : r)),
+                                );
+                              } catch (err) {
+                                console.error("Failed to toggle rule:", err);
+                                toast.error("Không thể cập nhật trạng thái loyalty rule.");
+                              }
+                            }}
+                          >
+                            {rule.status === 0 ? "Tạm tắt" : "Kích hoạt"}
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm">
+                    {editingRule ? "Chỉnh sửa quy tắc" : "Tạo mới / cập nhật quy tắc"}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Tên quy tắc</Label>
+                      <Input
+                        value={ruleForm.name}
+                        onChange={(e) =>
+                          setRuleForm((s) => ({ ...s, name: e.target.value }))
+                        }
+                        placeholder="Tích 1 điểm / 10,000đ"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Tỷ lệ điểm (earningRate)</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={ruleForm.earningRate}
+                        onChange={(e) =>
+                          setRuleForm((s) => ({
+                            ...s,
+                            earningRate: Number(e.target.value) || 1,
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Mức chi tối thiểu (minSpend)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={1000}
+                        value={ruleForm.minSpend}
+                        onChange={(e) =>
+                          setRuleForm((s) => ({
+                            ...s,
+                            minSpend: Number(e.target.value) || 0,
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Trạng thái</Label>
+                      <div className="flex items-center gap-2 text-xs">
+                        <Switch
+                          checked={ruleForm.status === 0}
+                          onCheckedChange={(v) =>
+                            setRuleForm((s) => ({ ...s, status: v ? 0 : 1 }))
+                          }
+                          className="data-[state=checked]:bg-teal-600"
+                        />
+                        <span className="text-muted-foreground">
+                          {ruleForm.status === 0 ? "Đang áp dụng" : "Tạm tắt"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditingRule(null);
+                        setRuleForm({
+                          name: "",
+                          type: 0,
+                          earningRate: 1,
+                          minSpend: 10000,
+                          status: 0,
+                        });
+                      }}
+                    >
+                      Xóa form
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={ruleSaving}
+                      className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
+                      onClick={async () => {
+                        if (!ruleForm.name.trim()) {
+                          toast.error("Vui lòng nhập tên quy tắc.");
+                          return;
+                        }
+                        try {
+                          setRuleSaving(true);
+                          if (editingRule) {
+                            const updated = await loyaltyApi.updateRule(
+                              editingRule.id,
+                              ruleForm,
+                            );
+                            setLoyaltyRules((prev) =>
+                              prev.map((r) =>
+                                r.id === editingRule.id ? updated : r,
+                              ),
+                            );
+                            toast.success("Đã cập nhật loyalty rule.");
+                          } else {
+                            const created = await loyaltyApi.createRule(ruleForm);
+                            setLoyaltyRules((prev) => [created, ...prev]);
+                            toast.success("Đã tạo loyalty rule mới.");
+                          }
+                        } catch (err) {
+                          console.error("Failed to save loyalty rule:", err);
+                          toast.error("Không thể lưu loyalty rule. Vui lòng thử lại.");
+                        } finally {
+                          setRuleSaving(false);
+                        }
+                      }}
+                    >
+                      {ruleSaving
+                        ? "Đang lưu..."
+                        : editingRule
+                          ? "Lưu thay đổi"
+                          : "Tạo quy tắc"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </>

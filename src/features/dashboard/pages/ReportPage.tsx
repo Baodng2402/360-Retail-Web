@@ -1,57 +1,236 @@
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
-import { FileText, Download, Calendar, TrendingUp } from "lucide-react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import {
+  FileText,
+  Star,
+  Frown,
+  Smile,
+  MessageSquare,
+  BarChart3,
+} from "lucide-react";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
+import { feedbackApi } from "@/shared/lib/feedbackApi";
+import type {
+  FeedbackPagedResult,
+  FeedbackSummary,
+} from "@/shared/lib/feedbackApi";
 
 const ReportPage = () => {
+  const [summary, setSummary] = useState<FeedbackSummary | null>(null);
+  const [feedbackPaged, setFeedbackPaged] = useState<FeedbackPagedResult>({
+    items: [],
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const [s, list] = await Promise.all([
+          feedbackApi.getSummary(),
+          feedbackApi.getFeedback({ page: 1, pageSize: 10 }),
+        ]);
+        setSummary(s);
+        setFeedbackPaged(list);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void load();
+  }, []);
+
+  const distributionData = useMemo(() => {
+    if (!summary) return [];
+    const entries = Object.entries(summary.distribution ?? {}).sort(
+      (a, b) => Number(a[0]) - Number(b[0]),
+    );
+    return entries.map(([rating, count]) => ({
+      rating: Number(rating),
+      count,
+      percentage:
+        summary.totalCount > 0 ? (count / summary.totalCount) * 100 : 0,
+    }));
+  }, [summary]);
+
   return (
     <div className="space-y-6">
       <StoreSelector pageDescription="Chuyển đổi để xem báo cáo của cửa hàng khác" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="p-6 hover:shadow-lg transition-shadow">
-          <FileText className="h-8 w-8 text-teal-600 mb-4" />
-          <h3 className="font-bold mb-2">Sales Report</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Báo cáo doanh số bán hàng theo thời gian
-          </p>
-          <Button className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Report
-          </Button>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white">
+                <Star className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-base">
+                  Customer Feedback Overview
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Điểm hài lòng tổng quan từ khách hàng.
+                </p>
+              </div>
+            </div>
+            {summary && (
+              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 text-xs gap-1">
+                <Smile className="h-3 w-3" />
+                {summary.avgRating.toFixed(1)}/5
+              </Badge>
+            )}
+          </div>
+          {loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-24" />
+              <Skeleton className="h-3 w-40" />
+              <Skeleton className="h-3 w-52" />
+            </div>
+          ) : summary ? (
+            <div className="space-y-2">
+              <p className="text-3xl font-bold text-foreground">
+                {summary.avgRating.toFixed(1)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Dựa trên {summary.totalCount} phản hồi của khách hàng.
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Chưa có dữ liệu feedback để thống kê.
+            </p>
+          )}
         </Card>
 
-        <Card className="p-6 hover:shadow-lg transition-shadow">
-          <TrendingUp className="h-8 w-8 text-teal-600 mb-4" />
-          <h3 className="font-bold mb-2">Revenue Analysis</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Phân tích doanh thu theo sản phẩm, nhân viên
-          </p>
-          <Button className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Report
-          </Button>
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white">
+              <BarChart3 className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-base">
+                Rating Distribution / Phân bổ điểm
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Tỷ lệ số lượng feedback theo từng mức sao.
+              </p>
+            </div>
+          </div>
+          {loading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-4 w-full" />
+              ))}
+            </div>
+          ) : distributionData.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Chưa có dữ liệu phân bổ điểm.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {distributionData.map((item) => (
+                <div
+                  key={item.rating}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  <div className="w-10 flex items-center gap-1">
+                    <span className="font-medium">{item.rating}</span>
+                    <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
+                  </div>
+                  <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-teal-500 to-teal-400"
+                      style={{ width: `${item.percentage.toFixed(1)}%` }}
+                    />
+                  </div>
+                  <span className="w-14 text-right text-muted-foreground">
+                    {item.count} ({item.percentage.toFixed(0)}%)
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
-        <Card className="p-6 hover:shadow-lg transition-shadow">
-          <Calendar className="h-8 w-8 text-teal-600 mb-4" />
-          <h3 className="font-bold mb-2">Attendance Report</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Báo cáo chấm công nhân viên theo tháng
-          </p>
-          <Button className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Report
-          </Button>
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center text-white">
+              <Frown className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-base">
+                Recent Feedback / Phản hồi gần đây
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Các feedback mới nhất từ khách hàng.
+              </p>
+            </div>
+          </div>
+          {loading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          ) : feedbackPaged.items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Chưa có feedback nào được ghi nhận.
+            </p>
+          ) : (
+            <div className="space-y-2 text-xs">
+              {feedbackPaged.items.slice(0, 4).map((f) => (
+                <div
+                  key={f.id}
+                  className="border rounded-lg px-2.5 py-2 bg-background space-y-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{f.customerName}</span>
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
+                      <span>{f.rating}/5</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground line-clamp-2">
+                    {f.content || "Khách không để lại nội dung chi tiết."}
+                  </p>
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span>{f.source}</span>
+                    <span>
+                      {new Date(f.createdAt).toLocaleDateString("vi-VN")}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
 
-      <Card className="p-12 text-center">
-        <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-xl font-bold mb-2">Coming Soon</h3>
-        <p className="text-muted-foreground">
-          Advanced reporting features are under development / Tính năng báo cáo
-          nâng cao đang phát triển
-        </p>
+      <Card className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center">
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold">
+              Chi tiết báo cáo nâng cao
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Xuất dữ liệu feedback để phân tích sâu hơn trong Excel/BI tool.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs text-muted-foreground hover:bg-muted"
+        >
+          <MessageSquare className="h-3 w-3" />
+          Export coming soon
+        </button>
       </Card>
     </div>
   );
