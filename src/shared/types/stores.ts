@@ -3,6 +3,8 @@ export interface Store {
   storeName: string;
   address?: string;
   phone?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   email?: string;
   isActive: boolean;
   createdAt?: string;
@@ -21,4 +23,6 @@ export interface UpdateStoreDto {
   address?: string;
   phone?: string;
   isActive: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
 }

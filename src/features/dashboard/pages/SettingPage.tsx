@@ -4,7 +4,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
-import { Store, Bell, Shield } from "lucide-react";
+import { Store, Bell, Shield, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { storesApi } from "@/shared/lib/storesApi";
@@ -14,6 +14,8 @@ const SettingPage = () => {
   const [storeName, setStoreName] = useState("");
   const [storeAddress, setStoreAddress] = useState("");
   const [storePhone, setStorePhone] = useState("");
+  const [storeLatitude, setStoreLatitude] = useState<string>("");
+  const [storeLongitude, setStoreLongitude] = useState<string>("");
   const [storeLoading, setStoreLoading] = useState(true);
   const [storeSaving, setStoreSaving] = useState(false);
 
@@ -75,6 +77,16 @@ const SettingPage = () => {
         setStoreName(store.storeName || "");
         setStoreAddress(store.address || "");
         setStorePhone(store.phone || "");
+        setStoreLatitude(
+          store.latitude !== undefined && store.latitude !== null
+            ? String(store.latitude)
+            : "",
+        );
+        setStoreLongitude(
+          store.longitude !== undefined && store.longitude !== null
+            ? String(store.longitude)
+            : "",
+        );
       } catch (err) {
         console.error("Failed to load store:", err);
         toast.error("Không thể tải thông tin cửa hàng");
@@ -87,6 +99,28 @@ const SettingPage = () => {
 
   const handleSaveStore = async () => {
     if (!storeId) return;
+
+    let latitude: number | null | undefined = undefined;
+    let longitude: number | null | undefined = undefined;
+
+    if (storeLatitude.trim()) {
+      const parsed = Number(storeLatitude.trim());
+      if (Number.isNaN(parsed)) {
+        toast.error("Latitude không hợp lệ");
+        return;
+      }
+      latitude = parsed;
+    }
+
+    if (storeLongitude.trim()) {
+      const parsed = Number(storeLongitude.trim());
+      if (Number.isNaN(parsed)) {
+        toast.error("Longitude không hợp lệ");
+        return;
+      }
+      longitude = parsed;
+    }
+
     setStoreSaving(true);
     try {
       await storesApi.updateStore(storeId, {
@@ -94,6 +128,8 @@ const SettingPage = () => {
         address: storeAddress || undefined,
         phone: storePhone || undefined,
         isActive: true,
+        latitude,
+        longitude,
       });
       toast.success("Đã lưu thông tin cửa hàng!");
     } catch (err) {
@@ -131,6 +167,26 @@ const SettingPage = () => {
     } finally {
       setPasswordSaving(false);
     }
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Trình duyệt không hỗ trợ GPS/location.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setStoreLatitude(String(pos.coords.latitude));
+        setStoreLongitude(String(pos.coords.longitude));
+        toast.success("Đã lấy tọa độ hiện tại.");
+      },
+      () => {
+        toast.error(
+          "Không thể lấy vị trí hiện tại. Vui lòng bật Location cho trình duyệt.",
+        );
+      },
+      { enableHighAccuracy: true, timeout: 15000 },
+    );
   };
 
   return (
@@ -221,6 +277,50 @@ const SettingPage = () => {
                       value={storePhone}
                       onChange={(e) => setStorePhone(e.target.value)}
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>GPS Location (tùy chọn)</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs gap-1"
+                        onClick={handleUseCurrentLocation}
+                      >
+                        <MapPin className="h-3 w-3" />
+                        Dùng vị trí hiện tại
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Nếu bạn nhập tọa độ GPS, hệ thống sẽ dùng để kiểm tra khoảng cách khi
+                      nhân viên chấm công.
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="store-latitude" className="text-xs">
+                          Latitude
+                        </Label>
+                        <Input
+                          id="store-latitude"
+                          placeholder="10.7769"
+                          value={storeLatitude}
+                          onChange={(e) => setStoreLatitude(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="store-longitude" className="text-xs">
+                          Longitude
+                        </Label>
+                        <Input
+                          id="store-longitude"
+                          placeholder="106.7009"
+                          value={storeLongitude}
+                          onChange={(e) => setStoreLongitude(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <Separator />
