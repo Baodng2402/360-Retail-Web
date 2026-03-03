@@ -49,7 +49,7 @@ const SettingPage = () => {
     { displayName: string; lat: string; lon: string }[]
   >([]);
   const [addressLoading, setAddressLoading] = useState(false);
-  const [addressSearchEnabled, setAddressSearchEnabled] = useState(true);
+  const [addressSearchEnabled, setAddressSearchEnabled] = useState(false);
   const [usingCurrentLocation, setUsingCurrentLocation] = useState(false);
   const parsedLatitude = Number(storeLatitude.trim());
   const parsedLongitude = Number(storeLongitude.trim());
@@ -167,6 +167,8 @@ const SettingPage = () => {
   }, []);
   useEffect(() => {
     if (!addressSearchEnabled) {
+      setAddressSuggestions([]);
+      setAddressLoading(false);
       return;
     }
 
@@ -212,7 +214,7 @@ const SettingPage = () => {
       controller.abort();
       window.clearTimeout(timeoutId);
     };
-  }, [storeAddress]);
+  }, [storeAddress, addressSearchEnabled]);
 
   const handleSaveStore = async () => {
     if (!storeId) return;

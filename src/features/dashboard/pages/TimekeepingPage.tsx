@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, TileLayer, CircleMarker } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  CircleMarker,
+  useMap,
+} from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
+import L from "leaflet";
 import { motion } from "motion/react";
 import {
   AlertCircle,
@@ -77,6 +84,27 @@ const TimekeepingPage = () => {
       userLongitude,
     );
   }, [storeLatitude, storeLongitude, userLatitude, userLongitude]);
+
+  const FitBoundsToPositions = ({
+    storePos,
+    userPos,
+    distance,
+  }: {
+    storePos: LatLngExpression;
+    userPos: LatLngExpression;
+    distance: number | null;
+  }) => {
+    const map = useMap();
+    useEffect(() => {
+      if (!distance || distance < 100) return;
+      const bounds = L.latLngBounds(
+        storePos as [number, number],
+        userPos as [number, number],
+      );
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }, [storePos, userPos, distance, map]);
+    return null;
+  };
 
   const loadToday = async () => {
     try {
@@ -194,6 +222,28 @@ const TimekeepingPage = () => {
     try {
       setProcessingCheckIn(true);
       const locationGps = await getCurrentLocation();
+      const [latStr, lonStr] = locationGps.split(",");
+      const currentLat = Number(latStr);
+      const currentLon = Number(lonStr);
+      if (
+        storeLatitude !== null &&
+        storeLongitude !== null &&
+        !Number.isNaN(currentLat) &&
+        !Number.isNaN(currentLon)
+      ) {
+        const distance = getDistanceMeters(
+          storeLatitude,
+          storeLongitude,
+          currentLat,
+          currentLon,
+        );
+        if (distance > 3000) {
+          toast.error(
+            "Bạn đang cách cửa hàng quá xa, không thể check-in bằng GPS. Vui lòng kiểm tra lại.",
+          );
+          return;
+        }
+      }
 
       let checkInImageUrl: string | undefined;
       if (selfieFile) {
@@ -223,6 +273,28 @@ const TimekeepingPage = () => {
     try {
       setProcessingCheckOut(true);
       const locationGps = await getCurrentLocation();
+      const [latStr, lonStr] = locationGps.split(",");
+      const currentLat = Number(latStr);
+      const currentLon = Number(lonStr);
+      if (
+        storeLatitude !== null &&
+        storeLongitude !== null &&
+        !Number.isNaN(currentLat) &&
+        !Number.isNaN(currentLon)
+      ) {
+        const distance = getDistanceMeters(
+          storeLatitude,
+          storeLongitude,
+          currentLat,
+          currentLon,
+        );
+        if (distance > 3000) {
+          toast.error(
+            "Bạn đang cách cửa hàng quá xa, không thể check-out bằng GPS. Vui lòng kiểm tra lại.",
+          );
+          return;
+        }
+      }
 
       await timekeepingApi.checkOut({ locationGps });
       toast.success("Check-out thành công!");
@@ -337,6 +409,13 @@ const TimekeepingPage = () => {
                         fillColor: "#0ea5e9",
                         fillOpacity: 0.9,
                       }}
+                    />
+                  )}
+                  {userPosition && distanceMeters !== null && (
+                    <FitBoundsToPositions
+                      storePos={storePosition}
+                      userPos={userPosition}
+                      distance={distanceMeters}
                     />
                   )}
                 </MapContainer>
