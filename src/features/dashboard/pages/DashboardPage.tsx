@@ -19,9 +19,9 @@ import { UserStatus } from "@/shared/types/jwt-claims";
 import { Button } from "@/shared/components/ui/button";
 import { Store, ArrowRight, Gift } from "lucide-react";
 import { useAuthStore } from "@/shared/store/authStore";
-import { ordersApi } from "@/shared/lib/ordersApi";
 import { productsApi } from "@/shared/lib/productsApi";
 import { employeesApi } from "@/shared/lib/employeesApi";
+import { salesDashboardApi } from "@/shared/lib/salesDashboardApi";
 import { formatVnd } from "@/shared/utils/formatMoney";
 import { motion } from "motion/react";
 
@@ -42,10 +42,21 @@ const DashboardPage = () => {
   const [showStartTrialDialog, setShowStartTrialDialog] = useState(false);
   const { user } = useAuthStore();
 
-  const [orders, setOrders] = useState<Awaited<ReturnType<typeof ordersApi.getOrders>>>([]);
-  const [products, setProducts] = useState<Awaited<ReturnType<typeof productsApi.getProducts>>>([]);
-  const [employees, setEmployees] = useState<Awaited<ReturnType<typeof employeesApi.getEmployees>>>([]);
+  const [overview, setOverview] = useState<
+    Awaited<ReturnType<typeof salesDashboardApi.getOverview>> | null
+  >(null);
+  const [orders, setOrders] = useState<
+    Awaited<ReturnType<typeof salesDashboardApi.getRecentActivity>>["activities"]
+  >([]);
+  const [products, setProducts] = useState<
+    Awaited<ReturnType<typeof productsApi.getProducts>>
+  >([]);
+  const [employees, setEmployees] = useState<
+    Awaited<ReturnType<typeof employeesApi.getEmployees>>
+  >([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [chartBarData, setChartBarData] = useState<ChartDataItem[]>([]);
+  const [chartLineData, setChartLineData] = useState<ChartLineDataItem[]>([]);
 
   const checkUserStoreStatus = async () => {
     try {
@@ -85,19 +96,54 @@ const DashboardPage = () => {
         today.setHours(0, 0, 0, 0);
         const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        const [ordersRes, productsRes, employeesRes] = await Promise.all([
-          ordersApi.getOrdersPaged({
-            fromDate: monthStart.toISOString(),
-            toDate: new Date().toISOString(),
-            pageSize: 100,
+        const [
+          overviewRes,
+          revenueChart,
+          topProducts,
+          activityRes,
+          employeesRes,
+          productsRes,
+        ] = await Promise.all([
+          salesDashboardApi.getOverview({
+            from: monthStart.toISOString(),
+            to: new Date().toISOString(),
           }),
-          productsApi.getProducts({ pageSize: 100, includeInactive: false }),
+          salesDashboardApi.getRevenueChart({
+            from: monthStart.toISOString(),
+            to: new Date().toISOString(),
+            groupBy: "month",
+          }),
+          salesDashboardApi.getTopProducts({
+            from: monthStart.toISOString(),
+            to: new Date().toISOString(),
+            top: 5,
+          }),
+          salesDashboardApi.getRecentActivity(20),
           employeesApi.getEmployees(true).catch(() => []),
+          productsApi.getProducts({ pageSize: 100, includeInactive: false }),
         ]);
 
-        setOrders(ordersRes.items);
-        setProducts(productsRes);
+        setOverview(overviewRes);
+        setOrders(activityRes.activities || []);
         setEmployees(employeesRes);
+        setProducts(productsRes);
+
+        const barData: ChartDataItem[] = topProducts.map((p, index) => ({
+          items: p.productName,
+          values: p.quantitySold,
+          fill: ["#14b8a6", "#3b82f6", "#a855f7", "#f97316", "#22c55e"][
+            index % 5
+          ],
+        }));
+        setChartBarData(barData);
+
+        const lineData: ChartLineDataItem[] = revenueChart.dataPoints.map(
+          (p) => ({
+            month: p.label,
+            desktop: p.revenue,
+          }),
+        );
+        setChartLineData(lineData);
       } catch (err) {
         console.error("Failed to load dashboard:", err);
       } finally {
@@ -109,23 +155,37 @@ const DashboardPage = () => {
   }, [userStatus]);
 
   const stats: StatItem[] = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-
-    const todayOrders = orders.filter((o) => new Date(o.createdAt) >= today);
-    const todayRevenue = todayOrders.reduce((s, o) => s + o.totalAmount, 0);
-    const monthlyRevenue = orders
-      .filter((o) => new Date(o.createdAt) >= monthStart)
-      .reduce((s, o) => s + o.totalAmount, 0);
+    if (!overview) return [];
     const activeEmployees = employees.filter((e) => e.isActive);
 
     return [
       {
-        label: "Today's Revenue",
-        subLabel: "Doanh thu hôm nay",
-        value: formatVnd(todayRevenue),
-        change: todayOrders.length > 0 ? `${todayOrders.length} đơn` : null,
+        label: "Total Revenue",
+        subLabel: "Doanh thu (30 ngày)",
+        value: formatVnd(overview.totalRevenue),
+        change:
+          overview.revenueGrowth !== undefined
+            ? `${overview.revenueGrowth.toFixed(1)}%`
+            : null,
+        icon: DollarSign,
+        color: "bg-teal-100 text-black",
+      },
+      {
+        label: "Total Orders",
+        subLabel: "Đơn hàng (30 ngày)",
+        value: String(overview.totalOrders),
+        change:
+          overview.orderGrowth !== undefined
+            ? `${overview.orderGrowth.toFixed(1)}%`
+            : null,
+        icon: ShoppingBag,
+        color: "bg-purple-100 text-black",
+      },
+      {
+        label: "Avg. Order Value",
+        subLabel: "Giá trị đơn trung bình",
+        value: formatVnd(overview.avgOrderValue),
+        change: null,
         icon: DollarSign,
         color: "bg-teal-100 text-black",
       },
@@ -133,73 +193,17 @@ const DashboardPage = () => {
         label: "Active Staff",
         subLabel: "Nhân viên đang làm",
         value: `${activeEmployees.length}/${employees.length}`,
-        change: employees.length > 0 ? "100%" : null,
+        change: undefined,
         icon: Users,
         color: "bg-orange-100 text-black",
       },
-      {
-        label: "New Orders",
-        subLabel: "Đơn hàng hôm nay",
-        value: String(todayOrders.length),
-        change: null,
-        icon: ShoppingBag,
-        color: "bg-purple-100 text-black",
-      },
-      {
-        label: "Monthly Revenue",
-        subLabel: "Doanh thu tháng này",
-        value: formatVnd(monthlyRevenue),
-        change: null,
-        icon: DollarSign,
-        color: "bg-teal-100 text-black",
-      },
     ];
-  }, [orders, employees]);
-
-  const chartBarData: ChartDataItem[] = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const o of orders) {
-      for (const item of o.orderItems || []) {
-        const name = item.productName || "Sản phẩm";
-        map.set(name, (map.get(name) || 0) + item.quantity);
-      }
-    }
-    const colors = ["#14b8a6", "#3b82f6", "#a855f7", "#f97316", "#22c55e"];
-    return Array.from(map.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([items, values], i) => ({
-        items,
-        values,
-        fill: colors[i % colors.length],
-      }));
-  }, [orders]);
-
-  const chartLineData: ChartLineDataItem[] = useMemo(() => {
-    const monthNames = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"];
-    const now = new Date();
-    const result: ChartLineDataItem[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const next = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-      const total = orders
-        .filter(
-          (o) =>
-            new Date(o.createdAt) >= d && new Date(o.createdAt) <= next
-        )
-        .reduce((s, o) => s + o.totalAmount, 0);
-      result.push({
-        month: monthNames[d.getMonth()],
-        desktop: total,
-      });
-    }
-    return result;
-  }, [orders]);
+  }, [overview, employees]);
 
   const lowStockProducts = useMemo(
     () =>
       products.filter((p) => p.stockQuantity > 0 && p.stockQuantity <= 10),
-    [products]
+    [products],
   );
 
   const handleCreateStore = () => {

@@ -1,15 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
-import { CreditCard, CheckCircle, AlertCircle, Clock, Loader2, Building2, Store, Calendar, User } from "lucide-react";
+import {
+  CreditCard,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Loader2,
+  Building2,
+  Store,
+  Calendar,
+  User,
+  ListChecks,
+  CalendarCheck,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { EditProfileForm } from "@/features/dashboard/components/EditProfileForm";
 import { useAuthStore } from "@/shared/store/authStore";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { storesApi } from "@/shared/lib/storesApi";
+import { tasksApi } from "@/shared/lib/tasksApi";
+import { timekeepingApi } from "@/shared/lib/timekeepingApi";
 import type { MySubscription } from "@/shared/types/subscription";
+import type { Task } from "@/shared/types/task";
+import type { TimekeepingHistoryRecord } from "@/shared/lib/timekeepingApi";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -94,10 +110,15 @@ export function ProfilePage() {
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [storesWithSubscription, setStoresWithSubscription] = useState<StoreWithSubscription[]>([]);
   const [storesLoading, setStoresLoading] = useState(true);
+  const [myTasks, setMyTasks] = useState<Task[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [timeHistory, setTimeHistory] = useState<TimekeepingHistoryRecord[]>([]);
+  const [timeLoading, setTimeLoading] = useState(false);
 
   useEffect(() => {
     loadSubscriptionData();
     loadStoresData();
+    loadHrData();
   }, []);
 
   const loadSubscriptionData = async () => {
@@ -151,6 +172,24 @@ export function ProfilePage() {
     }
   };
 
+  const loadHrData = async () => {
+    try {
+      setTasksLoading(true);
+      setTimeLoading(true);
+      const [tasks, history] = await Promise.all([
+        tasksApi.getMyTasks(true).catch(() => []),
+        timekeepingApi.getHistory().catch(() => []),
+      ]);
+      setMyTasks(tasks);
+      setTimeHistory(history);
+    } catch (err) {
+      console.error("Failed to load HR data:", err);
+    } finally {
+      setTasksLoading(false);
+      setTimeLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -160,6 +199,32 @@ export function ProfilePage() {
   }
 
   const progress = calculateProgress(subscriptionInfo?.startDate, subscriptionInfo?.endDate);
+
+  const activeTasks = useMemo(
+    () =>
+      myTasks.filter(
+        (t) => t.status !== "Completed" && t.status !== "Cancelled" && t.isActive,
+      ),
+    [myTasks],
+  );
+
+  const timeSummary = useMemo(() => {
+    if (!timeHistory.length) {
+      return { days: 0, hours: 0, late: 0 };
+    }
+    let days = timeHistory.length;
+    let hours = 0;
+    let late = 0;
+    for (const r of timeHistory) {
+      if (typeof r.workHours === "number") {
+        hours += r.workHours;
+      }
+      if (r.isLate) {
+        late += 1;
+      }
+    }
+    return { days, hours, late };
+  }, [timeHistory]);
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-6">
@@ -314,7 +379,9 @@ export function ProfilePage() {
               <Building2 className="h-5 w-5" />
               Cửa hàng của bạn ({storesWithSubscription.length})
             </h3>
-            {storesLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            {storesLoading && (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            )}
           </div>
 
           {storesLoading ? (
@@ -331,7 +398,7 @@ export function ProfilePage() {
                   transition={{ delay: 0.3 + index * 0.1 }}
                   className={cn(
                     "border rounded-lg p-4 transition-all hover:shadow-md bg-white/50 dark:bg-gray-800/30",
-                    !item.store.isActive && "opacity-60"
+                    !item.store.isActive && "opacity-60",
                   )}
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -343,7 +410,10 @@ export function ProfilePage() {
                         <div className="flex items-center gap-2">
                           <p className="font-semibold">{item.store.storeName}</p>
                           {item.store.isDefault && (
-                            <Badge variant="outline" className="text-xs px-2 py-0 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
+                            <Badge
+                              variant="outline"
+                              className="text-xs px-2 py-0 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
+                            >
                               Mặc định
                             </Badge>
                           )}
@@ -354,7 +424,9 @@ export function ProfilePage() {
                       </div>
                     </div>
                     {!item.store.isActive && (
-                      <Badge variant="destructive" className="text-xs">Ngừng hoạt động</Badge>
+                      <Badge variant="destructive" className="text-xs">
+                        Ngừng hoạt động
+                      </Badge>
                     )}
                   </div>
 
@@ -363,13 +435,19 @@ export function ProfilePage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <CreditCard className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">{item.subscription.planName}</span>
+                          <span className="text-sm font-medium">
+                            {item.subscription.planName}
+                          </span>
                         </div>
-                        {item.subscription.daysRemaining !== null && item.subscription.daysRemaining > 0 && (
-                          <Badge variant="outline" className="text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700">
-                            {item.subscription.daysRemaining} ngày còn lại
-                          </Badge>
-                        )}
+                        {item.subscription.daysRemaining !== null &&
+                          item.subscription.daysRemaining > 0 && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700"
+                            >
+                              {item.subscription.daysRemaining} ngày còn lại
+                            </Badge>
+                          )}
                       </div>
                     </div>
                   )}
@@ -383,6 +461,198 @@ export function ProfilePage() {
             </div>
           )}
         </Card>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.25 }}
+      >
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="p-6 bg-gradient-to-br from-white via-blue-50/40 to-teal-50/40 dark:from-gray-900 dark:via-gray-800/50 dark:to-teal-950/20 border-blue-100 dark:border-blue-900/30">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <ListChecks className="h-5 w-5 text-teal-600" />
+                Công việc của tôi
+              </h3>
+              {tasksLoading && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+            </div>
+            {activeTasks.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Hiện tại bạn chưa có công việc nào đang mở.
+              </p>
+            ) : (
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {activeTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="border rounded-lg px-3 py-2 bg-white/60 dark:bg-gray-900/40 flex flex-col gap-1"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-sm">{task.title}</p>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[11px]",
+                          task.priority === "High" &&
+                            "border-red-500 text-red-600 bg-red-50 dark:bg-red-950/30",
+                          task.priority === "Medium" &&
+                            "border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/30",
+                          task.priority === "Low" &&
+                            "border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30",
+                        )}
+                      >
+                        {task.priority}
+                      </Badge>
+                    </div>
+                    {task.deadline && (
+                      <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <CalendarCheck className="h-3 w-3" />
+                        Hạn:{" "}
+                        {new Date(task.deadline).toLocaleDateString("vi-VN")}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[11px] text-muted-foreground">
+                        Trạng thái:{" "}
+                        <span className="font-medium">{task.status}</span>
+                      </span>
+                      {task.status !== "Completed" &&
+                        task.status !== "Cancelled" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-[11px]"
+                            onClick={async () => {
+                              try {
+                                const updated = await tasksApi.updateTaskStatus(
+                                  task.id,
+                                  "Completed",
+                                );
+                                setMyTasks((prev) =>
+                                  prev.map((t) =>
+                                    t.id === task.id ? updated : t,
+                                  ),
+                                );
+                              } catch (err) {
+                                console.error(
+                                  "Failed to update task status:",
+                                  err,
+                                );
+                              }
+                            }}
+                          >
+                            Đánh dấu hoàn thành
+                          </Button>
+                        )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
+          <Card className="p-6 bg-gradient-to-br from-white via-blue-50/40 to-teal-50/40 dark:from-gray-900 dark:via-gray-800/50 dark:to-teal-950/20 border-blue-100 dark:border-blue-900/30">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <CalendarCheck className="h-5 w-5 text-teal-600" />
+                Lịch sử chấm công của tôi
+              </h3>
+              {timeLoading && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+            </div>
+            {timeHistory.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Chưa có dữ liệu chấm công được ghi nhận.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>
+                    Ngày công:{" "}
+                    <span className="font-semibold text-foreground">
+                      {timeSummary.days}
+                    </span>
+                  </span>
+                  <span>
+                    Giờ làm:{" "}
+                    <span className="font-semibold text-foreground">
+                      {timeSummary.hours.toFixed(1)}
+                    </span>
+                  </span>
+                  <span>
+                    Đi trễ:{" "}
+                    <span className="font-semibold text-foreground">
+                      {timeSummary.late}
+                    </span>
+                  </span>
+                </div>
+                <div className="max-h-64 overflow-y-auto text-xs space-y-2">
+                  {timeHistory.slice(0, 10).map((r) => (
+                    <div
+                      key={r.id}
+                      className="border rounded-lg px-3 py-2 bg-white/60 dark:bg-gray-900/40 flex flex-col gap-1"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-foreground">
+                          {new Date(r.checkInTime).toLocaleDateString(
+                            "vi-VN",
+                          )}
+                        </span>
+                        {r.isLate && (
+                          <Badge
+                            variant="outline"
+                            className="border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/30 text-[10px]"
+                          >
+                            Đi trễ
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                        <span>
+                          In:{" "}
+                          {new Date(r.checkInTime).toLocaleTimeString(
+                            "vi-VN",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
+                        </span>
+                        <span>
+                          Out:{" "}
+                          {r.checkOutTime
+                            ? new Date(r.checkOutTime).toLocaleTimeString(
+                                "vi-VN",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )
+                            : "-"}
+                        </span>
+                        <span>
+                          Giờ:{" "}
+                          {typeof r.workHours === "number"
+                            ? r.workHours.toFixed(1)
+                            : "-"}
+                        </span>
+                      </div>
+                      {r.warning && (
+                        <p className="text-[11px] text-amber-700 dark:text-amber-300">
+                          {r.warning}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Card>
+        </div>
       </motion.div>
 
       <div className="space-y-4">

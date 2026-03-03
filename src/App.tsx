@@ -28,6 +28,8 @@ import { ProfilePage } from "@/features/dashboard/pages/ProfilePage";
 import SubscriptionPlansPage from "@/features/subscription/pages/SubscriptionPlansPage";
 import PaymentSuccessPage from "@/features/payment/pages/PaymentSuccessPage";
 import PaymentFailedPage from "@/features/payment/pages/PaymentFailedPage";
+import CustomerDashboardPage from "@/features/customer/pages/CustomerDashboardPage";
+import SuperAdminPage from "@/features/admin/pages/SuperAdminPage";
 
 function App() {
   return (
@@ -51,7 +53,7 @@ function App() {
             <Route
               element={
                 <ProtectedRoute
-                  allowedRoles={["StoreOwner", "Manager", "PotentialOwner"]}
+                  allowedRoles={["StoreOwner", "Manager", "Staff", "PotentialOwner"]}
                 />
               }
             >
@@ -83,6 +85,22 @@ function App() {
                   element={<TimekeepingPage />}
                 />
               </Route>
+            </Route>
+            <Route
+              path="/customer"
+              element={
+                <ProtectedRoute allowedRoles={["Customer"]} />
+              }
+            >
+              <Route index element={<CustomerDashboardPage />} />
+            </Route>
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={["SuperAdmin"]} />
+              }
+            >
+              <Route index element={<SuperAdminPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

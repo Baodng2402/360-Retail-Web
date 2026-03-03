@@ -22,6 +22,16 @@ export interface UploadSelfieResponse {
   imageUrl: string;
 }
 
+export interface TimekeepingHistoryRecord {
+  id: string;
+  employeeName?: string;
+  checkInTime: string;
+  checkOutTime?: string | null;
+  isLate?: boolean;
+  workHours?: number | null;
+  warning?: string | null;
+}
+
 export const timekeepingApi = {
   async getToday(): Promise<TodayTimekeepingResponse> {
     const res = await hrApi.get<
@@ -33,6 +43,22 @@ export const timekeepingApi = {
     }
 
     return res.data as TodayTimekeepingResponse;
+  },
+
+  async getHistory(): Promise<TimekeepingHistoryRecord[]> {
+    const res = await hrApi.get<
+      ApiResponse<TimekeepingHistoryRecord[]> | TimekeepingHistoryRecord[]
+    >("hr/timekeeping");
+
+    if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
+      return res.data.data;
+    }
+
+    if (Array.isArray(res.data)) {
+      return res.data as TimekeepingHistoryRecord[];
+    }
+
+    return [];
   },
 
   async uploadSelfie(file: File): Promise<UploadSelfieResponse> {

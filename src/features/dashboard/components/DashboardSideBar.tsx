@@ -25,7 +25,7 @@ import {
   StaffCheckInModal,
 } from "@/features/dashboard/components/modals/QuickActionModals";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
-import { authApi } from "@/shared/lib/authApi";
+import { authApi } from "@/shared.lib/authApi";
 import { UserStatus } from "@/shared/types/jwt-claims";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -56,6 +56,7 @@ export const DashboardSideBar = ({
     y: number;
   } | null>(null);
   const [userStatus, setUserStatus] = useState<"loading" | "hasStore" | "noStore">("loading");
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [showSetupDialog, setShowSetupDialog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -73,6 +74,7 @@ export const DashboardSideBar = ({
       }
 
       const userInfo = await authApi.meWithSubscription();
+      setUserRole(userInfo.role || null);
       if (userInfo.status === UserStatus.Registered || !userInfo.storeId) {
         setUserStatus("noStore");
       } else {
@@ -99,6 +101,7 @@ export const DashboardSideBar = ({
       path: "/dashboard",
       end: true,
       requiresStore: false,
+      visibleFor: ["StoreOwner", "Manager", "Staff"],
     },
     {
       icon: MapPin,
@@ -107,6 +110,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/timekeeping",
       end: false,
       requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager", "Staff"],
     },
     {
       icon: Users,
@@ -115,6 +119,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/staff",
       end: false,
       requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager"],
     },
     {
       icon: StoreIcon,
@@ -123,6 +128,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/stores",
       end: false,
       requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager"],
     },
     {
       icon: Package,
@@ -131,6 +137,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/products",
       end: false,
       requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager"],
     },
     {
       icon: ShoppingCart,
@@ -139,6 +146,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/sales",
       end: false,
       requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager", "Staff"],
     },
     {
       icon: UserCircle,
@@ -147,6 +155,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/customers",
       end: false,
       requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager", "Staff"],
     },
     {
       icon: FileText,
@@ -155,6 +164,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/reports",
       end: false,
       requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager"],
     },
     {
       icon: CreditCard,
@@ -163,6 +173,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/subscription",
       end: false,
       requiresStore: true,
+      visibleFor: ["StoreOwner"],
     },
     {
       icon: Settings,
@@ -255,6 +266,13 @@ export const DashboardSideBar = ({
         <nav className={`flex-1 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent ${isCollapsed ? "scrollbar-hide" : ""}`}>
           <ul className="space-y-1">
             {mainNavItems.map((item) => {
+              if (
+                item.visibleFor &&
+                userRole &&
+                !item.visibleFor.includes(userRole)
+              ) {
+                return null;
+              }
               const isLocked = item.requiresStore && userStatus === "noStore";
               const isActive = location.pathname === item.path ||
                 (item.end === false && location.pathname.startsWith(item.path));
