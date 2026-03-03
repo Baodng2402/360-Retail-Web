@@ -11,6 +11,27 @@ import type { LatLngExpression } from "leaflet";
 import toast from "react-hot-toast";
 import { storesApi } from "@/shared/lib/storesApi";
 import { authApi } from "@/shared/lib/authApi";
+
+const toRad = (value: number) => (value * Math.PI) / 180;
+
+const getDistanceMeters = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) => {
+  const R = 6371; // km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c * 1000;
+};
 const SettingPage = () => {
   const [storeId, setStoreId] = useState<string | null>(null);
   const [storeName, setStoreName] = useState("");
@@ -280,11 +301,34 @@ const SettingPage = () => {
       toast.error("Trình duyệt không hỗ trợ GPS/location.");
       return;
     }
+    const prevLat = Number(storeLatitude.trim());
+    const prevLon = Number(storeLongitude.trim());
+    const hasPrevCoords =
+      !Number.isNaN(prevLat) && !Number.isNaN(prevLon) && storeAddress.trim();
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setStoreLatitude(String(pos.coords.latitude));
-        setStoreLongitude(String(pos.coords.longitude));
+        const { latitude, longitude } = pos.coords;
+        setStoreLatitude(String(latitude));
+        setStoreLongitude(String(longitude));
         toast.success("Đã lấy tọa độ hiện tại.");
+
+        if (hasPrevCoords) {
+          const distance = getDistanceMeters(
+            prevLat,
+            prevLon,
+            latitude,
+            longitude,
+          );
+          if (distance > 2000) {
+            const distanceText =
+              distance < 1000
+                ? `${distance.toFixed(0)} m`
+                : `${(distance / 1000).toFixed(1)} km`;
+            toast(
+              `Vị trí hiện tại (${distanceText}) cách xa vị trí cửa hàng. Vui lòng kiểm tra lại trước khi lưu GPS.`,
+            );
+          }
+        }
       },
       () => {
         toast.error(
