@@ -19,6 +19,7 @@ import { employeesApi } from "@/shared/lib/employeesApi";
 import { tasksApi } from "@/shared/lib/tasksApi";
 import type { Employee } from "@/shared/types/employee";
 import type { Task } from "@/shared/types/task";
+import { useStoreStore } from "@/shared/store/storeStore";
 
 const BUTTON_GRADIENT =
   "from-teal-500 to-teal-600 bg-gradient-to-r hover:from-teal-600 hover:to-teal-700 text-white shadow-sm transition-all";
@@ -31,6 +32,7 @@ const StaffManagementPage = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { currentStore } = useStoreStore();
 
   const loadData = () => {
     setLoading(true);
@@ -51,8 +53,11 @@ const StaffManagementPage = () => {
   };
 
   useEffect(() => {
+    // Mỗi khi đổi cửa hàng (StoreSelector -> refresh-access thành công),
+    // gọi lại API để lấy danh sách nhân viên và task theo chi nhánh mới.
     loadData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStore?.id]);
 
   const taskByAssignee = useMemo(() => {
     const map = new Map<string, Task>();
