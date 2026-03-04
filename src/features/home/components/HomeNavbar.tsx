@@ -1,7 +1,7 @@
  "use client";
 
 import { Menu } from "lucide-react";
-import logoImage from "@/assets/logo.svg";
+import logoImage from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
 import ThemeMode from "@/shared/components/ui/themeMode";
 
@@ -58,30 +58,14 @@ interface HomeNavbarProps {
 
 const HomeNavbar = ({
   logo = {
-    url: "http://localhost:5173/",
+    url: "/",
     src: logoImage,
-    alt: "logo",
+    alt: "360 Retail logo",
     title: "360 Retail",
   },
-  menu = [
-    { title: "Home", url: "#" },
-    {
-      title: "Products",
-      url: "#",
-    },
-    {
-      title: "Resources",
-      url: "#",
-    },
-    {
-      title: "Pricing",
-      url: "#",
-    },
-    {
-      title: "Blog",
-      url: "#",
-    },
-  ],
+  // Mặc định không hiển thị các mục menu mock (Products, Resources...).
+  // Nếu sau này bạn muốn thêm, có thể truyền prop menu từ ngoài vào.
+  menu = [],
   auth = {
     login: { title: "Login", url: "/login" },
     signup: { title: "Sign up", url: "/signup" },
@@ -103,25 +87,27 @@ const HomeNavbar = ({
             <div className="flex items-center gap-6">
               <a
                 href={logo.url}
-                className="flex items-center transition-opacity duration-300 hover:opacity-80"
+                className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-80"
               >
                 <img
                   src={logo.src}
-                  className="h-12 w-auto scale-150 transition-all duration-300"
+                  className="h-9 w-auto rounded-xl bg-transparent transition-all duration-300"
                   alt={logo.alt}
                 />
-                <span className="text-lg font-semibold tracking-tight -ml-3">
+                <span className="text-lg font-semibold tracking-tight">
                   {logo.title}
                 </span>
               </a>
 
-              <div className="flex items-center">
-                <NavigationMenu>
-                  <NavigationMenuList>
-                    {menu.map((item) => renderMenuItem(item))}
-                  </NavigationMenuList>
-                </NavigationMenu>
-              </div>
+              {menu.length > 0 && (
+                <div className="flex items-center">
+                  <NavigationMenu>
+                    <NavigationMenuList>
+                      {menu.map((item) => renderMenuItem(item))}
+                    </NavigationMenuList>
+                  </NavigationMenu>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-3">
@@ -143,14 +129,14 @@ const HomeNavbar = ({
             <div className="flex items-center justify-between">
               <a
                 href={logo.url}
-                className="flex items-center transition-opacity duration-300 hover:opacity-80"
+                className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-80"
               >
                 <img
                   src={logo.src}
-                  className="h-12 w-auto dark:invert transition-all duration-300"
+                  className="h-9 w-auto transition-all duration-300"
                   alt={logo.alt}
                 />
-                <span className="text-lg font-semibold tracking-tight -ml-2">
+                <span className="text-lg font-semibold tracking-tight">
                   {logo.title}
                 </span>
               </a>
@@ -161,37 +147,42 @@ const HomeNavbar = ({
                     <Menu className="size-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>
-                      <a href={logo.url} className="flex items-center gap-2">
-                        <img
-                          src={logo.src}
-                          className="h-8 w-auto dark:invert transition-all duration-300"
-                          alt={logo.alt}
-                        />
-                      </a>
-                    </SheetTitle>
-                  </SheetHeader>
+                  <SheetContent className="overflow-y-auto">
+                    <SheetHeader>
+                      <SheetTitle>
+                        <a href={logo.url} className="flex items-center gap-2">
+                          <img
+                            src={logo.src}
+                            className="h-8 w-auto transition-all duration-300"
+                            alt={logo.alt}
+                          />
+                          <span className="text-base font-semibold">
+                            {logo.title}
+                          </span>
+                        </a>
+                      </SheetTitle>
+                    </SheetHeader>
 
-                  <div className="mt-6 flex flex-col gap-6">
-                    <Accordion
-                      type="single"
-                      collapsible
-                      className="flex w-full flex-col gap-4"
-                    >
-                      {menu.map((item) => renderMobileMenuItem(item))}
-                    </Accordion>
+                    <div className="mt-6 flex flex-col gap-6">
+                      {menu.length > 0 && (
+                        <Accordion
+                          type="single"
+                          collapsible
+                          className="flex w-full flex-col gap-4"
+                        >
+                          {menu.map((item) => renderMobileMenuItem(item))}
+                        </Accordion>
+                      )}
 
-                    <div className="flex flex-col gap-3">
-                      <Button asChild variant="outline">
-                        <a href={auth.login.url}>{auth.login.title}</a>
-                      </Button>
-                      <Button asChild>
-                        <a href={auth.signup.url}>{auth.signup.title}</a>
-                      </Button>
+                      <div className="flex flex-col gap-3">
+                        <Button asChild variant="outline">
+                          <a href={auth.login.url}>{auth.login.title}</a>
+                        </Button>
+                        <Button asChild>
+                          <a href={auth.signup.url}>{auth.signup.title}</a>
+                        </Button>
+                      </div>
                     </div>
-                  </div>
                 </SheetContent>
               </Sheet>
             </div>

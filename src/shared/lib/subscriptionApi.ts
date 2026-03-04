@@ -7,6 +7,7 @@ import type {
   MySubscription,
   PaymentInitiation,
   SePayPaymentData,
+  PaymentStatus,
 } from "@/shared/types/subscription";
 import type { ApiResponse } from "@/shared/types/api-response";
 
@@ -182,6 +183,21 @@ export const subscriptionApi = {
    */
   async checkExpiry(days = 7): Promise<void> {
     await saasApi.post(`saas/subscriptions/check-expiry?days=${days}`);
+  },
+
+  /**
+   * Get payment status by paymentId
+   * GET /saas/payments/{paymentId}/status
+   */
+  async getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
+    const res = await saasApi.get<ApiResponse<PaymentStatus> | PaymentStatus>(
+      `saas/payments/${paymentId}/status`,
+    );
+
+    if ("success" in res.data && res.data.success && res.data.data) {
+      return res.data.data;
+    }
+    return res.data as PaymentStatus;
   },
 };
 

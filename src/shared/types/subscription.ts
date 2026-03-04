@@ -87,6 +87,17 @@ export interface SePayPaymentData {
 }
 
 /**
+ * Payment status - from GET /saas/payments/{paymentId}/status
+ */
+export interface PaymentStatus {
+  paymentId: string;
+  status: string; // Pending | Completed | Failed | ...
+  amount: number;
+  paymentDate: string | null;
+  transactionCode: string | null;
+}
+
+/**
  * VNPay Return Query params (parsed)
  */
 export interface VnpayReturnParams {

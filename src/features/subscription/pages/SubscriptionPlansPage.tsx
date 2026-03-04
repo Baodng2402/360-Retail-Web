@@ -115,6 +115,7 @@ export default function SubscriptionPlansPage() {
   const [sepayDialogOpen, setSepayDialogOpen] = useState(false);
   const [sepayData, setSepayData] = useState<SePayPaymentData | null>(null);
   const [refreshingAccess, setRefreshingAccess] = useState(false);
+  const [lastPaymentId, setLastPaymentId] = useState<string | null>(null);
   const { setAuth } = useAuthStore();
    const { currentStore } = useStoreStore();
 
@@ -187,6 +188,7 @@ export default function SubscriptionPlansPage() {
       );
 
       if (provider === "sepay") {
+        setLastPaymentId(purchaseRes.paymentId);
         if (
           typeof payment === "object" &&
           "provider" in payment &&
@@ -217,6 +219,33 @@ export default function SubscriptionPlansPage() {
       toast.error(message);
     } finally {
       setPurchasingPlanId(null);
+    }
+  };
+
+  const handleCheckPaymentStatus = async () => {
+    if (!lastPaymentId) {
+      toast.error("Không tìm thấy mã thanh toán để kiểm tra trạng thái.");
+      return;
+    }
+    try {
+      setRefreshingAccess(true);
+      const status = await subscriptionApi.getPaymentStatus(lastPaymentId);
+      if (status.status === "Completed") {
+        toast.success("Thanh toán đã được xác nhận thành công. Đang làm mới quyền...");
+        await handleRefreshAccess();
+      } else if (status.status === "Failed") {
+        toast.error("Thanh toán thất bại. Vui lòng thử lại hoặc chọn phương thức khác.");
+      } else {
+        toast("Thanh toán vẫn đang ở trạng thái chờ xử lý (Pending). Vui lòng đợi thêm một chút rồi thử lại.");
+      }
+    } catch (err) {
+      console.error("Failed to check payment status:", err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại.";
+      toast.error(message);
+    } finally {
+      setRefreshingAccess(false);
     }
   };
 
@@ -340,6 +369,23 @@ export default function SubscriptionPlansPage() {
         </p>
       </motion.div>
 
+      {!storeStatus?.planName && storeStatus?.status === "Inactive" && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-3xl mx-auto"
+        >
+          <Card className="border-dashed border-amber-300 bg-amber-50/60 dark:bg-amber-900/10">
+            <CardContent className="p-4 md:p-5">
+              <p className="text-sm md:text-base text-amber-900 dark:text-amber-100">
+                Cửa hàng hiện tại chưa có gói <span className="font-semibold">Trial</span> hoặc{" "}
+                <span className="font-semibold">Active</span>. Vui lòng chọn một gói bên dưới để bắt đầu.
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {(storeStatus?.planName || mySubscription?.planName) && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -361,6 +407,26 @@ export default function SubscriptionPlansPage() {
                     <p className="text-2xl font-bold text-foreground">
                       {storeStatus?.planName || mySubscription?.planName}
                     </p>
+                    {storeStatus?.status && (
+                      <p className="mt-1 text-xs font-medium">
+                        <Badge
+                          variant="outline"
+                          className={
+                            storeStatus.status === "Trial"
+                              ? "border-amber-400 text-amber-700 bg-amber-50"
+                              : storeStatus.status === "Active"
+                              ? "border-emerald-400 text-emerald-700 bg-emerald-50"
+                              : "border-slate-300 text-slate-700 bg-slate-50"
+                          }
+                        >
+                          {storeStatus.status === "Trial"
+                            ? "Đang dùng thử (Trial)"
+                            : storeStatus.status === "Active"
+                            ? "Đang hoạt động (Active)"
+                            : storeStatus.status}
+                        </Badge>
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col md:items-end gap-1">
@@ -443,8 +509,8 @@ export default function SubscriptionPlansPage() {
           <DialogHeader>
             <DialogTitle>Thanh toán QR (SePay)</DialogTitle>
             <DialogDescription>
-              Quét mã QR hoặc chuyển khoản theo thông tin bên dưới. Sau khi thanh toán
-              vài phút, hãy tải lại trang hoặc đăng nhập lại để cập nhật trạng thái gói.
+              Quét mã QR hoặc chuyển khoản theo thông tin bên dưới. Sau khi thanh toán,
+              bạn có thể bấm vào nút kiểm tra trạng thái để hệ thống tự động cập nhật gói.
             </DialogDescription>
           </DialogHeader>
           {sepayData ? (
@@ -499,7 +565,7 @@ export default function SubscriptionPlansPage() {
                 <p className="text-xs text-muted-foreground whitespace-pre-line">
                   {sepayData.instruction}
                 </p>
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex justify-end gap-2 pt-2 flex-wrap">
                   <Button
                     variant="outline"
                     type="button"
@@ -510,17 +576,17 @@ export default function SubscriptionPlansPage() {
                   </Button>
                   <Button
                     type="button"
-                    onClick={handleRefreshAccess}
+                    onClick={handleCheckPaymentStatus}
                     disabled={refreshingAccess}
                     className="bg-teal-600 hover:bg-teal-700 text-white"
                   >
                     {refreshingAccess ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Đang làm mới quyền...
+                        Đang kiểm tra trạng thái...
                       </>
                     ) : (
-                      "Đã thanh toán, làm mới quyền"
+                      "Kiểm tra trạng thái thanh toán"
                     )}
                   </Button>
                 </div>
