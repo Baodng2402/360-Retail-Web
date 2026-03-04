@@ -150,5 +150,38 @@ export const subscriptionApi = {
     );
     return res.data;
   },
+
+  /**
+   * Get my subscription expiry status
+   * GET /saas/subscriptions/my-expiry
+   */
+  async getMyExpiry(): Promise<{
+    planName: string;
+    expiryDate: string;
+    daysRemaining: number;
+    isExpired: boolean;
+  } | null> {
+    const res = await saasApi.get<
+      ApiResponse<{
+        planName: string;
+        expiryDate: string;
+        daysRemaining: number;
+        isExpired: boolean;
+      }> | null
+    >("saas/subscriptions/my-expiry");
+
+    if (res.data && "success" in res.data && res.data.success && res.data.data) {
+      return res.data.data;
+    }
+    return null;
+  },
+
+  /**
+   * Check & send email for expiring subscriptions (SuperAdmin)
+   * POST /saas/subscriptions/check-expiry
+   */
+  async checkExpiry(days = 7): Promise<void> {
+    await saasApi.post(`saas/subscriptions/check-expiry?days=${days}`);
+  },
 };
 

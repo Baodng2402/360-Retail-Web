@@ -12,7 +12,7 @@ export const ordersApi = {
       "sales/orders",
       data
     );
-    
+
     if (typeof res.data === "object" && res.data !== null && "success" in res.data) {
       const apiRes = res.data as ApiResponse<string>;
       if (apiRes.success && typeof apiRes.data === "string") {
@@ -83,7 +83,7 @@ export const ordersApi = {
 
   async getOrderById(id: string): Promise<Order> {
     const res = await salesApi.get<ApiResponse<Order> | Order>(`sales/orders/${id}`);
-    
+
     if ("success" in res.data && res.data.success && res.data.data) {
       return res.data.data;
     }
@@ -94,7 +94,22 @@ export const ordersApi = {
     const res = await salesApi.put<ApiResponse<Order> | Order>(
       `sales/orders/${id}/status?status=${encodeURIComponent(status)}`
     );
-    
+
+    if ("success" in res.data && res.data.success && res.data.data) {
+      return res.data.data;
+    }
+    return res.data as Order;
+  },
+
+  /**
+   * Cancel an order
+   * PUT /sales/orders/{id}/cancel
+   */
+  async cancelOrder(id: string): Promise<Order> {
+    const res = await salesApi.put<ApiResponse<Order> | Order>(
+      `sales/orders/${id}/cancel`,
+    );
+
     if ("success" in res.data && res.data.success && res.data.data) {
       return res.data.data;
     }

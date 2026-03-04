@@ -33,13 +33,12 @@ export const customersApi = {
     if (params?.pageSize) query.append("pageSize", params.pageSize.toString());
     if (params?.keyword) query.append("keyword", params.keyword);
 
-    const url = `crm/customers${
-      query.toString() ? `?${query.toString()}` : ""
-    }`;
+    const url = `crm/customers${query.toString() ? `?${query.toString()}` : ""
+      }`;
 
     const res = await crmApi.get<
       ApiResponse<{ items: Customer[]; total: number; page: number; pageSize: number }> |
-        Customer[]
+      Customer[]
     >(url);
 
     if ("success" in res.data && res.data.success && res.data.data) {
@@ -124,11 +123,19 @@ export const customersApi = {
 
   async getLoyaltyTransactions(
     customerId: string,
+    params?: { page?: number; pageSize?: number },
   ): Promise<LoyaltyTransaction[]> {
+    const query = new URLSearchParams();
+    if (params?.page) query.append("page", params.page.toString());
+    if (params?.pageSize) query.append("pageSize", params.pageSize.toString());
+
+    const url = `crm/customers/${customerId}/loyalty-transactions${query.toString() ? `?${query.toString()}` : ""
+      }`;
+
     const res = await crmApi.get<
       ApiResponse<{ items: LoyaltyTransaction[] } | LoyaltyTransaction[]> |
-        LoyaltyTransaction[]
-    >(`crm/customers/${customerId}/loyalty-transactions`);
+      LoyaltyTransaction[]
+    >(url);
 
     if ("success" in res.data && res.data.success && res.data.data) {
       const data = res.data.data;
@@ -147,10 +154,24 @@ export const customersApi = {
     return [];
   },
 
+  /**
+   * Redeem loyalty points for a customer
+   * POST /crm/customers/{customerId}/redeem
+   */
+  async redeemPoints(
+    customerId: string,
+    payload: { points: number; description?: string },
+  ): Promise<void> {
+    await crmApi.post(`crm/customers/${customerId}/redeem`, {
+      customerId,
+      ...payload,
+    });
+  },
+
   async getFeedbackByCustomer(customerId: string): Promise<Feedback[]> {
     const res = await crmApi.get<
       ApiResponse<Feedback[] | { items: Feedback[]; total: number }> |
-        Feedback[]
+      Feedback[]
     >(`crm/customers/${customerId}/feedback`);
 
     if ("success" in res.data && res.data.success && res.data.data) {

@@ -68,9 +68,9 @@ export const feedbackApi = {
 
     const res = await crmApi.get<
       ApiResponse<{ data: Feedback[]; meta?: { page: number; pageSize: number; total: number } }> |
-        ApiResponse<Feedback[]> |
-        { data: Feedback[]; meta?: { page: number; pageSize: number; total: number } } |
-        Feedback[]
+      ApiResponse<Feedback[]> |
+      { data: Feedback[]; meta?: { page: number; pageSize: number; total: number } } |
+      Feedback[]
     >(`crm/feedback?${query.toString()}`);
 
     if ("success" in res.data) {
@@ -118,6 +118,28 @@ export const feedbackApi = {
     }
 
     return { items: [], page: 1, pageSize: 20, total: 0 };
+  },
+
+  /**
+   * Staff creates feedback on behalf of a customer (in-store)
+   * POST /crm/feedback
+   */
+  async createStaffFeedback(payload: {
+    customerId: string;
+    content?: string;
+    rating: number;
+    source?: string;
+  }): Promise<Feedback> {
+    const res = await crmApi.post<ApiResponse<Feedback> | Feedback>(
+      "crm/feedback",
+      { ...payload, source: payload.source ?? "InStore" },
+    );
+
+    if ("success" in res.data && res.data.success && res.data.data) {
+      return res.data.data;
+    }
+
+    return res.data as Feedback;
   },
 
   async getSummary(): Promise<FeedbackSummary | null> {

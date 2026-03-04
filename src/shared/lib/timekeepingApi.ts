@@ -88,5 +88,33 @@ export const timekeepingApi = {
   async checkOut(payload: { locationGps: string }): Promise<void> {
     await hrApi.post("hr/timekeeping/check-out", payload);
   },
+
+  /**
+   * Get monthly timekeeping summary (Manager+)
+   * GET /hr/timekeeping/summary
+   */
+  async getSummary(params?: {
+    month?: number;
+    year?: number;
+  }): Promise<unknown> {
+    const query = new URLSearchParams();
+    if (params?.month) query.append("month", params.month.toString());
+    if (params?.year) query.append("year", params.year.toString());
+
+    const url = `hr/timekeeping/summary${query.toString() ? `?${query.toString()}` : ""
+      }`;
+
+    const res = await hrApi.get<ApiResponse<unknown> | unknown>(url);
+
+    if (
+      res.data &&
+      typeof res.data === "object" &&
+      "success" in res.data &&
+      (res.data as ApiResponse<unknown>).success
+    ) {
+      return (res.data as ApiResponse<unknown>).data;
+    }
+    return res.data;
+  },
 };
 
