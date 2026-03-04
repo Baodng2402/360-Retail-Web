@@ -67,7 +67,7 @@ const DashboardPage = () => {
   const [todayOverview, setTodayOverview] = useState<
     Awaited<ReturnType<typeof salesDashboardApi.getOverview>> | null
   >(null);
-  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [, setRecentOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "today">("30d");
   const lastOrderCreatedAt = useDashboardEventsStore(
     (state) => state.lastOrderCreatedAt,
@@ -276,22 +276,8 @@ const DashboardPage = () => {
     return items;
   }, [overview, employees, dateRange, todayOverview]);
 
-  const formatOrderTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
-    const diffHour = Math.floor(diffMin / 60);
-    const diffDay = Math.floor(diffHour / 24);
-
-    if (diffSec < 60) return "Vừa xong";
-    if (diffMin < 60) return `${diffMin} phút trước`;
-    if (diffHour < 24) return `${diffHour} giờ trước`;
-    if (diffDay === 1) return "Hôm qua";
-    if (diffDay < 7) return `${diffDay} ngày trước`;
-    return date.toLocaleString("vi-VN");
-  };
+  // formatOrderTime hiện không được dùng trong UI sau khi đơn hàng được tách sang trang khác,
+  // nên tạm thời bỏ để tránh cảnh báo TypeScript.
 
   const lowStockProducts = useMemo(
     () =>
@@ -459,89 +445,6 @@ const DashboardPage = () => {
             <ChartLineDefault data={chartLineData} isLoading={dashboardLoading} />
           </div>
           <RecentTransactions activities={orders} isLoading={dashboardLoading} />
-
-          <Card className="border border-border rounded-md p-4 md:p-6 bg-card">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  Đơn hàng gần đây
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  5 đơn mới nhất trong hệ thống
-                </p>
-              </div>
-            </div>
-            {dashboardLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="h-10 rounded-md bg-muted/50 animate-pulse"
-                  />
-                ))}
-              </div>
-            ) : recentOrders.length === 0 ? (
-              <div className="py-6 text-center text-muted-foreground text-sm">
-                Chưa có đơn hàng nào.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-xs text-muted-foreground">
-                      <th className="py-2 pr-3 text-left font-medium">
-                        Mã đơn
-                      </th>
-                      <th className="py-2 px-3 text-left font-medium">
-                        Khách hàng
-                      </th>
-                      <th className="py-2 px-3 text-left font-medium">
-                        Tổng tiền
-                      </th>
-                      <th className="py-2 px-3 text-left font-medium">
-                        Trạng thái
-                      </th>
-                      <th className="py-2 pl-3 text-right font-medium">
-                        Thời gian
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentOrders.map((order) => (
-                      <tr
-                        key={order.id}
-                        className="border-b border-border/60 last:border-0"
-                      >
-                        <td className="py-2 pr-3">
-                          <span className="font-medium text-foreground">
-                            {order.code || order.id.slice(0, 8)}
-                          </span>
-                        </td>
-                        <td className="py-2 px-3">
-                          <span className="text-foreground">
-                            {order.customerName || "Khách lẻ"}
-                          </span>
-                        </td>
-                        <td className="py-2 px-3">
-                          <span className="font-semibold text-foreground">
-                            {formatVnd(order.totalAmount)}
-                          </span>
-                        </td>
-                        <td className="py-2 px-3">
-                          <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="py-2 pl-3 text-right text-muted-foreground">
-                          {formatOrderTime(order.createdAt)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
         </div>
 
         <div className="xl:col-span-1">

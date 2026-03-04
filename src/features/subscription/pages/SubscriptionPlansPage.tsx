@@ -23,8 +23,10 @@ import { planReviewsApi } from "@/shared/lib/planReviewsApi";
 import { authApi } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { formatPriceVnd, type SePayPaymentData } from "@/shared/types/subscription";
-import type { Plan, MySubscription } from "@/shared/types/subscription";
+import type { Plan, MySubscription, SubscriptionStatus } from "@/shared/types/subscription";
 import type { PlanReviewSummary } from "@/shared/lib/planReviewsApi";
+import { useStoreStore } from "@/shared/store/storeStore";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 import {
   Dialog,
   DialogContent,
@@ -100,6 +102,7 @@ const parseFeatures = (featuresJson: string | null | undefined | string[]): stri
 export default function SubscriptionPlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [mySubscription, setMySubscription] = useState<MySubscription | null>(null);
+  const [storeStatus, setStoreStatus] = useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchasingPlanId, setPurchasingPlanId] = useState<string | null>(null);
@@ -113,19 +116,24 @@ export default function SubscriptionPlansPage() {
   const [sepayData, setSepayData] = useState<SePayPaymentData | null>(null);
   const [refreshingAccess, setRefreshingAccess] = useState(false);
   const { setAuth } = useAuthStore();
+   const { currentStore } = useStoreStore();
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const [plansData, mySubData, summaries] = await Promise.all([
+      const [plansData, mySubData, summaries, statusData] = await Promise.all([
         subscriptionApi.getPlans(),
         subscriptionApi.getMySubscription(),
         planReviewsApi.getSummaries(),
+        currentStore?.id
+          ? subscriptionApi.getStoreSubscriptionStatus(currentStore.id)
+          : Promise.resolve<SubscriptionStatus | null>(null),
       ]);
       setPlans(plansData);
       setMySubscription(mySubData);
       setReviewSummaries(summaries);
+      setStoreStatus(statusData);
     } catch (err) {
       console.error("Failed to load data:", err);
       setError("Không thể tải dữ liệu. Vui lòng thử lại.");
@@ -136,7 +144,8 @@ export default function SubscriptionPlansPage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStore?.id]);
 
   const handleRefreshAccess = async () => {
     try {
@@ -212,8 +221,10 @@ export default function SubscriptionPlansPage() {
   };
 
   const isCurrentPlan = (plan: Plan) => {
-    if (!mySubscription?.planName) return false;
-    return plan.planName.toLowerCase() === mySubscription.planName.toLowerCase();
+    const activePlanName =
+      storeStatus?.planName || mySubscription?.planName || null;
+    if (!activePlanName) return false;
+    return plan.planName.toLowerCase() === activePlanName.toLowerCase();
   };
 
   const getSummaryForPlan = (plan: Plan) =>
@@ -309,6 +320,8 @@ export default function SubscriptionPlansPage() {
 
   return (
     <div className="container mx-auto py-12 px-4 space-y-12">
+      <StoreSelector pageDescription="Chọn cửa hàng để xem và mua gói dịch vụ đúng chi nhánh." />
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
         animate={{ opacity: 1, y: 0 }}
@@ -318,11 +331,16 @@ export default function SubscriptionPlansPage() {
           Chọn gói dịch vụ
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Nâng cấp để mở khóa đầy đủ tính năng cho doanh nghiệp của bạn
+          Nâng cấp để mở khóa đầy đủ tính năng cho{" "}
+          {currentStore ? (
+            <span className="font-semibold">{currentStore.storeName}</span>
+          ) : (
+            "cửa hàng của bạn"
+          )}
         </p>
       </motion.div>
 
-      {mySubscription?.planName && (
+      {(storeStatus?.planName || mySubscription?.planName) && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -336,16 +354,26 @@ export default function SubscriptionPlansPage() {
                     <Check className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Gói dịch vụ hiện tại</p>
-                    <p className="text-2xl font-bold text-foreground">{mySubscription.planName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Gói dịch vụ hiện tại của{" "}
+                      {currentStore ? currentStore.storeName : "cửa hàng bạn"}
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {storeStatus?.planName || mySubscription?.planName}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col md:items-end gap-1">
-                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm">
-                    Còn {mySubscription.daysRemaining} ngày
-                  </Badge>
+                  {typeof storeStatus?.daysRemaining === "number" && (
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm">
+                      Còn {storeStatus.daysRemaining} ngày
+                    </Badge>
+                  )}
                   <p className="text-xs text-muted-foreground">
-                    Hết hạn: {formatDate(mySubscription.endDate)}
+                    Hết hạn:{" "}
+                    {formatDate(
+                      storeStatus?.subscriptionEndDate ?? mySubscription?.endDate,
+                    )}
                   </p>
                 </div>
               </div>
@@ -606,6 +634,7 @@ function PlanCard({
   onOpenReview: () => void;
 }) {
   const features = parseFeatures(plan.features ?? null);
+  const { currentStore } = useStoreStore();
 
   return (
     <motion.div
@@ -709,7 +738,7 @@ function PlanCard({
           {isCurrentPlan ? (
             <motion.div whileTap={{ scale: 0.95 }} className="w-full">
               <div className="space-y-2">
-                <Button
+              <Button
                   className="w-full h-12 text-base font-medium"
                   disabled
                   variant="outline"
@@ -717,7 +746,7 @@ function PlanCard({
                   <Check className="mr-2 h-4 w-4" />
                   Bạn đang sở hữu gói này
                 </Button>
-                <Button
+              <Button
                   type="button"
                   variant="ghost"
                   className="w-full h-8 text-xs font-medium text-teal-600 hover:text-teal-700"
@@ -738,6 +767,11 @@ function PlanCard({
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Đang xử lý...
+                  </>
+                ) : currentStore ? (
+                  <>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Mua gói cho {currentStore.storeName}
                   </>
                 ) : (
                   <>

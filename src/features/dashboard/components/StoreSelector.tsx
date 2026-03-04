@@ -12,6 +12,7 @@ import {
 import { Store as StoreIcon } from "lucide-react";
 import { useStoreStore } from "@/shared/store/storeStore";
 import { storesApi } from "@/shared/lib/storesApi";
+import { userStoresApi } from "@/shared/lib/userStoresApi";
 import type { Store } from "@/shared/types/stores";
 import toast from "react-hot-toast";
 
@@ -27,27 +28,54 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
   const [storesLoading, setStoresLoading] = useState(false);
   const [switchingStore, setSwitchingStore] = useState(false);
 
-  useEffect(() => {
-    void loadStores();
-  }, []);
-
   const loadStores = async () => {
     try {
       setStoresLoading(true);
       let source: Store[] = [];
 
+      // 1. Thử lấy các store mà user sở hữu
       try {
         source = await storesApi.getMyOwnedStores(true);
       } catch (err) {
         const status = (err as { response?: { status?: number } }).response
           ?.status;
-        // Nếu không phải Owner (403) thì bỏ qua, sẽ fallback sang my-store
+        // Nếu không phải Owner (403) thì bỏ qua, sẽ fallback sang my-store / user-stores
         if (status !== 403) {
           throw err;
         }
       }
 
-      // Nếu không có store owned (hoặc Manager/Staff), fallback dùng my-store
+      // 2. Bổ sung thêm các store mà user thuộc về (Owner/Manager/Staff/Customer)
+      try {
+        const userStores = await userStoresApi.getMyStores();
+        if (Array.isArray(userStores) && userStores.length > 0) {
+          const mappedFromUserStores: Store[] = userStores.map((s) => ({
+            id: s.storeId,
+            storeName: s.storeName,
+            address: undefined,
+            phone: undefined,
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            isDefault: s.isDefault,
+          }));
+
+          const existingIds = new Set(source.map((s) => s.id));
+          source = [
+            ...source,
+            ...mappedFromUserStores.filter((s) => !existingIds.has(s.id)),
+          ];
+        }
+      } catch (err) {
+        const status = (err as { response?: { status?: number } }).response
+          ?.status;
+        // Endpoint user-stores có thể chưa triển khai trên backend hiện tại,
+        // 404 thì bỏ qua lặng lẽ để tránh spam console.
+        if (status && status !== 404) {
+          console.error("Error loading user-stores:", err);
+        }
+      }
+
+      // 3. Nếu vẫn không có store (ví dụ chỉ là Staff 1 store) thì fallback dùng my-store
       if (!Array.isArray(source) || source.length === 0) {
         try {
           const myStore = await storesApi.getMyStore();
@@ -90,9 +118,23 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
     }
   };
 
+  useEffect(() => {
+    void loadStores();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleStoreChange = async (storeId: string) => {
     const selectedStore = stores.find((s) => s.id === storeId);
     if (!selectedStore || selectedStore.id === currentStore?.id) {
+      return;
+    }
+
+    // Nếu store chưa được kích hoạt (isActive = false) thì không cố switch,
+    // chỉ giải thích rõ cho người dùng và dừng tại đây.
+    if (!selectedStore.isActive) {
+      toast.error(
+        "Cửa hàng này chưa được kích hoạt vì chưa hoàn tất thanh toán gói dịch vụ. Vui lòng hoàn tất thanh toán khi tạo cửa hàng hoặc liên hệ hỗ trợ.",
+      );
       return;
     }
 
@@ -102,8 +144,37 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
       toast.success(`Đã chuyển sang cửa hàng: ${selectedStore.storeName}`);
       // Reload page data if needed - each page should handle this in their useEffect
     } catch (error) {
-      console.error("Error switching store:", error);
-      toast.error("Không thể chuyển cửa hàng. Vui lòng thử lại.");
+      const err = error as {
+        response?: { status?: number; data?: { error?: string; message?: string } };
+      };
+      const status = err.response?.status;
+      const data = err.response?.data;
+
+      // Nếu backend chặn vì hết hạn / chưa có subscription, giải thích rõ cho người dùng
+      if (status === 403 && data) {
+        const code = data.error;
+        const message = data.message;
+
+        if (code === "TrialExpired") {
+          toast.error(
+            message ||
+              "Thời gian dùng thử của cửa hàng này đã hết. Vui lòng mua gói dịch vụ trước khi chuyển sang cửa hàng đó.",
+          );
+        } else if (code === "SubscriptionExpired") {
+          toast.error(
+            message ||
+              "Gói dịch vụ của cửa hàng này đã hết hạn. Vui lòng gia hạn gói trước khi chuyển sang cửa hàng đó.",
+          );
+        } else {
+          toast.error(
+            message ||
+              "Không thể chuyển sang cửa hàng này do giới hạn gói dịch vụ. Vui lòng kiểm tra lại subscription.",
+          );
+        }
+      } else {
+        console.error("Error switching store:", error);
+        toast.error("Không thể chuyển cửa hàng. Vui lòng thử lại.");
+      }
     } finally {
       setSwitchingStore(false);
     }
@@ -149,10 +220,14 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
             </SelectTrigger>
             <SelectContent>
               {stores.map((store) => (
-                <SelectItem key={store.id} value={store.id}>
+                <SelectItem
+                  key={store.id}
+                  value={store.id}
+                  disabled={!store.isActive}
+                >
                   {store.storeName}
                   {store.isDefault && " (Mặc định)"}
-                  {!store.isActive && " - Ngừng hoạt động"}
+                  {!store.isActive && " - Chưa kích hoạt"}
                 </SelectItem>
               ))}
             </SelectContent>

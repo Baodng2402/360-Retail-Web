@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -17,12 +18,17 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { Loader2 } from "lucide-react";
+// Lưu ý: map preview có thể gây lỗi hiển thị trong Dialog trên một số trình duyệt,
+// nên modal tạo cửa hàng chỉ dùng input địa chỉ + toạ độ đơn giản.
+import { subscriptionApi } from "@/shared/lib/subscriptionApi";
+import type { Plan } from "@/shared/types/subscription";
 
 interface StoreFormData {
   storeName: string;
   address: string;
   phone: string;
   isActive: boolean;
+  planId: string;
 }
 
 interface StoreFormDialogProps {
@@ -46,6 +52,38 @@ export const StoreFormDialog = ({
   isSaving,
   mandatory = false,
 }: StoreFormDialogProps) => {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [plansError, setPlansError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open || isEditing) return;
+    let cancelled = false;
+    const loadPlans = async () => {
+      try {
+        setPlansLoading(true);
+        setPlansError(null);
+        const res = await subscriptionApi.getPlans();
+        if (!cancelled) {
+          setPlans(res);
+        }
+      } catch (err) {
+        console.error("Failed to load subscription plans for store dialog:", err);
+        if (!cancelled) {
+          setPlansError("Không thể tải danh sách gói dịch vụ. Bạn vẫn có thể nhập planId thủ công nếu biết.");
+        }
+      } finally {
+        if (!cancelled) {
+          setPlansLoading(false);
+        }
+      }
+    };
+    void loadPlans();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, isEditing]);
+
   return (
     <Dialog open={open} onOpenChange={mandatory ? () => {} : onOpenChange}>
       <DialogContent
@@ -83,14 +121,14 @@ export const StoreFormDialog = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="store-address">Địa chỉ</Label>
+              <Label htmlFor="store-address">Address / Địa chỉ</Label>
               <Input
                 id="store-address"
                 value={formData.address}
                 onChange={(e) =>
                   onFormChange({ ...formData, address: e.target.value })
                 }
-                placeholder="Ví dụ: S5.03"
+                placeholder="Nhập địa chỉ cửa hàng..."
               />
             </div>
 
@@ -123,6 +161,57 @@ export const StoreFormDialog = ({
                 </SelectContent>
               </Select>
             </div>
+            {!isEditing && (
+              <div className="space-y-2">
+                <Label htmlFor="store-plan">Gói dịch vụ (plan)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Chọn gói subscription cho cửa hàng này. Mặc định nên chọn cùng gói với store hiện tại.
+                </p>
+                {plansLoading ? (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span>Đang tải danh sách gói dịch vụ...</span>
+                  </div>
+                ) : plans.length > 0 ? (
+                  <Select
+                    value={formData.planId || ""}
+                    onValueChange={(value) =>
+                      onFormChange({ ...formData, planId: value })
+                    }
+                  >
+                    <SelectTrigger id="store-plan">
+                      <SelectValue placeholder="Chọn gói dịch vụ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {plans.map((plan) => (
+                        <SelectItem key={plan.id} value={plan.id}>
+                          {plan.planName}{" "}
+                          {typeof plan.price === "number"
+                            ? `- ${plan.price.toLocaleString("vi-VN")}₫/${plan.durationDays || 30
+                              } ngày`
+                            : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <>
+                    <Input
+                      id="store-plan"
+                      placeholder="Không tải được danh sách gói - nhập planId nếu biết"
+                      value={formData.planId}
+                      onChange={(e) =>
+                        onFormChange({ ...formData, planId: e.target.value })
+                      }
+                    />
+                    {plansError && (
+                      <p className="text-[11px] text-red-500">{plansError}</p>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
 

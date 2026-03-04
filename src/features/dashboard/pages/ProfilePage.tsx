@@ -2,16 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Progress } from "@/shared/components/ui/progress";
 import {
   CreditCard,
   CheckCircle,
   AlertCircle,
-  Clock,
   Loader2,
   Building2,
   Store,
-  Calendar,
   User,
   ListChecks,
   CalendarCheck,
@@ -29,6 +26,7 @@ import type { TimekeepingHistoryRecord } from "@/shared/lib/timekeepingApi";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useStoreStore } from "@/shared/store/storeStore";
 
 interface StoreWithSubscription {
   store: {
@@ -48,22 +46,6 @@ interface StoreWithSubscription {
   } | null;
 }
 
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return "-";
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return dateString;
-  }
-};
-
 const formatDateShort = (dateString: string | null | undefined) => {
   if (!dateString) return "-";
   try {
@@ -75,20 +57,6 @@ const formatDateShort = (dateString: string | null | undefined) => {
     });
   } catch {
     return dateString;
-  }
-};
-
-const calculateProgress = (startDate: string | null | undefined, endDate: string | null | undefined) => {
-  if (!startDate || !endDate) return 0;
-  try {
-    const start = new Date(startDate).getTime();
-    const end = new Date(endDate).getTime();
-    const now = Date.now();
-    const total = end - start;
-    const elapsed = now - start;
-    return Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
-  } catch {
-    return 0;
   }
 };
 
@@ -114,6 +82,7 @@ export function ProfilePage() {
   const [tasksLoading, setTasksLoading] = useState(false);
   const [timeHistory, setTimeHistory] = useState<TimekeepingHistoryRecord[]>([]);
   const [timeLoading, setTimeLoading] = useState(false);
+  const { currentStore } = useStoreStore();
 
   useEffect(() => {
     loadSubscriptionData();
@@ -212,7 +181,9 @@ export function ProfilePage() {
     );
   }
 
-  const progress = calculateProgress(subscriptionInfo?.startDate, subscriptionInfo?.endDate);
+  const currentStoreSubscription = currentStore
+    ? storesWithSubscription.find((s) => s.store.id === currentStore.id)?.subscription
+    : null;
 
   const activeTasks = useMemo(
     () =>
@@ -284,6 +255,17 @@ export function ProfilePage() {
                   <User className="h-4 w-4" />
                   <span>{user?.email || "Chưa có email"}</span>
                 </div>
+                {currentStore && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <Store className="h-3 w-3" />
+                    <span>
+                      Đang làm việc tại{" "}
+                      <span className="font-medium">
+                        {currentStore.storeName}
+                      </span>
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -339,11 +321,13 @@ export function ProfilePage() {
                           {subscriptionInfo.planName}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Gói cửa hàng hiện đang sử dụng
+                          {currentStore
+                            ? `Gói hiện tại của ${currentStore.storeName}`
+                            : "Gói dịch vụ hiện đang sử dụng"}
                         </p>
                       </div>
                     </div>
-                    {typeof subscriptionInfo.daysRemaining === "number" && (
+                        {typeof subscriptionInfo.daysRemaining === "number" && (
                       <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm">
                         Còn {subscriptionInfo.daysRemaining} ngày
                       </Badge>
@@ -383,9 +367,16 @@ export function ProfilePage() {
             ) : canManageSubscription ? (
               <div className="text-center py-8">
                 <AlertCircle className="h-12 w-12 mx-auto mb-4 text-amber-500" />
-                <p className="text-muted-foreground mb-4">
-                  Bạn chưa có gói dịch vụ cho cửa hàng.
+                <p className="text-muted-foreground mb-2">
+                  {currentStore
+                    ? `Cửa hàng ${currentStore.storeName} chưa có gói active.`
+                    : "Bạn chưa có gói dịch vụ cho cửa hàng."}
                 </p>
+                {currentStoreSubscription && currentStoreSubscription.planName && (
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Tuy nhiên, một số cửa hàng khác có thể đang có gói dịch vụ active.
+                  </p>
+                )}
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={() => navigate("/dashboard/subscription")}

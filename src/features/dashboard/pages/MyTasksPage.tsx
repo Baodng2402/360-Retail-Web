@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { tasksApi } from "@/shared/lib/tasksApi";
 import type { Task, TaskStatus } from "@/shared/types/task";

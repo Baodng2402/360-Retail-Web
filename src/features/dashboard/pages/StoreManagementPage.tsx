@@ -32,6 +32,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { storesApi } from "@/shared/lib/storesApi";
+import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import type { Store } from "@/shared/types/stores";
 import toast from "react-hot-toast";
 import { StoreFormDialog } from "../components/StoreFormDialog";
@@ -60,6 +61,7 @@ const StoreManagementPage = () => {
     address: "",
     phone: "",
     isActive: true,
+    planId: "",
   });
 
   useEffect(() => {
@@ -131,6 +133,7 @@ const StoreManagementPage = () => {
       address: "",
       phone: "",
       isActive: true,
+      planId: "",
     });
     setStoreDialogOpen(true);
   };
@@ -142,6 +145,7 @@ const StoreManagementPage = () => {
       address: store.address || "",
       phone: store.phone || "",
       isActive: store.isActive,
+      planId: "",
     });
     setStoreDialogOpen(true);
   };
@@ -178,14 +182,64 @@ const StoreManagementPage = () => {
         );
         toast.success("Cập nhật cửa hàng thành công!");
       } else {
-        await storesApi.createStore({
+        if (!storeForm.planId.trim()) {
+          toast.error("Vui lòng chọn gói (plan) để tạo cửa hàng.");
+          return;
+        }
+        const createResult = await storesApi.createStore({
           storeName: storeForm.storeName,
           address: storeForm.address || undefined,
           phone: storeForm.phone || undefined,
+          planId: storeForm.planId,
         });
 
         await fetchStores();
-        toast.success("Tạo cửa hàng thành công!");
+        const paymentId = createResult.payment?.paymentId;
+
+        if (paymentId) {
+          try {
+            // Khởi tạo thanh toán qua Gateway đúng chuẩn backend:
+            // GET /saas/payments/initiate?paymentId=...&provider=vnpay
+            const payment = await subscriptionApi.initiatePayment(
+              paymentId,
+              "vnpay",
+            );
+
+            if (
+              typeof payment === "object" &&
+              payment !== null &&
+              "paymentUrl" in payment &&
+              (payment as { paymentUrl?: string }).paymentUrl
+            ) {
+              const { paymentUrl } = payment as { paymentUrl: string };
+              toast.success(
+                `Tạo cửa hàng "${storeForm.storeName}" thành công. Đang mở trang thanh toán để kích hoạt cửa hàng mới.`,
+                { duration: 8000 },
+              );
+              window.open(paymentUrl, "_blank");
+            } else {
+              toast.error(
+                "Tạo cửa hàng thành công nhưng không khởi tạo được thanh toán. Vui lòng thử lại từ trang Gói dịch vụ.",
+              );
+            }
+          } catch (err) {
+            console.error(
+              "Failed to initiate payment for new store subscription:",
+              err,
+            );
+            const message =
+              (err as {
+                response?: { data?: { message?: string } };
+              })?.response?.data?.message ||
+              "Không thể khởi tạo thanh toán cho cửa hàng mới. Vui lòng thử lại từ trang Gói dịch vụ.";
+            toast.error(message);
+          }
+        } else {
+          toast.success(
+            `Tạo cửa hàng "${storeForm.storeName}" thành công. Để sử dụng, hãy mua gói dịch vụ cho cửa hàng này trong trang Gói dịch vụ.`,
+            { duration: 5000 },
+          );
+        }
       }
 
       setStoreDialogOpen(false);

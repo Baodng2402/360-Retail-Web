@@ -3,6 +3,7 @@ import type {
   Store,
   CreateStoreDto,
   UpdateStoreDto,
+  StoreCreateResponse,
 } from "@/shared/types/stores";
 import type { ApiResponse } from "@/shared/types/api-response";
 
@@ -74,21 +75,42 @@ export const storesApi = {
     return res.data as Store;
   },
 
-  async createStore(data: CreateStoreDto): Promise<Store> {
-    const res = await saasApi.post<Store | ApiResponse<Store>>("saas/stores", {
+  async createStore(data: CreateStoreDto): Promise<StoreCreateResponse> {
+    const res = await saasApi.post<
+      Store | ApiResponse<Store> | StoreCreateResponse | ApiResponse<StoreCreateResponse>
+    >("saas/stores", {
       storeName: data.storeName,
       address: data.address,
       phone: data.phone,
+      planId: data.planId,
+      latitude: data.latitude,
+      longitude: data.longitude,
     });
 
-    let newStore: Store;
-    if ("success" in res.data && res.data.success && res.data.data) {
-      newStore = res.data.data;
-    } else {
-      newStore = res.data as Store;
+    const body = res.data as
+      | Store
+      | ApiResponse<Store>
+      | StoreCreateResponse
+      | ApiResponse<StoreCreateResponse>;
+
+    // Case 1: Gateway-style ApiResponse<StoreCreateResponse>
+    if ("success" in body && body.success && body.data) {
+      const payload = body.data as StoreCreateResponse;
+      if ("store" in payload) {
+        return payload;
+      }
+      // Older format ApiResponse<Store>
+      return { store: payload as unknown as Store };
     }
 
-    return newStore;
+    // Case 2: Direct StoreCreateResponse from backend
+    if ("store" in body) {
+      return body as StoreCreateResponse;
+    }
+
+    // Case 3: Fallback legacy: plain Store
+    const legacyStore = body as Store;
+    return { store: legacyStore };
   },
 
   async updateStore(id: string, data: UpdateStoreDto): Promise<Store> {
@@ -133,8 +155,8 @@ export const storesApi = {
         return {
           id,
           storeName: data.storeName || "",
-          address: data.address || null,
-          phone: data.phone || null,
+          address: data.address || undefined,
+          phone: data.phone || undefined,
           isActive: data.isActive ?? true,
           createdAt: new Date().toISOString(),
           isDefault: false,
