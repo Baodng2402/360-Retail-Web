@@ -36,6 +36,7 @@ import SuperAdminPage from "@/features/admin/pages/SuperAdminPage";
 import EmployeeDetailPage from "@/features/dashboard/pages/EmployeeDetailPage";
 import MyTasksPage from "@/features/dashboard/pages/MyTasksPage";
 import CrmDashboardPage from "@/features/dashboard/pages/CrmDashboardPage";
+import InventoryManagementPage from "@/features/dashboard/pages/InventoryManagementPage";
 
 function App() {
   return (
@@ -91,6 +92,10 @@ function App() {
                 <Route
                   path="/dashboard/products"
                   element={<ProductManagementPage />}
+                />
+                <Route
+                  path="/dashboard/inventory"
+                  element={<InventoryManagementPage />}
                 />
                 <Route path="/dashboard/profile" element={<ProfilePage />} />
                 <Route

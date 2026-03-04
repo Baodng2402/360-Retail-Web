@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Store as StoreIcon,
   Package,
+  Warehouse,
   CreditCard,
   Lock,
   AlertCircle,
@@ -150,6 +151,15 @@ export const DashboardSideBar = ({
       visibleFor: ["StoreOwner", "Manager"],
     },
     {
+      icon: Warehouse,
+      label: "Inventory",
+      subLabel: "Nhập/Xuất kho",
+      path: "/dashboard/inventory",
+      end: false,
+      requiresStore: true,
+      visibleFor: ["StoreOwner", "Manager"],
+    },
+    {
       icon: ShoppingCart,
       label: "Sales & POS",
       subLabel: "Bán hàng",
@@ -255,28 +265,25 @@ export const DashboardSideBar = ({
         </div>
       )}
       <aside
-        className={`relative flex h-screen flex-col border-r bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-[width] duration-300 ease-in-out ${
-          isCollapsed ? "w-20" : "w-64"
-        }`}
+        className={`relative flex h-screen flex-col border-r bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-[width] duration-300 ease-in-out ${isCollapsed ? "w-20" : "w-64"
+          }`}
         style={{
           willChange: "width",
         }}
       >
         <div className={`h-[73px] flex items-center px-4 flex-shrink-0 border-b border-gray-200 dark:border-gray-800`}>
           <div
-            className={`flex items-center gap-3 w-full ${
-              isCollapsed ? "justify-center" : ""
-            }`}
+            className={`flex items-center gap-3 w-full ${isCollapsed ? "justify-center" : ""
+              }`}
           >
             <div className="flex w-10 h-10 items-center justify-center flex-shrink-0">
               <img src={logo} alt="logo" className="w-full h-full object-contain" />
             </div>
             <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                isCollapsed
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed
                   ? "w-0 opacity-0 scale-95"
                   : "w-auto opacity-100 scale-100 min-w-0"
-              }`}
+                }`}
               style={{
                 transitionDelay: isCollapsed ? "0ms" : "100ms",
               }}
@@ -344,8 +351,8 @@ export const DashboardSideBar = ({
                       isActive
                         ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-md"
                         : isLocked
-                        ? "opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
-                        : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                          ? "opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                     )}
                   >
                     <div className="relative">
@@ -355,11 +362,10 @@ export const DashboardSideBar = ({
                       )}
                     </div>
                     <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isCollapsed
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed
                           ? "w-0 opacity-0 scale-95"
                           : "w-auto opacity-100 scale-100 ml-0"
-                      }`}
+                        }`}
                       style={{
                         transitionDelay: isCollapsed ? "0ms" : "100ms",
                       }}
