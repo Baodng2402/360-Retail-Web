@@ -29,6 +29,8 @@ import {
 } from "@/shared/lib/timekeepingApi";
 import { storesApi } from "@/shared/lib/storesApi";
 import { useAuthStore } from "@/shared/store/authStore";
+import { useStoreStore } from "@/shared/store/storeStore";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 
 const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
 
@@ -55,6 +57,7 @@ const getDistanceMeters = (
 
 const TimekeepingPage = () => {
   const { user } = useAuthStore();
+  const { currentStore } = useStoreStore();
   const canViewSummary =
     user?.role === "StoreOwner" || user?.role === "Manager";
 
@@ -216,15 +219,20 @@ const TimekeepingPage = () => {
   };
 
   useEffect(() => {
-    void loadToday();
-    void loadHistory();
     void getCurrentLocation().catch(() => {
       // ignore initial location error
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    void loadToday();
+    void loadHistory();
     if (canViewSummary) {
       void loadMonthlySummary();
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStore?.id, canViewSummary]);
 
   const getCurrentLocation = (): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -400,6 +408,7 @@ const TimekeepingPage = () => {
 
   return (
     <div className="space-y-6">
+      <StoreSelector pageDescription="Chuyển đổi để chấm công cho cửa hàng khác" />
       {loading && !today ? (
         <div className="flex min-h-[40vh] items-center justify-center">
           <div className="flex items-center gap-2 text-muted-foreground">

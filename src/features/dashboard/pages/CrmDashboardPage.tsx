@@ -15,8 +15,9 @@ import { loyaltyApi } from "@/shared/lib/loyaltyApi";
 import { customersApi } from "@/shared/lib/customersApi";
 import type { Feedback, FeedbackSummary } from "@/shared/lib/feedbackApi";
 import type { LoyaltyRule } from "@/shared/types/loyalty";
+import type { Customer } from "@/shared/types/customers";
 import { useAuthStore } from "@/shared/store/authStore";
-import { Star, MessageSquare, Gift, Loader2, Coins, PenLine } from "lucide-react";
+import { Star, MessageSquare, Gift, Loader2, Coins, PenLine, Search } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,9 +28,12 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Label } from "@/shared/components/ui/label";
 import toast from "react-hot-toast";
+import { useStoreStore } from "@/shared/store/storeStore";
+import StoreSelector from "@/features/dashboard/components/StoreSelector";
 
 const CrmDashboardPage = () => {
   const { user } = useAuthStore();
+  const { currentStore } = useStoreStore();
   const canManageRules =
     user?.role === "StoreOwner" || user?.role === "Manager";
 
@@ -62,6 +66,9 @@ const CrmDashboardPage = () => {
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [redeemDesc, setRedeemDesc] = useState("");
   const [redeemLoading, setRedeemLoading] = useState(false);
+  const [redeemSearch, setRedeemSearch] = useState("");
+  const [redeemSearchLoading, setRedeemSearchLoading] = useState(false);
+  const [redeemSearchResults, setRedeemSearchResults] = useState<Customer[]>([]);
 
   // Staff feedback state
   const [staffFbOpen, setStaffFbOpen] = useState(false);
@@ -69,6 +76,9 @@ const CrmDashboardPage = () => {
   const [staffFbRating, setStaffFbRating] = useState(5);
   const [staffFbContent, setStaffFbContent] = useState("");
   const [staffFbLoading, setStaffFbLoading] = useState(false);
+  const [staffSearch, setStaffSearch] = useState("");
+  const [staffSearchLoading, setStaffSearchLoading] = useState(false);
+  const [staffSearchResults, setStaffSearchResults] = useState<Customer[]>([]);
 
   useEffect(() => {
     const loadSummary = async () => {
@@ -221,6 +231,24 @@ const CrmDashboardPage = () => {
     }
   };
 
+  const handleRedeemSearchCustomers = async () => {
+    if (!redeemSearch.trim()) return;
+    try {
+      setRedeemSearchLoading(true);
+      const res = await customersApi.getCustomers({
+        keyword: redeemSearch.trim(),
+        page: 1,
+        pageSize: 8,
+      });
+      setRedeemSearchResults(res.items);
+    } catch (err) {
+      console.error("Failed to search customers for redeem:", err);
+      toast.error("Không thể tìm khách hàng. Vui lòng thử lại.");
+    } finally {
+      setRedeemSearchLoading(false);
+    }
+  };
+
   const handleStaffFeedback = async () => {
     if (!staffFbCustomerId.trim()) return;
     try {
@@ -243,8 +271,27 @@ const CrmDashboardPage = () => {
     }
   };
 
+  const handleStaffSearchCustomers = async () => {
+    if (!staffSearch.trim()) return;
+    try {
+      setStaffSearchLoading(true);
+      const res = await customersApi.getCustomers({
+        keyword: staffSearch.trim(),
+        page: 1,
+        pageSize: 8,
+      });
+      setStaffSearchResults(res.items);
+    } catch (err) {
+      console.error("Failed to search customers for staff feedback:", err);
+      toast.error("Không thể tìm khách hàng. Vui lòng thử lại.");
+    } finally {
+      setStaffSearchLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      <StoreSelector pageDescription="Chọn cửa hàng để xem feedback và cấu hình loyalty cho đúng chi nhánh." />
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="p-4 md:p-6 lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between gap-3">
@@ -255,7 +302,8 @@ const CrmDashboardPage = () => {
                   CRM Feedback &amp; Loyalty
                 </h1>
                 <p className="text-xs md:text-sm text-muted-foreground">
-                  Tổng quan điểm đánh giá khách hàng và cấu hình quy tắc tích điểm.
+                  Tổng quan điểm đánh giá khách hàng và cấu hình quy tắc tích điểm
+                  {currentStore ? ` cho ${currentStore.storeName}` : ""}.
                 </p>
               </div>
             </div>
@@ -383,7 +431,8 @@ const CrmDashboardPage = () => {
                         <div className="flex flex-col items-end gap-1 text-[11px]">
                           <Button
                             variant="outline"
-                            size="xs"
+                            size="sm"
+                            className="h-7 px-2 text-[11px]"
                             onClick={() => openEditRule(rule)}
                           >
                             Sửa
@@ -695,6 +744,55 @@ const CrmDashboardPage = () => {
                 placeholder="Nhập ID khách hàng..."
               />
             </div>
+            <div className="space-y-1 rounded-md border bg-muted/40 p-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-[11px] flex items-center gap-1">
+                  <Search className="h-3 w-3" />
+                  Tìm khách hàng nhanh
+                </Label>
+              </div>
+              <div className="mt-1 flex items-center gap-2">
+                <Input
+                  value={redeemSearch}
+                  onChange={(e) => setRedeemSearch(e.target.value)}
+                  placeholder="Nhập tên, số điện thoại hoặc email..."
+                  className="h-8 text-xs"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-2 text-xs"
+                  disabled={redeemSearchLoading}
+                  onClick={() => void handleRedeemSearchCustomers()}
+                >
+                  {redeemSearchLoading ? "Đang tìm..." : "Tìm"}
+                </Button>
+              </div>
+              {redeemSearchResults.length > 0 && (
+                <div className="mt-2 max-h-40 overflow-y-auto rounded-md border bg-background">
+                  {redeemSearchResults.map((c) => (
+                    <button
+                      type="button"
+                      key={c.id}
+                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-muted"
+                      onClick={() => {
+                        setRedeemCustomerId(c.id);
+                        setRedeemSearchResults([]);
+                        toast.success(`Đã chọn khách hàng: ${c.fullName}`);
+                      }}
+                    >
+                      <span className="font-medium">{c.fullName}</span>
+                      {(c.phoneNumber || c.email) && (
+                        <span className="ml-1 text-[11px] text-muted-foreground">
+                          {c.phoneNumber || c.email || ""}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="space-y-1">
               <Label>Số điểm đổi</Label>
               <Input
@@ -750,6 +848,55 @@ const CrmDashboardPage = () => {
                 onChange={(e) => setStaffFbCustomerId(e.target.value)}
                 placeholder="Nhập ID khách hàng..."
               />
+            </div>
+            <div className="space-y-1 rounded-md border bg-muted/40 p-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-[11px] flex items-center gap-1">
+                  <Search className="h-3 w-3" />
+                  Tìm khách hàng nhanh
+                </Label>
+              </div>
+              <div className="mt-1 flex items-center gap-2">
+                <Input
+                  value={staffSearch}
+                  onChange={(e) => setStaffSearch(e.target.value)}
+                  placeholder="Nhập tên, số điện thoại hoặc email..."
+                  className="h-8 text-xs"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-2 text-xs"
+                  disabled={staffSearchLoading}
+                  onClick={() => void handleStaffSearchCustomers()}
+                >
+                  {staffSearchLoading ? "Đang tìm..." : "Tìm"}
+                </Button>
+              </div>
+              {staffSearchResults.length > 0 && (
+                <div className="mt-2 max-h-40 overflow-y-auto rounded-md border bg-background">
+                  {staffSearchResults.map((c) => (
+                    <button
+                      type="button"
+                      key={c.id}
+                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-muted"
+                      onClick={() => {
+                        setStaffFbCustomerId(c.id);
+                        setStaffSearchResults([]);
+                        toast.success(`Đã chọn khách hàng: ${c.fullName}`);
+                      }}
+                    >
+                      <span className="font-medium">{c.fullName}</span>
+                      {(c.phoneNumber || c.email) && (
+                        <span className="ml-1 text-[11px] text-muted-foreground">
+                          {c.phoneNumber || c.email || ""}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="space-y-1">
               <Label>Đánh giá</Label>

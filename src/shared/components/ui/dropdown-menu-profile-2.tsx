@@ -119,7 +119,9 @@ const Example = () => {
                       {user?.email || "user@email.com"}
                     </p>
                     <Badge className="w-fit text-xs bg-teal-400" variant="secondary">
-                      {user?.role?.replace(/([A-Z])/g, " $1").trim() || "Store Owner"}
+                      {typeof user?.role === "string"
+                        ? user.role.replace(/([A-Z])/g, " $1").trim()
+                        : "Store Owner"}
                     </Badge>
                   </div>
                 </div>

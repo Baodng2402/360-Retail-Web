@@ -22,6 +22,7 @@ import { ordersApi } from "@/shared/lib/ordersApi";
 import type { Order, OrderStatus } from "@/shared/types/orders";
 import { formatVnd } from "@/shared/utils/formatMoney";
 import { useAuthStore } from "@/shared/store/authStore";
+import { useStoreStore } from "@/shared/store/storeStore";
 import toast from "react-hot-toast";
 
 const statusLabels: Record<OrderStatus, string> = {
@@ -44,6 +45,7 @@ const OrderDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { currentStore } = useStoreStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -144,6 +146,12 @@ const OrderDetailPage = () => {
     );
   }
 
+  const effectiveStoreId = order.storeId || currentStore?.id || null;
+  const feedbackUrl =
+    order.customerId && effectiveStoreId
+      ? `${window.location.origin}/feedback/${order.id}?customerId=${order.customerId}&storeId=${effectiveStoreId}`
+      : null;
+
   return (
     <div className="space-y-6">
       <Button
@@ -243,6 +251,52 @@ const OrderDetailPage = () => {
               {formatVnd(order.totalAmount)}
             </p>
           </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+          <div className="md:col-span-2 space-y-1">
+            <p className="text-sm font-semibold text-foreground">
+              QR đánh giá khách hàng
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Mã QR này dẫn tới trang feedback cho đơn hàng hiện tại. Bạn có thể
+              in kèm trên hóa đơn hoặc cho khách quét trực tiếp tại quầy.
+            </p>
+            {feedbackUrl ? (
+              <div className="mt-2 space-y-2">
+                <p className="text-[11px] text-muted-foreground">
+                  URL feedback:
+                </p>
+                <div className="rounded-md border bg-muted/40 px-2 py-1 text-[11px] break-all font-mono">
+                  {feedbackUrl}
+                </div>
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Đơn hàng này chưa gắn với khách hàng hoặc cửa hàng cụ thể nên
+                không thể tạo QR feedback. Vui lòng gắn khách hàng khi tạo đơn
+                để sử dụng tính năng này.
+              </p>
+            )}
+          </div>
+          {feedbackUrl && (
+            <div className="flex justify-center md:justify-end">
+              <div className="inline-flex flex-col items-center gap-2 rounded-xl border bg-background p-3">
+                <div className="bg-white p-2 rounded-md">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                      feedbackUrl,
+                    )}`}
+                    alt="QR feedback"
+                    className="h-40 w-40"
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground text-center max-w-[160px]">
+                  Khách quét mã này để gửi đánh giá đơn hàng.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3 pt-4">

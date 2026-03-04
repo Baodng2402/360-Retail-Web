@@ -165,7 +165,7 @@ const StaffManagementPage = () => {
             <SearchInput
               placeholder="Search staff / Tìm kiếm..."
               wrapperClassName="w-full sm:w-64"
-              className="from-gray-50 to-gray-100 bg-gradient-to-r"
+              className="bg-background"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -180,7 +180,6 @@ const StaffManagementPage = () => {
             <DataTable
               data={filteredStaff}
               onViewStaff={handleViewStaff}
-              onEditStaff={handleViewStaff}
             />
           </div>
         )}

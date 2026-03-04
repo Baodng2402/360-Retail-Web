@@ -40,24 +40,29 @@ const ChartBarMixed = ({
       <BarChart
         accessibilityLayer
         data={chartData}
-        layout="vertical"
         margin={{
-          left: 0,
+          left: 12,
+          right: 12,
         }}
       >
-        <YAxis
+        <XAxis
           axisLine={false}
           dataKey="items"
           tickLine={false}
           tickMargin={10}
-          type="category"
+          interval={0}
+          tickFormatter={(value: string) =>
+            typeof value === "string" && value.length > 10
+              ? `${value.slice(0, 10)}…`
+              : value
+          }
         />
-        <XAxis dataKey="values" hide type="number" />
+        <YAxis axisLine={false} tickLine={false} tickMargin={10} />
         <ChartTooltip
           content={<ChartTooltipContent hideLabel />}
           cursor={false}
         />
-        <Bar dataKey="values" layout="vertical" radius={5}>
+        <Bar dataKey="values" radius={5}>
           {chartData.map((entry, index) => (
             <Cell
               key={`cell-${index}`}

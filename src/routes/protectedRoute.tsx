@@ -10,13 +10,17 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  const normalizedAllowedRoles = (allowedRoles ?? []).map((role) =>
-    role.toLowerCase(),
-  );
+  const normalizedAllowedRoles = (allowedRoles ?? [])
+    .filter((role) => typeof role === "string")
+    .map((role) => role.toLowerCase());
+
+  const userRole =
+    typeof user?.role === "string" ? user.role.toLowerCase() : null;
+
   if (
     normalizedAllowedRoles.length > 0 &&
-    user &&
-    !normalizedAllowedRoles.includes(user.role.toLowerCase())
+    userRole &&
+    !normalizedAllowedRoles.includes(userRole)
   ) {
     return <Navigate to="/unauthorized" replace />;
   }

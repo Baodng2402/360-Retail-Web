@@ -100,6 +100,12 @@ const SalePostPage = () => {
     { product: string; sold: number; revenue: number }[]
   >([]);
   const [reportLoading, setReportLoading] = useState(false);
+  const [removeLastConfirmOpen, setRemoveLastConfirmOpen] = useState(false);
+  const [pendingRemoveProductId, setPendingRemoveProductId] = useState<string | null>(null);
+  const pendingRemoveProductName =
+    pendingRemoveProductId
+      ? cart.find((c) => c.product.id === pendingRemoveProductId)?.product.name
+      : null;
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -257,6 +263,16 @@ const SalePostPage = () => {
   };
 
   const updateQuantity = (productId: string, delta: number) => {
+    const target = cart.find((i) => i.product.id === productId);
+    if (!target) return;
+
+    // Nếu user giảm về 0 và đây là sản phẩm cuối cùng trong giỏ -> hỏi xác nhận
+    if (delta < 0 && target.quantity <= 1 && cart.length === 1) {
+      setPendingRemoveProductId(productId);
+      setRemoveLastConfirmOpen(true);
+      return;
+    }
+
     setCart(
       cart
         .map((item) =>
@@ -269,6 +285,11 @@ const SalePostPage = () => {
   };
 
   const removeFromCart = (productId: string) => {
+    if (cart.length === 1) {
+      setPendingRemoveProductId(productId);
+      setRemoveLastConfirmOpen(true);
+      return;
+    }
     setCart(cart.filter((item) => item.product.id !== productId));
   };
 
@@ -759,6 +780,54 @@ const SalePostPage = () => {
         open={addProductModalOpen}
         onOpenChange={setAddProductModalOpen}
       />
+
+      <Dialog
+        open={removeLastConfirmOpen}
+        onOpenChange={(open) => {
+          setRemoveLastConfirmOpen(open);
+          if (!open) setPendingRemoveProductId(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Xóa sản phẩm cuối cùng</DialogTitle>
+            <DialogDescription>
+              Bạn đang xóa sản phẩm cuối cùng trong giỏ{" "}
+              {pendingRemoveProductName ? (
+                <>
+                  (<strong>{pendingRemoveProductName}</strong>)
+                </>
+              ) : null}
+              . Bạn có chắc muốn tiếp tục?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRemoveLastConfirmOpen(false);
+                setPendingRemoveProductId(null);
+              }}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (pendingRemoveProductId) {
+                  setCart((prev) =>
+                    prev.filter((i) => i.product.id !== pendingRemoveProductId),
+                  );
+                }
+                setRemoveLastConfirmOpen(false);
+                setPendingRemoveProductId(null);
+              }}
+            >
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

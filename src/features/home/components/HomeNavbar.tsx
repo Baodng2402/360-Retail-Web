@@ -1,7 +1,7 @@
-"use client";
+ "use client";
 
 import { Menu } from "lucide-react";
-import logoImage from "@/assets/logo.png";
+import logoImage from "@/assets/logo.svg";
 import { cn } from "@/lib/utils";
 import ThemeMode from "@/shared/components/ui/themeMode";
 

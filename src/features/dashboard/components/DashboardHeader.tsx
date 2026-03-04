@@ -48,7 +48,9 @@ export const DashboardHeader = ({
           <div className="flex flex-col">
             <span className="text-sm">Xin chào, {user?.name || "User"}</span>
             <span className="text-sm text-muted-foreground">
-              {user?.role?.replace(/([A-Z])/g, " $1").trim() || "Store Owner"}{" "}
+              {typeof user?.role === "string"
+                ? user.role.replace(/([A-Z])/g, " $1").trim()
+                : "Store Owner"}{" "}
             </span>
           </div>
         </div>

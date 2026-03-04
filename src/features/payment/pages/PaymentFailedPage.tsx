@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { XCircle, Loader2, Home, CreditCard } from "lucide-react";
-import { Globe, FloatingParticles, GradientOrb, GlassCard } from "@/shared/components/ui/Globe3D";
+import { FloatingParticles, GradientOrb, GlassCard } from "@/shared/components/ui/Globe3D";
 
 export default function PaymentFailedPage() {
   const [searchParams] = useSearchParams();
@@ -155,16 +155,6 @@ export default function PaymentFailedPage() {
             </p>
           </motion.div>
         </GlassCard>
-
-        {/* 3D Globe decoration */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="absolute -bottom-32 -right-32 opacity-20 pointer-events-none hidden lg:block"
-        >
-          <Globe size={400} />
-        </motion.div>
       </motion.div>
     </div>
   );

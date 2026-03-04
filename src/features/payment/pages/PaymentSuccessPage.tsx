@@ -6,7 +6,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { CheckCircle, XCircle, Loader2, ArrowRight, Home, CreditCard } from "lucide-react";
 import { authApi } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
-import { Globe, GradientOrb, FloatingParticles, GlassCard } from "@/shared/components/ui/Globe3D";
+import { GradientOrb, FloatingParticles, GlassCard } from "@/shared/components/ui/Globe3D";
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
@@ -240,16 +240,6 @@ export default function PaymentSuccessPage() {
             </p>
           </motion.div>
         </GlassCard>
-
-        {/* 3D Globe decoration */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="absolute -bottom-32 -right-32 opacity-20 pointer-events-none hidden lg:block"
-        >
-          <Globe size={400} />
-        </motion.div>
       </motion.div>
     </div>
   );

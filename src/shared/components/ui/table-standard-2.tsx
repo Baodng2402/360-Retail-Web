@@ -47,14 +47,12 @@ const getInitials = (name: string) => {
 interface StaffTableProps {
   data: Staff[];
   onViewStaff?: (staff: Staff) => void;
-  onEditStaff?: (staff: Staff) => void;
   onDeleteStaff?: (staff: Staff) => void;
 }
 
 export const StaffTable = ({
   data,
   onViewStaff,
-  onEditStaff,
   onDeleteStaff,
 }: StaffTableProps) => {
   return (
@@ -135,10 +133,7 @@ export const StaffTable = ({
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => onViewStaff?.(staff)}>
-                      View details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEditStaff?.(staff)}>
-                      Edit staff
+                      View / Edit details
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600"

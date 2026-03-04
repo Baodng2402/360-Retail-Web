@@ -6,10 +6,25 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import { employeesApi } from "@/shared/lib/employeesApi";
 import type { Employee } from "@/shared/types/employee";
 import { useAuthStore } from "@/shared/store/authStore";
-import { ArrowLeft, Loader2, User, Mail, Phone, Briefcase, Calendar } from "lucide-react";
+import { ArrowLeft, Loader2, User, Mail, Phone, Briefcase, Calendar, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 const getInitials = (name: string) =>
@@ -30,11 +45,24 @@ export default function EmployeeDetailPage() {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [fullName, setFullName] = useState("");
   const [position, setPosition] = useState("");
+  const [positionMode, setPositionMode] = useState<"preset" | "custom">("preset");
   const [baseSalary, setBaseSalary] = useState<string>("");
   const [isActive, setIsActive] = useState(true);
+  const [customPosition, setCustomPosition] = useState("");
+
+  const POSITION_OPTIONS = [
+    "StoreOwner",
+    "Manager",
+    "Staff",
+    "Cashier",
+    "Sales",
+    "Warehouse",
+  ] as const;
 
   useEffect(() => {
     const load = async () => {
@@ -45,6 +73,11 @@ export default function EmployeeDetailPage() {
         setEmployee(emp);
         setFullName(emp.fullName);
         setPosition(emp.position);
+        const isPreset =
+          !!emp.position &&
+          (POSITION_OPTIONS as readonly string[]).includes(emp.position);
+        setPositionMode(isPreset ? "preset" : "custom");
+        setCustomPosition(isPreset ? "" : emp.position || "");
         setBaseSalary(
           typeof emp.baseSalary === "number" ? String(emp.baseSalary) : "",
         );
@@ -70,19 +103,45 @@ export default function EmployeeDetailPage() {
         setSaving(false);
         return;
       }
+      const nextPosition =
+        positionMode === "custom"
+          ? customPosition.trim()
+          : position.trim();
+      if (!nextPosition) {
+        toast.error("Vui lòng chọn chức danh.");
+        setSaving(false);
+        return;
+      }
       const updated = await employeesApi.updateEmployee(id, {
         fullName: fullName.trim() || employee.fullName,
-        position: position.trim() || employee.position,
+        position: nextPosition || employee.position,
         baseSalary: salaryNumber,
         isActive,
       });
-      setEmployee(updated);
+      setEmployee((prev) => (prev ? { ...prev, ...updated } : updated));
       toast.success("Đã cập nhật thông tin nhân viên.");
     } catch (err) {
       console.error("Failed to update employee:", err);
       toast.error("Không thể cập nhật thông tin nhân viên.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!employee || !id || !canEdit) return;
+    try {
+      setDeleting(true);
+      const updated = await employeesApi.updateEmployee(id, { isActive: false });
+      setEmployee((prev) => (prev ? { ...prev, ...updated, isActive: false } : updated));
+      setIsActive(false);
+      toast.success("Đã ngừng hoạt động nhân viên.");
+      setDeleteOpen(false);
+    } catch (err) {
+      console.error("Failed to deactivate employee:", err);
+      toast.error("Không thể xóa/ngừng hoạt động nhân viên. Vui lòng thử lại.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -166,14 +225,25 @@ export default function EmployeeDetailPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Thông tin & phân quyền nhân viên</h2>
             {canEdit && (
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
-              >
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Lưu thay đổi
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="border-red-500 text-red-600 hover:bg-red-50"
+                  onClick={() => setDeleteOpen(true)}
+                  disabled={saving || deleting}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Xóa nhân viên
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={saving || deleting}
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
+                >
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Lưu thay đổi
+                </Button>
+              </div>
             )}
           </div>
 
@@ -193,12 +263,48 @@ export default function EmployeeDetailPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="position">Chức danh</Label>
-              <Input
-                id="position"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-                disabled={!canEdit}
-              />
+              <div className="grid gap-2">
+                <Select
+                  value={positionMode}
+                  onValueChange={(v) => setPositionMode(v as "preset" | "custom")}
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="preset">Chọn từ danh sách</SelectItem>
+                    <SelectItem value="custom">Nhập thủ công</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {positionMode === "preset" ? (
+                  <Select
+                    value={position}
+                    onValueChange={setPosition}
+                    disabled={!canEdit}
+                  >
+                    <SelectTrigger id="position" className="w-full">
+                      <SelectValue placeholder="Chọn chức danh" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {POSITION_OPTIONS.map((p) => (
+                        <SelectItem key={p} value={p}>
+                          {p}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id="position"
+                    value={customPosition}
+                    onChange={(e) => setCustomPosition(e.target.value)}
+                    disabled={!canEdit}
+                    placeholder="VD: Nhân viên bán hàng"
+                  />
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="baseSalary">Lương cơ bản (VND)</Label>
@@ -231,6 +337,27 @@ export default function EmployeeDetailPage() {
           </div>
         </Card>
       </div>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Xóa / ngừng hoạt động nhân viên</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc muốn ngừng hoạt động nhân viên{" "}
+              <strong>{employee.fullName}</strong>? Nhân viên sẽ không thể đăng nhập và chấm công.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Xác nhận
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

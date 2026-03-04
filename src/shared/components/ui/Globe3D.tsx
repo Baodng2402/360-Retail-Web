@@ -24,12 +24,20 @@ export function Globe({ className = "", size = 600 }: GlobeProps) {
     // Dynamic import to avoid SSR issues
     let globe: { destroy: () => void } | null = null;
     
-    import("cobe").then((cobe) => {
+    import("cobe").then((cobeModule) => {
       if (!canvasRef.current) return;
-      
-      const createGlobe = (cobe as unknown as { createGlobe: (canvas: HTMLCanvasElement, options: unknown) => { destroy: () => void } }).createGlobe;
-      
-      globe = createGlobe(canvasRef.current, {
+      const createGlobeFn =
+        // default export (ESM)
+        (cobeModule as unknown as { default?: (canvas: HTMLCanvasElement, options: unknown) => { destroy: () => void } }).default ??
+        // or named export "createGlobe" (for older typings)
+        (cobeModule as unknown as { createGlobe?: (canvas: HTMLCanvasElement, options: unknown) => { destroy: () => void } }).createGlobe;
+
+      if (!createGlobeFn) {
+        console.error("cobe module does not export createGlobe function");
+        return;
+      }
+
+      globe = createGlobeFn(canvasRef.current, {
         devicePixelRatio: 2,
         width: width * 2,
         height: width * 2,
