@@ -12,13 +12,15 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { feedbackApi } from "@/shared/lib/feedbackApi";
 import { loyaltyApi } from "@/shared/lib/loyaltyApi";
+import { customersApi } from "@/shared/lib/customersApi";
 import type { Feedback, FeedbackSummary } from "@/shared/lib/feedbackApi";
 import type { LoyaltyRule } from "@/shared/types/loyalty";
 import { useAuthStore } from "@/shared/store/authStore";
-import { Star, MessageSquare, Gift, Loader2 } from "lucide-react";
+import { Star, MessageSquare, Gift, Loader2, Coins, PenLine } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -53,6 +55,20 @@ const CrmDashboardPage = () => {
     status: 1,
   });
   const [ruleSaving, setRuleSaving] = useState(false);
+
+  // Redeem points state
+  const [redeemOpen, setRedeemOpen] = useState(false);
+  const [redeemCustomerId, setRedeemCustomerId] = useState("");
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [redeemDesc, setRedeemDesc] = useState("");
+  const [redeemLoading, setRedeemLoading] = useState(false);
+
+  // Staff feedback state
+  const [staffFbOpen, setStaffFbOpen] = useState(false);
+  const [staffFbCustomerId, setStaffFbCustomerId] = useState("");
+  const [staffFbRating, setStaffFbRating] = useState(5);
+  const [staffFbContent, setStaffFbContent] = useState("");
+  const [staffFbLoading, setStaffFbLoading] = useState(false);
 
   useEffect(() => {
     const loadSummary = async () => {
@@ -181,6 +197,49 @@ const CrmDashboardPage = () => {
     } catch (err) {
       console.error("Failed to delete loyalty rule:", err);
       toast.error("Không thể xóa luật tích điểm.");
+    }
+  };
+
+  const handleRedeemPoints = async () => {
+    if (!redeemCustomerId.trim() || redeemPoints <= 0) return;
+    try {
+      setRedeemLoading(true);
+      await customersApi.redeemPoints(redeemCustomerId.trim(), {
+        points: redeemPoints,
+        description: redeemDesc || undefined,
+      });
+      toast.success(`Đổi ${redeemPoints} điểm thành công!`);
+      setRedeemOpen(false);
+      setRedeemCustomerId("");
+      setRedeemPoints(0);
+      setRedeemDesc("");
+    } catch (err) {
+      console.error("Failed to redeem points:", err);
+      toast.error("Đổi điểm thất bại. Kiểm tra lại mã khách hàng và số điểm.");
+    } finally {
+      setRedeemLoading(false);
+    }
+  };
+
+  const handleStaffFeedback = async () => {
+    if (!staffFbCustomerId.trim()) return;
+    try {
+      setStaffFbLoading(true);
+      await feedbackApi.createStaffFeedback({
+        customerId: staffFbCustomerId.trim(),
+        rating: staffFbRating,
+        content: staffFbContent || undefined,
+      });
+      toast.success("Tạo feedback hộ khách thành công!");
+      setStaffFbOpen(false);
+      setStaffFbCustomerId("");
+      setStaffFbRating(5);
+      setStaffFbContent("");
+    } catch (err) {
+      console.error("Failed to create staff feedback:", err);
+      toast.error("Tạo feedback thất bại.");
+    } finally {
+      setStaffFbLoading(false);
     }
   };
 
@@ -343,6 +402,35 @@ const CrmDashboardPage = () => {
                 </div>
               )}
             </Card>
+          </div>
+        </Card>
+
+        {/* Quick Actions: Redeem Points & Staff Feedback */}
+        <Card className="p-4 md:p-6">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <h2 className="text-sm md:text-base font-semibold text-foreground">
+              Thao tác nhanh
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {canManageRules && (
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setRedeemOpen(true)}
+              >
+                <Coins className="h-4 w-4 text-amber-500" />
+                Đổi điểm thưởng
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => setStaffFbOpen(true)}
+            >
+              <PenLine className="h-4 w-4 text-teal-500" />
+              Tạo feedback hộ khách
+            </Button>
           </div>
         </Card>
 
@@ -581,6 +669,127 @@ const CrmDashboardPage = () => {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               Lưu
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Redeem Points Dialog */}
+      <Dialog open={redeemOpen} onOpenChange={setRedeemOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Coins className="h-5 w-5 text-amber-500" />
+              Đổi điểm thưởng
+            </DialogTitle>
+            <DialogDescription>
+              Nhập mã khách hàng và số điểm muốn đổi.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div className="space-y-1">
+              <Label>Mã khách hàng (Customer ID)</Label>
+              <Input
+                value={redeemCustomerId}
+                onChange={(e) => setRedeemCustomerId(e.target.value)}
+                placeholder="Nhập ID khách hàng..."
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Số điểm đổi</Label>
+              <Input
+                type="number"
+                min={1}
+                value={redeemPoints || ""}
+                onChange={(e) => setRedeemPoints(Number(e.target.value) || 0)}
+                placeholder="Nhập số điểm..."
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Mô tả (tùy chọn)</Label>
+              <Input
+                value={redeemDesc}
+                onChange={(e) => setRedeemDesc(e.target.value)}
+                placeholder="VD: Đổi voucher 50k"
+              />
+            </div>
+          </div>
+          <DialogFooter className="pt-2">
+            <Button variant="outline" onClick={() => setRedeemOpen(false)} disabled={redeemLoading}>
+              Hủy
+            </Button>
+            <Button
+              onClick={() => void handleRedeemPoints()}
+              disabled={redeemLoading || !redeemCustomerId.trim() || redeemPoints <= 0}
+              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+            >
+              {redeemLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Đổi điểm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Staff Feedback Dialog */}
+      <Dialog open={staffFbOpen} onOpenChange={setStaffFbOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PenLine className="h-5 w-5 text-teal-500" />
+              Tạo feedback hộ khách hàng
+            </DialogTitle>
+            <DialogDescription>
+              Staff/Manager tạo feedback in-store thay cho khách.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div className="space-y-1">
+              <Label>Mã khách hàng (Customer ID)</Label>
+              <Input
+                value={staffFbCustomerId}
+                onChange={(e) => setStaffFbCustomerId(e.target.value)}
+                placeholder="Nhập ID khách hàng..."
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Đánh giá</Label>
+              <Select
+                value={String(staffFbRating)}
+                onValueChange={(v) => setStaffFbRating(Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">⭐⭐⭐⭐⭐ 5 sao</SelectItem>
+                  <SelectItem value="4">⭐⭐⭐⭐ 4 sao</SelectItem>
+                  <SelectItem value="3">⭐⭐⭐ 3 sao</SelectItem>
+                  <SelectItem value="2">⭐⭐ 2 sao</SelectItem>
+                  <SelectItem value="1">⭐ 1 sao</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Nội dung (tùy chọn)</Label>
+              <textarea
+                className="flex w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                value={staffFbContent}
+                onChange={(e) => setStaffFbContent(e.target.value)}
+                placeholder="Khách nhận xét..."
+              />
+            </div>
+          </div>
+          <DialogFooter className="pt-2">
+            <Button variant="outline" onClick={() => setStaffFbOpen(false)} disabled={staffFbLoading}>
+              Hủy
+            </Button>
+            <Button
+              onClick={() => void handleStaffFeedback()}
+              disabled={staffFbLoading || !staffFbCustomerId.trim()}
+              className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white"
+            >
+              {staffFbLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Tạo feedback
             </Button>
           </DialogFooter>
         </DialogContent>
