@@ -48,6 +48,8 @@ const OrderDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [newStatus, setNewStatus] = useState<OrderStatus | "">("");
+  const [cancelling, setCancelling] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const canUpdateStatus =
     user?.role === "StoreOwner" || user?.role === "Manager";
@@ -85,6 +87,23 @@ const OrderDetailPage = () => {
       toast.error("Không thể cập nhật trạng thái đơn hàng.");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!order) return;
+    try {
+      setCancelling(true);
+      const updated = await ordersApi.cancelOrder(order.id);
+      setOrder(updated);
+      setNewStatus(updated.status);
+      setShowCancelDialog(false);
+      toast.success("Đã hủy đơn hàng thành công.");
+    } catch (err) {
+      console.error("Failed to cancel order:", err);
+      toast.error("Không thể hủy đơn hàng.");
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -187,6 +206,16 @@ const OrderDetailPage = () => {
                 >
                   Lưu
                 </Button>
+                {(order.status === "Pending" || order.status === "Processing") && (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => setShowCancelDialog(true)}
+                    disabled={cancelling}
+                  >
+                    Hủy đơn
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -265,6 +294,38 @@ const OrderDetailPage = () => {
           </Table>
         </div>
       </Card>
+
+      {/* Cancel Order Confirmation Dialog */}
+      {showCancelDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <Card className="p-6 max-w-sm w-full mx-4 space-y-4">
+            <h3 className="text-lg font-semibold">Xác nhận hủy đơn hàng</h3>
+            <p className="text-sm text-muted-foreground">
+              Bạn có chắc chắn muốn hủy đơn hàng{" "}
+              <strong>{order.code || order.id.slice(0, 8)}</strong>? Hành động
+              này không thể hoàn tác.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCancelDialog(false)}
+                disabled={cancelling}
+              >
+                Không
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => void handleCancelOrder()}
+                disabled={cancelling}
+              >
+                {cancelling ? "Đang hủy..." : "Hủy đơn hàng"}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
