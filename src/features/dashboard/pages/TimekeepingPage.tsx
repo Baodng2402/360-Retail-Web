@@ -15,17 +15,20 @@ import {
   MapPin,
   CheckCircle2,
   Loader2,
+  BarChart3,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import {
   timekeepingApi,
   type TimekeepingHistoryRecord,
 } from "@/shared/lib/timekeepingApi";
 import { storesApi } from "@/shared/lib/storesApi";
+import { useAuthStore } from "@/shared/store/authStore";
 
 const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
 
@@ -43,14 +46,18 @@ const getDistanceMeters = (
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c * 1000;
 };
 
 const TimekeepingPage = () => {
+  const { user } = useAuthStore();
+  const canViewSummary =
+    user?.role === "StoreOwner" || user?.role === "Manager";
+
   const [loading, setLoading] = useState(true);
   const [today, setToday] = useState<
     Awaited<ReturnType<typeof timekeepingApi.getToday>> | null
@@ -186,12 +193,37 @@ const TimekeepingPage = () => {
     }
   };
 
+  // Monthly summary state (Manager/StoreOwner)
+  const [summaryMonth, setSummaryMonth] = useState(new Date().getMonth() + 1);
+  const [summaryYear, setSummaryYear] = useState(new Date().getFullYear());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [monthlySummary, setMonthlySummary] = useState<any>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
+  const loadMonthlySummary = async (month?: number, year?: number) => {
+    try {
+      setSummaryLoading(true);
+      const res = await timekeepingApi.getSummary({
+        month: month ?? summaryMonth,
+        year: year ?? summaryYear,
+      });
+      setMonthlySummary(res);
+    } catch {
+      setMonthlySummary(null);
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
   useEffect(() => {
     void loadToday();
     void loadHistory();
     void getCurrentLocation().catch(() => {
       // ignore initial location error
     });
+    if (canViewSummary) {
+      void loadMonthlySummary();
+    }
   }, []);
 
   const getCurrentLocation = (): Promise<string> => {
@@ -685,6 +717,89 @@ const TimekeepingPage = () => {
           )}
         </Card>
       </motion.div>
+
+      {/* Monthly Summary for Manager/StoreOwner */}
+      {canViewSummary && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <Card className="p-4 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-indigo-600" />
+                <h2 className="text-base font-semibold text-foreground">
+                  Báo cáo chấm công tháng
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <Label className="text-xs">Tháng:</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={12}
+                    className="w-16 h-8 text-xs"
+                    value={summaryMonth}
+                    onChange={(e) => setSummaryMonth(Number(e.target.value) || 1)}
+                  />
+                </div>
+                <div className="flex items-center gap-1">
+                  <Label className="text-xs">Năm:</Label>
+                  <Input
+                    type="number"
+                    min={2020}
+                    max={2030}
+                    className="w-20 h-8 text-xs"
+                    value={summaryYear}
+                    onChange={(e) => setSummaryYear(Number(e.target.value) || 2026)}
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  className="h-8"
+                  onClick={() => void loadMonthlySummary(summaryMonth, summaryYear)}
+                  disabled={summaryLoading}
+                >
+                  {summaryLoading && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+                  Xem
+                </Button>
+              </div>
+            </div>
+            {monthlySummary ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                <div className="rounded-lg border px-3 py-2 bg-muted/60">
+                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Tổng nhân viên</span>
+                  <span className="font-semibold text-foreground">{monthlySummary.totalEmployees ?? "-"}</span>
+                </div>
+                <div className="rounded-lg border px-3 py-2 bg-muted/60">
+                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Tổng ngày công</span>
+                  <span className="font-semibold text-foreground">{monthlySummary.totalWorkDays ?? "-"}</span>
+                </div>
+                <div className="rounded-lg border px-3 py-2 bg-muted/60">
+                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Tổng giờ làm</span>
+                  <span className="font-semibold text-foreground">
+                    {typeof monthlySummary.totalWorkHours === "number" ? `${monthlySummary.totalWorkHours.toFixed(1)}h` : "-"}
+                  </span>
+                </div>
+                <div className="rounded-lg border px-3 py-2 bg-muted/60">
+                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Tổng đi trễ</span>
+                  <span className="font-semibold text-foreground">{monthlySummary.totalLateCount ?? "-"}</span>
+                </div>
+              </div>
+            ) : summaryLoading ? (
+              <div className="py-4 text-sm text-muted-foreground flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> Đang tải báo cáo...
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground py-4">
+                Chọn tháng/năm rồi nhấn "Xem" để xem báo cáo chấm công.
+              </p>
+            )}
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 };

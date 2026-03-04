@@ -28,6 +28,9 @@ import { ordersApi } from "@/shared/lib/ordersApi";
 import type { Order } from "@/shared/types/orders";
 import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
 import { Card } from "@/shared/components/ui/card";
+import { subscriptionApi } from "@/shared/lib/subscriptionApi";
+import { Badge } from "@/shared/components/ui/badge";
+import { AlertCircle } from "lucide-react";
 
 const chartConfig = {
   values: { label: "Products Sold" },
@@ -70,6 +73,10 @@ const DashboardPage = () => {
     (state) => state.lastOrderCreatedAt,
   );
 
+  // Subscription expiry warning
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [expiryInfo, setExpiryInfo] = useState<any>(null);
+
   const checkUserStoreStatus = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -96,6 +103,10 @@ const DashboardPage = () => {
 
   useEffect(() => {
     checkUserStoreStatus();
+    // Load subscription expiry for StoreOwner
+    if (user?.role === "StoreOwner") {
+      subscriptionApi.getMyExpiry().then(setExpiryInfo).catch(() => null);
+    }
   }, []);
 
   useEffect(() => {
@@ -372,6 +383,26 @@ const DashboardPage = () => {
       transition={{ duration: 0.3 }}
       className="space-y-10"
     >
+      {/* Subscription Expiry Warning */}
+      {expiryInfo && expiryInfo.daysRemaining !== undefined && expiryInfo.daysRemaining <= 14 && (
+        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 flex items-center gap-3">
+          <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
+          <div className="flex-1 text-sm">
+            <span className="font-medium text-amber-900 dark:text-amber-200">
+              Gói subscription sắp hết hạn!
+            </span>{" "}
+            <span className="text-amber-800 dark:text-amber-300">
+              Còn lại <strong>{expiryInfo.daysRemaining}</strong> ngày
+              {expiryInfo.endDate && ` (hết hạn ${new Date(expiryInfo.endDate).toLocaleDateString("vi-VN")})`}.
+              Vui lòng gia hạn để không bị gián đoạn dịch vụ.
+            </span>
+          </div>
+          <Badge className="bg-amber-500 text-white shrink-0">
+            {expiryInfo.daysRemaining} ngày
+          </Badge>
+        </Card>
+      )}
+
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-foreground">
@@ -380,33 +411,30 @@ const DashboardPage = () => {
           <div className="inline-flex rounded-md border bg-background p-1 text-xs sm:text-sm">
             <button
               type="button"
-              className={`px-3 py-1 rounded-md ${
-                dateRange === "today"
+              className={`px-3 py-1 rounded-md ${dateRange === "today"
                   ? "bg-teal-500 text-white"
                   : "text-muted-foreground"
-              }`}
+                }`}
               onClick={() => setDateRange("today")}
             >
               Hôm nay
             </button>
             <button
               type="button"
-              className={`px-3 py-1 rounded-md ${
-                dateRange === "7d"
+              className={`px-3 py-1 rounded-md ${dateRange === "7d"
                   ? "bg-teal-500 text-white"
                   : "text-muted-foreground"
-              }`}
+                }`}
               onClick={() => setDateRange("7d")}
             >
               7 ngày
             </button>
             <button
               type="button"
-              className={`px-3 py-1 rounded-md ${
-                dateRange === "30d"
+              className={`px-3 py-1 rounded-md ${dateRange === "30d"
                   ? "bg-teal-500 text-white"
                   : "text-muted-foreground"
-              }`}
+                }`}
               onClick={() => setDateRange("30d")}
             >
               30 ngày
