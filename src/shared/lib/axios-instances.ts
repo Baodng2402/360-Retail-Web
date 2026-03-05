@@ -9,7 +9,12 @@ const createAxiosInstance = (baseURL: string) => {
   instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const token = localStorage.getItem("token");
-      if (token && token !== "null" && token !== "undefined" && token.trim() !== "") {
+      if (
+        token &&
+        token !== "null" &&
+        token !== "undefined" &&
+        token.trim() !== ""
+      ) {
         config.headers.Authorization = `Bearer ${token}`;
       } else {
         delete config.headers.Authorization;
@@ -18,7 +23,7 @@ const createAxiosInstance = (baseURL: string) => {
     },
     (error) => {
       return Promise.reject(error);
-    }
+    },
   );
 
   instance.interceptors.response.use(
@@ -69,17 +74,33 @@ const createAxiosInstance = (baseURL: string) => {
       }
 
       return Promise.reject(error);
-    }
+    },
   );
 
   return instance;
 };
 
-const baseURL = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") || "http://localhost:5001";
-const apiBaseURL = baseURL + "/";
+const globalBaseURL =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") ||
+  "http://localhost:5001";
 
-export const identityApi = createAxiosInstance(apiBaseURL);
-export const saasApi = createAxiosInstance(apiBaseURL);
-export const salesApi = createAxiosInstance(apiBaseURL);
-export const hrApi = createAxiosInstance(apiBaseURL);
-export const crmApi = createAxiosInstance(apiBaseURL);
+const getApiUrl = (envVar?: string) => {
+  const url = envVar?.replace(/\/+$/, "") || globalBaseURL;
+  return url + "/";
+};
+
+export const identityApi = createAxiosInstance(
+  getApiUrl(import.meta.env.VITE_IDENTITY_API_URL),
+);
+export const saasApi = createAxiosInstance(
+  getApiUrl(import.meta.env.VITE_SAAS_API_URL),
+);
+export const salesApi = createAxiosInstance(
+  getApiUrl(import.meta.env.VITE_SALES_API_URL),
+);
+export const hrApi = createAxiosInstance(
+  getApiUrl(import.meta.env.VITE_HR_API_URL),
+);
+export const crmApi = createAxiosInstance(
+  getApiUrl(import.meta.env.VITE_CRM_API_URL),
+);
