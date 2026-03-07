@@ -298,8 +298,22 @@ export default function ProductManagementPage() {
 
       setCategories(filteredCategoriesWithColors);
     } catch (error) {
-      console.error("Error loading categories:", error);
-      toast.error("Không thể tải danh mục. Vui lòng thử lại.");
+      const err = error as {
+        response?: { status?: number; data?: { message?: string; code?: string } };
+        message?: string;
+      };
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || "";
+      const isStoreError =
+        status === 400 ||
+        /store|store_id|cửa hàng|StoreIdRequired/i.test(msg);
+      if (isStoreError) {
+        toast.error(
+          "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+        );
+      } else {
+        toast.error("Không thể tải danh mục. Vui lòng thử lại.");
+      }
     } finally {
       setCategoriesLoading(false);
     }
@@ -361,8 +375,28 @@ export default function ProductManagementPage() {
         })),
       );
     } catch (error) {
-      console.error("Error loading products:", error);
-      toast.error("Không thể tải sản phẩm. Vui lòng thử lại.");
+      const err = error as {
+        response?: { status?: number; data?: { message?: string; code?: string } };
+        message?: string;
+      };
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || "";
+      const isStoreError =
+        status === 400 ||
+        /store|store_id|cửa hàng|StoreIdRequired/i.test(msg);
+      const isCategoryError =
+        /danh mục|category|không thuộc cửa hàng|chưa có danh mục/i.test(msg);
+      if (isStoreError) {
+        toast.error(
+          "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+        );
+      } else if (isCategoryError) {
+        toast.error(
+          "Vui lòng tạo ít nhất một danh mục trước khi thêm sản phẩm.",
+        );
+      } else {
+        toast.error("Không thể tải sản phẩm. Vui lòng thử lại.");
+      }
     } finally {
       setLoading(false);
     }

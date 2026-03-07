@@ -25,6 +25,10 @@ export interface PagedResult<T> {
 }
 
 export const customersApi = {
+  /**
+   * GET crm/customers – backend lấy storeId từ JWT (claim store_id), không từ query.
+   * Token phải có store_id hợp lệ (Guid); thiếu/sai format → 500. Gửi Authorization: Bearer.
+   */
   async getCustomers(
     params?: GetCustomersParams,
   ): Promise<PagedResult<Customer>> {

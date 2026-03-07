@@ -160,7 +160,11 @@ export function ProfilePage() {
       setTasksLoading(true);
       setTimeLoading(true);
       const [tasks, history] = await Promise.all([
-        tasksApi.getMyTasks(true).catch(() => []),
+        // Tasks ở trang Profile chỉ là hiển thị phụ; với Trial (không có has_tasks)
+        // backend trả FeatureNotAvailable. Đánh dấu silentOnFeatureGate để không bật modal nâng cấp.
+        tasksApi.getMyTasks(true, { silentOnFeatureGate: true }).catch(
+          () => [],
+        ),
         timekeepingApi.getHistory().catch(() => []),
       ]);
       setMyTasks(tasks);

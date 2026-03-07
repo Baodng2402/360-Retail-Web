@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { z } from "zod";
@@ -33,15 +33,6 @@ const LoginBody = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
-  const googleButtonRef = useRef<HTMLDivElement>(null);
-
-  const handleGoogleButtonClick = (e: React.MouseEvent) => {
-    const iframe = googleButtonRef.current?.querySelector("iframe");
-    if (iframe) {
-      e.preventDefault();
-      iframe.click();
-    }
-  };
 
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     const idToken = credentialResponse.credential;
@@ -291,34 +282,21 @@ const LoginBody = () => {
                     social.alt === "Google" ? (
                       <div
                         key={social.alt}
-                        ref={googleButtonRef}
-                        role="button"
-                        tabIndex={0}
-                        onClick={handleGoogleButtonClick}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            (e.currentTarget.querySelector("iframe") as HTMLElement)?.click();
-                          }
-                        }}
-                        className="relative flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] cursor-pointer items-center justify-center rounded-[22px] border border-gray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
+                        className="relative flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] items-center justify-center rounded-[22px] border border-gray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
                       >
-                        <div className="absolute inset-0 z-0 flex items-center justify-center [&>div]:!min-h-[40px] [&>div]:!min-w-[40px]">
-                          <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={handleGoogleError}
-                            theme="outline"
-                            size="large"
-                            type="icon"
-                            shape="rectangular"
-                            containerProps={{ style: { border: "none", outline: "none" } }}
-                          />
-                        </div>
                         <img
                           src={googleIcon}
                           alt="Google"
                           className="pointer-events-none absolute inset-0 z-10 m-auto h-9 w-9 object-contain sm:h-11 sm:w-11"
                         />
+                        <div className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center opacity-0">
+                          <div className="scale-[5]">
+                            <GoogleLogin
+                              onSuccess={handleGoogleSuccess}
+                              onError={handleGoogleError}
+                            />
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       <Button

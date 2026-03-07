@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -107,59 +107,82 @@ const SalePostPage = () => {
       ? cart.find((c) => c.product.id === pendingRemoveProductId)?.product.name
       : null;
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        let storeId = currentStore?.id;
+  const loadProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      let storeId = currentStore?.id;
 
-        if (!storeId) {
-          try {
-            const myStore = await storesApi.getMyStore();
-            storeId = myStore.id;
-          } catch (storeError) {
-            console.error("Failed to get store:", storeError);
-            toast.error(
-              "Không thể lấy thông tin cửa hàng hiện tại. Vui lòng liên hệ chủ cửa hàng.",
-            );
-            setProducts([]);
-            return;
-          }
+      if (!storeId) {
+        try {
+          const myStore = await storesApi.getMyStore();
+          storeId = myStore.id;
+        } catch (storeError) {
+          setProducts([]);
+          toast.error(
+            "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+          );
+          return;
         }
-
-        const allProducts = await productsApi.getProducts({
-          storeId,
-          includeInactive: false,
-        });
-        const transformed = transformProducts(allProducts);
-        setProducts(transformed);
-        if (transformed.length > 0) {
-          setSelectedProduct(transformed[0]);
-        } else {
-          setSelectedProduct(null);
-        }
-      } catch (error: any) {
-        console.error("Failed to load products:", error);
-        const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          "Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.";
-        toast.error(errorMessage);
-        setProducts([]);
-        setSelectedProduct(null);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    loadProducts();
+      const allProducts = await productsApi.getProducts({
+        storeId,
+        includeInactive: false,
+      });
+      const transformed = transformProducts(allProducts);
+      setProducts(transformed);
+      if (transformed.length > 0) {
+        setSelectedProduct(transformed[0]);
+      } else {
+        setSelectedProduct(null);
+      }
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { status?: number; data?: { message?: string; code?: string } };
+        message?: string;
+      };
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || "";
+      const isStoreError =
+        status === 400 ||
+        /store|store_id|cửa hàng|StoreIdRequired/i.test(msg);
+      const isCategoryError =
+        /danh mục|category|không thuộc cửa hàng|chưa có danh mục/i.test(msg);
+
+      if (isStoreError) {
+        toast.error(
+          "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+        );
+      } else if (isCategoryError) {
+        toast.error(
+          "Vui lòng tạo ít nhất một danh mục trước khi thêm sản phẩm.",
+        );
+      } else {
+        toast.error(
+          msg || "Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.",
+        );
+      }
+      setProducts([]);
+      setSelectedProduct(null);
+    } finally {
+      setLoading(false);
+    }
   }, [currentStore?.id]);
+
+  useEffect(() => {
+    void loadProducts();
+  }, [loadProducts]);
 
   useEffect(() => {
     const loadReports = async () => {
       try {
         setReportLoading(true);
-        const top = await salesDashboardApi.getTopProducts({ top: 10 });
+        // Với Trial, endpoint dashboard/top-products có thể trả FeatureNotAvailable.
+        // Đánh dấu silentOnFeatureGate để không bật modal nâng cấp khi chỉ đang ở trang Sales & POS.
+        const top = await salesDashboardApi.getTopProducts(
+          { top: 10 },
+          { silentOnFeatureGate: true },
+        );
         const mapped = top.map((p: TopProduct) => ({
           product: p.productName,
           sold: p.quantitySold,
@@ -381,6 +404,24 @@ const SalePostPage = () => {
                   {loading ? (
                     <div className="flex items-center justify-center h-48 text-muted-foreground">
                       Đang tải sản phẩm...
+                    </div>
+                  ) : filteredProducts.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                      <Package className="h-14 w-14 text-muted-foreground mb-4" />
+                      <p className="font-medium text-foreground mb-1">
+                        Chưa có sản phẩm
+                      </p>
+                      <p className="text-sm text-muted-foreground max-w-sm">
+                        Tạo danh mục (Sản phẩm → Danh mục) rồi thêm sản phẩm để bán hàng.
+                      </p>
+                      <Button
+                        className="mt-4"
+                        variant="outline"
+                        onClick={() => setAddProductModalOpen(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Thêm sản phẩm
+                      </Button>
                     </div>
                   ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -779,6 +820,8 @@ const SalePostPage = () => {
       <AddProductModal
         open={addProductModalOpen}
         onOpenChange={setAddProductModalOpen}
+        storeId={currentStore?.id}
+        onSuccess={() => void loadProducts()}
       />
 
       <Dialog

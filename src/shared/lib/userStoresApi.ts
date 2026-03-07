@@ -10,20 +10,29 @@ export interface UserStore {
 
 export const userStoresApi = {
     /**
-     * Get list of stores the current user belongs to
+     * Get list of stores the current user belongs to.
      * GET /identity/user-stores/stores-my
+     * Backend có thể chưa có endpoint này → 404; khi đó trả [] để StoreSelector fallback sang getMyStore().
      */
     async getMyStores(): Promise<UserStore[]> {
-        const res = await identityApi.get<ApiResponse<UserStore[]> | UserStore[]>(
-            "identity/user-stores/stores-my",
-        );
+        try {
+            const res = await identityApi.get<ApiResponse<UserStore[]> | UserStore[]>(
+                "identity/user-stores/stores-my",
+            );
 
-        if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
-            return res.data.data;
+            if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
+                return res.data.data;
+            }
+            if (Array.isArray(res.data)) {
+                return res.data;
+            }
+            return [];
+        } catch (err) {
+            const status = (err as { response?: { status?: number } })?.response?.status;
+            if (status === 404) {
+                return [];
+            }
+            throw err;
         }
-        if (Array.isArray(res.data)) {
-            return res.data;
-        }
-        return [];
     },
 };

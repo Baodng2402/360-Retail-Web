@@ -28,7 +28,9 @@ import {
 } from "@/features/dashboard/components/modals/QuickActionModals";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
 import { authApi } from "@/shared/lib/authApi";
+import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { UserStatus } from "@/shared/types/jwt-claims";
+import { useFeatureGateStore } from "@/shared/store/featureGateStore";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -44,6 +46,34 @@ interface DashboardSideBarProps {
   onToggle: () => void;
 }
 
+/** Feature codes from backend (same as 403 response field "feature") */
+export const SIDEBAR_FEATURE_KEYS = [
+  "has_dashboard",
+  "has_gps_checkin",
+  "has_tasks",
+  "has_invite_staff",
+  "has_multi_store",
+  "has_variants",
+  "has_inventory_tickets",
+  "has_loyalty",
+  "has_feedback_qr",
+  "has_export_excel",
+] as const;
+export type SidebarFeatureKey = (typeof SIDEBAR_FEATURE_KEYS)[number];
+
+interface NavItem {
+  icon: typeof LayoutDashboard;
+  label: string;
+  subLabel: string;
+  path: string;
+  end: boolean;
+  requiresStore: boolean;
+  visibleFor?: string[];
+  allowWhenExpired?: boolean;
+  /** Backend feature code: if not in plan's allowed list, item is locked */
+  featureKey?: SidebarFeatureKey;
+}
+
 export const DashboardSideBar = ({
   isCollapsed,
   onToggle,
@@ -56,12 +86,17 @@ export const DashboardSideBar = ({
     subLabel: string;
     x: number;
     y: number;
+    lockHint?: string;
   } | null>(null);
   const [userStatus, setUserStatus] = useState<"loading" | "hasStore" | "noStore">("loading");
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [trialExpired, setTrialExpired] = useState(false);
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
+  const [allowedFeatures, setAllowedFeatures] = useState<string[] | null>(null);
   const [showSetupDialog, setShowSetupDialog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const openUpgradeModal = useFeatureGateStore((s) => s.openUpgradeModal);
 
   useEffect(() => {
     checkUserStoreStatus();
@@ -77,25 +112,46 @@ export const DashboardSideBar = ({
 
       const userInfo = await authApi.meWithSubscription();
       setUserRole(userInfo.role || null);
+      setTrialExpired(userInfo.trialExpired ?? false);
+      setSubscriptionExpired(userInfo.subscriptionExpired ?? false);
       if (userInfo.status === UserStatus.Registered || !userInfo.storeId) {
         setUserStatus("noStore");
       } else {
         setUserStatus("hasStore");
       }
+
+      subscriptionApi.getAllowedFeatures().then(setAllowedFeatures).catch(() => setAllowedFeatures(null));
     } catch {
       setUserStatus("noStore");
     }
   };
 
-  const handleNavClick = (item: typeof mainNavItems[0]) => {
-    if (userStatus === "noStore" && item.requiresStore) {
+  const handleNavClick = (item: NavItem) => {
+    const lockedByNoStore = item.requiresStore && userStatus === "noStore";
+    const lockedByExpired =
+      (trialExpired || subscriptionExpired) && !item.allowWhenExpired;
+    const lockedByPlanFeature =
+      item.featureKey != null &&
+      allowedFeatures !== null &&
+      !allowedFeatures.includes(item.featureKey);
+
+    if (lockedByNoStore) {
       setShowSetupDialog(true);
+      return;
+    }
+    if (lockedByExpired || lockedByPlanFeature) {
+      openUpgradeModal({
+        errorType: "FeatureNotAvailable",
+        message:
+          "Tính năng này không khả dụng trong gói hiện tại. Vui lòng nâng cấp gói để sử dụng.",
+        feature: item.featureKey ?? item.label,
+      });
       return;
     }
     navigate(item.path);
   };
 
-  const mainNavItems = [
+  const mainNavItems: NavItem[] = [
     {
       icon: LayoutDashboard,
       label: "Dashboard 360°",
@@ -103,7 +159,9 @@ export const DashboardSideBar = ({
       path: "/dashboard",
       end: true,
       requiresStore: false,
-      visibleFor: ["StoreOwner", "Manager", "Staff"],
+      visibleFor: ["StoreOwner", "Manager", "Staff", "PotentialOwner"],
+      allowWhenExpired: true,
+      featureKey: "has_dashboard",
     },
     {
       icon: MapPin,
@@ -113,6 +171,7 @@ export const DashboardSideBar = ({
       end: false,
       requiresStore: true,
       visibleFor: ["StoreOwner", "Manager", "Staff"],
+      featureKey: "has_gps_checkin",
     },
     {
       icon: ListChecks,
@@ -122,6 +181,7 @@ export const DashboardSideBar = ({
       end: false,
       requiresStore: true,
       visibleFor: ["StoreOwner", "Manager", "Staff"],
+      featureKey: "has_tasks",
     },
     {
       icon: Users,
@@ -140,6 +200,7 @@ export const DashboardSideBar = ({
       end: false,
       requiresStore: true,
       visibleFor: ["StoreOwner", "Manager"],
+      featureKey: "has_multi_store",
     },
     {
       icon: Package,
@@ -158,6 +219,7 @@ export const DashboardSideBar = ({
       end: false,
       requiresStore: true,
       visibleFor: ["StoreOwner", "Manager"],
+      featureKey: "has_inventory_tickets",
     },
     {
       icon: ShoppingCart,
@@ -194,6 +256,7 @@ export const DashboardSideBar = ({
       end: false,
       requiresStore: true,
       visibleFor: ["StoreOwner", "Manager", "Staff"],
+      featureKey: "has_loyalty",
     },
     {
       icon: FileText,
@@ -203,6 +266,7 @@ export const DashboardSideBar = ({
       end: false,
       requiresStore: true,
       visibleFor: ["StoreOwner", "Manager"],
+      featureKey: "has_export_excel",
     },
     {
       icon: CreditCard,
@@ -211,7 +275,8 @@ export const DashboardSideBar = ({
       path: "/dashboard/subscription",
       end: false,
       requiresStore: true,
-      visibleFor: ["StoreOwner"],
+      visibleFor: ["StoreOwner", "PotentialOwner"],
+      allowWhenExpired: true,
     },
     {
       icon: Settings,
@@ -220,6 +285,7 @@ export const DashboardSideBar = ({
       path: "/dashboard/settings",
       end: false,
       requiresStore: true,
+      allowWhenExpired: true,
     },
   ];
 
@@ -245,6 +311,8 @@ export const DashboardSideBar = ({
   ];
   const canUseQuickActions =
     userRole === "StoreOwner" || userRole === "Manager" || userRole === "Staff";
+  // Quick actions (tạo đơn, check-in, ghi feedback) vẫn cho Trial dùng nếu subscription còn hạn.
+  const quickActionsLockedByPlan = subscriptionExpired;
 
   return (
     <>
@@ -259,7 +327,9 @@ export const DashboardSideBar = ({
         >
           <div className="px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-lg shadow-xl whitespace-nowrap">
             <div className="font-medium">{hoveredItem.label}</div>
-            <div className="text-xs opacity-90">{hoveredItem.subLabel}</div>
+            <div className="text-xs opacity-90">
+              {hoveredItem.lockHint ?? hoveredItem.subLabel}
+            </div>
             <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
           </div>
         </div>
@@ -321,7 +391,15 @@ export const DashboardSideBar = ({
               ) {
                 return null;
               }
-              const isLocked = item.requiresStore && userStatus === "noStore";
+              const lockedByNoStore = item.requiresStore && userStatus === "noStore";
+              const lockedByExpired =
+                (trialExpired || subscriptionExpired) && !item.allowWhenExpired;
+              const lockedByPlanFeature =
+                item.featureKey != null &&
+                allowedFeatures !== null &&
+                !allowedFeatures.includes(item.featureKey);
+              const isLocked =
+                lockedByNoStore || lockedByExpired || lockedByPlanFeature;
               const isActive = location.pathname === item.path ||
                 (item.end === false && location.pathname.startsWith(item.path));
 
@@ -337,6 +415,12 @@ export const DashboardSideBar = ({
                           subLabel: item.subLabel,
                           x: rect.right + 8,
                           y: rect.top + rect.height / 2,
+                          lockHint:
+                            lockedByPlanFeature || lockedByExpired
+                              ? "Nâng cấp gói để sử dụng"
+                              : lockedByNoStore
+                                ? "Thiết lập cửa hàng trước"
+                                : undefined,
                         });
                       }
                     }}
@@ -394,6 +478,12 @@ export const DashboardSideBar = ({
                       onClick={() => {
                         if (userStatus === "noStore") {
                           setShowSetupDialog(true);
+                        } else if (quickActionsLockedByPlan) {
+                          openUpgradeModal({
+                            errorType: "FeatureNotAvailable",
+                            message:
+                              "Vui lòng nâng cấp gói để sử dụng tính năng này.",
+                          });
                         } else {
                           if (action.label === "Staff Check-in" && userRole === "Staff") {
                             navigate("/dashboard/timekeeping");
@@ -416,7 +506,7 @@ export const DashboardSideBar = ({
                       }}
                       className={cn(
                         "flex w-full items-center justify-center rounded-lg px-3 py-2.5 transition-all duration-200",
-                        userStatus === "noStore"
+                        userStatus === "noStore" || quickActionsLockedByPlan
                           ? "opacity-50 cursor-not-allowed text-gray-400"
                           : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                       )}
@@ -441,6 +531,12 @@ export const DashboardSideBar = ({
                       onClick={() => {
                         if (userStatus === "noStore") {
                           setShowSetupDialog(true);
+                        } else if (quickActionsLockedByPlan) {
+                          openUpgradeModal({
+                            errorType: "FeatureNotAvailable",
+                            message:
+                              "Vui lòng nâng cấp gói để sử dụng tính năng này.",
+                          });
                         } else {
                           if (action.label === "Staff Check-in" && userRole === "Staff") {
                             navigate("/dashboard/timekeeping");
@@ -451,7 +547,7 @@ export const DashboardSideBar = ({
                       }}
                       className={cn(
                         "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200",
-                        userStatus === "noStore"
+                        userStatus === "noStore" || quickActionsLockedByPlan
                           ? "opacity-50 cursor-not-allowed text-gray-400"
                           : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                       )}

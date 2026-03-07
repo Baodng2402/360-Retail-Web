@@ -44,6 +44,7 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
 
       toast.success("Tạo cửa hàng dùng thử thành công!");
 
+      // Backend xác nhận: token từ refresh-access đã có store_id và StoreOwner; không cần login lần 2.
       const refreshRes = await authApi.refreshAccess();
       if (refreshRes.accessToken) {
         localStorage.setItem("token", refreshRes.accessToken);
