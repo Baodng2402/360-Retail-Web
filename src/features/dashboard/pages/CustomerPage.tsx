@@ -33,6 +33,7 @@ import type {
 } from "@/shared/types/loyalty";
 import type { Feedback } from "@/shared/lib/feedbackApi";
 import { useAuthStore } from "@/shared/store/authStore";
+import { authApi } from "@/shared/lib/authApi";
 import toast from "react-hot-toast";
 
 type CustomerFormState = {
@@ -75,14 +76,35 @@ const CustomerPage = () => {
   const loadCustomers = async () => {
     try {
       setLoading(true);
+      // Backend GET crm/customers lấy storeId từ JWT (claim store_id). Token thiếu/sai store_id → 500.
+      const me = await authApi.meWithSubscription().catch(() => null);
+      if (!me?.storeId?.trim()) {
+        setCustomers([]);
+        toast.error(
+          "Chưa có cửa hàng trong phiên đăng nhập. Vui lòng chọn cửa hàng hoặc đăng nhập lại.",
+        );
+        return;
+      }
       const res = await customersApi.getCustomers({ pageSize: 200 });
       setCustomers(res.items);
       if (!selectedCustomer && res.items.length > 0) {
         void handleSelectCustomer(res.items[0]);
       }
-    } catch (error) {
-      console.error("Failed to load customers:", error);
-      toast.error("Không thể tải danh sách khách hàng.");
+    } catch (error: unknown) {
+      const res = (error as { response?: { status?: number; data?: { code?: string; message?: string } } })?.response;
+      const status = res?.status;
+      const code = res?.data?.code;
+      const serverMsg = res?.data?.message ?? "";
+
+      let message: string;
+      if (status === 400 && (code === "StoreIdRequired" || /store|store_id|cửa hàng/i.test(serverMsg))) {
+        message = "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.";
+      } else if (status === 500) {
+        message = "Lỗi máy chủ (500). Kiểm tra đăng nhập / cửa hàng hoặc liên hệ hỗ trợ.";
+      } else {
+        message = "Không thể tải danh sách khách hàng.";
+      }
+      toast.error(message);
     } finally {
       setLoading(false);
     }

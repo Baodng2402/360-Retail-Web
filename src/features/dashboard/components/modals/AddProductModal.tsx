@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -18,50 +18,117 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { categoriesApi } from "@/shared/lib/categoriesApi";
+import { productsApi } from "@/shared/lib/productsApi";
+import type { Category } from "@/shared/types/categories";
 
 interface AddProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Store ID to load categories and create product in context of this store */
+  storeId?: string | null;
+  /** Called after product is created successfully (e.g. refetch product list) */
+  onSuccess?: () => void;
 }
 
-const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
+const AddProductModal = ({
+  open,
+  onOpenChange,
+  storeId,
+  onSuccess,
+}: AddProductModalProps) => {
   const [productName, setProductName] = useState("");
-  const [category, setCategory] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [barcode, setBarcode] = useState("");
   const [image, setImage] = useState("📦");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
-  const handleSubmit = () => {
-    if (!productName || !category || !price || !stock) {
-      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+  useEffect(() => {
+    if (!open || !storeId) {
+      setCategories([]);
+      setCategoryId("");
+      return;
+    }
+    let cancelled = false;
+    setCategoriesLoading(true);
+    categoriesApi
+      .getCategories(storeId, true)
+      .then((data) => {
+        if (!cancelled) {
+          setCategories(data);
+          setCategoryId(data.length > 0 ? data[0].id : "");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          toast.error("Không thể tải danh mục.");
+          setCategories([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setCategoriesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, storeId]);
+
+  const handleSubmit = async () => {
+    if (!productName?.trim()) {
+      toast.error("Vui lòng nhập tên sản phẩm.");
+      return;
+    }
+    if (!categoryId) {
+      toast.error("Vui lòng chọn danh mục.");
+      return;
+    }
+    const priceNum = parseFloat(price);
+    if (!price || isNaN(priceNum) || priceNum <= 0) {
+      toast.error("Vui lòng nhập giá bán hợp lệ.");
+      return;
+    }
+    const stockNum = parseInt(stock, 10);
+    if (!stock || isNaN(stockNum) || stockNum < 0) {
+      toast.error("Vui lòng nhập số lượng tồn kho hợp lệ.");
       return;
     }
 
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      console.log("Product added:", {
-        name: productName,
-        category,
-        price: parseInt(price),
-        stock: parseInt(stock),
-        barcode: barcode || generateBarcode(),
-        image,
+    try {
+      await productsApi.createProduct({
+        productName: productName.trim(),
+        categoryId,
+        price: priceNum,
+        stockQuantity: stockNum,
+        barCode: barcode.trim() || undefined,
       });
-
-      toast.success(`Đã thêm sản phẩm "${productName}" thành công!`);
-
-      setIsSubmitting(false);
+      toast.success(`Đã thêm sản phẩm "${productName.trim()}" thành công!`);
       resetForm();
       onOpenChange(false);
-    }, 1000);
+      onSuccess?.();
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? "Không thể thêm sản phẩm. Vui lòng thử lại.";
+      const isCategoryError =
+        /danh mục|category|không thuộc cửa hàng|chưa có danh mục/i.test(msg);
+      toast.error(
+        isCategoryError
+          ? "Vui lòng tạo ít nhất một danh mục trước khi thêm sản phẩm."
+          : msg,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
     setProductName("");
-    setCategory("");
+    setCategoryId(categories.length > 0 ? categories[0].id : "");
     setPrice("");
     setStock("");
     setBarcode("");
@@ -92,6 +159,9 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
     "📦",
   ];
 
+  const categoryName =
+    categories.find((c) => c.id === categoryId)?.categoryName ?? categoryId;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -121,19 +191,28 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
               <Label htmlFor="category">
                 Category / Danh mục <span className="text-red-500">*</span>
               </Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select
+                value={categoryId}
+                onValueChange={setCategoryId}
+                disabled={categoriesLoading}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Chọn danh mục" />
+                  <SelectValue
+                    placeholder={
+                      categoriesLoading
+                        ? "Đang tải..."
+                        : categories.length === 0
+                          ? "Chưa có danh mục – tạo trong tab Sản phẩm"
+                          : "Chọn danh mục"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Apparel">👕 Apparel / Quần áo</SelectItem>
-                  <SelectItem value="Footwear">
-                    👟 Footwear / Giày dép
-                  </SelectItem>
-                  <SelectItem value="Accessories">
-                    👜 Accessories / Phụ kiện
-                  </SelectItem>
-                  <SelectItem value="Others">📦 Others / Khác</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.categoryName}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -215,9 +294,14 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
                 <span className="text-3xl">{image}</span>
                 <div>
                   <p className="font-semibold">{productName}</p>
-                  <p className="text-sm text-muted-foreground">{category}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {categoryName}
+                  </p>
                   <p className="text-sm font-bold text-teal-600">
-                    {price ? parseInt(price).toLocaleString("vi-VN") : "0"} ₫
+                    {price
+                      ? parseInt(price, 10).toLocaleString("vi-VN")
+                      : "0"}{" "}
+                    ₫
                   </p>
                 </div>
               </div>
@@ -235,8 +319,13 @@ const AddProductModal = ({ open, onOpenChange }: AddProductModalProps) => {
           </Button>
           <Button
             className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
+            onClick={() => void handleSubmit()}
+            disabled={
+              isSubmitting ||
+              !storeId ||
+              categories.length === 0 ||
+              !categoryId
+            }
           >
             {isSubmitting ? "Đang thêm..." : "Add Product / Thêm sản phẩm"}
           </Button>

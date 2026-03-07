@@ -12,7 +12,6 @@ import {
 import { Store as StoreIcon } from "lucide-react";
 import { useStoreStore } from "@/shared/store/storeStore";
 import { storesApi } from "@/shared/lib/storesApi";
-import { userStoresApi } from "@/shared/lib/userStoresApi";
 import type { Store } from "@/shared/types/stores";
 import toast from "react-hot-toast";
 
@@ -45,35 +44,7 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
         }
       }
 
-      // 2. Bổ sung thêm các store mà user thuộc về (Owner/Manager/Staff/Customer)
-      try {
-        const userStores = await userStoresApi.getMyStores();
-        if (Array.isArray(userStores) && userStores.length > 0) {
-          const mappedFromUserStores: Store[] = userStores.map((s) => ({
-            id: s.storeId,
-            storeName: s.storeName,
-            address: undefined,
-            phone: undefined,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            isDefault: s.isDefault,
-          }));
-
-          const existingIds = new Set(source.map((s) => s.id));
-          source = [
-            ...source,
-            ...mappedFromUserStores.filter((s) => !existingIds.has(s.id)),
-          ];
-        }
-      } catch (err) {
-        const status = (err as { response?: { status?: number } }).response
-          ?.status;
-        // Endpoint user-stores có thể chưa triển khai trên backend hiện tại,
-        // 404 thì bỏ qua lặng lẽ để tránh spam console.
-        if (status && status !== 404) {
-          console.error("Error loading user-stores:", err);
-        }
-      }
+      // 2. (Bỏ gọi user-stores/stores-my vì backend chưa có → 404 spam console. Khi backend có endpoint thì bật lại.)
 
       // 3. Nếu vẫn không có store (ví dụ chỉ là Staff 1 store) thì fallback dùng my-store
       if (!Array.isArray(source) || source.length === 0) {

@@ -38,7 +38,9 @@ const StaffManagementPage = () => {
     setLoading(true);
     Promise.all([
       employeesApi.getEmployees(true),
-      tasksApi.getTasks(true),
+      // Tasks chỉ là thống kê phụ; với gói không có has_tasks (ví dụ Trial) thì
+      // backend trả FeatureNotAvailable. Đánh dấu silentOnFeatureGate để không bật modal nâng cấp.
+      tasksApi.getTasks(true, { silentOnFeatureGate: true }),
     ])
       .then(([empRes, taskRes]) => {
         setEmployees(empRes);

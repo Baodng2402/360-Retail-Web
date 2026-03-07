@@ -15,7 +15,7 @@ export interface ChatbotSuggestion {
 export const chatbotApi = {
   async ask(question: string): Promise<ChatbotAnswer> {
     const res = await saasApi.post<ApiResponse<ChatbotAnswer> | ChatbotAnswer>(
-      "saas/chatbot",
+      "saas/chatbot/ask",
       { question },
     );
 

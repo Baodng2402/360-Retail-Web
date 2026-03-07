@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
@@ -41,15 +41,6 @@ const SignupPage = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
-  const googleButtonRef = useRef<HTMLDivElement>(null);
-
-  const handleGoogleButtonClick = (e: React.MouseEvent) => {
-    const iframe = googleButtonRef.current?.querySelector("iframe");
-    if (iframe) {
-      e.preventDefault();
-      (iframe as HTMLElement).click();
-    }
-  };
 
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     const idToken = credentialResponse.credential;
@@ -170,34 +161,21 @@ const SignupPage = () => {
                     social.alt === "Google" ? (
                       <div
                         key={social.alt + index}
-                        ref={googleButtonRef}
-                        role="button"
-                        tabIndex={0}
-                        onClick={handleGoogleButtonClick}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            (e.currentTarget.querySelector("iframe") as HTMLElement)?.click();
-                          }
-                        }}
                         className="relative flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] cursor-pointer items-center justify-center rounded-[24px] border border-gray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
                       >
-                        <div className="absolute inset-0 z-0 flex items-center justify-center [&>div]:!min-h-[40px] [&>div]:!min-w-[40px]">
-                          <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={handleGoogleError}
-                            theme="outline"
-                            size="large"
-                            type="icon"
-                            shape="rectangular"
-                            containerProps={{ style: { border: "none", outline: "none" } }}
-                          />
-                        </div>
                         <img
                           src={googleIcon}
                           alt="Google"
                           className="pointer-events-none absolute inset-0 z-10 m-auto h-10 w-10 object-contain sm:h-12 sm:w-12"
                         />
+                        <div className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center opacity-0 overflow-hidden">
+                          <div className="scale-[5]">
+                            <GoogleLogin
+                              onSuccess={handleGoogleSuccess}
+                              onError={handleGoogleError}
+                            />
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       <Button
@@ -229,16 +207,16 @@ const SignupPage = () => {
                     >
                       Name
                     </Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="Your full name"
-                        className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        autoComplete="off"
-                        data-form-type="other"
-                      />
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Your full name"
+                      className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      autoComplete="off"
+                      data-form-type="other"
+                    />
                   </div>
 
                   <div className="flex flex-col gap-2.5">

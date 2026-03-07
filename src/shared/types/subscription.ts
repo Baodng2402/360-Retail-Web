@@ -1,5 +1,12 @@
 /**
+ * Plan features from backend: JSON object as string, keys = feature codes (has_gps_checkin, etc.)
+ * Value true = feature enabled for that plan.
+ */
+export type PlanFeaturesJson = Record<string, boolean>;
+
+/**
  * Subscription Plan - from GET /saas/subscriptions/plans
+ * Backend may return Features (capital F) as string = JSON of PlanFeaturesJson
  */
 export interface Plan {
   id: string;
@@ -7,7 +14,10 @@ export interface Plan {
   price: number;
   durationDays: number;
   description?: string;
+  /** Parsed list of feature keys with value true (frontend may derive from Features string) */
   features?: string[];
+  /** Backend: JSON string of PlanFeaturesJson, e.g. {"has_dashboard":true,"has_gps_checkin":false} */
+  Features?: string;
   isPopular?: boolean;
 }
 

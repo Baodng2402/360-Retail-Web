@@ -38,6 +38,15 @@ const createAxiosInstance = (baseURL: string) => {
           const errorCode = data.error;
           const store = useFeatureGateStore.getState();
 
+          // Cho phép một số request (ví dụ load tasks để hiển thị thống kê) đánh dấu bỏ qua popup nâng cấp.
+          const skipFeatureGate =
+            error.config &&
+            error.config.headers &&
+            (error.config.headers["X-Skip-Feature-Gate"] === "1" ||
+              (error.config.headers as Record<string, unknown>)[
+                "x-skip-feature-gate"
+              ] === "1");
+
           if (errorCode === "TrialExpired") {
             store.openUpgradeModal({
               errorType: "TrialExpired",
@@ -52,7 +61,7 @@ const createAxiosInstance = (baseURL: string) => {
                 data.message ||
                 "Gói dịch vụ của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng.",
             });
-          } else if (errorCode === "FeatureNotAvailable") {
+          } else if (errorCode === "FeatureNotAvailable" && !skipFeatureGate) {
             store.openUpgradeModal({
               errorType: "FeatureNotAvailable",
               message:

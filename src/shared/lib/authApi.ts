@@ -15,10 +15,12 @@ export interface ForgotPasswordDto {
 
 export interface ResetPasswordDto {
   email: string;
-  code: string;
+  /** Backend expects "resetCode" (camelCase). */
+  resetCode: string;
   newPassword: string;
 }
 
+/** Payload for POST identity/auth/verify-email. Backend expects camelCase "otpCode". */
 export interface VerifyEmailDto {
   email: string;
   otpCode: string;

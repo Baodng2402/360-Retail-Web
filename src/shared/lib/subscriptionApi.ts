@@ -49,6 +49,43 @@ export const subscriptionApi = {
   },
 
   /**
+   * Get allowed feature keys for the current user's plan (same codes as 403 feature field).
+   * GET saas/subscriptions/my → planName, then GET plans → find plan → parse Features JSON string.
+   * Backend: Features is a JSON object string, e.g. {"has_dashboard":true,"has_gps_checkin":false}.
+   * Returns keys where value === true.
+   */
+  async getAllowedFeatures(): Promise<string[]> {
+    const mySub = await this.getMySubscription();
+    const planName = mySub?.planName?.trim();
+    if (!planName) return [];
+
+    const plans = await this.getPlans();
+    const plan = plans.find(
+      (p) =>
+        p.planName?.trim() === planName ||
+        p.planName?.trim().toLowerCase() === planName.toLowerCase(),
+    );
+    if (!plan) return [];
+
+    if (Array.isArray(plan.features) && plan.features.length > 0) {
+      return plan.features;
+    }
+
+    const planAny = plan as Record<string, unknown>;
+    const raw = (planAny["Features"] ?? planAny["features"]) as unknown;
+    if (typeof raw !== "string") return [];
+
+    try {
+      const obj = JSON.parse(raw) as Record<string, boolean>;
+      return Object.entries(obj)
+        .filter(([, v]) => v === true)
+        .map(([k]) => k);
+    } catch {
+      return [];
+    }
+  },
+
+  /**
    * Get my current subscription
    * GET /saas/subscriptions/my
    */
@@ -60,7 +97,7 @@ export const subscriptionApi = {
     if ("success" in res.data && res.data.success && res.data.data) {
       return res.data.data;
     }
-    if ("id" in res.data) {
+    if (res.data && typeof res.data === "object" && ("planName" in res.data || "subscriptionId" in res.data)) {
       return res.data as MySubscription;
     }
     return null;

@@ -67,6 +67,11 @@ export interface RecentActivityResponse {
   activities: RecentActivityItem[];
 }
 
+interface SalesDashboardRequestOptions {
+  /** Khi true và backend trả FeatureNotAvailable (ví dụ Trial không có has_dashboard), interceptor sẽ không bật popup nâng cấp. */
+  silentOnFeatureGate?: boolean;
+}
+
 export const salesDashboardApi = {
   async getOverview(params?: { from?: string; to?: string }): Promise<SalesOverview> {
     const query = new URLSearchParams();
@@ -102,11 +107,14 @@ export const salesDashboardApi = {
     return res.data as RevenueChartResponse;
   },
 
-  async getTopProducts(params?: {
-    from?: string;
-    to?: string;
-    top?: number;
-  }): Promise<TopProduct[]> {
+  async getTopProducts(
+    params?: {
+      from?: string;
+      to?: string;
+      top?: number;
+    },
+    options?: SalesDashboardRequestOptions,
+  ): Promise<TopProduct[]> {
     const query = new URLSearchParams();
     if (params?.from) query.append("from", params.from);
     if (params?.to) query.append("to", params.to);
@@ -114,8 +122,13 @@ export const salesDashboardApi = {
     const url = `sales/dashboard/top-products${
       query.toString() ? `?${query.toString()}` : ""
     }`;
+    const config =
+      options?.silentOnFeatureGate === true
+        ? { headers: { "X-Skip-Feature-Gate": "1" } }
+        : undefined;
     const res = await salesApi.get<ApiResponse<TopProduct[]> | TopProduct[]>(
       url,
+      config,
     );
     if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
       return res.data.data;
