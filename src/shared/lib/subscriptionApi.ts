@@ -71,7 +71,7 @@ export const subscriptionApi = {
       return plan.features;
     }
 
-    const planAny = plan as Record<string, unknown>;
+    const planAny = plan as unknown as Record<string, unknown>;
     const raw = (planAny["Features"] ?? planAny["features"]) as unknown;
     if (typeof raw !== "string") return [];
 
