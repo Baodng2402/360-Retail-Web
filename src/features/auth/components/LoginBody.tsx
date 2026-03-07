@@ -135,28 +135,22 @@ const LoginBody = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-white text-gray-900">
+    <div className="flex min-h-screen w-full bg-slate-950 text-gray-900">
       <div className="mx-auto flex w-full max-w-[1920px]">
-        <div className="relative flex w-[45%] flex-col items-center justify-center bg-white dark:bg-white px-16 py-14 text-gray-900 dark:text-gray-900">
-          <div className="pointer-events-none absolute left-0 top-0 h-[531.85px] w-[531.85px] -ml-[121.8px] -mt-[124.6px] rounded-full bg-gradient-to-br from-[rgba(13,148,136,0.18)] to-[rgba(13,148,136,0)] blur-[32px] rotate-[36.47deg]" />
+        {/* Left: login form */}
+        <div className="relative flex w-full sm:w-[50%] min-w-0 flex-col items-center justify-center bg-white px-6 py-12 text-gray-900 sm:px-10 md:px-16">
+          <div className="pointer-events-none absolute left-0 top-0 h-[532px] w-[532px] -ml-[122px] -mt-[125px] rounded-full bg-gradient-to-br from-[rgba(13,148,136,0.18)] to-[rgba(13,148,136,0)] blur-[32px] rotate-[36deg]" />
 
-          <div className="absolute left-16 top-10 z-20">
+          <div className="absolute left-6 sm:left-12 top-8 z-20">
             <img
               src={logo}
               alt="360 Retail"
-              className="h-24 w-auto object-contain"
+              className="h-16 sm:h-20 w-auto object-contain"
             />
           </div>
 
           <div className="relative z-10 w-full max-w-md mt-24">
-            <div className="mb-3">
-              <h1 className="mb-2 text-[35px] font-bold leading-[40px] tracking-[-0.9px] text-teal-600">
-                Sign In
-              </h1>
-              <p className="text-sm text-gray-600">Welcome 360 Retail</p>
-            </div>
-
-            <div className="mb-8">
+            <div className="mb-6">
               <Link
                 to="/"
                 className="inline-flex items-center gap-2 text-sm font-medium text-teal-600 transition-colors hover:text-teal-700"
@@ -164,6 +158,15 @@ const LoginBody = () => {
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Home</span>
               </Link>
+            </div>
+
+            <div className="mb-6 space-y-2">
+              <h1 className="text-[28px] md:text-[32px] font-bold leading-tight tracking-tight text-teal-600">
+                Sign in to 360Retail
+              </h1>
+              <p className="text-sm text-gray-600">
+                Đăng nhập để tiếp tục quản lý bán hàng, kho và khách hàng.
+              </p>
             </div>
 
             <form className="login-form space-y-6" onSubmit={handleSubmit}>
@@ -245,9 +248,9 @@ const LoginBody = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full bg-[#0D9488] text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0D9488]/90 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="h-12 w-full bg-[#0D9488] text-sm font-semibold tracking-wide text-white hover:bg-[#0D9488]/90 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {loading ? "ĐANG ĐĂNG NHẬP..." : "LOGIN"}
+                {loading ? "Đang đăng nhập..." : "Đăng nhập"}
               </Button>
 
               <div className="space-y-6">
@@ -319,13 +322,14 @@ const LoginBody = () => {
           </div>
         </div>
 
-        <div className="relative w-[55%] h-[88vh] overflow-hidden rounded-bl-[32px] bg-gradient-to-br from-[#19D6C8] to-[#FF7B21]">
-          <div className="absolute bottom-6 left-0 h-[548px] w-[677px] opacity-60">
-            <div className="h-full w-full bg-gradient-to-t from-white/20 to-transparent blur-3xl" />
+        {/* Right: decorative gradient panel */}
+        <div className="relative hidden w-[50%] overflow-hidden rounded-bl-[32px] bg-gradient-to-br from-[#19D6C8] via-[#2563EB] to-[#FF7B21] min-h-[88vh] sm:block">
+          <div className="absolute inset-0 opacity-70">
+            <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.4)_0,transparent_55%),radial-gradient(circle_at_bottom,rgba(15,23,42,0.7)_0,transparent_60%)]" />
           </div>
 
           <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2">
-            <div className="h-full w-full rounded-full bg-white/5 backdrop-blur-sm" />
+            <div className="h-full w-full rounded-[40%] bg-white/10 backdrop-blur-sm border border-white/25 shadow-[0_24px_80px_rgba(15,23,42,0.85)]" />
           </div>
         </div>
       </div>

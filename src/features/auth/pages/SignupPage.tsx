@@ -115,31 +115,37 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center bg-white overflow-x-hidden">
-      <div className="relative z-0 mt-4 w-[calc(100%-24px)] mx-3 min-h-[35vh] sm:min-h-[38vh] md:min-h-[48vh] rounded-[24px] bg-[linear-gradient(160deg,rgba(25,214,200,1)_0%,rgba(255,123,33,1)_100%)] pt-2 pb-16 sm:pb-14 md:pb-20 text-white shadow-md">
-        <div className="flex w-full items-start justify-between px-4 sm:px-5">
+    <div className="relative flex min-h-screen w-full flex-col items-center bg-slate-950 overflow-x-hidden">
+      {/* Hero gradient */}
+      <div className="relative z-0 mt-6 w-[calc(100%-24px)] mx-3 min-h-[34vh] sm:min-h-[38vh] md:min-h-[46vh] rounded-[28px] bg-[linear-gradient(145deg,rgba(25,214,200,1)_0%,rgba(25,118,210,1)_40%,rgba(255,123,33,1)_100%)] pt-3 pb-16 sm:pb-14 md:pb-20 text-white shadow-[0_24px_80px_rgba(15,23,42,0.85)]">
+        <div className="flex w-full items-start justify-between px-4 sm:px-6">
           <img
             src={logo}
             alt="360 Retail"
-            className="h-14 sm:h-16 md:h-20 w-auto object-contain"
+            className="h-14 sm:h-16 md:h-20 w-auto object-contain drop-shadow-md"
           />
 
-          <div />
+          <div className="hidden sm:flex flex-col items-end text-xs sm:text-sm text-white/90">
+            <span>Tăng trưởng doanh thu, giảm thao tác tay</span>
+            <span>Quản lý POS, kho, CRM trong một nền tảng</span>
+          </div>
         </div>
 
-        <div className="mt-3 sm:mt-1 sm:-mt-4 md:-mt-8 flex flex-col items-center text-center px-4">
-          <h1 className="text-2xl sm:text-3xl md:text-[40px] font-extrabold leading-tight sm:leading-[40px] md:leading-[48px] tracking-[-0.9px]">
-            Sign up
+        <div className="mt-4 sm:mt-2 md:mt-0 flex flex-col items-center text-center px-4">
+          <h1 className="text-2xl sm:text-3xl md:text-[40px] font-extrabold leading-tight sm:leading-[40px] md:leading-[48px] tracking-[-0.9px] drop-shadow">
+            Tạo tài khoản 360Retail
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-white/90">
-            No tech expertise required. We promise.
+          <p className="mt-2 text-sm sm:text-base text-white/90 max-w-xl">
+            Dùng thử 7 ngày đầy đủ tính năng, không cần thẻ tín dụng. Chỉ mất vài
+            phút để bắt đầu.
           </p>
         </div>
       </div>
 
-      <div className="relative z-50 signup-card-wrapper mb-16 flex w-full max-w-[1120px] justify-center px-4 sm:px-6 md:px-0">
-        <div className="w-full max-w-[520px] rounded-[15px] bg-white shadow-xl">
-          <div className="px-4 sm:px-6 md:px-7 pb-8 pt-6 sm:pt-7 md:pt-8">
+      {/* Card form */}
+      <div className="relative z-50 signup-card-wrapper mb-20 flex w-full max-w-[1120px] justify-center px-4 sm:px-6 md:px-0">
+        <div className="w-full max-w-[640px] rounded-2xl bg-white/95 shadow-2xl backdrop-blur-sm border border-slate-100">
+          <div className="px-4 sm:px-7 md:px-9 pb-9 pt-7 sm:pt-8 md:pt-9">
             <div className="flex flex-col gap-5">
               <div>
                 <Link
@@ -153,7 +159,7 @@ const SignupPage = () => {
 
               <div className="flex flex-col gap-6 sm:gap-[30px]">
                 <h2 className="text-center text-lg font-extrabold leading-[25.2px] text-gray-700">
-                  Sign in with
+                  Đăng ký nhanh với
                 </h2>
 
                 <div className="flex items-center justify-center gap-3 sm:gap-[15px]">
@@ -198,7 +204,7 @@ const SignupPage = () => {
                 </div>
               </div>
 
-              <form className="flex flex-col gap-4 sm:gap-6" onSubmit={handleSubmit}>
+              <form className="flex flex-col gap-5 sm:gap-6" onSubmit={handleSubmit}>
                 <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                   <div className="flex flex-col gap-2.5">
                     <Label
