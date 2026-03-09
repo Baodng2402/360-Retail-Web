@@ -22,6 +22,9 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
     userRole &&
     !normalizedAllowedRoles.includes(userRole)
   ) {
+    // Route fallback by role to avoid blank/loop UX (e.g. SuperAdmin hitting /dashboard).
+    if (userRole === "superadmin") return <Navigate to="/admin" replace />;
+    if (userRole === "customer") return <Navigate to="/customer" replace />;
     return <Navigate to="/unauthorized" replace />;
   }
   return <Outlet />;

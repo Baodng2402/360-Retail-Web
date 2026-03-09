@@ -1,7 +1,7 @@
 import { Suspense, useEffect } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import HomePage from "@/features/home/pages/HomePage";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./routes/protectedRoute";
 import "./App.css";
 import LoginPage from "@/features/auth/pages/LoginPage";
@@ -33,13 +33,21 @@ import PaymentSuccessPage from "@/features/payment/pages/PaymentSuccessPage";
 import PaymentFailedPage from "@/features/payment/pages/PaymentFailedPage";
 import CustomerDashboardPage from "@/features/customer/pages/CustomerDashboardPage";
 import CustomerOrderDetailPage from "@/features/customer/pages/CustomerOrderDetailPage";
-import SuperAdminPage from "@/features/admin/pages/SuperAdminPage";
+import { AdminLayout } from "@/features/admin/components/AdminLayout";
+import AdminDashboardPage from "@/features/admin/pages/AdminDashboardPage";
+import AdminUsersPage from "@/features/admin/pages/AdminUsersPage";
+import AdminUserDetailPage from "@/features/admin/pages/AdminUserDetailPage";
+import AdminStoresPage from "@/features/admin/pages/AdminStoresPage";
+import AdminReviewsPage from "@/features/admin/pages/AdminReviewsPage";
+import AdminProfilePage from "@/features/admin/pages/AdminProfilePage";
 import EmployeeDetailPage from "@/features/dashboard/pages/EmployeeDetailPage";
 import MyTasksPage from "@/features/dashboard/pages/MyTasksPage";
 import CrmDashboardPage from "@/features/dashboard/pages/CrmDashboardPage";
 import InventoryManagementPage from "@/features/dashboard/pages/InventoryManagementPage";
 import i18n from "@/i18n";
 import { useLanguageStore } from "@/shared/store/languageStore";
+import UnauthorizedPage from "@/shared/pages/UnauthorizedPage";
+import NotFoundPage from "@/shared/pages/NotFoundPage";
 
 function App() {
   const language = useLanguageStore((s) => s.language);
@@ -68,6 +76,7 @@ function App() {
               <Route path="/feedback/:orderId" element={<FeedbackPage />} />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
               <Route path="/payment/failed" element={<PaymentFailedPage />} />
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
               <Route
                 element={
                   <ProtectedRoute
@@ -132,8 +141,17 @@ function App() {
                   <ProtectedRoute allowedRoles={["SuperAdmin"]} />
                 }
               >
-                <Route index element={<SuperAdminPage />} />
+                <Route element={<AdminLayout />}>
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<AdminDashboardPage />} />
+                  <Route path="users" element={<AdminUsersPage />} />
+                  <Route path="users/:id" element={<AdminUserDetailPage />} />
+                  <Route path="stores" element={<AdminStoresPage />} />
+                  <Route path="reviews" element={<AdminReviewsPage />} />
+                  <Route path="profile" element={<AdminProfilePage />} />
+                </Route>
               </Route>
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </BrowserRouter>
         </Suspense>

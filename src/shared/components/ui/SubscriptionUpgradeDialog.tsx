@@ -56,25 +56,27 @@ export function SubscriptionUpgradeDialog() {
             </div>
             <DialogTitle>{title}</DialogTitle>
           </div>
-          <DialogDescription className="mt-2 space-y-2">
-            <p>{message}</p>
-            {errorType === "FeatureNotAvailable" && requiredPlan && (
-              <p className="text-sm text-muted-foreground">
-                {currentPlan && (
-                  <>
-                    {t("upgradeDialog.currentPlan", { plan: currentPlan })}{" "}
-                  </>
-                )}
-                {feature
-                  ? t("upgradeDialog.toUseFeature", {
-                      feature,
-                      requiredPlan,
-                    })
-                  : t("upgradeDialog.toUseFeatureFallback", {
-                      requiredPlan,
-                    })}
-              </p>
-            )}
+          <DialogDescription asChild className="mt-2">
+            <div className="space-y-2">
+              <p>{message}</p>
+              {errorType === "FeatureNotAvailable" && requiredPlan && (
+                <p className="text-sm text-muted-foreground">
+                  {currentPlan && (
+                    <>
+                      {t("upgradeDialog.currentPlan", { plan: currentPlan })}{" "}
+                    </>
+                  )}
+                  {feature
+                    ? t("upgradeDialog.toUseFeature", {
+                        feature,
+                        requiredPlan,
+                      })
+                    : t("upgradeDialog.toUseFeatureFallback", {
+                        requiredPlan,
+                      })}
+                </p>
+              )}
+            </div>
           </DialogDescription>
         </DialogHeader>
 

@@ -1,2 +1,193 @@
-{}
+{
+  "header": {
+    "dashboard": {
+      "title": "SuperAdmin Dashboard",
+      "subtitle": "Tổng quan hệ thống (users, gói dịch vụ, reviews, stores)."
+    },
+    "users": {
+      "title": "Quản lý người dùng",
+      "subtitle": "CRUD users (SuperAdmin)."
+    },
+    "reviews": {
+      "title": "Plan Reviews",
+      "subtitle": "Quản trị đánh giá gói SaaS."
+    },
+    "fallback": {
+      "title": "SuperAdmin",
+      "subtitle": "Khu vực quản trị hệ thống."
+    },
+    "logout": "Đăng xuất"
+  },
+  "sidebar": {
+    "brand": {
+      "title": "SuperAdmin",
+      "subtitle": "System Console"
+    },
+    "nav": {
+      "dashboard": {
+        "label": "Dashboard",
+        "subLabel": "KPI & charts"
+      },
+      "users": {
+        "label": "Users",
+        "subLabel": "CRUD users"
+      },
+      "reviews": {
+        "label": "Reviews",
+        "subLabel": "Plan reviews admin"
+      }
+    }
+  },
+  "stores": {
+    "title": "Quản lý Stores",
+    "badge": "SuperAdmin",
+    "description": "Xem và quản lý tất cả stores (kể cả inactive).",
+    "searchPlaceholder": "Tìm theo tên hoặc địa chỉ...",
+    "includeInactive": "Hiện cả stores inactive",
+    "columns": {
+      "name": "Tên store",
+      "address": "Địa chỉ",
+      "phone": "Số điện thoại",
+      "status": "Trạng thái",
+      "createdAt": "Ngày tạo"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "noData": "Không có store nào."
+  },
+  "dashboard": {
+    "badge": "SuperAdmin",
+    "caption": "Dashboard tổng quan hệ thống",
+    "filters": {
+      "from": "Từ ngày",
+      "to": "Đến ngày",
+      "groupBy": "Group by",
+      "groupByOptions": {
+        "day": "Ngày",
+        "week": "Tuần",
+        "month": "Tháng"
+      },
+      "refresh": "Làm mới",
+      "refreshLoading": "Đang tải"
+    },
+    "kpis": {
+      "totalRevenue": "Tổng doanh thu",
+      "mrr": "MRR",
+      "activeStores": "Active Stores",
+      "trialStores": "Trial Stores",
+      "expiredStores": "Expired Stores",
+      "conversionRate": "Tỉ lệ chuyển đổi"
+    },
+    "revenueChart": {
+      "title": "Biểu đồ doanh thu",
+      "tooltipLabel": "Doanh thu"
+    },
+    "planDistribution": {
+      "title": "Phân bổ gói",
+      "badge": "Plans",
+      "empty": "Chưa có dữ liệu.",
+      "label": "Stores"
+    },
+    "funnel": {
+      "title": "Funnel Landing → Signup",
+      "badge": "Identity",
+      "landing": "Landing",
+      "signup": "Signup",
+      "conversion": "Conversion"
+    },
+    "registrations": {
+      "title": "Đăng ký mới theo ngày",
+      "badge": "Registrations",
+      "label": "Đăng ký mới"
+    },
+    "states": {
+      "loading": "Đang tải..."
+    },
+    "toast": {
+      "loadError": "Không tải được dữ liệu dashboard SuperAdmin."
+    }
+  },
+  "users": {
+    "badge": "SuperAdmin",
+    "caption": "Quản lý Users",
+    "description": "CRUD theo identity/super-admin/users",
+    "searchPlaceholder": "Tìm theo email hoặc id...",
+    "create": "Tạo user",
+    "listTitle": "Danh sách users",
+    "noData": "Không có dữ liệu.",
+    "columns": {
+      "email": "Email",
+      "roles": "Roles",
+      "status": "Status",
+      "activated": "Kích hoạt",
+      "storeId": "StoreId",
+      "actions": "Thao tác"
+    },
+    "activated": {
+      "yes": "Có",
+      "no": "Không"
+    },
+    "pagination": {
+      "summary": "Hiển thị {{from}} - {{to}} trong {{total}} users",
+      "prev": "Trang trước",
+      "next": "Trang sau"
+    },
+    "dialog": {
+      "titleCreate": "Tạo user",
+      "titleEdit": "Cập nhật user",
+      "descriptionCreate": "Tạo user mới (không cho tạo role SuperAdmin).",
+      "descriptionEdit": "Chỉnh trạng thái/kích hoạt. (Role/email hiện tại không đổi theo API này)",
+      "fields": {
+        "email": "Email",
+        "password": "Mật khẩu",
+        "role": "Role",
+        "status": "Trạng thái",
+        "activated": "Kích hoạt"
+      },
+      "cancel": "Hủy",
+      "save": "Lưu",
+      "create": "Tạo"
+    },
+    "deleteDialog": {
+      "title": "Xác nhận xoá",
+      "description": "Bạn có chắc muốn xoá {{email}}?",
+      "cancel": "Hủy",
+      "confirm": "Xoá"
+    },
+    "toast": {
+      "loadError": "Không tải được danh sách users (SuperAdmin).",
+      "createSuccess": "Đã tạo user.",
+      "updateSuccess": "Đã cập nhật user.",
+      "deleteSuccess": "Đã xoá user.",
+      "saveError": "Lưu user thất bại.",
+      "deleteError": "Xoá user thất bại."
+    }
+  },
+  "profile": {
+    "title": "Hồ sơ SuperAdmin",
+    "subtitle": "Quản lý tài khoản quản trị hệ thống.",
+    "section": {
+      "account": "Tài khoản",
+      "security": "Bảo mật"
+    },
+    "fields": {
+      "email": "Email",
+      "role": "Vai trò"
+    },
+    "changePassword": {
+      "title": "Đổi mật khẩu",
+      "current": "Mật khẩu hiện tại",
+      "new": "Mật khẩu mới",
+      "confirm": "Nhập lại mật khẩu mới",
+      "submit": "Cập nhật mật khẩu",
+      "submitting": "Đang cập nhật..."
+    },
+    "toast": {
+      "success": "Đã đổi mật khẩu thành công.",
+      "error": "Đổi mật khẩu thất bại. Vui lòng thử lại."
+    }
+  }
+}
 
