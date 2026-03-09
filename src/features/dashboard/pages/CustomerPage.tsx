@@ -35,6 +35,7 @@ import type { Feedback } from "@/shared/lib/feedbackApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { authApi } from "@/shared/lib/authApi";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 type CustomerFormState = {
   fullName: string;
@@ -49,6 +50,8 @@ const emptyForm: CustomerFormState = {
 };
 
 const CustomerPage = () => {
+  const { t: tCustomer } = useTranslation("customer");
+  const { t: tCommon } = useTranslation("common");
   const { user } = useAuthStore();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
@@ -81,7 +84,7 @@ const CustomerPage = () => {
       if (!me?.storeId?.trim()) {
         setCustomers([]);
         toast.error(
-          "Chưa có cửa hàng trong phiên đăng nhập. Vui lòng chọn cửa hàng hoặc đăng nhập lại.",
+          tCustomer("toasts.missingStoreInSession"),
         );
         return;
       }
@@ -98,11 +101,11 @@ const CustomerPage = () => {
 
       let message: string;
       if (status === 400 && (code === "StoreIdRequired" || /store|store_id|cửa hàng/i.test(serverMsg))) {
-        message = "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.";
+        message = tCustomer("errors.noStoreAssigned");
       } else if (status === 500) {
-        message = "Lỗi máy chủ (500). Kiểm tra đăng nhập / cửa hàng hoặc liên hệ hỗ trợ.";
+        message = tCustomer("errors.server500");
       } else {
-        message = "Không thể tải danh sách khách hàng.";
+        message = tCustomer("errors.loadCustomersFailed");
       }
       toast.error(message);
     } finally {
@@ -158,7 +161,7 @@ const CustomerPage = () => {
 
   const handleSave = async () => {
     if (!formState.fullName.trim() || !formState.phoneNumber.trim()) {
-      toast.error("Vui lòng nhập đầy đủ họ tên và số điện thoại.");
+      toast.error(tCustomer("toasts.validationMissingNamePhone"));
       return;
     }
     try {
@@ -175,7 +178,7 @@ const CustomerPage = () => {
         if (selectedCustomer?.id === updated.id) {
           setSelectedCustomer(updated);
         }
-        toast.success("Cập nhật khách hàng thành công.");
+        toast.success(tCustomer("toasts.updateSuccess"));
       } else {
         const created = await customersApi.createCustomer({
           fullName: formState.fullName.trim(),
@@ -183,12 +186,12 @@ const CustomerPage = () => {
           email: formState.email.trim() || undefined,
         });
         setCustomers((prev) => [created, ...prev]);
-        toast.success("Thêm khách hàng mới thành công.");
+        toast.success(tCustomer("toasts.createSuccess"));
       }
       setFormOpen(false);
     } catch (error) {
       console.error("Failed to save customer:", error);
-      toast.error("Không thể lưu khách hàng. Vui lòng thử lại.");
+      toast.error(tCustomer("errors.saveCustomerFailed"));
     } finally {
       setSaving(false);
     }
@@ -213,11 +216,11 @@ const CustomerPage = () => {
         setLoyaltyTransactions([]);
         setFeedbacks([]);
       }
-      toast.success("Đã xóa khách hàng.");
+      toast.success(tCustomer("toasts.deleteSuccess"));
       setDeleteDialogOpen(false);
     } catch (error) {
       console.error("Failed to delete customer:", error);
-      toast.error("Không thể xóa khách hàng. Vui lòng thử lại.");
+      toast.error(tCustomer("errors.deleteCustomerFailed"));
     } finally {
       setDeleting(false);
     }
@@ -237,7 +240,7 @@ const CustomerPage = () => {
 
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Chuyển đổi để xem khách hàng của cửa hàng khác" />
+      <StoreSelector pageDescription={tCustomer("page.storeSelectorHint")} />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -253,10 +256,10 @@ const CustomerPage = () => {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-foreground">
-                  Khách hàng
+                  {tCustomer("header.title")}
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Quản lý thông tin và lịch sử chăm sóc khách hàng.
+                  {tCustomer("header.subtitle")}
                 </p>
               </div>
             </div>
@@ -264,7 +267,7 @@ const CustomerPage = () => {
               <div className="relative w-full md:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Tìm theo tên, SĐT, email..."
+                  placeholder={tCustomer("search.placeholder")}
                   className="pl-8"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -275,18 +278,18 @@ const CustomerPage = () => {
                 onClick={openCreateForm}
               >
                 <UserPlus className="mr-2 h-4 w-4" />
-                Thêm khách
+                {tCustomer("actions.addCustomer")}
               </Button>
             </div>
           </div>
 
           {loading ? (
             <div className="py-10 text-center text-muted-foreground">
-              Đang tải danh sách khách hàng...
+              {tCustomer("states.loadingList")}
             </div>
           ) : filteredCustomers.length === 0 ? (
             <div className="py-10 text-center text-muted-foreground">
-              Chưa có khách hàng nào. Hãy thêm khách hàng đầu tiên của bạn.
+              {tCustomer("states.emptyList")}
             </div>
           ) : (
             <div className="border rounded-xl overflow-hidden">
@@ -295,16 +298,16 @@ const CustomerPage = () => {
                   <thead className="bg-muted/60 sticky top-0 z-10">
                     <tr>
                       <th className="px-4 py-2 text-left font-medium text-xs text-muted-foreground">
-                        Khách hàng
+                        {tCustomer("table.customer")}
                       </th>
                       <th className="px-4 py-2 text-left font-medium text-xs text-muted-foreground">
-                        Liên hệ
+                        {tCustomer("table.contact")}
                       </th>
                       <th className="px-4 py-2 text-left font-medium text-xs text-muted-foreground">
-                        Tổng đơn / chi tiêu
+                        {tCustomer("table.ordersSpend")}
                       </th>
                       <th className="px-4 py-2 text-right font-medium text-xs text-muted-foreground">
-                        Hành động
+                        {tCustomer("table.actions")}
                       </th>
                     </tr>
                   </thead>
@@ -327,7 +330,7 @@ const CustomerPage = () => {
                                 {c.fullName}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                ID: {c.id.slice(0, 8)}...
+                                {tCustomer("table.idPrefix")} {c.id.slice(0, 8)}...
                               </span>
                             </div>
                           </td>
@@ -348,13 +351,13 @@ const CustomerPage = () => {
                           <td className="px-4 py-3 text-xs">
                             <div className="flex flex-col gap-1">
                               <span>
-                                Đơn:{" "}
+                                {tCustomer("table.ordersLabel")}{" "}
                                 <strong>
                                   {c.totalOrders ?? 0}
                                 </strong>
                               </span>
                               <span className="text-muted-foreground">
-                                Chi tiêu:{" "}
+                                {tCustomer("table.spendLabel")}{" "}
                                 <strong>
                                   {c.totalSpend
                                     ? `${c.totalSpend.toLocaleString("vi-VN")}₫`
@@ -373,7 +376,7 @@ const CustomerPage = () => {
                                   e.stopPropagation();
                                   openEditForm(c);
                                 }}
-                                aria-label="Chỉnh sửa"
+                                aria-label={tCustomer("aria.edit")}
                               >
                                 <Edit2 className="h-4 w-4" />
                               </Button>
@@ -386,7 +389,7 @@ const CustomerPage = () => {
                                     e.stopPropagation();
                                     confirmDelete(c);
                                   }}
-                                  aria-label="Xóa khách hàng"
+                                  aria-label={tCustomer("aria.deleteCustomer")}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -407,17 +410,17 @@ const CustomerPage = () => {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-semibold text-foreground">
-                Loyalty & Feedback
+                {tCustomer("insights.title")}
               </h3>
               <p className="text-xs text-muted-foreground">
-                Điểm tích lũy và đánh giá của khách.
+                {tCustomer("insights.subtitle")}
               </p>
             </div>
           </div>
 
           {!selectedCustomer ? (
             <div className="py-8 text-center text-muted-foreground text-sm">
-              Chọn một khách hàng ở bảng bên trái để xem chi tiết.
+              {tCustomer("insights.selectCustomerHint")}
             </div>
           ) : (
             <div className="space-y-4">
@@ -442,55 +445,58 @@ const CustomerPage = () => {
                 <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      Tổng điểm tích lũy
+                      {tCustomer("loyalty.totalPointsLabel")}
                     </span>
                     <span className="text-sm font-semibold">
-                      {loyaltySummary.totalPoints.toLocaleString("vi-VN")} điểm
+                      {tCustomer("loyalty.totalPointsValue", {
+                        points: loyaltySummary.totalPoints,
+                      })}
                     </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    Hạng hiện tại giúp khách nhận ưu đãi tốt hơn. Bạn có thể cấu
-                    hình luật tích điểm trong phần Loyalty Rules.
+                    {tCustomer("loyalty.rankHint")}
                   </p>
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed bg-muted/40 p-3 text-xs text-muted-foreground">
-                  Khách hàng này chưa có dữ liệu loyalty.
+                  {tCustomer("loyalty.empty")}
                 </div>
               )}
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-foreground">
-                    Giao dịch điểm gần đây
+                    {tCustomer("loyalty.recentTransactions.title")}
                   </span>
                   <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    <span>Gần nhất</span>
+                    <span>{tCustomer("loyalty.recentTransactions.latest")}</span>
                   </div>
                 </div>
                 {loyaltyTransactions.length === 0 ? (
                   <p className="text-xs text-muted-foreground">
-                    Chưa có giao dịch tích/đổi điểm nào.
+                    {tCustomer("loyalty.recentTransactions.empty")}
                   </p>
                 ) : (
                   <div className="max-h-40 overflow-y-auto space-y-2 text-xs">
-                    {loyaltyTransactions.slice(0, 5).map((t) => (
+                    {loyaltyTransactions.slice(0, 5).map((txn) => (
                       <div
-                        key={t.id}
+                        key={txn.id}
                         className="flex items-center justify-between rounded-md bg-background border px-2 py-1.5"
                       >
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {t.points > 0 ? "+" : ""}
-                            {t.points} điểm
+                            {txn.points > 0 ? "+" : ""}
+                            {tCustomer("loyalty.pointsValue", { points: txn.points })}
                           </span>
                           <span className="text-[11px] text-muted-foreground">
-                            {t.description || "Giao dịch loyalty"}
+                            {txn.description || tCustomer("loyalty.transactionFallback")}
                           </span>
                         </div>
                         <span className="text-[11px] text-muted-foreground">
-                          {new Date(t.createdAt).toLocaleDateString("vi-VN")}
+                          {tCommon("formats.date", {
+                            value: new Date(txn.createdAt),
+                          })}
                         </span>
                       </div>
                     ))}
@@ -501,16 +507,16 @@ const CustomerPage = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-foreground">
-                    Feedback gần đây
+                    {tCustomer("feedback.title")}
                   </span>
                   <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Star className="h-3 w-3 text-amber-400" />
-                    <span>{feedbacks.length} feedback</span>
+                    <span>{tCustomer("feedback.count", { count: feedbacks.length })}</span>
                   </div>
                 </div>
                 {feedbacks.length === 0 ? (
                   <p className="text-xs text-muted-foreground">
-                    Chưa có feedback nào từ khách hàng này.
+                    {tCustomer("feedback.empty")}
                   </p>
                 ) : (
                   <div className="max-h-40 overflow-y-auto space-y-2 text-xs">
@@ -525,11 +531,11 @@ const CustomerPage = () => {
                             <span>{f.rating}/5</span>
                           </div>
                           <span className="text-muted-foreground">
-                            {new Date(f.createdAt).toLocaleDateString("vi-VN")}
+                            {tCommon("formats.date", { value: new Date(f.createdAt) })}
                           </span>
                         </div>
                         <p className="text-[11px] text-muted-foreground line-clamp-2">
-                          {f.content || "Không có nội dung chi tiết."}
+                          {f.content || tCustomer("feedback.contentFallback")}
                         </p>
                       </div>
                     ))}
@@ -545,41 +551,42 @@ const CustomerPage = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCustomer ? "Chỉnh sửa khách hàng" : "Thêm khách hàng mới"}
+              {editingCustomer
+                ? tCustomer("form.editTitle")
+                : tCustomer("form.createTitle")}
             </DialogTitle>
             <DialogDescription>
-              Lưu thông tin cơ bản để dễ dàng chăm sóc và tra cứu lịch sử mua
-              hàng.
+              {tCustomer("form.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                Họ tên
+                {tCustomer("form.fullNameLabel")}
               </label>
               <Input
                 value={formState.fullName}
                 onChange={(e) =>
                   setFormState((s) => ({ ...s, fullName: e.target.value }))
                 }
-                placeholder="Nguyễn Văn A"
+                placeholder={tCustomer("form.fullNamePlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                Số điện thoại
+                {tCustomer("form.phoneLabel")}
               </label>
               <Input
                 value={formState.phoneNumber}
                 onChange={(e) =>
                   setFormState((s) => ({ ...s, phoneNumber: e.target.value }))
                 }
-                placeholder="0901234567"
+                placeholder={tCustomer("form.phonePlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                Email (không bắt buộc)
+                {tCustomer("form.emailLabel")}
               </label>
               <Input
                 type="email"
@@ -587,13 +594,13 @@ const CustomerPage = () => {
                 onChange={(e) =>
                   setFormState((s) => ({ ...s, email: e.target.value }))
                 }
-                placeholder="customer@example.com"
+                placeholder={tCustomer("form.emailPlaceholder")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setFormOpen(false)}>
-              Hủy
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               onClick={handleSave}
@@ -601,10 +608,10 @@ const CustomerPage = () => {
               className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
             >
               {saving
-                ? "Đang lưu..."
+                ? tCommon("states.saving")
                 : editingCustomer
-                  ? "Lưu thay đổi"
-                  : "Thêm khách hàng"}
+                  ? tCommon("actions.saveChanges")
+                  : tCustomer("actions.addCustomer")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -613,9 +620,9 @@ const CustomerPage = () => {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Xóa khách hàng</DialogTitle>
+            <DialogTitle>{tCustomer("delete.title")}</DialogTitle>
             <DialogDescription>
-              Hành động này sẽ xóa khách hàng khỏi hệ thống. Bạn có chắc chắn?
+              {tCustomer("delete.description")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -623,14 +630,14 @@ const CustomerPage = () => {
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
             >
-              Hủy
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
               disabled={deleting}
             >
-              {deleting ? "Đang xóa..." : "Xóa khách hàng"}
+              {deleting ? tCommon("states.deleting") : tCustomer("delete.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

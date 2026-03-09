@@ -26,6 +26,7 @@ import type { Employee } from "@/shared/types/employee";
 import { useAuthStore } from "@/shared/store/authStore";
 import { ArrowLeft, Loader2, User, Mail, Phone, Briefcase, Calendar, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 const getInitials = (name: string) =>
   name
@@ -36,6 +37,8 @@ const getInitials = (name: string) =>
     .toUpperCase();
 
 export default function EmployeeDetailPage() {
+  const { t: tStaff, i18n } = useTranslation("staff");
+  const { t: tCommon } = useTranslation("common");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -84,13 +87,13 @@ export default function EmployeeDetailPage() {
         setIsActive(emp.isActive);
       } catch (err) {
         console.error("Failed to load employee:", err);
-        toast.error("Không thể tải thông tin nhân viên.");
+        toast.error(tStaff("detail.toasts.loadFailed"));
       } finally {
         setLoading(false);
       }
     };
     void load();
-  }, [id]);
+  }, [id, tStaff]);
 
   const handleSave = async () => {
     if (!employee || !id || !canEdit) return;
@@ -99,7 +102,7 @@ export default function EmployeeDetailPage() {
       const salaryNumber =
         baseSalary.trim() === "" ? undefined : Number(baseSalary.trim());
       if (salaryNumber !== undefined && Number.isNaN(salaryNumber)) {
-        toast.error("Lương cơ bản không hợp lệ.");
+        toast.error(tStaff("detail.toasts.invalidBaseSalary"));
         setSaving(false);
         return;
       }
@@ -108,7 +111,7 @@ export default function EmployeeDetailPage() {
           ? customPosition.trim()
           : position.trim();
       if (!nextPosition) {
-        toast.error("Vui lòng chọn chức danh.");
+        toast.error(tStaff("detail.toasts.positionRequired"));
         setSaving(false);
         return;
       }
@@ -119,10 +122,10 @@ export default function EmployeeDetailPage() {
         isActive,
       });
       setEmployee((prev) => (prev ? { ...prev, ...updated } : updated));
-      toast.success("Đã cập nhật thông tin nhân viên.");
+      toast.success(tStaff("detail.toasts.updateSuccess"));
     } catch (err) {
       console.error("Failed to update employee:", err);
-      toast.error("Không thể cập nhật thông tin nhân viên.");
+      toast.error(tStaff("detail.toasts.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -135,11 +138,11 @@ export default function EmployeeDetailPage() {
       const updated = await employeesApi.updateEmployee(id, { isActive: false });
       setEmployee((prev) => (prev ? { ...prev, ...updated, isActive: false } : updated));
       setIsActive(false);
-      toast.success("Đã ngừng hoạt động nhân viên.");
+      toast.success(tStaff("detail.toasts.deactivateSuccess"));
       setDeleteOpen(false);
     } catch (err) {
       console.error("Failed to deactivate employee:", err);
-      toast.error("Không thể xóa/ngừng hoạt động nhân viên. Vui lòng thử lại.");
+      toast.error(tStaff("detail.toasts.deactivateFailed"));
     } finally {
       setDeleting(false);
     }
@@ -150,7 +153,7 @@ export default function EmployeeDetailPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Đang tải thông tin nhân viên...</span>
+          <span>{tStaff("detail.loading")}</span>
         </div>
       </div>
     );
@@ -159,13 +162,18 @@ export default function EmployeeDetailPage() {
   if (!employee) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <p className="text-muted-foreground">Không tìm thấy nhân viên.</p>
+        <p className="text-muted-foreground">{tStaff("detail.notFound")}</p>
         <Button variant="outline" onClick={() => navigate("/dashboard/staff")}>
-          Quay lại danh sách nhân viên
+          {tStaff("detail.backToList")}
         </Button>
       </div>
     );
   }
+
+  const formatJoinDate = (value: string) => {
+    const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
+    return new Intl.DateTimeFormat(locale, { dateStyle: "short" }).format(new Date(value));
+  };
 
   return (
     <div className="space-y-6">
@@ -175,7 +183,7 @@ export default function EmployeeDetailPage() {
         onClick={() => navigate("/dashboard/staff")}
       >
         <ArrowLeft className="h-4 w-4" />
-        Quay lại danh sách nhân viên
+        {tStaff("detail.backToList")}
       </Button>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -194,7 +202,7 @@ export default function EmployeeDetailPage() {
               </p>
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                 <Briefcase className="h-3 w-3" />
-                {employee.position || "Chưa cập nhật chức danh"}
+                {employee.position || tStaff("detail.positionFallback")}
               </p>
             </div>
             <div className="space-y-1 text-sm text-muted-foreground">
@@ -212,8 +220,7 @@ export default function EmployeeDetailPage() {
                 <div className="flex items-center justify-center gap-2">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>
-                    Ngày vào làm:{" "}
-                    {new Date(employee.joinDate).toLocaleDateString("vi-VN")}
+                    {tStaff("detail.joinDateLabel")} {formatJoinDate(employee.joinDate)}
                   </span>
                 </div>
               )}
@@ -223,7 +230,7 @@ export default function EmployeeDetailPage() {
 
         <Card className="p-6 md:col-span-2 space-y-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Thông tin & phân quyền nhân viên</h2>
+            <h2 className="text-lg font-semibold">{tStaff("detail.sectionTitle")}</h2>
             {canEdit && (
               <div className="flex items-center gap-2">
                 <Button
@@ -233,7 +240,7 @@ export default function EmployeeDetailPage() {
                   disabled={saving || deleting}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Xóa nhân viên
+                  {tStaff("detail.actions.deactivate")}
                 </Button>
                 <Button
                   onClick={handleSave}
@@ -241,7 +248,7 @@ export default function EmployeeDetailPage() {
                   className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
                 >
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Lưu thay đổi
+                  {tStaff("detail.actions.saveChanges")}
                 </Button>
               </div>
             )}
@@ -249,7 +256,7 @@ export default function EmployeeDetailPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Họ tên</Label>
+              <Label htmlFor="fullName">{tStaff("detail.form.fullName")}</Label>
               <Input
                 id="fullName"
                 value={fullName}
@@ -262,7 +269,7 @@ export default function EmployeeDetailPage() {
               <Input value={employee.email} disabled />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="position">Chức danh</Label>
+              <Label htmlFor="position">{tStaff("detail.form.position")}</Label>
               <div className="grid gap-2">
                 <Select
                   value={positionMode}
@@ -273,8 +280,12 @@ export default function EmployeeDetailPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="preset">Chọn từ danh sách</SelectItem>
-                    <SelectItem value="custom">Nhập thủ công</SelectItem>
+                    <SelectItem value="preset">
+                      {tStaff("detail.form.positionModePreset")}
+                    </SelectItem>
+                    <SelectItem value="custom">
+                      {tStaff("detail.form.positionModeCustom")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -285,7 +296,7 @@ export default function EmployeeDetailPage() {
                     disabled={!canEdit}
                   >
                     <SelectTrigger id="position" className="w-full">
-                      <SelectValue placeholder="Chọn chức danh" />
+                      <SelectValue placeholder={tStaff("detail.form.positionPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
                       {POSITION_OPTIONS.map((p) => (
@@ -301,13 +312,13 @@ export default function EmployeeDetailPage() {
                     value={customPosition}
                     onChange={(e) => setCustomPosition(e.target.value)}
                     disabled={!canEdit}
-                    placeholder="VD: Nhân viên bán hàng"
+                    placeholder={tStaff("detail.form.customPositionPlaceholder")}
                   />
                 )}
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="baseSalary">Lương cơ bản (VND)</Label>
+              <Label htmlFor="baseSalary">{tStaff("detail.form.baseSalary")}</Label>
               <Input
                 id="baseSalary"
                 type="number"
@@ -321,11 +332,11 @@ export default function EmployeeDetailPage() {
 
           <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-3 py-2">
             <div className="space-y-0.5">
-              <p className="text-sm font-medium">Trạng thái làm việc</p>
+              <p className="text-sm font-medium">{tStaff("detail.form.workStatusTitle")}</p>
               <p className="text-xs text-muted-foreground">
                 {isActive
-                  ? "Nhân viên đang hoạt động và có thể đăng nhập, chấm công."
-                  : "Nhân viên tạm ngưng, không thể thao tác trên hệ thống."}
+                  ? tStaff("detail.form.activeHint")
+                  : tStaff("detail.form.inactiveHint")}
               </p>
             </div>
             <Switch
@@ -341,19 +352,24 @@ export default function EmployeeDetailPage() {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
-            <DialogTitle>Xóa / ngừng hoạt động nhân viên</DialogTitle>
+            <DialogTitle>{tStaff("detail.dialog.title")}</DialogTitle>
             <DialogDescription>
-              Bạn có chắc muốn ngừng hoạt động nhân viên{" "}
-              <strong>{employee.fullName}</strong>? Nhân viên sẽ không thể đăng nhập và chấm công.
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: tStaff("detail.dialog.description", {
+                    name: employee.fullName,
+                  }),
+                }}
+              />
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleting}>
-              Hủy
+              {tCommon("actions.cancel")}
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Xác nhận
+              {tCommon("actions.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

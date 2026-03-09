@@ -1,0 +1,20 @@
+{
+  "page": {
+    "selectStoreFirst": "Please select a store to manage products",
+    "storeSelectorHint": "Switch to manage products and categories for another store"
+  },
+  "stats": {
+    "totalProducts": "Total products",
+    "inventoryValue": "Inventory value",
+    "lowStockAlerts": "Low stock alerts",
+    "avgMargin": "Average margin"
+  },
+  "tabs": {
+    "products": "Products",
+    "categories": "Categories"
+  },
+  "search": {
+    "productsPlaceholder": "Search products..."
+  }
+}
+

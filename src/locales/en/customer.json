@@ -1,0 +1,87 @@
+{
+  "page": {
+    "storeSelectorHint": "Switch to view customers from another store"
+  },
+  "header": {
+    "title": "Customers",
+    "subtitle": "Manage customer information and engagement history."
+  },
+  "actions": {
+    "addCustomer": "Add customer"
+  },
+  "search": {
+    "placeholder": "Search by name, phone, email..."
+  },
+  "states": {
+    "loadingList": "Loading customer list...",
+    "emptyList": "No customers yet. Add your first customer."
+  },
+  "aria": {
+    "edit": "Edit",
+    "deleteCustomer": "Delete customer"
+  },
+  "table": {
+    "customer": "Customer",
+    "contact": "Contact",
+    "ordersSpend": "Orders / spend",
+    "actions": "Actions",
+    "idPrefix": "ID:",
+    "ordersLabel": "Orders:",
+    "spendLabel": "Spend:"
+  },
+  "insights": {
+    "title": "Loyalty & Feedback",
+    "subtitle": "Points balance and customer feedback.",
+    "selectCustomerHint": "Select a customer from the list to view details."
+  },
+  "loyalty": {
+    "totalPointsLabel": "Total points",
+    "totalPointsValue": "{{points, number}} pts",
+    "rankHint": "A higher tier unlocks better perks. Configure loyalty rules in Loyalty Rules.",
+    "empty": "This customer has no loyalty data yet.",
+    "recentTransactions": {
+      "title": "Recent point transactions",
+      "latest": "Latest",
+      "empty": "No earn/redeem transactions yet."
+    },
+    "pointsValue": "{{points, number}} pts",
+    "transactionFallback": "Loyalty transaction"
+  },
+  "feedback": {
+    "title": "Recent feedback",
+    "count": "{{count}} feedback",
+    "empty": "No feedback from this customer yet.",
+    "contentFallback": "No detailed content."
+  },
+  "form": {
+    "editTitle": "Edit customer",
+    "createTitle": "Add new customer",
+    "description": "Save basic info for easier support and purchase-history lookup.",
+    "fullNameLabel": "Full name",
+    "fullNamePlaceholder": "John Doe",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "0901234567",
+    "emailLabel": "Email (optional)",
+    "emailPlaceholder": "customer@example.com"
+  },
+  "delete": {
+    "title": "Delete customer",
+    "description": "This action will remove the customer from the system. Are you sure?",
+    "confirm": "Delete customer"
+  },
+  "toasts": {
+    "missingStoreInSession": "No store is associated with this session. Please select a store or sign in again.",
+    "validationMissingNamePhone": "Please enter a full name and phone number.",
+    "updateSuccess": "Customer updated successfully.",
+    "createSuccess": "Customer created successfully.",
+    "deleteSuccess": "Customer deleted."
+  },
+  "errors": {
+    "noStoreAssigned": "No store is assigned. Please sign in again or start a trial to assign a store.",
+    "server500": "Server error (500). Check your sign-in/store status or contact support.",
+    "loadCustomersFailed": "Unable to load customers.",
+    "saveCustomerFailed": "Unable to save customer. Please try again.",
+    "deleteCustomerFailed": "Unable to delete customer. Please try again."
+  }
+}
+

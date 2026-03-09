@@ -1,0 +1,119 @@
+{
+  "page": {
+    "storeSelectorHint": "Select a store to view feedback and configure loyalty for the correct branch."
+  },
+  "header": {
+    "title": "CRM Feedback & Loyalty",
+    "subtitle": "Customer rating overview and loyalty-rule configuration{{storeSuffix}}.",
+    "storeSuffix": " for {{storeName}}",
+    "totalRatings": "{{count, number}} ratings"
+  },
+  "distribution": {
+    "title": "Rating distribution",
+    "empty": "No rating data yet."
+  },
+  "loyalty": {
+    "title": "Current loyalty rules",
+    "addRule": "Add rule",
+    "loading": "Loading loyalty rules...",
+    "empty": "No loyalty rules yet. Create a rule to start your loyalty program.",
+    "minOrderLabel": "Minimum order:",
+    "statusLabel": "Status:",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "edit": "Edit",
+    "delete": "Delete",
+    "earningRateBadge": "{{rate}} pts / 1k",
+    "confirmDelete": "Are you sure you want to delete rule \"{{name}}\"?"
+  },
+  "quickActions": {
+    "title": "Quick actions",
+    "redeemPoints": "Redeem points",
+    "createStaffFeedback": "Create feedback for customer"
+  },
+  "filters": {
+    "title": "Filter customer feedback",
+    "total": "Total: {{count, number}} feedback",
+    "ratingLabel": "Rating",
+    "ratingPlaceholder": "All",
+    "all": "All",
+    "stars5": "5 stars",
+    "stars4": "4 stars",
+    "stars3": "3 stars",
+    "stars2": "2 stars",
+    "stars1": "1 star",
+    "fromDate": "From",
+    "toDate": "To",
+    "reset": "Reset filters"
+  },
+  "recentFeedback": {
+    "title": "Recent customer feedback",
+    "loading": "Loading feedback...",
+    "empty": "No feedback matches the current filters.",
+    "contentFallback": "(No detailed content)",
+    "sourceLabel": "Source:",
+    "sourceUnknown": "Unknown",
+    "timeLabel": "Time:"
+  },
+  "dialogs": {
+    "rule": {
+      "editTitle": "Update loyalty rule",
+      "createTitle": "Add loyalty rule",
+      "nameLabel": "Rule name",
+      "namePlaceholder": "e.g. Points per invoice",
+      "typeLabel": "Rule type",
+      "earningRateLabel": "Earning rate (pts/1k)",
+      "minSpendLabel": "Minimum order (VND)",
+      "statusLabel": "Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "redeem": {
+      "title": "Redeem points",
+      "description": "Enter a customer ID and the number of points to redeem.",
+      "customerIdLabel": "Customer ID",
+      "customerIdPlaceholder": "Enter customer ID...",
+      "quickSearchLabel": "Quick customer search",
+      "searchPlaceholder": "Enter name, phone, or email...",
+      "searching": "Searching...",
+      "search": "Search",
+      "selectedCustomerToast": "Selected customer: {{name}}",
+      "pointsLabel": "Points",
+      "pointsPlaceholder": "Enter points...",
+      "descLabel": "Description (optional)",
+      "descPlaceholder": "e.g. Redeem 50k voucher",
+      "cancel": "Cancel",
+      "confirm": "Redeem"
+    },
+    "staffFeedback": {
+      "title": "Create feedback on behalf of customer",
+      "description": "Staff/Manager can create in-store feedback for the customer.",
+      "customerIdLabel": "Customer ID",
+      "customerIdPlaceholder": "Enter customer ID...",
+      "quickSearchLabel": "Quick customer search",
+      "searchPlaceholder": "Enter name, phone, or email...",
+      "searching": "Searching...",
+      "search": "Search",
+      "selectedCustomerToast": "Selected customer: {{name}}",
+      "ratingLabel": "Rating",
+      "contentLabel": "Content (optional)",
+      "contentPlaceholder": "Customer comment...",
+      "cancel": "Cancel",
+      "confirm": "Create feedback"
+    }
+  },
+  "toasts": {
+    "ruleUpdateSuccess": "Loyalty rule updated.",
+    "ruleCreateSuccess": "New loyalty rule created.",
+    "ruleSaveFailed": "Unable to save loyalty rule.",
+    "ruleDeleteSuccess": "Loyalty rule deleted.",
+    "ruleDeleteFailed": "Unable to delete loyalty rule.",
+    "redeemSuccess": "Redeemed {{points, number}} points successfully!",
+    "redeemFailed": "Redeem failed. Please check customer ID and points.",
+    "searchCustomerFailed": "Unable to search customers. Please try again.",
+    "staffFeedbackSuccess": "Feedback created successfully.",
+    "staffFeedbackFailed": "Unable to create feedback."
+  }
+}

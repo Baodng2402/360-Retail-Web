@@ -1,0 +1,20 @@
+{
+  "page": {
+    "selectStoreFirst": "Vui lòng chọn cửa hàng để quản lý sản phẩm",
+    "storeSelectorHint": "Chuyển đổi để quản lý sản phẩm và danh mục của cửa hàng khác"
+  },
+  "stats": {
+    "totalProducts": "Tổng sản phẩm",
+    "inventoryValue": "Giá trị kho",
+    "lowStockAlerts": "Cảnh báo tồn kho",
+    "avgMargin": "Lợi nhuận trung bình"
+  },
+  "tabs": {
+    "products": "Sản phẩm",
+    "categories": "Danh mục"
+  },
+  "search": {
+    "productsPlaceholder": "Tìm sản phẩm..."
+  }
+}
+

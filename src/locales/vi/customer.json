@@ -1,0 +1,87 @@
+{
+  "page": {
+    "storeSelectorHint": "Chuyển đổi để xem khách hàng của cửa hàng khác"
+  },
+  "header": {
+    "title": "Khách hàng",
+    "subtitle": "Quản lý thông tin và lịch sử chăm sóc khách hàng."
+  },
+  "actions": {
+    "addCustomer": "Thêm khách"
+  },
+  "search": {
+    "placeholder": "Tìm theo tên, SĐT, email..."
+  },
+  "states": {
+    "loadingList": "Đang tải danh sách khách hàng...",
+    "emptyList": "Chưa có khách hàng nào. Hãy thêm khách hàng đầu tiên của bạn."
+  },
+  "aria": {
+    "edit": "Chỉnh sửa",
+    "deleteCustomer": "Xóa khách hàng"
+  },
+  "table": {
+    "customer": "Khách hàng",
+    "contact": "Liên hệ",
+    "ordersSpend": "Tổng đơn / chi tiêu",
+    "actions": "Hành động",
+    "idPrefix": "ID:",
+    "ordersLabel": "Đơn:",
+    "spendLabel": "Chi tiêu:"
+  },
+  "insights": {
+    "title": "Loyalty & Feedback",
+    "subtitle": "Điểm tích lũy và đánh giá của khách.",
+    "selectCustomerHint": "Chọn một khách hàng ở bảng bên trái để xem chi tiết."
+  },
+  "loyalty": {
+    "totalPointsLabel": "Tổng điểm tích lũy",
+    "totalPointsValue": "{{points, number}} điểm",
+    "rankHint": "Hạng hiện tại giúp khách nhận ưu đãi tốt hơn. Bạn có thể cấu hình luật tích điểm trong phần Loyalty Rules.",
+    "empty": "Khách hàng này chưa có dữ liệu loyalty.",
+    "recentTransactions": {
+      "title": "Giao dịch điểm gần đây",
+      "latest": "Gần nhất",
+      "empty": "Chưa có giao dịch tích/đổi điểm nào."
+    },
+    "pointsValue": "{{points, number}} điểm",
+    "transactionFallback": "Giao dịch loyalty"
+  },
+  "feedback": {
+    "title": "Feedback gần đây",
+    "count": "{{count}} feedback",
+    "empty": "Chưa có feedback nào từ khách hàng này.",
+    "contentFallback": "Không có nội dung chi tiết."
+  },
+  "form": {
+    "editTitle": "Chỉnh sửa khách hàng",
+    "createTitle": "Thêm khách hàng mới",
+    "description": "Lưu thông tin cơ bản để dễ dàng chăm sóc và tra cứu lịch sử mua hàng.",
+    "fullNameLabel": "Họ tên",
+    "fullNamePlaceholder": "Nguyễn Văn A",
+    "phoneLabel": "Số điện thoại",
+    "phonePlaceholder": "0901234567",
+    "emailLabel": "Email (không bắt buộc)",
+    "emailPlaceholder": "customer@example.com"
+  },
+  "delete": {
+    "title": "Xóa khách hàng",
+    "description": "Hành động này sẽ xóa khách hàng khỏi hệ thống. Bạn có chắc chắn?",
+    "confirm": "Xóa khách hàng"
+  },
+  "toasts": {
+    "missingStoreInSession": "Chưa có cửa hàng trong phiên đăng nhập. Vui lòng chọn cửa hàng hoặc đăng nhập lại.",
+    "validationMissingNamePhone": "Vui lòng nhập đầy đủ họ tên và số điện thoại.",
+    "updateSuccess": "Cập nhật khách hàng thành công.",
+    "createSuccess": "Thêm khách hàng mới thành công.",
+    "deleteSuccess": "Đã xóa khách hàng."
+  },
+  "errors": {
+    "noStoreAssigned": "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán cửa hàng.",
+    "server500": "Lỗi máy chủ (500). Kiểm tra đăng nhập / cửa hàng hoặc liên hệ hỗ trợ.",
+    "loadCustomersFailed": "Không thể tải danh sách khách hàng.",
+    "saveCustomerFailed": "Không thể lưu khách hàng. Vui lòng thử lại.",
+    "deleteCustomerFailed": "Không thể xóa khách hàng. Vui lòng thử lại."
+  }
+}
+

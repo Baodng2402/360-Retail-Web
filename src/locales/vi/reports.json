@@ -1,0 +1,30 @@
+{
+  "page": {
+    "storeSelectorHint": "Chuyển đổi để xem báo cáo của cửa hàng khác"
+  },
+  "overview": {
+    "title": "Tổng quan phản hồi khách hàng",
+    "subtitle": "Điểm hài lòng tổng quan từ khách hàng.",
+    "basedOnCount": "Dựa trên {{count, number}} phản hồi của khách hàng.",
+    "noData": "Chưa có dữ liệu feedback để thống kê."
+  },
+  "distribution": {
+    "title": "Phân bổ điểm",
+    "subtitle": "Tỷ lệ số lượng feedback theo từng mức sao.",
+    "noData": "Chưa có dữ liệu phân bổ điểm."
+  },
+  "recent": {
+    "title": "Phản hồi gần đây",
+    "subtitle": "Các feedback mới nhất từ khách hàng.",
+    "empty": "Chưa có feedback nào được ghi nhận.",
+    "contentFallback": "Khách không để lại nội dung chi tiết."
+  },
+  "advanced": {
+    "title": "Chi tiết báo cáo nâng cao",
+    "subtitle": "Xuất dữ liệu feedback để phân tích sâu hơn trong Excel/BI tool."
+  },
+  "actions": {
+    "exportComingSoon": "Xuất dữ liệu (sắp có)"
+  }
+}
+

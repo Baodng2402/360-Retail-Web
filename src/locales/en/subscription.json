@@ -1,0 +1,77 @@
+{
+  "page": {
+    "title": "Choose a subscription plan",
+    "loadingTitle": "Choose a subscription plan",
+    "errorTitle": "Choose a subscription plan",
+    "heroSubtitle": "Upgrade to unlock full features for {{storeName}}.",
+    "heroSubtitleFallbackStore": "your store",
+    "inactiveNotice": "The current store does not have a Trial or Active plan yet. Please choose a plan below to get started.",
+    "currentPlanTitle": "Current plan of {{storeName}}",
+    "currentPlanStoreFallback": "your store",
+    "status": {
+      "trial": "Trial",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "expiresLabel": "Expires: {{date}}",
+    "whyUsTitle": "Why choose us?",
+    "whyUs": {
+      "securePayment": "Secure payment via VNPay",
+      "instantActivation": "Instant account activation",
+      "support": "24/7 customer support",
+      "updates": "Free feature updates"
+    }
+  },
+  "planCard": {
+    "mostPopular": "Most popular",
+    "currentPlanBadge": "Current plan",
+    "durationDays": "{{days}} days of usage",
+    "pricePerMonth": "/month",
+    "noReviews": "No reviews yet",
+    "reviewsSummary": "{{count}} reviews",
+    "buyForStore": "Buy for {{storeName}}",
+    "payWithSepay": "Pay with QR (SePay)",
+    "orPayWithVnpay": "Or pay with VNPay demo",
+    "owningPlan": "You already own this plan",
+    "writeReview": "Write a review for this plan",
+    "processing": "Processing..."
+  },
+  "sepayDialog": {
+    "title": "QR Payment (SePay)",
+    "description": "Scan the QR code or transfer money using the details below. After payment, click the check status button to let the system refresh your plan automatically.",
+    "paymentCode": "Payment code:",
+    "bankInfoTitle": "Bank transfer details",
+    "bankName": "Bank:",
+    "accountNumber": "Account number:",
+    "accountName": "Account name:",
+    "amount": "Amount:",
+    "content": "Transfer content:",
+    "close": "Close",
+    "checkStatus": "Check payment status",
+    "checkingStatus": "Checking status..."
+  },
+  "reviewDialog": {
+    "title": "Review plan {{planName}}",
+    "description": "Share your SaaS experience to help other store owners evaluate.",
+    "ratingLabel": "Satisfaction level",
+    "ratingAria": "{{value}} stars",
+    "contentLabel": "Comment (optional)",
+    "contentPlaceholder": "What type of stores is this plan suitable for? What are the pros and cons?",
+    "cancel": "Cancel",
+    "submit": "Submit review",
+    "submitting": "Submitting..."
+  },
+  "toasts": {
+    "refreshAccessSuccess": "Access and subscription refreshed successfully.",
+    "refreshAccessError": "Cannot refresh access. Please sign in again.",
+    "paymentInitError": "Cannot initiate payment. Please try again.",
+    "paymentStatusPending": "Payment is still pending. Please wait a bit and try again.",
+    "paymentStatusCompleted": "Payment confirmed successfully. Refreshing access...",
+    "paymentStatusFailed": "Payment failed. Please try again or choose another method.",
+    "noPaymentId": "No payment id found to check status.",
+    "loadError": "Failed to load data. Please try again.",
+    "submitReviewSuccess": "Your plan review has been submitted. Thank you!",
+    "submitReviewError": "Cannot submit review. Please try again."
+  }
+}
+

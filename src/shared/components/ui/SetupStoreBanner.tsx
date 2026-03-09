@@ -19,12 +19,14 @@ import { authApi } from "@/shared/lib/authApi";
 import { useStoreStore } from "@/shared/store/storeStore";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface SetupStoreBannerProps {
   className?: string;
 }
 
 export function SetupStoreBanner({ className }: SetupStoreBannerProps) {
+  const { t } = useTranslation("store");
   const [isVisible, setIsVisible] = useState(true);
   const [hasStore, setHasStore] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -79,10 +81,10 @@ export function SetupStoreBanner({ className }: SetupStoreBannerProps) {
               </div>
               <div>
                 <h3 className="font-semibold text-lg">
-                  Thiết lập cửa hàng của bạn
+                  {t("setup.bannerTitle")}
                 </h3>
                 <p className="text-blue-100 text-sm">
-                  Hoàn thiện thông tin cửa hàng để bắt đầu bán hàng ngay hôm nay
+                  {t("setup.bannerSubtitle")}
                 </p>
               </div>
             </div>
@@ -93,8 +95,8 @@ export function SetupStoreBanner({ className }: SetupStoreBannerProps) {
                 className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white gap-2"
               >
                 <Building2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Thiết lập ngay</span>
-                <span className="sm:hidden">Thiết lập</span>
+                <span className="hidden sm:inline">{t("setup.setupNowLong")}</span>
+                <span className="sm:hidden">{t("setup.setupNowShort")}</span>
               </Button>
               <Button
                 variant="ghost"
@@ -115,6 +117,7 @@ export function SetupStoreBanner({ className }: SetupStoreBannerProps) {
  * Compact banner for dashboard pages
  */
 export function SetupStoreCompactBanner() {
+  const { t } = useTranslation("store");
   const [isVisible, setIsVisible] = useState(true);
   const navigate = useNavigate();
 
@@ -132,9 +135,9 @@ export function SetupStoreCompactBanner() {
             <Store className="h-5 w-5 text-amber-600" />
           </div>
           <div>
-            <p className="font-medium text-amber-800">Bạn chưa có cửa hàng</p>
+            <p className="font-medium text-amber-800">{t("setup.compactTitle")}</p>
             <p className="text-sm text-amber-600">
-              Thiết lập cửa hàng để bắt đầu sử dụng
+              {t("setup.compactSubtitle")}
             </p>
           </div>
         </div>
@@ -144,7 +147,7 @@ export function SetupStoreCompactBanner() {
             onClick={() => navigate("/dashboard/settings?tab=store")}
             className="gap-1"
           >
-            Thiết lập
+            {t("setup.setupNowShort")}
             <ArrowRight className="h-4 w-4" />
           </Button>
           <Button
@@ -153,7 +156,7 @@ export function SetupStoreCompactBanner() {
             onClick={handleDismiss}
             className="text-amber-700 hover:text-amber-900 hover:bg-amber-100"
           >
-            Để sau
+            {t("setup.dismiss")}
           </Button>
         </div>
       </div>
@@ -170,6 +173,7 @@ interface StoreSetupDialogProps {
 }
 
 export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) {
+  const { t } = useTranslation("store");
   const _navigate = useNavigate();
   const { currentStore: _currentStore } = useStoreStore();
   void _navigate;
@@ -185,7 +189,7 @@ export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) 
     e.preventDefault();
 
     if (!formData.storeName.trim()) {
-      toast.error("Vui lòng nhập tên cửa hàng");
+      toast.error(t("setup.validation.storeNameRequired"));
       return;
     }
 
@@ -195,7 +199,7 @@ export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) 
         storeName: formData.storeName,
       });
 
-      toast.success("Tạo cửa hàng thành công!");
+      toast.success(t("setup.toast.createTrialSuccess"));
 
       // Refresh token and reload
       const refreshRes = await authApi.refreshAccess();
@@ -209,7 +213,7 @@ export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) 
       console.error("Failed to create store:", error);
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Không thể tạo cửa hàng";
+          ?.data?.message || t("setup.toast.createTrialError");
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -242,9 +246,9 @@ export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) 
                 <Store className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-xl">Tạo cửa hàng</CardTitle>
+                <CardTitle className="text-xl">{t("setup.dialog.title")}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Thiết lập cửa hàng để bắt đầu bán hàng
+                  {t("setup.dialog.subtitle")}
                 </p>
               </div>
             </div>
@@ -253,12 +257,12 @@ export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="storeName">Tên cửa hàng *</Label>
+                <Label htmlFor="storeName">{t("setup.dialog.storeNameLabel")}</Label>
                 <div className="relative">
                   <Store className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="storeName"
-                    placeholder="Nhập tên cửa hàng"
+                    placeholder={t("setup.dialog.storeNamePlaceholder")}
                     className="pl-10"
                     value={formData.storeName}
                     onChange={(e) =>
@@ -270,12 +274,12 @@ export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Địa chỉ</Label>
+                <Label htmlFor="address">{t("setup.dialog.addressLabel")}</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Textarea
                     id="address"
-                    placeholder="Nhập địa chỉ cửa hàng"
+                    placeholder={t("setup.dialog.addressPlaceholder")}
                     className="pl-10 resize-none"
                     rows={2}
                     value={formData.address}
@@ -288,13 +292,13 @@ export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Số điện thoại</Label>
+                <Label htmlFor="phone">{t("setup.dialog.phoneLabel")}</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="Nhập số điện thoại"
+                    placeholder={t("setup.dialog.phonePlaceholder")}
                     className="pl-10"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
@@ -311,18 +315,18 @@ export function StoreSetupDialog({ open, onOpenChange }: StoreSetupDialogProps) 
                   onClick={() => onOpenChange(false)}
                   disabled={loading}
                 >
-                  Hủy
+                  {t("setup.dialog.cancel")}
                 </Button>
                 <Button type="submit" className="flex-1" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang tạo...
+                      {t("setup.dialog.creating")}
                     </>
                   ) : (
                     <>
                       <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Tạo cửa hàng
+                      {t("setup.dialog.create")}
                     </>
                   )}
                 </Button>

@@ -16,8 +16,10 @@ import type {
   FeedbackPagedResult,
   FeedbackSummary,
 } from "@/shared/lib/feedbackApi";
+import { useTranslation } from "react-i18next";
 
 const ReportPage = () => {
+  const { t } = useTranslation("reports");
   const [summary, setSummary] = useState<FeedbackSummary | null>(null);
   const [feedbackPaged, setFeedbackPaged] = useState<FeedbackPagedResult>({
     items: [],
@@ -59,7 +61,7 @@ const ReportPage = () => {
 
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Chuyển đổi để xem báo cáo của cửa hàng khác" />
+      <StoreSelector pageDescription={t("page.storeSelectorHint")} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="p-6 space-y-4">
@@ -70,10 +72,10 @@ const ReportPage = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-base">
-                  Customer Feedback Overview
+                  {t("overview.title")}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Điểm hài lòng tổng quan từ khách hàng.
+                  {t("overview.subtitle")}
                 </p>
               </div>
             </div>
@@ -96,12 +98,12 @@ const ReportPage = () => {
                 {summary.avgRating.toFixed(1)}
               </p>
               <p className="text-xs text-muted-foreground">
-                Dựa trên {summary.totalCount} phản hồi của khách hàng.
+                {t("overview.basedOnCount", { count: summary.totalCount })}
               </p>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Chưa có dữ liệu feedback để thống kê.
+              {t("overview.noData")}
             </p>
           )}
         </Card>
@@ -113,10 +115,10 @@ const ReportPage = () => {
             </div>
             <div>
               <h3 className="font-semibold text-base">
-                Rating Distribution / Phân bổ điểm
+                {t("distribution.title")}
               </h3>
               <p className="text-xs text-muted-foreground">
-                Tỷ lệ số lượng feedback theo từng mức sao.
+                {t("distribution.subtitle")}
               </p>
             </div>
           </div>
@@ -128,7 +130,7 @@ const ReportPage = () => {
             </div>
           ) : distributionData.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Chưa có dữ liệu phân bổ điểm.
+              {t("distribution.noData")}
             </p>
           ) : (
             <div className="space-y-2">
@@ -163,10 +165,10 @@ const ReportPage = () => {
             </div>
             <div>
               <h3 className="font-semibold text-base">
-                Recent Feedback / Phản hồi gần đây
+                {t("recent.title")}
               </h3>
               <p className="text-xs text-muted-foreground">
-                Các feedback mới nhất từ khách hàng.
+                {t("recent.subtitle")}
               </p>
             </div>
           </div>
@@ -178,7 +180,7 @@ const ReportPage = () => {
             </div>
           ) : feedbackPaged.items.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Chưa có feedback nào được ghi nhận.
+              {t("recent.empty")}
             </p>
           ) : (
             <div className="space-y-2 text-xs">
@@ -195,7 +197,7 @@ const ReportPage = () => {
                     </div>
                   </div>
                   <p className="text-[11px] text-muted-foreground line-clamp-2">
-                    {f.content || "Khách không để lại nội dung chi tiết."}
+                    {f.content || t("recent.contentFallback")}
                   </p>
                   <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                     <span>{f.source}</span>
@@ -217,10 +219,10 @@ const ReportPage = () => {
           </div>
           <div>
             <h3 className="text-sm font-semibold">
-              Chi tiết báo cáo nâng cao
+              {t("advanced.title")}
             </h3>
             <p className="text-xs text-muted-foreground">
-              Xuất dữ liệu feedback để phân tích sâu hơn trong Excel/BI tool.
+              {t("advanced.subtitle")}
             </p>
           </div>
         </div>
@@ -229,7 +231,7 @@ const ReportPage = () => {
           className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs text-muted-foreground hover:bg-muted"
         >
           <MessageSquare className="h-3 w-3" />
-          Export coming soon
+          {t("actions.exportComingSoon")}
         </button>
       </Card>
     </div>

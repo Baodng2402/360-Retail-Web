@@ -1,3 +1,4 @@
+import { Suspense, useEffect } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import HomePage from "@/features/home/pages/HomePage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -37,94 +38,105 @@ import EmployeeDetailPage from "@/features/dashboard/pages/EmployeeDetailPage";
 import MyTasksPage from "@/features/dashboard/pages/MyTasksPage";
 import CrmDashboardPage from "@/features/dashboard/pages/CrmDashboardPage";
 import InventoryManagementPage from "@/features/dashboard/pages/InventoryManagementPage";
+import i18n from "@/i18n";
+import { useLanguageStore } from "@/shared/store/languageStore";
 
 function App() {
+  const language = useLanguageStore((s) => s.language);
+
+  useEffect(() => {
+    void i18n.changeLanguage(language);
+    document.documentElement.lang = language;
+  }, [language]);
+
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-        <BrowserRouter>
-          <SubscriptionUpgradeDialog />
-          <Routes>
-            <Route element={<HomeLayout />}>
-              <Route path="/" element={<HomePage />} />
-            </Route>
-
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordRequestPage />} />
-            <Route path="/reset-password" element={<ForgotPasswordResetPage />} />
-            <Route path="/feedback/:orderId" element={<FeedbackPage />} />
-            <Route path="/payment/success" element={<PaymentSuccessPage />} />
-            <Route path="/payment/failed" element={<PaymentFailedPage />} />
-            <Route
-              element={
-                <ProtectedRoute
-                  allowedRoles={["StoreOwner", "Manager", "Staff", "PotentialOwner"]}
-                />
-              }
-            >
-              <Route element={<DashboardLayout />}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route
-                  path="/dashboard/staff"
-                  element={<StaffManagementPage />}
-                />
-                <Route
-                  path="/dashboard/staff/:id"
-                  element={<EmployeeDetailPage />}
-                />
-                <Route path="/dashboard/sales" element={<SalePostPage />} />
-                <Route path="/dashboard/my-tasks" element={<MyTasksPage />} />
-                <Route path="/dashboard/orders" element={<OrdersPage />} />
-                <Route
-                  path="/dashboard/orders/:id"
-                  element={<OrderDetailPage />}
-                />
-                <Route path="/dashboard/reports" element={<ReportPage />} />
-                <Route path="/dashboard/settings" element={<SettingPage />} />
-                <Route path="/dashboard/customers" element={<CustomerPage />} />
-                <Route path="/dashboard/crm" element={<CrmDashboardPage />} />
-                <Route
-                  path="/dashboard/stores"
-                  element={<StoreManagementPage />}
-                />
-                <Route
-                  path="/dashboard/products"
-                  element={<ProductManagementPage />}
-                />
-                <Route
-                  path="/dashboard/inventory"
-                  element={<InventoryManagementPage />}
-                />
-                <Route path="/dashboard/profile" element={<ProfilePage />} />
-                <Route
-                  path="/dashboard/subscription"
-                  element={<SubscriptionPlansPage />}
-                />
-                <Route
-                  path="/dashboard/timekeeping"
-                  element={<TimekeepingPage />}
-                />
+        <Suspense fallback={<div className="p-4 text-sm">Loading...</div>}>
+          <BrowserRouter>
+            <SubscriptionUpgradeDialog />
+            <Routes>
+              <Route element={<HomeLayout />}>
+                <Route path="/" element={<HomePage />} />
               </Route>
-            </Route>
-            <Route
-              path="/customer"
-              element={<ProtectedRoute allowedRoles={["Customer"]} />}
-            >
-              <Route index element={<CustomerDashboardPage />} />
-              <Route path="orders/:orderId" element={<CustomerOrderDetailPage />} />
-            </Route>
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={["SuperAdmin"]} />
-              }
-            >
-              <Route index element={<SuperAdminPage />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordRequestPage />} />
+              <Route path="/reset-password" element={<ForgotPasswordResetPage />} />
+              <Route path="/feedback/:orderId" element={<FeedbackPage />} />
+              <Route path="/payment/success" element={<PaymentSuccessPage />} />
+              <Route path="/payment/failed" element={<PaymentFailedPage />} />
+              <Route
+                element={
+                  <ProtectedRoute
+                    allowedRoles={["StoreOwner", "Manager", "Staff", "PotentialOwner"]}
+                  />
+                }
+              >
+                <Route element={<DashboardLayout />}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route
+                    path="/dashboard/staff"
+                    element={<StaffManagementPage />}
+                  />
+                  <Route
+                    path="/dashboard/staff/:id"
+                    element={<EmployeeDetailPage />}
+                  />
+                  <Route path="/dashboard/sales" element={<SalePostPage />} />
+                  <Route path="/dashboard/my-tasks" element={<MyTasksPage />} />
+                  <Route path="/dashboard/orders" element={<OrdersPage />} />
+                  <Route
+                    path="/dashboard/orders/:id"
+                    element={<OrderDetailPage />}
+                  />
+                  <Route path="/dashboard/reports" element={<ReportPage />} />
+                  <Route path="/dashboard/settings" element={<SettingPage />} />
+                  <Route path="/dashboard/customers" element={<CustomerPage />} />
+                  <Route path="/dashboard/crm" element={<CrmDashboardPage />} />
+                  <Route
+                    path="/dashboard/stores"
+                    element={<StoreManagementPage />}
+                  />
+                  <Route
+                    path="/dashboard/products"
+                    element={<ProductManagementPage />}
+                  />
+                  <Route
+                    path="/dashboard/inventory"
+                    element={<InventoryManagementPage />}
+                  />
+                  <Route path="/dashboard/profile" element={<ProfilePage />} />
+                  <Route
+                    path="/dashboard/subscription"
+                    element={<SubscriptionPlansPage />}
+                  />
+                  <Route
+                    path="/dashboard/timekeeping"
+                    element={<TimekeepingPage />}
+                  />
+                </Route>
+              </Route>
+              <Route
+                path="/customer"
+                element={<ProtectedRoute allowedRoles={["Customer"]} />}
+              >
+                <Route index element={<CustomerDashboardPage />} />
+                <Route path="orders/:orderId" element={<CustomerOrderDetailPage />} />
+              </Route>
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute allowedRoles={["SuperAdmin"]} />
+                }
+              >
+                <Route index element={<SuperAdminPage />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </Suspense>
         <Toaster position="top-right" />
       </div>
     </GoogleOAuthProvider>

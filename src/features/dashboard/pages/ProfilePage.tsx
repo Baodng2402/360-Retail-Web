@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -27,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useStoreStore } from "@/shared/store/storeStore";
+import { useTranslation } from "react-i18next";
 
 interface StoreWithSubscription {
   store: {
@@ -46,11 +47,14 @@ interface StoreWithSubscription {
   } | null;
 }
 
-const formatDateShort = (dateString: string | null | undefined) => {
+const formatDateShort = (
+  dateString: string | null | undefined,
+  locale: string,
+) => {
   if (!dateString) return "-";
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
+    return date.toLocaleDateString(locale, {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -60,17 +64,8 @@ const formatDateShort = (dateString: string | null | undefined) => {
   }
 };
 
-const formatRole = (role: string | undefined) => {
-  if (!role) return "Thành viên";
-  const roleMap: Record<string, string> = {
-    StoreOwner: "Chủ cửa hàng",
-    Manager: "Quản lý",
-    Staff: "Nhân viên",
-  };
-  return roleMap[role] || role;
-};
-
 export function ProfilePage() {
+  const { t: tProfile, i18n } = useTranslation("profile");
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [subscriptionInfo, setSubscriptionInfo] = useState<MySubscription | null>(null);
@@ -84,13 +79,7 @@ export function ProfilePage() {
   const [timeLoading, setTimeLoading] = useState(false);
   const { currentStore } = useStoreStore();
 
-  useEffect(() => {
-    loadSubscriptionData();
-    loadStoresData();
-    loadHrData();
-  }, []);
-
-  const loadSubscriptionData = async () => {
+  const loadSubscriptionData = useCallback(async () => {
     try {
       setSubscriptionLoading(true);
       setSubscriptionError(null);
@@ -98,13 +87,13 @@ export function ProfilePage() {
       setSubscriptionInfo(res);
     } catch (err) {
       console.error("Failed to load subscription:", err);
-      setSubscriptionError("Không thể tải thông tin gói dịch vụ");
+      setSubscriptionError(tProfile("subscription.loadFailed"));
     } finally {
       setSubscriptionLoading(false);
     }
-  };
+  }, [tProfile]);
 
-  const loadStoresData = async () => {
+  const loadStoresData = useCallback(async () => {
     try {
       setStoresLoading(true);
       const stores = await storesApi
@@ -153,9 +142,9 @@ export function ProfilePage() {
     } finally {
       setStoresLoading(false);
     }
-  };
+  }, []);
 
-  const loadHrData = async () => {
+  const loadHrData = useCallback(async () => {
     try {
       setTasksLoading(true);
       setTimeLoading(true);
@@ -175,15 +164,19 @@ export function ProfilePage() {
       setTasksLoading(false);
       setTimeLoading(false);
     }
-  };
+  }, []);
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted-foreground">Đang tải...</p>
-      </div>
-    );
-  }
+  const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
+
+  const formatRole = (roleValue: string | undefined) => {
+    if (!roleValue) return tProfile("roles.member");
+    const key = `roles.${roleValue}` as
+      | "roles.StoreOwner"
+      | "roles.Manager"
+      | "roles.Staff"
+      | "roles.PotentialOwner";
+    return tProfile(key, { defaultValue: roleValue });
+  };
 
   const currentStoreSubscription = currentStore
     ? storesWithSubscription.find((s) => s.store.id === currentStore.id)?.subscription
@@ -201,7 +194,7 @@ export function ProfilePage() {
     if (!timeHistory.length) {
       return { days: 0, hours: 0, late: 0 };
     }
-    let days = timeHistory.length;
+    const days = timeHistory.length;
     let hours = 0;
     let late = 0;
     for (const r of timeHistory) {
@@ -214,6 +207,20 @@ export function ProfilePage() {
     }
     return { days, hours, late };
   }, [timeHistory]);
+
+  useEffect(() => {
+    loadSubscriptionData();
+    loadStoresData();
+    loadHrData();
+  }, [loadHrData, loadStoresData, loadSubscriptionData]);
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">{tProfile("states.loading")}</p>
+      </div>
+    );
+  }
 
   const role = user?.role ?? "";
   const isOwner = role === "StoreOwner";
@@ -234,7 +241,7 @@ export function ProfilePage() {
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
             <div className="relative">
               <Avatar className="w-24 h-24 border-4 border-white dark:border-gray-700 shadow-lg">
-                <AvatarImage src={user?.avatar} alt={user?.name || "User"} />
+                <AvatarImage src={user?.avatar} alt={user?.name || tProfile("user.nameFallback")} />
                 <AvatarFallback className="bg-gradient-to-br from-teal-400 to-blue-500 text-white text-2xl font-bold">
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
@@ -244,7 +251,9 @@ export function ProfilePage() {
 
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h2 className="text-2xl font-bold text-foreground">{user?.name || "Người dùng"}</h2>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {user?.name || tProfile("user.nameFallback")}
+                </h2>
                 <Badge className="bg-gradient-to-r from-teal-500 to-blue-500 text-white border-0">
                   {formatRole(user?.role)}
                 </Badge>
@@ -257,16 +266,13 @@ export function ProfilePage() {
               <div className="space-y-1 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  <span>{user?.email || "Chưa có email"}</span>
+                  <span>{user?.email || tProfile("user.emailFallback")}</span>
                 </div>
                 {currentStore && (
                   <div className="flex items-center gap-2 text-xs">
                     <Store className="h-3 w-3" />
                     <span>
-                      Đang làm việc tại{" "}
-                      <span className="font-medium">
-                        {currentStore.storeName}
-                      </span>
+                      {tProfile("user.workingAt", { storeName: currentStore.storeName })}
                     </span>
                   </div>
                 )}
@@ -280,7 +286,7 @@ export function ProfilePage() {
                   className="gap-2 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 border-0"
                 >
                   <CreditCard className="h-4 w-4" />
-                  Quản lý gói
+                  {tProfile("actions.managePlan")}
                 </Button>
               </motion.div>
             )}
@@ -298,7 +304,7 @@ export function ProfilePage() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-primary" />
-                Thông tin gói dịch vụ
+                {tProfile("subscription.title")}
               </h3>
               {subscriptionLoading && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -309,7 +315,7 @@ export function ProfilePage() {
               <div className="text-center py-4">
                 <p className="text-muted-foreground mb-2">{subscriptionError}</p>
                 <Button variant="outline" size="sm" onClick={loadSubscriptionData}>
-                  Thử lại
+                  {tProfile("actions.retry")}
                 </Button>
               </div>
             ) : subscriptionInfo?.planName ? (
@@ -326,29 +332,33 @@ export function ProfilePage() {
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {currentStore
-                            ? `Gói hiện tại của ${currentStore.storeName}`
-                            : "Gói dịch vụ hiện đang sử dụng"}
+                            ? tProfile("subscription.currentPlanForStore", {
+                                storeName: currentStore.storeName,
+                              })
+                            : tProfile("subscription.currentPlanGeneric")}
                         </p>
                       </div>
                     </div>
                         {typeof subscriptionInfo.daysRemaining === "number" && (
                       <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm">
-                        Còn {subscriptionInfo.daysRemaining} ngày
+                        {tProfile("subscription.daysRemaining", {
+                          days: subscriptionInfo.daysRemaining,
+                        })}
                       </Badge>
                     )}
                   </div>
 
                   <div className="space-y-1 text-xs text-muted-foreground">
                     <p>
-                      Bắt đầu:{" "}
+                      {tProfile("subscription.startDate")}{" "}
                       <span className="font-medium text-foreground">
-                        {formatDateShort(subscriptionInfo.startDate)}
+                        {formatDateShort(subscriptionInfo.startDate, locale)}
                       </span>
                     </p>
                     <p>
-                      Hết hạn:{" "}
+                      {tProfile("subscription.endDate")}{" "}
                       <span className="font-medium text-foreground">
-                        {formatDateShort(subscriptionInfo.endDate)}
+                        {formatDateShort(subscriptionInfo.endDate, locale)}
                       </span>
                     </p>
                   </div>
@@ -362,7 +372,7 @@ export function ProfilePage() {
                         className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 border-0 gap-2"
                       >
                         <CreditCard className="h-4 w-4" />
-                        Quản lý / nâng cấp gói
+                        {tProfile("actions.manageOrUpgrade")}
                       </Button>
                     </motion.div>
                   </div>
@@ -373,12 +383,14 @@ export function ProfilePage() {
                 <AlertCircle className="h-12 w-12 mx-auto mb-4 text-amber-500" />
                 <p className="text-muted-foreground mb-2">
                   {currentStore
-                    ? `Cửa hàng ${currentStore.storeName} chưa có gói active.`
-                    : "Bạn chưa có gói dịch vụ cho cửa hàng."}
+                    ? tProfile("subscription.noActivePlanForStore", {
+                        storeName: currentStore.storeName,
+                      })
+                    : tProfile("subscription.noPlanGeneric")}
                 </p>
                 {currentStoreSubscription && currentStoreSubscription.planName && (
                   <p className="text-xs text-muted-foreground mb-4">
-                    Tuy nhiên, một số cửa hàng khác có thể đang có gói dịch vụ active.
+                    {tProfile("subscription.otherStoresMayHavePlan")}
                   </p>
                 )}
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -386,16 +398,18 @@ export function ProfilePage() {
                     onClick={() => navigate("/dashboard/subscription")}
                     className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 border-0"
                   >
-                    Mua gói dịch vụ
+                    {tProfile("actions.buyPlan")}
                   </Button>
                 </motion.div>
               </div>
             ) : (
               <div className="py-4 text-sm text-muted-foreground">
                 <p>
-                  Gói dịch vụ được quản lý bởi{" "}
-                  <span className="font-semibold">chủ cửa hàng</span>. Bạn vẫn có
-                  thể tiếp tục làm việc bình thường theo phân quyền hiện tại.
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: tProfile("subscription.managedByOwnerNote"),
+                    }}
+                  />
                 </p>
               </div>
             )}
@@ -412,7 +426,7 @@ export function ProfilePage() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Cửa hàng của bạn ({storesWithSubscription.length})
+              {tProfile("stores.title", { count: storesWithSubscription.length })}
             </h3>
             {storesLoading && (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -449,18 +463,18 @@ export function ProfilePage() {
                               variant="outline"
                               className="text-xs px-2 py-0 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
                             >
-                              Mặc định
+                              {tProfile("stores.default")}
                             </Badge>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {item.store.address || "Chưa có địa chỉ"}
+                          {item.store.address || tProfile("stores.noAddress")}
                         </p>
                       </div>
                     </div>
                     {!item.store.isActive && (
                       <Badge variant="destructive" className="text-xs">
-                        Ngừng hoạt động
+                        {tProfile("stores.inactive")}
                       </Badge>
                     )}
                   </div>
@@ -480,7 +494,9 @@ export function ProfilePage() {
                               variant="outline"
                               className="text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700"
                             >
-                              {item.subscription.daysRemaining} ngày còn lại
+                              {tProfile("stores.daysLeft", {
+                                days: item.subscription.daysRemaining,
+                              })}
                             </Badge>
                           )}
                       </div>
@@ -492,7 +508,7 @@ export function ProfilePage() {
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <Store className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Chưa có cửa hàng nào</p>
+              <p>{tProfile("stores.empty")}</p>
             </div>
           )}
         </Card>
@@ -508,7 +524,7 @@ export function ProfilePage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <ListChecks className="h-5 w-5 text-teal-600" />
-                Công việc của tôi
+                {tProfile("tasks.title")}
               </h3>
               {tasksLoading && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -516,7 +532,7 @@ export function ProfilePage() {
             </div>
             {activeTasks.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Hiện tại bạn chưa có công việc nào đang mở.
+                {tProfile("tasks.empty")}
               </p>
             ) : (
               <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -545,13 +561,13 @@ export function ProfilePage() {
                     {task.deadline && (
                       <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                         <CalendarCheck className="h-3 w-3" />
-                        Hạn:{" "}
-                        {new Date(task.deadline).toLocaleDateString("vi-VN")}
+                        {tProfile("tasks.deadline")}{" "}
+                        {new Date(task.deadline).toLocaleDateString(locale)}
                       </p>
                     )}
                     <div className="flex items-center justify-between pt-1">
                       <span className="text-[11px] text-muted-foreground">
-                        Trạng thái:{" "}
+                        {tProfile("tasks.status")}{" "}
                         <span className="font-medium">{task.status}</span>
                       </span>
                       {task.status !== "Completed" &&
@@ -579,7 +595,7 @@ export function ProfilePage() {
                               }
                             }}
                           >
-                            Đánh dấu hoàn thành
+                            {tProfile("actions.markDone")}
                           </Button>
                         )}
                     </div>
@@ -593,7 +609,7 @@ export function ProfilePage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <CalendarCheck className="h-5 w-5 text-teal-600" />
-                Lịch sử chấm công của tôi
+                {tProfile("timekeeping.title")}
               </h3>
               {timeLoading && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -601,25 +617,25 @@ export function ProfilePage() {
             </div>
             {timeHistory.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Chưa có dữ liệu chấm công được ghi nhận.
+                {tProfile("timekeeping.empty")}
               </p>
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span>
-                    Ngày công:{" "}
+                    {tProfile("timekeeping.summary.days")}{" "}
                     <span className="font-semibold text-foreground">
                       {timeSummary.days}
                     </span>
                   </span>
                   <span>
-                    Giờ làm:{" "}
+                    {tProfile("timekeeping.summary.hours")}{" "}
                     <span className="font-semibold text-foreground">
                       {timeSummary.hours.toFixed(1)}
                     </span>
                   </span>
                   <span>
-                    Đi trễ:{" "}
+                    {tProfile("timekeeping.summary.late")}{" "}
                     <span className="font-semibold text-foreground">
                       {timeSummary.late}
                     </span>
@@ -634,7 +650,7 @@ export function ProfilePage() {
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-foreground">
                           {new Date(r.checkInTime).toLocaleDateString(
-                            "vi-VN",
+                            locale,
                           )}
                         </span>
                         {r.isLate && (
@@ -642,7 +658,7 @@ export function ProfilePage() {
                             variant="outline"
                             className="border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/30 text-[10px]"
                           >
-                            Đi trễ
+                            {tProfile("timekeeping.lateBadge")}
                           </Badge>
                         )}
                       </div>
@@ -650,7 +666,7 @@ export function ProfilePage() {
                         <span>
                           In:{" "}
                           {new Date(r.checkInTime).toLocaleTimeString(
-                            "vi-VN",
+                            locale,
                             {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -661,7 +677,7 @@ export function ProfilePage() {
                           Out:{" "}
                           {r.checkOutTime
                             ? new Date(r.checkOutTime).toLocaleTimeString(
-                                "vi-VN",
+                                locale,
                                 {
                                   hour: "2-digit",
                                   minute: "2-digit",
@@ -670,7 +686,7 @@ export function ProfilePage() {
                             : "-"}
                         </span>
                         <span>
-                          Giờ:{" "}
+                          {tProfile("timekeeping.hoursLabel")}{" "}
                           {typeof r.workHours === "number"
                             ? r.workHours.toFixed(1)
                             : "-"}
@@ -692,7 +708,9 @@ export function ProfilePage() {
 
       <div className="space-y-4">
         <Card className="p-6 bg-gradient-to-br from-white via-blue-50/30 to-teal-50/30 dark:from-gray-900 dark:via-gray-800/50 dark:to-teal-950/20 border-blue-100 dark:border-blue-900/30">
-          <h3 className="text-lg font-semibold mb-4">Thông tin cá nhân</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            {tProfile("personalInfo.title")}
+          </h3>
           <EditProfileForm user={user} />
         </Card>
       </div>

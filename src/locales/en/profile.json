@@ -1,0 +1,65 @@
+{
+  "states": {
+    "loading": "Loading..."
+  },
+  "roles": {
+    "member": "Member",
+    "StoreOwner": "Store owner",
+    "Manager": "Manager",
+    "Staff": "Staff",
+    "PotentialOwner": "Store owner (pending)"
+  },
+  "user": {
+    "nameFallback": "User",
+    "emailFallback": "No email",
+    "workingAt": "Working at {{storeName}}"
+  },
+  "actions": {
+    "managePlan": "Manage plan",
+    "retry": "Retry",
+    "manageOrUpgrade": "Manage / upgrade plan",
+    "buyPlan": "Purchase plan",
+    "markDone": "Mark as done"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "loadFailed": "Unable to load subscription information",
+    "currentPlanForStore": "Current plan for {{storeName}}",
+    "currentPlanGeneric": "Current subscription plan",
+    "daysRemaining": "{{days, number}} day(s) remaining",
+    "startDate": "Start:",
+    "endDate": "End:",
+    "noActivePlanForStore": "{{storeName}} does not have an active plan yet.",
+    "noPlanGeneric": "You don't have a subscription plan for this store.",
+    "otherStoresMayHavePlan": "However, some of your other stores may have an active plan.",
+    "managedByOwnerNote": "The subscription is managed by the <strong>store owner</strong>. You can continue working normally based on your current permissions."
+  },
+  "stores": {
+    "title": "Your stores ({{count, number}})",
+    "default": "Default",
+    "noAddress": "No address",
+    "inactive": "Inactive",
+    "daysLeft": "{{days, number}} day(s) left",
+    "empty": "No stores yet"
+  },
+  "tasks": {
+    "title": "My tasks",
+    "empty": "You currently have no open tasks.",
+    "deadline": "Due:",
+    "status": "Status:"
+  },
+  "timekeeping": {
+    "title": "My timekeeping history",
+    "empty": "No timekeeping data recorded yet.",
+    "summary": {
+      "days": "Days:",
+      "hours": "Hours:",
+      "late": "Late:"
+    },
+    "lateBadge": "Late",
+    "hoursLabel": "Hours:"
+  },
+  "personalInfo": {
+    "title": "Personal information"
+  }
+}

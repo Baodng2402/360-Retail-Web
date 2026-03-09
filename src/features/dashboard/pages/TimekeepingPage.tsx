@@ -31,6 +31,7 @@ import { storesApi } from "@/shared/lib/storesApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { useStoreStore } from "@/shared/store/storeStore";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
+import { useTranslation } from "react-i18next";
 
 const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
 
@@ -56,6 +57,7 @@ const getDistanceMeters = (
 };
 
 const TimekeepingPage = () => {
+  const { t } = useTranslation("timekeeping");
   const { user } = useAuthStore();
   const { currentStore } = useStoreStore();
   const canViewSummary =
@@ -190,7 +192,7 @@ const TimekeepingPage = () => {
       }
     } catch (err) {
       console.error("Failed to load timekeeping today:", err);
-      toast.error("Không thể tải trạng thái chấm công hôm nay.");
+      toast.error(t("toasts.loadTodayFailed"));
     } finally {
       setLoading(false);
     }
@@ -237,7 +239,7 @@ const TimekeepingPage = () => {
   const getCurrentLocation = (): Promise<string> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error("Trình duyệt không hỗ trợ định vị GPS."));
+        reject(new Error(t("toasts.gpsNotSupported")));
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -251,7 +253,7 @@ const TimekeepingPage = () => {
           console.error("Geolocation error", error);
           reject(
             new Error(
-              "Không thể lấy vị trí hiện tại. Vui lòng bật GPS/Location cho trình duyệt.",
+              t("toasts.getLocationFailed"),
             ),
           );
         },
@@ -297,7 +299,7 @@ const TimekeepingPage = () => {
         );
         if (distance > 3000) {
           toast.error(
-            "Bạn đang cách cửa hàng quá xa, không thể check-in bằng GPS. Vui lòng kiểm tra lại.",
+            t("toasts.tooFarForCheckIn"),
           );
           return;
         }
@@ -310,7 +312,7 @@ const TimekeepingPage = () => {
       }
 
       await timekeepingApi.checkIn({ locationGps, checkInImageUrl });
-      toast.success("Check-in thành công!");
+      toast.success(t("toasts.checkInSuccess"));
       void loadToday();
       void loadHistory();
     } catch (err) {
@@ -318,9 +320,7 @@ const TimekeepingPage = () => {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
-        (err instanceof Error
-          ? err.message
-          : "Không thể check-in. Vui lòng thử lại.");
+        (err instanceof Error ? err.message : t("toasts.checkInFailed"));
       toast.error(message);
     } finally {
       setProcessingCheckIn(false);
@@ -349,14 +349,14 @@ const TimekeepingPage = () => {
         );
         if (distance > 3000) {
           toast.error(
-            "Bạn đang cách cửa hàng quá xa, không thể check-out bằng GPS. Vui lòng kiểm tra lại.",
+            t("toasts.tooFarForCheckOut"),
           );
           return;
         }
       }
 
       await timekeepingApi.checkOut({ locationGps });
-      toast.success("Check-out thành công!");
+      toast.success(t("toasts.checkOutSuccess"));
       void loadToday();
       void loadHistory();
     } catch (err) {
@@ -364,9 +364,7 @@ const TimekeepingPage = () => {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
-        (err instanceof Error
-          ? err.message
-          : "Không thể check-out. Vui lòng thử lại.");
+        (err instanceof Error ? err.message : t("toasts.checkOutFailed"));
       toast.error(message);
     } finally {
       setProcessingCheckOut(false);
@@ -408,12 +406,12 @@ const TimekeepingPage = () => {
 
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Chuyển đổi để chấm công cho cửa hàng khác" />
+      <StoreSelector pageDescription={t("page.storeSelectorHint")} />
       {loading && !today ? (
         <div className="flex min-h-[40vh] items-center justify-center">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Đang tải trạng thái chấm công...</span>
+            <span>{t("states.loadingToday")}</span>
           </div>
         </div>
       ) : null}
@@ -436,25 +434,25 @@ const TimekeepingPage = () => {
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-teal-600" />
               <h2 className="text-base font-semibold text-foreground">
-                Trạng thái hôm nay
+                {t("today.title")}
               </h2>
             </div>
             <div className="text-sm text-muted-foreground space-y-1">
               <p>
                 Check-in:{" "}
                 <span className="font-medium text-foreground">
-                  {today?.hasCheckedIn ? "Đã check-in" : "Chưa check-in"}
+                  {today?.hasCheckedIn ? t("today.checkedIn") : t("today.notCheckedIn")}
                 </span>
               </p>
               <p>
                 Check-out:{" "}
                 <span className="font-medium text-foreground">
-                  {today?.hasCheckedOut ? "Đã check-out" : "Chưa check-out"}
+                  {today?.hasCheckedOut ? t("today.checkedOut") : t("today.notCheckedOut")}
                 </span>
               </p>
               {today?.record && (
                 <p>
-                  Giờ check-in:{" "}
+                  {t("today.checkInTime")}{" "}
                   <span className="font-medium text-foreground">
                     {new Date(today.record.checkInTime).toLocaleString("vi-VN")}
                   </span>
@@ -474,11 +472,10 @@ const TimekeepingPage = () => {
             <div className="relative flex flex-col gap-2 mb-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-teal-700 shadow-sm">
                 <MapPin className="h-3.5 w-3.5" />
-                Bản đồ cửa hàng (OpenStreetMap)
+                  {t("map.title")}
               </div>
               <p className="text-sm text-muted-foreground">
-                Vị trí cửa hàng được dùng để kiểm tra khoảng cách khi bạn chấm công
-                bằng GPS. Bạn có thể cập nhật tọa độ trong phần Cài đặt cửa hàng.
+                {t("map.subtitle")}
               </p>
             </div>
             {storePosition ? (
@@ -516,15 +513,12 @@ const TimekeepingPage = () => {
               </div>
             ) : (
               <div className="mt-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-6 text-sm text-muted-foreground">
-                Chưa có tọa độ GPS cho cửa hàng. Vui lòng vào{" "}
-                <span className="font-semibold">Dashboard &gt; Settings</span> và
-                cập nhật mục <span className="font-semibold">GPS Location</span> để
-                xem bản đồ tại đây và bật kiểm tra khoảng cách khi chấm công.
+                {t("map.missingStoreGps")}
               </div>
             )}
             {distanceMeters !== null && (
               <p className="mt-2 text-xs text-muted-foreground">
-                Khoảng cách hiện tại từ bạn tới cửa hàng:{" "}
+                {t("map.distanceLabel")}{" "}
                 <span className="font-medium text-foreground">
                   {distanceMeters < 1000
                     ? `${distanceMeters.toFixed(0)} m`
@@ -546,12 +540,11 @@ const TimekeepingPage = () => {
             <div className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-teal-600" />
               <h2 className="text-base font-semibold text-foreground">
-                Ảnh selfie chấm công
+                {t("selfie.title")}
               </h2>
             </div>
             <p className="text-xs text-muted-foreground">
-              Chọn ảnh khuôn mặt của bạn (JPEG/PNG/WebP, tối đa 5MB). Ảnh sẽ được gửi
-              kèm khi check-in để đảm bảo đúng người, đúng ca làm.
+              {t("selfie.hint")}
             </p>
             <div className="flex items-center gap-3">
               <Input
@@ -563,7 +556,7 @@ const TimekeepingPage = () => {
               {selfiePreview && (
                 <img
                   src={selfiePreview}
-                  alt="Selfie preview"
+                  alt={t("selfie.title")}
                   className="h-16 w-16 rounded-md object-cover border"
                 />
               )}
@@ -580,12 +573,11 @@ const TimekeepingPage = () => {
             <div className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-teal-600" />
               <h2 className="text-base font-semibold text-foreground">
-                Thao tác chấm công
+                {t("actions.title")}
               </h2>
             </div>
             <p className="text-xs text-muted-foreground">
-              Hệ thống sẽ sử dụng vị trí GPS hiện tại của bạn. Vui lòng cho phép trình
-              duyệt truy cập Location khi được hỏi.
+              {t("actions.hint")}
             </p>
             <div className="flex flex-wrap gap-3 pt-1">
               <Button
@@ -626,17 +618,17 @@ const TimekeepingPage = () => {
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-teal-600" />
                 <h2 className="text-base font-semibold text-foreground">
-                  Lịch sử &amp; tổng quan chấm công
+                  {t("history.title")}
                 </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                Dữ liệu chấm công của riêng bạn trong thời gian gần đây.
+                {t("history.subtitle")}
               </p>
             </div>
             <div className="flex flex-wrap gap-3 text-xs sm:text-sm">
               <div className="rounded-lg border px-3 py-1.5 bg-muted/60">
                 <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Số ngày có dữ liệu
+                  {t("history.daysWithData")}
                 </span>
                 <span className="font-semibold text-foreground">
                   {historySummary.days}
@@ -644,7 +636,7 @@ const TimekeepingPage = () => {
               </div>
               <div className="rounded-lg border px-3 py-1.5 bg-muted/60">
                 <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Tổng giờ làm (ước tính)
+                  {t("history.totalHours")}
                 </span>
                 <span className="font-semibold text-foreground">
                   {historySummary.hours.toFixed(1)}h
@@ -652,7 +644,7 @@ const TimekeepingPage = () => {
               </div>
               <div className="rounded-lg border px-3 py-1.5 bg-muted/60">
                 <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Số buổi đi trễ
+                  {t("history.lateCount")}
                 </span>
                 <span className="font-semibold text-foreground">
                   {historySummary.late}
@@ -663,18 +655,20 @@ const TimekeepingPage = () => {
 
           {historyLoading ? (
             <div className="py-6 text-sm text-muted-foreground">
-              Đang tải lịch sử chấm công...
+              {t("history.loading")}
             </div>
           ) : !history.length ? (
             <div className="py-6 text-sm text-muted-foreground">
-              Chưa có dữ liệu chấm công lịch sử.
+              {t("history.empty")}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
-                    <th className="text-left py-2 pr-3 font-medium">Ngày</th>
+                    <th className="text-left py-2 pr-3 font-medium">
+                      {t("history.table.date")}
+                    </th>
                     <th className="text-left py-2 px-3 font-medium">
                       Check-in
                     </th>
@@ -682,9 +676,11 @@ const TimekeepingPage = () => {
                       Check-out
                     </th>
                     <th className="text-right py-2 px-3 font-medium">
-                      Giờ làm
+                      {t("history.table.workHours")}
                     </th>
-                    <th className="text-right py-2 pl-3 font-medium">Trễ</th>
+                    <th className="text-right py-2 pl-3 font-medium">
+                      {t("history.table.late")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -710,11 +706,11 @@ const TimekeepingPage = () => {
                       <td className="py-2 pl-3 text-right">
                         {r.isLate ? (
                           <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 text-[11px]">
-                            Trễ
+                            {t("history.table.late")}
                           </span>
                         ) : (
                           <span className="text-[11px] text-muted-foreground">
-                            Đúng giờ
+                            {t("history.table.onTime")}
                           </span>
                         )}
                       </td>
@@ -739,12 +735,12 @@ const TimekeepingPage = () => {
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-indigo-600" />
                 <h2 className="text-base font-semibold text-foreground">
-                  Báo cáo chấm công tháng
+                  {t("monthly.title")}
                 </h2>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <Label className="text-xs">Tháng:</Label>
+                  <Label className="text-xs">{t("monthly.monthLabel")}</Label>
                   <Input
                     type="number"
                     min={1}
@@ -755,7 +751,7 @@ const TimekeepingPage = () => {
                   />
                 </div>
                 <div className="flex items-center gap-1">
-                  <Label className="text-xs">Năm:</Label>
+                  <Label className="text-xs">{t("monthly.yearLabel")}</Label>
                   <Input
                     type="number"
                     min={2020}
@@ -772,38 +768,46 @@ const TimekeepingPage = () => {
                   disabled={summaryLoading}
                 >
                   {summaryLoading && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
-                  Xem
+                  {t("monthly.view")}
                 </Button>
               </div>
             </div>
             {monthlySummary ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                 <div className="rounded-lg border px-3 py-2 bg-muted/60">
-                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Tổng nhân viên</span>
+                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {t("monthly.summary.totalEmployees")}
+                  </span>
                   <span className="font-semibold text-foreground">{monthlySummary.totalEmployees ?? "-"}</span>
                 </div>
                 <div className="rounded-lg border px-3 py-2 bg-muted/60">
-                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Tổng ngày công</span>
+                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {t("monthly.summary.totalWorkDays")}
+                  </span>
                   <span className="font-semibold text-foreground">{monthlySummary.totalWorkDays ?? "-"}</span>
                 </div>
                 <div className="rounded-lg border px-3 py-2 bg-muted/60">
-                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Tổng giờ làm</span>
+                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {t("monthly.summary.totalWorkHours")}
+                  </span>
                   <span className="font-semibold text-foreground">
                     {typeof monthlySummary.totalWorkHours === "number" ? `${monthlySummary.totalWorkHours.toFixed(1)}h` : "-"}
                   </span>
                 </div>
                 <div className="rounded-lg border px-3 py-2 bg-muted/60">
-                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Tổng đi trễ</span>
+                  <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {t("monthly.summary.totalLateCount")}
+                  </span>
                   <span className="font-semibold text-foreground">{monthlySummary.totalLateCount ?? "-"}</span>
                 </div>
               </div>
             ) : summaryLoading ? (
               <div className="py-4 text-sm text-muted-foreground flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" /> Đang tải báo cáo...
+                <Loader2 className="h-4 w-4 animate-spin" /> {t("monthly.loading")}
               </div>
             ) : (
               <p className="text-xs text-muted-foreground py-4">
-                Chọn tháng/năm rồi nhấn "Xem" để xem báo cáo chấm công.
+                {t("monthly.hint")}
               </p>
             )}
           </Card>

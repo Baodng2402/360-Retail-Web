@@ -1,0 +1,44 @@
+{
+  "page": {
+    "titleOwner": "Công việc của tôi",
+    "titleStaff": "Công việc được giao cho bạn",
+    "subtitle": "Xem và cập nhật tiến độ các công việc HR được giao cho bạn."
+  },
+  "filters": {
+    "label": "Lọc theo trạng thái:",
+    "placeholder": "Tất cả",
+    "all": "Tất cả"
+  },
+  "states": {
+    "loading": "Đang tải công việc...",
+    "empty": "Hiện tại bạn chưa có công việc nào phù hợp với bộ lọc."
+  },
+  "priority": {
+    "label": "Ưu tiên:",
+    "Low": "Thấp",
+    "Medium": "Trung bình",
+    "High": "Cao"
+  },
+  "meta": {
+    "deadline": "Hạn:",
+    "assignedBy": "Người giao:",
+    "assignedByFallback": "Quản lý / Chủ cửa hàng"
+  },
+  "statusLabels": {
+    "Pending": "Chờ xử lý",
+    "InProgress": "Đang làm",
+    "Completed": "Hoàn thành",
+    "Cancelled": "Đã hủy"
+  },
+  "actions": {
+    "updateStatusPlaceholder": "Cập nhật trạng thái"
+  },
+  "toasts": {
+    "loadFailed": "Không thể tải danh sách công việc của bạn.",
+    "updateSuccess": "Cập nhật trạng thái công việc thành công.",
+    "updateFailed": "Không thể cập nhật trạng thái công việc."
+  },
+  "helper": {
+    "note": "Lưu ý: Bạn chỉ có thể cập nhật trạng thái cho các công việc được giao cho tài khoản hiện tại."
+  }
+}

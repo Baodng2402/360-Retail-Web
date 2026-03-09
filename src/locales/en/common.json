@@ -1,0 +1,41 @@
+{
+  "appName": "360 Retail",
+  "smePlatform": "SME Platform",
+  "actions": {
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "backToHome": "Back to Home",
+    "backToLogin": "Back to Login",
+    "confirm": "Confirm",
+    "retry": "Retry",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create"
+  },
+  "states": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "noData": "No data available",
+    "error": "Something went wrong. Please try again."
+  },
+  "formats": {
+    "date": "{{value, datetime}}",
+    "number": "{{value, number}}",
+    "currency": "{{value, currency}}"
+  },
+  "validation": {
+    "required": "Please fill in this field.",
+    "invalidEmail": "Invalid email address.",
+    "minLength": "Please enter at least {{min}} characters.",
+    "passwordMismatch": "Password confirmation does not match."
+  },
+  "toast": {
+    "unknownError": "An unexpected error occurred. Please try again.",
+    "networkError": "Cannot connect to server. Please check your network."
+  }
+}
+

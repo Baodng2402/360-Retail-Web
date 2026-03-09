@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { storesApi } from "@/shared/lib/storesApi";
 import { authApi } from "@/shared/lib/authApi";
 import { loyaltyApi } from "@/shared/lib/loyaltyApi";
@@ -47,6 +48,7 @@ const getDistanceMeters = (
   return R * c * 1000;
 };
 const SettingPage = () => {
+  const { t: tDashboard } = useTranslation("dashboard");
   const { currentStore } = useStoreStore();
   const [storeId, setStoreId] = useState<string | null>(null);
   const [storeName, setStoreName] = useState("");
@@ -211,7 +213,7 @@ const SettingPage = () => {
         }
       } catch (err) {
         console.error("Failed to load store:", err);
-        toast.error("Không thể tải thông tin cửa hàng");
+        toast.error(tDashboard("settingsPage.toasts.loadStoreFailed"));
       } finally {
         setStoreLoading(false);
       }
@@ -279,7 +281,7 @@ const SettingPage = () => {
     if (storeLatitude.trim()) {
       const parsed = Number(storeLatitude.trim());
       if (Number.isNaN(parsed)) {
-        toast.error("Latitude không hợp lệ");
+        toast.error(tDashboard("settingsPage.toasts.invalidLatitude"));
         return;
       }
       latitude = parsed;
@@ -288,7 +290,7 @@ const SettingPage = () => {
     if (storeLongitude.trim()) {
       const parsed = Number(storeLongitude.trim());
       if (Number.isNaN(parsed)) {
-        toast.error("Longitude không hợp lệ");
+        toast.error(tDashboard("settingsPage.toasts.invalidLongitude"));
         return;
       }
       longitude = parsed;
@@ -315,10 +317,10 @@ const SettingPage = () => {
       } catch {
         // ignore
       }
-      toast.success("Đã lưu thông tin cửa hàng!");
+      toast.success(tDashboard("settingsPage.toasts.saveStoreSuccess"));
     } catch (err) {
       console.error("Failed to save store:", err);
-      toast.error("Không thể lưu thông tin cửa hàng");
+      toast.error(tDashboard("settingsPage.toasts.saveStoreFailed"));
     } finally {
       setStoreSaving(false);
     }
@@ -327,11 +329,11 @@ const SettingPage = () => {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp");
+      toast.error(tDashboard("settingsPage.security.validation.passwordMismatch"));
       return;
     }
     if (newPassword.length < 8) {
-      toast.error("Mật khẩu mới phải từ 8 ký tự trở lên");
+      toast.error(tDashboard("settingsPage.security.validation.passwordMinLength", { min: 8 }));
       return;
     }
     setPasswordSaving(true);
@@ -341,13 +343,13 @@ const SettingPage = () => {
         newPassword,
         confirmNewPassword: confirmPassword,
       });
-      toast.success("Đổi mật khẩu thành công. Vui lòng đăng nhập lại.");
+      toast.success(tDashboard("settingsPage.security.toasts.changePasswordSuccess"));
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
       console.error("Failed to change password:", err);
-      toast.error("Không thể đổi mật khẩu. Kiểm tra mật khẩu hiện tại.");
+      toast.error(tDashboard("settingsPage.security.toasts.changePasswordFailed"));
     } finally {
       setPasswordSaving(false);
     }
@@ -355,7 +357,7 @@ const SettingPage = () => {
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Trình duyệt không hỗ trợ GPS/location.");
+      toast.error(tDashboard("settingsPage.toasts.browserNoGps"));
       return;
     }
     const prevLat = Number(storeLatitude.trim());
@@ -373,7 +375,7 @@ const SettingPage = () => {
           setAddressSuggestions([]);
           setAddressSearchEnabled(false);
           addressInputRef.current?.blur();
-          toast.success("Đã lấy tọa độ hiện tại cho cửa hàng.");
+          toast.success(tDashboard("settingsPage.toasts.useCurrentLocationSuccess"));
         };
 
         if (hasPrevCoords) {
@@ -391,12 +393,12 @@ const SettingPage = () => {
             toast.custom((t) => (
               <div className="max-w-sm rounded-md bg-background border shadow-lg p-3 text-sm">
                 <p className="font-medium mb-1">
-                  Vị trí hiện tại cách xa cửa hàng
+                  {tDashboard("settingsPage.gpsDistanceWarning.title")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Vị trí hiện tại của bạn đang cách vị trí cửa hàng khoảng{" "}
-                  <span className="font-semibold">{distanceText}</span>. Bạn có
-                  chắc muốn cập nhật GPS cửa hàng theo vị trí hiện tại?
+                  {tDashboard("settingsPage.gpsDistanceWarning.description", {
+                    distance: distanceText,
+                  })}
                 </p>
                 <div className="mt-2 flex justify-end gap-2">
                   <button
@@ -404,10 +406,10 @@ const SettingPage = () => {
                     className="px-2 py-1 rounded border text-xs"
                     onClick={() => {
                       toast.dismiss(t.id);
-                      toast("Đã giữ nguyên toạ độ cửa hàng.");
+                      toast(tDashboard("settingsPage.toasts.keepExistingCoords"));
                     }}
                   >
-                    Giữ nguyên
+                    {tDashboard("settingsPage.gpsDistanceWarning.keepExisting")}
                   </button>
                   <button
                     type="button"
@@ -417,7 +419,7 @@ const SettingPage = () => {
                       toast.dismiss(t.id);
                     }}
                   >
-                    Dùng vị trí hiện tại
+                    {tDashboard("settingsPage.store.gps.useCurrentLocation")}
                   </button>
                 </div>
               </div>
@@ -432,7 +434,7 @@ const SettingPage = () => {
       },
       () => {
         toast.error(
-          "Không thể lấy vị trí hiện tại. Vui lòng bật Location cho trình duyệt.",
+          tDashboard("settingsPage.toasts.useCurrentLocationFailed"),
         );
         setUsingCurrentLocation(false);
       },
@@ -442,7 +444,7 @@ const SettingPage = () => {
 
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Chuyển đổi để cấu hình cửa hàng khác" />
+      <StoreSelector pageDescription={tDashboard("settingsPage.storeSelectorHint")} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="p-4 h-fit">
           <nav className="space-y-1">
@@ -455,7 +457,7 @@ const SettingPage = () => {
               }`}
             >
               <Store className="h-4 w-4" />
-              Store Info / Thông tin cửa hàng
+              {tDashboard("settingsPage.tabs.store")}
             </button>
             <button
               onClick={() => setActiveTab("notifications")}
@@ -466,7 +468,7 @@ const SettingPage = () => {
               }`}
             >
               <Bell className="h-4 w-4" />
-              Notifications / Thông báo
+              {tDashboard("settingsPage.tabs.notifications")}
             </button>
             <button
               onClick={() => setActiveTab("loyalty")}
@@ -477,7 +479,7 @@ const SettingPage = () => {
               }`}
             >
               <Percent className="h-4 w-4" />
-              Loyalty Rules / Tích điểm
+              {tDashboard("settingsPage.tabs.loyalty")}
             </button>
             <button
               onClick={() => setActiveTab("security")}
@@ -488,7 +490,7 @@ const SettingPage = () => {
               }`}
             >
               <Shield className="h-4 w-4" />
-              Security / Bảo mật
+              {tDashboard("settingsPage.tabs.security")}
             </button>
           </nav>
         </Card>
@@ -720,7 +722,9 @@ const SettingPage = () => {
                       onClick={handleSaveStore}
                       disabled={storeSaving || !canEditStoreInfo}
                     >
-                      {storeSaving ? "Đang lưu..." : "Save Changes / Lưu thay đổi"}
+                      {storeSaving
+                        ? tDashboard("settingsPage.store.actions.saving")
+                        : tDashboard("settingsPage.store.actions.saveChanges")}
                     </Button>
                   </div>
                 </div>
@@ -733,11 +737,11 @@ const SettingPage = () => {
               <div className="flex items-center gap-2 mb-6">
                 <Bell className="h-5 w-5 text-teal-600" />
                 <h3 className="text-lg font-bold">
-                  Notification Preferences / Tùy chọn thông báo
+                  {tDashboard("settingsPage.notifications.title")}
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground mb-4 p-3 bg-muted/50 rounded-lg">
-                Cài đặt thông báo được lưu trên thiết bị của bạn. Tính năng đồng bộ lên máy chủ sẽ được cập nhật sau.
+                {tDashboard("settingsPage.notifications.description")}
               </p>
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-2">
@@ -814,10 +818,10 @@ const SettingPage = () => {
                       <Bell className="h-4 w-4 text-amber-600 mt-0.5" />
                       <div>
                         <p className="text-sm font-medium text-amber-900">
-                          Gửi email cảnh báo tồn kho thấp
+                          {tDashboard("settingsPage.notifications.lowStockEmail.title")}
                         </p>
                         <p className="text-xs text-amber-800">
-                          Hệ thống sẽ kiểm tra các sản phẩm có tồn kho nhỏ hơn hoặc bằng ngưỡng và gửi email cảnh báo cho chủ cửa hàng.
+                          {tDashboard("settingsPage.notifications.lowStockEmail.description")}
                         </p>
                       </div>
                     </div>
@@ -832,12 +836,12 @@ const SettingPage = () => {
                           setLowStockCheckSending(true);
                           await inventoryApi.checkLowStock(5);
                           toast.success(
-                            "Đã chạy kiểm tra tồn kho thấp và gửi email cảnh báo (nếu có).",
+                            tDashboard("settingsPage.notifications.lowStockEmail.toasts.success"),
                           );
                         } catch (err) {
                           console.error("Failed to trigger low stock check:", err);
                           toast.error(
-                            "Không thể chạy kiểm tra tồn kho thấp. Vui lòng thử lại.",
+                            tDashboard("settingsPage.notifications.lowStockEmail.toasts.failed"),
                           );
                         } finally {
                           setLowStockCheckSending(false);
@@ -847,7 +851,7 @@ const SettingPage = () => {
                       {lowStockCheckSending && (
                         <Loader2 className="h-3 w-3 animate-spin mr-2" />
                       )}
-                      Kiểm tra tồn kho thấp (ngưỡng 5)
+                      {tDashboard("settingsPage.notifications.lowStockEmail.action", { threshold: 5 })}
                     </Button>
                   </div>
                 )}
@@ -860,17 +864,16 @@ const SettingPage = () => {
               <div className="flex items-center gap-2 mb-6">
                 <Star className="h-5 w-5 text-teal-600" />
                 <h3 className="text-lg font-bold">
-                  Loyalty Rules / Cấu hình tích điểm
+                  {tDashboard("settingsPage.loyalty.title")}
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Thiết lập quy tắc tích điểm cho khách hàng. Mỗi quy tắc định nghĩa
-                cách quy đổi doanh thu sang điểm thưởng.
+                {tDashboard("settingsPage.loyalty.description")}
               </p>
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm text-muted-foreground">
-                    Các quy tắc sẽ được áp dụng theo thứ tự ưu tiên do backend quy định.
+                    {tDashboard("settingsPage.loyalty.note")}
                   </p>
                   {canManageLoyaltyRules && (
                     <Button
@@ -892,14 +895,14 @@ const SettingPage = () => {
                             setLoyaltyRules(rules);
                           } catch (err) {
                             console.error("Failed to load loyalty rules:", err);
-                            toast.error("Không thể tải danh sách loyalty rules.");
+                            toast.error(tDashboard("settingsPage.loyalty.toasts.loadFailed"));
                           } finally {
                             setLoyaltyLoading(false);
                           }
                         }
                       }}
                     >
-                      Thêm quy tắc
+                      {tDashboard("settingsPage.loyalty.actions.addRule")}
                     </Button>
                   )}
                 </div>
@@ -907,13 +910,13 @@ const SettingPage = () => {
                 <div className="grid gap-4">
                   {loyaltyLoading ? (
                     <div className="py-6 text-center text-muted-foreground text-sm">
-                      Đang tải loyalty rules...
+                      {tDashboard("settingsPage.loyalty.states.loading")}
                     </div>
                   ) : loyaltyRules.length === 0 ? (
                     <div className="py-6 text-center text-muted-foreground text-sm border rounded-lg">
                       {canManageLoyaltyRules
-                        ? "Chưa có loyalty rule nào. Bạn có thể thêm quy tắc đầu tiên."
-                        : "Chưa có loyalty rule nào. Bạn chỉ có quyền xem khi quản lý đã cấu hình."}
+                        ? tDashboard("settingsPage.loyalty.states.emptyManage")
+                        : tDashboard("settingsPage.loyalty.states.emptyReadOnly")}
                     </div>
                   ) : (
                     loyaltyRules.map((rule) => (
@@ -928,17 +931,19 @@ const SettingPage = () => {
                             </span>
                             {rule.status === 0 ? (
                               <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                                Đang áp dụng
+                                {tDashboard("settingsPage.loyalty.status.active")}
                               </span>
                             ) : (
                               <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                                Tạm tắt
+                                {tDashboard("settingsPage.loyalty.status.inactive")}
                               </span>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            Tích {rule.earningRate} điểm mỗi{" "}
-                            {rule.minSpend.toLocaleString("vi-VN")}₫ chi tiêu.
+                            {tDashboard("settingsPage.loyalty.ruleSummary", {
+                              earningRate: rule.earningRate,
+                              minSpend: rule.minSpend,
+                            })}
                           </p>
                         </div>
                         {canManageLoyaltyRules && (
@@ -957,7 +962,7 @@ const SettingPage = () => {
                                 });
                               }}
                             >
-                              Chỉnh sửa
+                              {tDashboard("settingsPage.loyalty.actions.edit")}
                             </Button>
                             <Button
                               size="sm"
@@ -982,11 +987,13 @@ const SettingPage = () => {
                                   );
                                 } catch (err) {
                                   console.error("Failed to toggle rule:", err);
-                                  toast.error("Không thể cập nhật trạng thái loyalty rule.");
+                                  toast.error(tDashboard("settingsPage.loyalty.toasts.toggleFailed"));
                                 }
                               }}
                             >
-                              {rule.status === 0 ? "Tạm tắt" : "Kích hoạt"}
+                              {rule.status === 0
+                                ? tDashboard("settingsPage.loyalty.actions.deactivate")
+                                : tDashboard("settingsPage.loyalty.actions.activate")}
                             </Button>
                           </div>
                         )}
@@ -1001,21 +1008,27 @@ const SettingPage = () => {
 
                     <div className="space-y-3">
                       <h4 className="font-semibold text-sm">
-                        {editingRule ? "Chỉnh sửa quy tắc" : "Tạo mới / cập nhật quy tắc"}
+                        {editingRule
+                          ? tDashboard("settingsPage.loyalty.form.editTitle")
+                          : tDashboard("settingsPage.loyalty.form.createTitle")}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Tên quy tắc</Label>
+                          <Label className="text-xs">
+                            {tDashboard("settingsPage.loyalty.form.nameLabel")}
+                          </Label>
                           <Input
                             value={ruleForm.name}
                             onChange={(e) =>
                               setRuleForm((s) => ({ ...s, name: e.target.value }))
                             }
-                            placeholder="Tích 1 điểm / 10,000đ"
+                            placeholder={tDashboard("settingsPage.loyalty.form.namePlaceholder")}
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Tỷ lệ điểm (earningRate)</Label>
+                          <Label className="text-xs">
+                            {tDashboard("settingsPage.loyalty.form.earningRateLabel")}
+                          </Label>
                           <Input
                             type="number"
                             min={1}
@@ -1029,7 +1042,9 @@ const SettingPage = () => {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Mức chi tối thiểu (minSpend)</Label>
+                          <Label className="text-xs">
+                            {tDashboard("settingsPage.loyalty.form.minSpendLabel")}
+                          </Label>
                           <Input
                             type="number"
                             min={0}
@@ -1044,7 +1059,9 @@ const SettingPage = () => {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Trạng thái</Label>
+                          <Label className="text-xs">
+                            {tDashboard("settingsPage.loyalty.form.statusLabel")}
+                          </Label>
                           <div className="flex items-center gap-2 text-xs">
                             <Switch
                               checked={ruleForm.status === 0}
@@ -1054,7 +1071,9 @@ const SettingPage = () => {
                               className="data-[state=checked]:bg-teal-600"
                             />
                             <span className="text-muted-foreground">
-                              {ruleForm.status === 0 ? "Đang áp dụng" : "Tạm tắt"}
+                              {ruleForm.status === 0
+                                ? tDashboard("settingsPage.loyalty.status.active")
+                                : tDashboard("settingsPage.loyalty.status.inactive")}
                             </span>
                           </div>
                         </div>
@@ -1074,7 +1093,7 @@ const SettingPage = () => {
                             });
                           }}
                         >
-                          Xóa form
+                          {tDashboard("settingsPage.loyalty.form.reset")}
                         </Button>
                         <Button
                           size="sm"
@@ -1082,7 +1101,7 @@ const SettingPage = () => {
                           className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
                           onClick={async () => {
                             if (!ruleForm.name.trim()) {
-                              toast.error("Vui lòng nhập tên quy tắc.");
+                              toast.error(tDashboard("settingsPage.loyalty.toasts.nameRequired"));
                               return;
                             }
                             try {
@@ -1097,25 +1116,25 @@ const SettingPage = () => {
                                     r.id === editingRule.id ? updated : r,
                                   ),
                                 );
-                                toast.success("Đã cập nhật loyalty rule.");
+                                toast.success(tDashboard("settingsPage.loyalty.toasts.updateSuccess"));
                               } else {
                                 const created = await loyaltyApi.createRule(ruleForm);
                                 setLoyaltyRules((prev) => [created, ...prev]);
-                                toast.success("Đã tạo loyalty rule mới.");
+                                toast.success(tDashboard("settingsPage.loyalty.toasts.createSuccess"));
                               }
                             } catch (err) {
                               console.error("Failed to save loyalty rule:", err);
-                              toast.error("Không thể lưu loyalty rule. Vui lòng thử lại.");
+                              toast.error(tDashboard("settingsPage.loyalty.toasts.saveFailed"));
                             } finally {
                               setRuleSaving(false);
                             }
                           }}
                         >
                           {ruleSaving
-                            ? "Đang lưu..."
+                            ? tDashboard("settingsPage.loyalty.form.saving")
                             : editingRule
-                              ? "Lưu thay đổi"
-                              : "Tạo quy tắc"}
+                              ? tDashboard("settingsPage.loyalty.form.saveChanges")
+                              : tDashboard("settingsPage.loyalty.form.create")}
                         </Button>
                       </div>
                     </div>
@@ -1129,43 +1148,57 @@ const SettingPage = () => {
             <>
               <div className="flex items-center gap-2 mb-6">
                 <Shield className="h-5 w-5 text-teal-600" />
-                <h3 className="text-lg font-bold">Security / Bảo mật</h3>
+                <h3 className="text-lg font-bold">
+                  {tDashboard("settingsPage.security.title")}
+                </h3>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Đổi mật khẩu được lưu vào hệ thống. Sau khi đổi thành công, bạn cần đăng nhập lại.
+                {tDashboard("settingsPage.security.description")}
               </p>
               <form onSubmit={handleChangePassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="current-password">Mật khẩu hiện tại</Label>
+                  <Label htmlFor="current-password">
+                    {tDashboard("settingsPage.security.fields.currentPasswordLabel")}
+                  </Label>
                   <Input
                     id="current-password"
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Nhập mật khẩu hiện tại"
+                    placeholder={tDashboard(
+                      "settingsPage.security.fields.currentPasswordPlaceholder",
+                    )}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">Mật khẩu mới</Label>
+                  <Label htmlFor="new-password">
+                    {tDashboard("settingsPage.security.fields.newPasswordLabel")}
+                  </Label>
                   <Input
                     id="new-password"
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Nhập mật khẩu mới (tối thiểu 8 ký tự)"
+                    placeholder={tDashboard(
+                      "settingsPage.security.fields.newPasswordPlaceholder",
+                    )}
                     required
                     minLength={8}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Xác nhận mật khẩu mới</Label>
+                  <Label htmlFor="confirm-password">
+                    {tDashboard("settingsPage.security.fields.confirmPasswordLabel")}
+                  </Label>
                   <Input
                     id="confirm-password"
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Nhập lại mật khẩu mới"
+                    placeholder={tDashboard(
+                      "settingsPage.security.fields.confirmPasswordPlaceholder",
+                    )}
                     required
                   />
                 </div>
@@ -1174,7 +1207,9 @@ const SettingPage = () => {
                   disabled={passwordSaving}
                   className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
                 >
-                  {passwordSaving ? "Đang xử lý..." : "Đổi mật khẩu"}
+                  {passwordSaving
+                    ? tDashboard("settingsPage.security.actions.processing")
+                    : tDashboard("settingsPage.security.actions.changePassword")}
                 </Button>
               </form>
             </>

@@ -1,0 +1,73 @@
+{
+  "page": {
+    "storeSelectorHint": "Chuyển đổi để quản lý nhân viên của cửa hàng khác"
+  },
+  "actions": {
+    "createTask": "Tạo công việc",
+    "addStaff": "Thêm nhân viên"
+  },
+  "list": {
+    "title": "Danh sách nhân viên",
+    "searchPlaceholder": "Tìm kiếm nhân viên...",
+    "loading": "Đang tải...",
+    "noTask": "Không có"
+  },
+  "stats": {
+    "totalStaff": {
+      "label": "Tổng nhân viên",
+      "subLabel": "Tổng nhân viên"
+    },
+    "activeStaff": {
+      "label": "Đang hoạt động",
+      "subLabel": "Đang hoạt động"
+    },
+    "activeTasks": {
+      "label": "Công việc đang làm",
+      "subLabel": "Công việc đang làm"
+    },
+    "inactive": {
+      "label": "Tạm ngừng",
+      "subLabel": "Tạm ngừng"
+    }
+  },
+  "detail": {
+    "loading": "Đang tải thông tin nhân viên...",
+    "notFound": "Không tìm thấy nhân viên.",
+    "backToList": "Quay lại danh sách nhân viên",
+    "positionFallback": "Chưa cập nhật chức danh",
+    "joinDateLabel": "Ngày vào làm:",
+    "sectionTitle": "Thông tin & phân quyền nhân viên",
+    "actions": {
+      "deactivate": "Xóa nhân viên",
+      "saveChanges": "Lưu thay đổi"
+    },
+    "form": {
+      "fullName": "Họ tên",
+      "position": "Chức danh",
+      "positionModePreset": "Chọn từ danh sách",
+      "positionModeCustom": "Nhập thủ công",
+      "positionPlaceholder": "Chọn chức danh",
+      "customPositionPlaceholder": "VD: Nhân viên bán hàng",
+      "baseSalary": "Lương cơ bản (VND)",
+      "workStatusTitle": "Trạng thái làm việc",
+      "activeHint": "Nhân viên đang hoạt động và có thể đăng nhập, chấm công.",
+      "inactiveHint": "Nhân viên tạm ngưng, không thể thao tác trên hệ thống."
+    },
+    "dialog": {
+      "title": "Xóa / ngừng hoạt động nhân viên",
+      "description": "Bạn có chắc muốn ngừng hoạt động nhân viên <strong>{{name}}</strong>? Nhân viên sẽ không thể đăng nhập và chấm công.",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
+    },
+    "toasts": {
+      "loadFailed": "Không thể tải thông tin nhân viên.",
+      "invalidBaseSalary": "Lương cơ bản không hợp lệ.",
+      "positionRequired": "Vui lòng chọn chức danh.",
+      "updateSuccess": "Đã cập nhật thông tin nhân viên.",
+      "updateFailed": "Không thể cập nhật thông tin nhân viên.",
+      "deactivateSuccess": "Đã ngừng hoạt động nhân viên.",
+      "deactivateFailed": "Không thể xóa/ngừng hoạt động nhân viên. Vui lòng thử lại."
+    }
+  }
+}
+

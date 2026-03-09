@@ -20,11 +20,13 @@ import { tasksApi } from "@/shared/lib/tasksApi";
 import type { Employee } from "@/shared/types/employee";
 import type { Task } from "@/shared/types/task";
 import { useStoreStore } from "@/shared/store/storeStore";
+import { useTranslation } from "react-i18next";
 
 const BUTTON_GRADIENT =
   "from-teal-500 to-teal-600 bg-gradient-to-r hover:from-teal-600 hover:to-teal-700 text-white shadow-sm transition-all";
 
 const StaffManagementPage = () => {
+  const { t } = useTranslation("staff");
   const [query, setQuery] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -81,10 +83,10 @@ const StaffManagementPage = () => {
           email: emp.email,
           phone: emp.phoneNumber || "-",
           checkin: null,
-          task: task?.title ?? "Không có",
+          task: task?.title ?? t("list.noTask"),
         };
       }),
-    [employees, taskByAssignee]
+    [employees, taskByAssignee, t]
   );
 
   const filteredStaff = useMemo(() => {
@@ -103,15 +105,15 @@ const StaffManagementPage = () => {
 
   const stats: StatItem[] = [
     {
-      label: "Total Staff",
-      subLabel: "Tổng nhân viên",
+      label: t("stats.totalStaff.label"),
+      subLabel: t("stats.totalStaff.subLabel"),
       value: employees.length,
       icon: Users,
       color: "bg-teal-50 text-teal-600",
     },
     {
-      label: "Active Staff",
-      subLabel: "Đang hoạt động",
+      label: t("stats.activeStaff.label"),
+      subLabel: t("stats.activeStaff.subLabel"),
       value: activeCount,
       change: employees.length > 0 ? `${activeCount}/${employees.length}` : null,
       trend: "up",
@@ -119,15 +121,15 @@ const StaffManagementPage = () => {
       color: "bg-blue-50 text-blue-600",
     },
     {
-      label: "Active Tasks",
-      subLabel: "Công việc đang làm",
+      label: t("stats.activeTasks.label"),
+      subLabel: t("stats.activeTasks.subLabel"),
       value: pendingTasks,
       icon: ListChecks,
       color: "bg-orange-50 text-orange-600",
     },
     {
-      label: "Inactive",
-      subLabel: "Tạm ngừng",
+      label: t("stats.inactive.label"),
+      subLabel: t("stats.inactive.subLabel"),
       value: employees.length - activeCount,
       icon: BadgeAlert,
       trend: employees.length - activeCount > 0 ? "down" : undefined,
@@ -144,21 +146,21 @@ const StaffManagementPage = () => {
 
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Chuyển đổi để quản lý nhân viên của cửa hàng khác" />
+      <StoreSelector pageDescription={t("page.storeSelectorHint")} />
       <div className="flex flex-wrap items-center justify-end gap-3">
         <Button
           variant="outline"
           className="border-teal-600 text-teal-600 hover:bg-teal-50"
           onClick={() => setCreateTaskModalOpen(true)}
         >
-          Create Task / Tạo công việc
+          {t("actions.createTask")}
         </Button>
         <Button
           className={BUTTON_GRADIENT}
           onClick={() => setInviteModalOpen(true)}
         >
           <UserPlus className="mr-2 h-4 w-4" />
-          Add staff / Thêm nhân viên
+          {t("actions.addStaff")}
         </Button>
       </div>
 
@@ -166,11 +168,11 @@ const StaffManagementPage = () => {
       <div className="border pb-10 px-5 rounded-2xl">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-5">
           <span className="text-md font-bold">
-            Staff List / Danh sách nhân viên
+            {t("list.title")}
           </span>
           <div className="relative w-full sm:w-64">
             <SearchInput
-              placeholder="Search staff / Tìm kiếm..."
+              placeholder={t("list.searchPlaceholder")}
               wrapperClassName="w-full sm:w-64"
               className="bg-background"
               value={query}
@@ -180,7 +182,7 @@ const StaffManagementPage = () => {
         </div>
         {loading ? (
           <div className="py-12 text-center text-muted-foreground">
-            Đang tải...
+            {t("list.loading")}
           </div>
         ) : (
           <div className="flex justify-center pt-10 min-w-full">

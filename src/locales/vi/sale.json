@@ -1,0 +1,85 @@
+{
+  "page": {
+    "storeSelectorHint": "Chuyển đổi để bán hàng cho cửa hàng khác"
+  },
+  "tabs": {
+    "pos": "POS / Bán hàng",
+    "inventory": "Kho / Sản phẩm",
+    "reports": "Báo cáo"
+  },
+  "search": {
+    "placeholder": "Tìm theo tên, mã vạch, danh mục..."
+  },
+  "actions": {
+    "scan": "Quét",
+    "addProduct": "Thêm sản phẩm",
+    "stockIn": "Nhập kho",
+    "stockOut": "Xuất kho",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "completeOrder": "Hoàn tất đơn"
+  },
+  "states": {
+    "loadingProducts": "Đang tải sản phẩm...",
+    "noProductsTitle": "Chưa có sản phẩm",
+    "noProductsBody": "Tạo danh mục (Sản phẩm → Danh mục) rồi thêm sản phẩm để bán hàng.",
+    "loadingBestSelling": "Đang tải báo cáo bán chạy...",
+    "noReportData": "Chưa có dữ liệu bán hàng đủ để hiển thị báo cáo."
+  },
+  "cart": {
+    "title": "Giỏ hàng",
+    "itemsCount": "{{count}} món",
+    "empty": "Giỏ hàng trống",
+    "customerLabel": "Khách hàng",
+    "customerPlaceholder": "Tìm khách...",
+    "total": "Tổng"
+  },
+  "inventory": {
+    "title": "Danh sách sản phẩm"
+  },
+  "table": {
+    "product": "Sản phẩm",
+    "category": "Danh mục",
+    "price": "Giá",
+    "stock": "Tồn kho",
+    "barcode": "Mã vạch",
+    "actions": "Thao tác"
+  },
+  "stock": {
+    "stockInTitle": "Nhập kho",
+    "stockOutTitle": "Xuất kho",
+    "noProductSelected": "Chưa chọn sản phẩm",
+    "currentStock": "Tồn kho hiện tại: {{stock}}",
+    "amountLabel": "Số lượng {{mode}}",
+    "amountPlaceholder": "Nhập số lượng..."
+  },
+  "confirmRemoveLast": {
+    "title": "Xóa sản phẩm cuối cùng",
+    "description": "Bạn đang xóa sản phẩm cuối cùng trong giỏ {{name}}. Bạn có chắc muốn tiếp tục?",
+    "cancel": "Hủy",
+    "delete": "Xóa"
+  },
+  "toasts": {
+    "noStore": "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+    "needCategoryFirst": "Vui lòng tạo ít nhất một danh mục trước khi thêm sản phẩm.",
+    "loadProductsError": "Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.",
+    "cartEmpty": "Giỏ hàng trống!",
+    "orderCreated": "Đơn hàng đã được tạo thành công!",
+    "orderCreateFailed": "Không thể tạo đơn hàng. Vui lòng thử lại!"
+  },
+  "misc": {
+    "uncategorized": "Chưa phân loại",
+    "productAlt": "Sản phẩm",
+    "left": "còn {{count}}"
+  },
+  "reports": {
+    "title": "Sản phẩm bán chạy",
+    "sold": "Đã bán",
+    "revenue": "Doanh thu",
+    "quantityLegend": "Số lượng",
+    "revenueLegend": "Doanh thu",
+    "avgPrice": "Giá TB",
+    "quantitySold": "Số lượng"
+  }
+}
+

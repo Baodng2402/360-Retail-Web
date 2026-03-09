@@ -1,0 +1,44 @@
+{
+  "page": {
+    "titleOwner": "My tasks",
+    "titleStaff": "Tasks assigned to you",
+    "subtitle": "View and update progress for HR tasks assigned to you."
+  },
+  "filters": {
+    "label": "Filter by status:",
+    "placeholder": "All",
+    "all": "All"
+  },
+  "states": {
+    "loading": "Loading tasks...",
+    "empty": "You currently have no tasks matching this filter."
+  },
+  "priority": {
+    "label": "Priority:",
+    "Low": "Low",
+    "Medium": "Medium",
+    "High": "High"
+  },
+  "meta": {
+    "deadline": "Due:",
+    "assignedBy": "Assigned by:",
+    "assignedByFallback": "Manager / Store owner"
+  },
+  "statusLabels": {
+    "Pending": "Pending",
+    "InProgress": "In progress",
+    "Completed": "Completed",
+    "Cancelled": "Cancelled"
+  },
+  "actions": {
+    "updateStatusPlaceholder": "Update status"
+  },
+  "toasts": {
+    "loadFailed": "Unable to load your tasks.",
+    "updateSuccess": "Task status updated.",
+    "updateFailed": "Unable to update task status."
+  },
+  "helper": {
+    "note": "Note: You can only update status for tasks assigned to your account."
+  }
+}

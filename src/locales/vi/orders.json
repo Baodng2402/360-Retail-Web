@@ -1,0 +1,90 @@
+{
+  "page": {
+    "storeSelectorHint": "Quản lý các đơn hàng POS của cửa hàng",
+    "title": "Quản lý đơn hàng",
+    "subtitle": "Xem, lọc và truy cập chi tiết các đơn hàng đã tạo.",
+    "totalOrdersLabel": "Tổng số đơn:"
+  },
+  "filters": {
+    "statusLabel": "Trạng thái",
+    "statusPlaceholder": "Tất cả trạng thái",
+    "all": "Tất cả",
+    "fromDate": "Từ ngày",
+    "toDate": "Đến ngày",
+    "reset": "Đặt lại"
+  },
+  "states": {
+    "loadingList": "Đang tải danh sách đơn hàng...",
+    "emptyList": "Không có đơn hàng nào phù hợp với bộ lọc hiện tại."
+  },
+  "table": {
+    "orderCode": "Mã đơn",
+    "customer": "Khách hàng",
+    "total": "Tổng tiền",
+    "status": "Trạng thái",
+    "paymentMethod": "Phương thức thanh toán",
+    "time": "Thời gian",
+    "walkInCustomer": "Khách lẻ"
+  },
+  "pagination": {
+    "pageLabel": "Trang",
+    "prev": "Trước",
+    "next": "Sau"
+  },
+  "time": {
+    "justNow": "Vừa xong",
+    "yesterday": "Hôm qua",
+    "minutesAgo": "{{count}} phút trước",
+    "hoursAgo": "{{count}} giờ trước",
+    "daysAgo": "{{count}} ngày trước"
+  },
+  "statusLabels": {
+    "Pending": "Chờ xử lý",
+    "Processing": "Đang xử lý",
+    "Completed": "Hoàn thành",
+    "Cancelled": "Đã hủy",
+    "Refunded": "Hoàn tiền"
+  },
+  "detail": {
+    "backToList": "Quay lại danh sách",
+    "notFound": "Không tìm thấy đơn hàng.",
+    "title": "Đơn hàng {{code}}",
+    "createdAtLabel": "Tạo lúc",
+    "newStatusPlaceholder": "Trạng thái mới",
+    "save": "Lưu",
+    "cancelOrder": "Hủy đơn",
+    "customerLabel": "Khách hàng",
+    "paymentLabel": "Thanh toán",
+    "paymentUnknown": "Chưa rõ",
+    "totalLabel": "Tổng tiền",
+    "feedbackQrTitle": "QR đánh giá khách hàng",
+    "feedbackQrDescription": "Mã QR này dẫn tới trang feedback cho đơn hàng hiện tại. Bạn có thể in kèm trên hóa đơn hoặc cho khách quét trực tiếp tại quầy.",
+    "feedbackUrlLabel": "URL feedback:",
+    "feedbackUnavailable": "Đơn hàng này chưa gắn với khách hàng hoặc cửa hàng cụ thể nên không thể tạo QR feedback. Vui lòng gắn khách hàng khi tạo đơn để sử dụng tính năng này.",
+    "feedbackQrHint": "Khách quét mã này để gửi đánh giá đơn hàng.",
+    "itemsTitle": "Sản phẩm trong đơn",
+    "itemsTable": {
+      "product": "Sản phẩm",
+      "barcodeSku": "Mã vạch / SKU",
+      "quantity": "Số lượng",
+      "unitPrice": "Đơn giá",
+      "lineTotal": "Thành tiền",
+      "sizeLabel": "Size: {{size}}",
+      "colorLabel": "Màu: {{color}}"
+    },
+    "cancelDialog": {
+      "title": "Xác nhận hủy đơn hàng",
+      "description": "Bạn có chắc chắn muốn hủy đơn hàng <strong>{{code}}</strong>? Hành động này không thể hoàn tác.",
+      "no": "Không",
+      "confirm": "Hủy đơn hàng",
+      "cancelling": "Đang hủy..."
+    },
+    "toasts": {
+      "loadFailed": "Không thể tải chi tiết đơn hàng.",
+      "updateStatusSuccess": "Cập nhật trạng thái đơn hàng thành công.",
+      "updateStatusFailed": "Không thể cập nhật trạng thái đơn hàng.",
+      "cancelSuccess": "Đã hủy đơn hàng thành công.",
+      "cancelFailed": "Không thể hủy đơn hàng."
+    }
+  }
+}

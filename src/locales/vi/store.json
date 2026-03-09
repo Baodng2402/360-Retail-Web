@@ -1,0 +1,54 @@
+{
+  "setup": {
+    "bannerTitle": "Thiết lập cửa hàng của bạn",
+    "bannerSubtitle": "Hoàn thiện thông tin cửa hàng để bắt đầu bán hàng ngay hôm nay",
+    "setupNowLong": "Thiết lập ngay",
+    "setupNowShort": "Thiết lập",
+    "compactTitle": "Bạn chưa có cửa hàng",
+    "compactSubtitle": "Thiết lập cửa hàng để bắt đầu sử dụng",
+    "dismiss": "Để sau",
+    "dialog": {
+      "title": "Tạo cửa hàng",
+      "subtitle": "Thiết lập cửa hàng để bắt đầu bán hàng",
+      "storeNameLabel": "Tên cửa hàng *",
+      "storeNamePlaceholder": "Nhập tên cửa hàng",
+      "addressLabel": "Địa chỉ",
+      "addressPlaceholder": "Nhập địa chỉ cửa hàng",
+      "phoneLabel": "Số điện thoại",
+      "phonePlaceholder": "Nhập số điện thoại",
+      "cancel": "Hủy",
+      "creating": "Đang tạo...",
+      "create": "Tạo cửa hàng"
+    },
+    "validation": {
+      "storeNameRequired": "Vui lòng nhập tên cửa hàng"
+    },
+    "toast": {
+      "createTrialSuccess": "Tạo cửa hàng thành công!",
+      "createTrialError": "Không thể tạo cửa hàng"
+    }
+  },
+  "trial": {
+    "start": {
+      "title": "Bắt đầu dùng thử miễn phí 7 ngày",
+      "subtitle": "Tạo cửa hàng của bạn để bắt đầu sử dụng 360 Retail",
+      "benefits": {
+        "trial": "7 ngày dùng thử miễn phí - Không cần thẻ tín dụng",
+        "instant": "Tạo cửa hàng và quản lý sản phẩm ngay lập tức",
+        "premium": "Truy cập tất cả tính năng cao cấp"
+      },
+      "defaultStoreName": "Cửa hàng của {{name}}",
+      "storeNameLabel": "Tên cửa hàng",
+      "storeNamePlaceholder": "Nhập tên cửa hàng",
+      "storeNameHint": "Nếu để trống, hệ thống sẽ tự động tạo tên: \"{{storeName}}\"",
+      "later": "Để sau",
+      "creating": "Đang tạo...",
+      "startNow": "Bắt đầu dùng thử",
+      "note": "Sau 7 ngày, bạn có thể nâng cấp lên gói trả phí để tiếp tục sử dụng",
+      "close": "Đóng",
+      "toastSuccess": "Tạo cửa hàng dùng thử thành công!",
+      "toastError": "Không thể tạo cửa hàng dùng thử"
+    }
+  }
+}
+

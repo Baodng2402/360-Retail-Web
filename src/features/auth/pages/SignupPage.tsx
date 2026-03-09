@@ -4,6 +4,7 @@ import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";
+import { useTranslation } from "react-i18next";
 
 import logo from "@/assets/logo.png";
 import googleIcon from "@/assets/icon/google-icon.svg";
@@ -12,25 +13,31 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { authApi } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
-
-const signupSchema = z
-  .object({
-    name: z.string().min(1, "Vui lòng nhập tên."),
-    email: z.string().min(1, "Vui lòng nhập email.").email("Email không hợp lệ."),
-    password: z
-      .string()
-      .min(1, "Vui lòng nhập mật khẩu.")
-      .min(6, "Mật khẩu phải có ít nhất 6 ký tự."),
-    confirmPassword: z.string().min(1, "Vui lòng nhập lại mật khẩu."),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Mật khẩu xác nhận không khớp.",
-  });
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 const socialButtons = [{ src: googleIcon, alt: "Google" }] as const;
 
 const SignupPage = () => {
+  const { t } = useTranslation(["auth", "common"]);
+
+  const signupSchema = z
+    .object({
+      name: z.string().min(1, t("common:validation.required")),
+      email: z
+        .string()
+        .min(1, t("common:validation.required"))
+        .email(t("common:validation.invalidEmail")),
+      password: z
+        .string()
+        .min(1, t("common:validation.required"))
+        .min(6, t("common:validation.minLength", { min: 6 })),
+      confirmPassword: z.string().min(1, t("common:validation.required")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      path: ["confirmPassword"],
+      message: t("common:validation.passwordMismatch"),
+    });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState("");
@@ -45,7 +52,7 @@ const SignupPage = () => {
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     const idToken = credentialResponse.credential;
     if (!idToken) {
-      toast.error("Không thể lấy thông tin từ Google.");
+      toast.error(t("auth:login.googleLoginError"));
       return;
     }
     try {
@@ -63,20 +70,20 @@ const SignupPage = () => {
       if (res.isNewUser) {
         sessionStorage.setItem("pendingGoogleNewUser", "1");
       }
-      toast.success("Đăng nhập thành công!");
+      toast.success(t("auth:login.googleLoginSuccess"));
       navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
       console.error("Google signup/login error", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Đăng nhập Google thất bại. Vui lòng thử lại.";
+          ?.message || t("auth:login.googleLoginError");
       setError(message);
       toast.error(message);
     }
   };
 
   const handleGoogleError = () => {
-    toast.error("Đăng nhập Google bị hủy hoặc có lỗi.");
+    toast.error(t("auth:login.googleLoginCanceled"));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,7 +98,8 @@ const SignupPage = () => {
     });
 
     if (!parsed.success) {
-      const firstError = parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";
+      const firstError =
+        parsed.error.issues[0]?.message ?? t("common:states.error");
       setError(firstError);
       return;
     }
@@ -100,13 +108,13 @@ const SignupPage = () => {
       setLoading(true);
       await authApi.register({ email, password });
 
-      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để nhập mã xác nhận.");
+      toast.success(t("auth:signup.signupSuccess"));
       navigate(`/verify-email?email=${encodeURIComponent(email)}`, { replace: true });
     } catch (err: unknown) {
       console.error("Register error", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+          ?.data?.message || t("auth:signup.signupError");
       setError(message);
       toast.error(message);
     } finally {
@@ -124,15 +132,15 @@ const SignupPage = () => {
             className="h-14 sm:h-16 md:h-20 w-auto object-contain"
           />
 
-          <div />
+          <LanguageSwitcher />
         </div>
 
         <div className="mt-3 sm:mt-1 sm:-mt-4 md:-mt-8 flex flex-col items-center text-center px-4">
           <h1 className="text-2xl sm:text-3xl md:text-[40px] font-extrabold leading-tight sm:leading-[40px] md:leading-[48px] tracking-[-0.9px]">
-            Sign up
+            {t("auth:signup.heroTitle")}
           </h1>
           <p className="mt-2 text-sm sm:text-base text-white/90">
-            No tech expertise required. We promise.
+            {t("auth:signup.heroSubtitle")}
           </p>
         </div>
       </div>
@@ -147,13 +155,13 @@ const SignupPage = () => {
                   className="inline-flex items-center gap-2 text-sm font-medium text-teal-600 transition-colors hover:text-teal-700"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back to Home</span>
+                  <span>{t("common:actions.backToHome")}</span>
                 </Link>
               </div>
 
               <div className="flex flex-col gap-6 sm:gap-[30px]">
                 <h2 className="text-center text-lg font-extrabold leading-[25.2px] text-gray-700">
-                  Sign in with
+                  {t("auth:signup.socialTitle")}
                 </h2>
 
                 <div className="flex items-center justify-center gap-3 sm:gap-[15px]">
@@ -194,7 +202,7 @@ const SignupPage = () => {
                 </div>
 
                 <div className="text-center text-lg font-bold leading-[25.2px] text-gray-400">
-                  or
+                  {t("auth:signup.or")}
                 </div>
               </div>
 
@@ -205,12 +213,12 @@ const SignupPage = () => {
                       htmlFor="name"
                       className="text-sm font-normal leading-[19.6px] text-gray-700"
                     >
-                      Name
+                      {t("auth:signup.name")}
                     </Label>
                     <Input
                       id="name"
                       type="text"
-                      placeholder="Your full name"
+                      placeholder={t("auth:signup.namePlaceholder")}
                       className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -224,13 +232,13 @@ const SignupPage = () => {
                       htmlFor="password"
                       className="text-sm font-normal leading-[19.6px] text-gray-700"
                     >
-                      Password
+                      {t("auth:signup.password")}
                     </Label>
                     <div className="relative">
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Your password"
+                        placeholder={t("auth:signup.passwordPlaceholder")}
                         className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -257,12 +265,12 @@ const SignupPage = () => {
                       htmlFor="email"
                       className="text-sm font-normal leading-[19.6px] text-gray-700"
                     >
-                      Email
+                      {t("auth:signup.email")}
                     </Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Your email address"
+                      placeholder={t("auth:signup.emailPlaceholder")}
                       className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -276,13 +284,13 @@ const SignupPage = () => {
                       htmlFor="confirm-password"
                       className="text-sm font-normal leading-[19.6px] text-gray-700"
                     >
-                      Confirm Password
+                      {t("auth:signup.confirmPassword")}
                     </Label>
                     <div className="relative">
                       <Input
                         id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
+                        placeholder={t("auth:signup.confirmPasswordPlaceholder")}
                         className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -318,16 +326,16 @@ const SignupPage = () => {
                   disabled={loading}
                   className="h-12 sm:h-[52px] rounded-xl bg-[linear-gradient(145deg,rgba(0,187,167,1)_0%,rgba(0,150,137,1)_100%)] px-4 py-3 text-xs sm:text-sm font-bold leading-[18px] tracking-[0.02em] text-white hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {loading ? "ĐANG ĐĂNG KÝ..." : "SIGN UP"}
+                  {loading ? t("auth:signup.submitting") : t("auth:signup.submit")}
                 </Button>
 
                 <p className="text-center text-xs font-normal leading-[18px] text-gray-400">
-                  Already have an account?{" "}
+                  {t("auth:signup.alreadyHaveAccount")}{" "}
                   <Link
                     to="/login"
                     className="font-medium text-[#00bba7] hover:underline"
                   >
-                    Sign in
+                    {t("auth:signup.goToLogin")}
                   </Link>
                 </p>
               </form>

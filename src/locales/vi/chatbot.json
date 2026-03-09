@@ -1,0 +1,19 @@
+{
+  "widget": {
+    "title": "360Retail Assistant",
+    "subtitle": "Hỏi về giá, tính năng, gói dịch vụ 360Retail",
+    "closeLabel": "Đóng chatbot",
+    "emptyState": "Bắt đầu bằng cách chọn một câu hỏi gợi ý bên dưới hoặc gõ câu hỏi của bạn về gói Trial, Basic, Pro, Yearly, thanh toán, v.v.",
+    "typing": "Đang soạn câu trả lời...",
+    "sourceLabel": "Nguồn: {{source}}",
+    "sourceFaq": "FAQ",
+    "sourceAi": "AI",
+    "clearConversation": "Xóa cuộc trò chuyện này",
+    "inputPlaceholder": "Hỏi về giá gói, tính năng, dùng thử...",
+    "openButtonLabel": "Mở chatbot 360Retail"
+  },
+  "errors": {
+    "cannotConnect": "Không thể kết nối chatbot. Vui lòng thử lại sau."
+  }
+}
+

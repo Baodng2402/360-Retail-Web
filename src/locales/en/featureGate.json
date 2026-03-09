@@ -1,0 +1,15 @@
+{
+  "upgradeDialog": {
+    "title": {
+      "trialExpired": "Your trial has ended",
+      "subscriptionExpired": "Your subscription has expired",
+      "featureNotAvailable": "This feature is not available in your current plan"
+    },
+    "currentPlan": "Your current plan: {{plan}}.",
+    "toUseFeature": "To use {{feature}}, please upgrade to {{requiredPlan}} or higher.",
+    "toUseFeatureFallback": "To use this feature, please upgrade to {{requiredPlan}} or higher.",
+    "later": "Later",
+    "upgradeNow": "Upgrade now"
+  }
+}
+

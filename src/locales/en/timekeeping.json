@@ -1,0 +1,70 @@
+{
+  "page": {
+    "storeSelectorHint": "Switch to timekeeping for another store"
+  },
+  "toasts": {
+    "loadTodayFailed": "Unable to load today's timekeeping status.",
+    "gpsNotSupported": "Your browser does not support GPS geolocation.",
+    "getLocationFailed": "Unable to get your current location. Please enable GPS/Location for your browser.",
+    "tooFarForCheckIn": "You are too far from the store to check in with GPS. Please try again.",
+    "checkInSuccess": "Checked in successfully!",
+    "checkInFailed": "Unable to check in. Please try again.",
+    "tooFarForCheckOut": "You are too far from the store to check out with GPS. Please try again.",
+    "checkOutSuccess": "Checked out successfully!",
+    "checkOutFailed": "Unable to check out. Please try again."
+  },
+  "states": {
+    "loadingToday": "Loading today's timekeeping status..."
+  },
+  "today": {
+    "title": "Today's status",
+    "checkedIn": "Checked in",
+    "notCheckedIn": "Not checked in",
+    "checkedOut": "Checked out",
+    "notCheckedOut": "Not checked out",
+    "checkInTime": "Check-in time:"
+  },
+  "map": {
+    "title": "Store map (OpenStreetMap)",
+    "subtitle": "The store location is used to validate distance when you timekeep via GPS. You can update coordinates in Store settings.",
+    "missingStoreGps": "Store GPS coordinates are not set. Go to Dashboard > Settings and update GPS Location to see the map here and enable distance validation.",
+    "distanceLabel": "Current distance from you to the store:"
+  },
+  "selfie": {
+    "title": "Timekeeping selfie",
+    "hint": "Choose a face photo (JPEG/PNG/WebP, max 5MB). It will be sent with check-in to ensure the right person and shift."
+  },
+  "actions": {
+    "title": "Timekeeping actions",
+    "hint": "The system uses your current GPS location. Please allow Location access when prompted."
+  },
+  "history": {
+    "title": "History & overview",
+    "subtitle": "Your recent timekeeping history.",
+    "daysWithData": "Days with data",
+    "totalHours": "Total hours (estimated)",
+    "lateCount": "Late check-ins",
+    "loading": "Loading timekeeping history...",
+    "empty": "No historical timekeeping data.",
+    "table": {
+      "date": "Date",
+      "workHours": "Work hours",
+      "late": "Late",
+      "onTime": "On time"
+    }
+  },
+  "monthly": {
+    "title": "Monthly timekeeping report",
+    "monthLabel": "Month:",
+    "yearLabel": "Year:",
+    "view": "View",
+    "summary": {
+      "totalEmployees": "Total employees",
+      "totalWorkDays": "Total workdays",
+      "totalWorkHours": "Total work hours",
+      "totalLateCount": "Total late check-ins"
+    },
+    "loading": "Loading report...",
+    "hint": "Select month/year and click \"View\" to see the monthly timekeeping report."
+  }
+}

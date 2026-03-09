@@ -12,8 +12,8 @@ import {
   Calendar,
 } from "lucide-react";
 import { authApi } from "@/shared/lib/authApi";
-import { UserStatus } from "@/shared/types/jwt-claims";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface StartTrialDialogProps {
   open: boolean;
@@ -22,15 +22,17 @@ interface StartTrialDialogProps {
 }
 
 export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDialogProps) {
+  const { t } = useTranslation(["store"]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [storeName, setStoreName] = useState("");
 
   useEffect(() => {
     if (open && userEmail) {
-      setStoreName(`Cửa hàng của ${userEmail.split("@")[0]}`);
+      const name = userEmail.split("@")[0] ?? "";
+      setStoreName(t("store:trial.start.defaultStoreName", { name }));
     }
-  }, [open, userEmail]);
+  }, [open, userEmail, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,10 +41,12 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
       setLoading(true);
 
       await authApi.createStoreTrial({
-        storeName: storeName.trim() || `Cửa hàng của ${userEmail}`,
+        storeName:
+          storeName.trim() ||
+          t("store:trial.start.defaultStoreName", { name: userEmail ?? "" }),
       });
 
-      toast.success("Tạo cửa hàng dùng thử thành công!");
+      toast.success(t("store:trial.start.toastSuccess"));
 
       // Backend xác nhận: token từ refresh-access đã có store_id và StoreOwner; không cần login lần 2.
       const refreshRes = await authApi.refreshAccess();
@@ -58,7 +62,7 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
       console.error("Failed to start trial:", error);
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Không thể tạo cửa hàng dùng thử";
+          ?.data?.message || t("store:trial.start.toastError");
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -82,9 +86,9 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-500 shadow-lg">
               <Gift className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl">Bắt đầu dùng thử miễn phí 7 ngày</CardTitle>
+            <CardTitle className="text-2xl">{t("store:trial.start.title")}</CardTitle>
             <CardDescription className="text-base">
-              Tạo cửa hàng của bạn để bắt đầu sử dụng 360 Retail
+              {t("store:trial.start.subtitle")}
             </CardDescription>
           </CardHeader>
 
@@ -94,30 +98,30 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
                 <div className="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0">
                   <Calendar className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                 </div>
-                <span>7 ngày dùng thử miễn phí - Không cần thẻ tín dụng</span>
+                <span>{t("store:trial.start.benefits.trial")}</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
                   <Store className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <span>Tạo cửa hàng và quản lý sản phẩm ngay lập tức</span>
+                <span>{t("store:trial.start.benefits.instant")}</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </div>
-                <span>Truy cập tất cả tính năng cao cấp</span>
+                <span>{t("store:trial.start.benefits.premium")}</span>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="storeName">Tên cửa hàng</Label>
+                <Label htmlFor="storeName">{t("store:trial.start.storeNameLabel")}</Label>
                 <div className="relative">
                   <Store className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="storeName"
-                    placeholder="Nhập tên cửa hàng"
+                    placeholder={t("store:trial.start.storeNamePlaceholder")}
                     className="pl-10 h-11"
                     value={storeName}
                     onChange={(e) => setStoreName(e.target.value)}
@@ -125,7 +129,11 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Nếu để trống, hệ thống sẽ tự động tạo tên: "Cửa hàng của {userEmail?.split("@")[0]}"
+                  {t("store:trial.start.storeNameHint", {
+                    storeName: t("store:trial.start.defaultStoreName", {
+                      name: userEmail?.split("@")[0] ?? "",
+                    }),
+                  })}
                 </p>
               </div>
 
@@ -137,18 +145,18 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
                   onClick={handleSkip}
                   disabled={loading}
                 >
-                  Để sau
+                  {t("store:trial.start.later")}
                 </Button>
                 <Button type="submit" className="flex-1 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang tạo...
+                      {t("store:trial.start.creating")}
                     </>
                   ) : (
                     <>
                       <Gift className="mr-2 h-4 w-4" />
-                      Bắt đầu dùng thử
+                      {t("store:trial.start.startNow")}
                     </>
                   )}
                 </Button>
@@ -156,7 +164,7 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
             </form>
 
             <p className="text-center text-xs text-muted-foreground mt-4">
-              Sau 7 ngày, bạn có thể nâng cấp lên gói trả phí để tiếp tục sử dụng
+              {t("store:trial.start.note")}
             </p>
           </CardContent>
         </Card>
@@ -165,7 +173,7 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
           onClick={() => onOpenChange(false)}
           className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{t("store:trial.start.close")}</span>
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -173,37 +181,5 @@ export function StartTrialDialog({ open, onOpenChange, userEmail }: StartTrialDi
       </div>
     </div>
   );
-}
-
-export function useNeedsTrial() {
-  const [needsTrial, setNeedsTrial] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const checkStatus = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setNeedsTrial(false);
-        return false;
-      }
-
-      const userInfo = await authApi.meWithSubscription();
-      const needs = userInfo.status === UserStatus.Registered || !userInfo.storeId;
-      setNeedsTrial(needs);
-      return needs;
-    } catch {
-      setNeedsTrial(false);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    checkStatus();
-  }, []);
-
-  return { needsTrial, loading, checkStatus };
 }
 

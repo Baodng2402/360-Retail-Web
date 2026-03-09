@@ -1,0 +1,30 @@
+{
+  "page": {
+    "storeSelectorHint": "Switch to view reports from another store"
+  },
+  "overview": {
+    "title": "Customer feedback overview",
+    "subtitle": "Overall customer satisfaction score.",
+    "basedOnCount": "Based on {{count, number}} customer feedback entries.",
+    "noData": "No feedback data available yet."
+  },
+  "distribution": {
+    "title": "Rating distribution",
+    "subtitle": "Share of feedback by star rating.",
+    "noData": "No distribution data available yet."
+  },
+  "recent": {
+    "title": "Recent feedback",
+    "subtitle": "Latest feedback from customers.",
+    "empty": "No feedback recorded yet.",
+    "contentFallback": "No detailed message provided."
+  },
+  "advanced": {
+    "title": "Advanced report details",
+    "subtitle": "Export feedback data for deeper analysis in Excel/BI tools."
+  },
+  "actions": {
+    "exportComingSoon": "Export (coming soon)"
+  }
+}
+

@@ -1,0 +1,70 @@
+{
+  "page": {
+    "storeSelectorHint": "Chuyển đổi để chấm công cho cửa hàng khác"
+  },
+  "toasts": {
+    "loadTodayFailed": "Không thể tải trạng thái chấm công hôm nay.",
+    "gpsNotSupported": "Trình duyệt không hỗ trợ định vị GPS.",
+    "getLocationFailed": "Không thể lấy vị trí hiện tại. Vui lòng bật GPS/Location cho trình duyệt.",
+    "tooFarForCheckIn": "Bạn đang cách cửa hàng quá xa, không thể check-in bằng GPS. Vui lòng kiểm tra lại.",
+    "checkInSuccess": "Check-in thành công!",
+    "checkInFailed": "Không thể check-in. Vui lòng thử lại.",
+    "tooFarForCheckOut": "Bạn đang cách cửa hàng quá xa, không thể check-out bằng GPS. Vui lòng kiểm tra lại.",
+    "checkOutSuccess": "Check-out thành công!",
+    "checkOutFailed": "Không thể check-out. Vui lòng thử lại."
+  },
+  "states": {
+    "loadingToday": "Đang tải trạng thái chấm công..."
+  },
+  "today": {
+    "title": "Trạng thái hôm nay",
+    "checkedIn": "Đã check-in",
+    "notCheckedIn": "Chưa check-in",
+    "checkedOut": "Đã check-out",
+    "notCheckedOut": "Chưa check-out",
+    "checkInTime": "Giờ check-in:"
+  },
+  "map": {
+    "title": "Bản đồ cửa hàng (OpenStreetMap)",
+    "subtitle": "Vị trí cửa hàng được dùng để kiểm tra khoảng cách khi bạn chấm công bằng GPS. Bạn có thể cập nhật tọa độ trong phần Cài đặt cửa hàng.",
+    "missingStoreGps": "Chưa có tọa độ GPS cho cửa hàng. Vui lòng vào Dashboard > Settings và cập nhật mục GPS Location để xem bản đồ tại đây và bật kiểm tra khoảng cách khi chấm công.",
+    "distanceLabel": "Khoảng cách hiện tại từ bạn tới cửa hàng:"
+  },
+  "selfie": {
+    "title": "Ảnh selfie chấm công",
+    "hint": "Chọn ảnh khuôn mặt của bạn (JPEG/PNG/WebP, tối đa 5MB). Ảnh sẽ được gửi kèm khi check-in để đảm bảo đúng người, đúng ca làm."
+  },
+  "actions": {
+    "title": "Thao tác chấm công",
+    "hint": "Hệ thống sẽ sử dụng vị trí GPS hiện tại của bạn. Vui lòng cho phép trình duyệt truy cập Location khi được hỏi."
+  },
+  "history": {
+    "title": "Lịch sử & tổng quan chấm công",
+    "subtitle": "Dữ liệu chấm công của riêng bạn trong thời gian gần đây.",
+    "daysWithData": "Số ngày có dữ liệu",
+    "totalHours": "Tổng giờ làm (ước tính)",
+    "lateCount": "Số buổi đi trễ",
+    "loading": "Đang tải lịch sử chấm công...",
+    "empty": "Chưa có dữ liệu chấm công lịch sử.",
+    "table": {
+      "date": "Ngày",
+      "workHours": "Giờ làm",
+      "late": "Trễ",
+      "onTime": "Đúng giờ"
+    }
+  },
+  "monthly": {
+    "title": "Báo cáo chấm công tháng",
+    "monthLabel": "Tháng:",
+    "yearLabel": "Năm:",
+    "view": "Xem",
+    "summary": {
+      "totalEmployees": "Tổng nhân viên",
+      "totalWorkDays": "Tổng ngày công",
+      "totalWorkHours": "Tổng giờ làm",
+      "totalLateCount": "Tổng đi trễ"
+    },
+    "loading": "Đang tải báo cáo...",
+    "hint": "Chọn tháng/năm rồi nhấn \"Xem\" để xem báo cáo chấm công."
+  }
+}

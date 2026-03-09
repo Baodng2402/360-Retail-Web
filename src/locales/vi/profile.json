@@ -1,0 +1,65 @@
+{
+  "states": {
+    "loading": "Đang tải..."
+  },
+  "roles": {
+    "member": "Thành viên",
+    "StoreOwner": "Chủ cửa hàng",
+    "Manager": "Quản lý",
+    "Staff": "Nhân viên",
+    "PotentialOwner": "Chủ cửa hàng (chờ kích hoạt)"
+  },
+  "user": {
+    "nameFallback": "Người dùng",
+    "emailFallback": "Chưa có email",
+    "workingAt": "Đang làm việc tại {{storeName}}"
+  },
+  "actions": {
+    "managePlan": "Quản lý gói",
+    "retry": "Thử lại",
+    "manageOrUpgrade": "Quản lý / nâng cấp gói",
+    "buyPlan": "Mua gói dịch vụ",
+    "markDone": "Đánh dấu hoàn thành"
+  },
+  "subscription": {
+    "title": "Thông tin gói dịch vụ",
+    "loadFailed": "Không thể tải thông tin gói dịch vụ",
+    "currentPlanForStore": "Gói hiện tại của {{storeName}}",
+    "currentPlanGeneric": "Gói dịch vụ hiện đang sử dụng",
+    "daysRemaining": "Còn {{days, number}} ngày",
+    "startDate": "Bắt đầu:",
+    "endDate": "Hết hạn:",
+    "noActivePlanForStore": "Cửa hàng {{storeName}} chưa có gói active.",
+    "noPlanGeneric": "Bạn chưa có gói dịch vụ cho cửa hàng.",
+    "otherStoresMayHavePlan": "Tuy nhiên, một số cửa hàng khác có thể đang có gói dịch vụ active.",
+    "managedByOwnerNote": "Gói dịch vụ được quản lý bởi <strong>chủ cửa hàng</strong>. Bạn vẫn có thể tiếp tục làm việc bình thường theo phân quyền hiện tại."
+  },
+  "stores": {
+    "title": "Cửa hàng của bạn ({{count, number}})",
+    "default": "Mặc định",
+    "noAddress": "Chưa có địa chỉ",
+    "inactive": "Ngừng hoạt động",
+    "daysLeft": "{{days, number}} ngày còn lại",
+    "empty": "Chưa có cửa hàng nào"
+  },
+  "tasks": {
+    "title": "Công việc của tôi",
+    "empty": "Hiện tại bạn chưa có công việc nào đang mở.",
+    "deadline": "Hạn:",
+    "status": "Trạng thái:"
+  },
+  "timekeeping": {
+    "title": "Lịch sử chấm công của tôi",
+    "empty": "Chưa có dữ liệu chấm công được ghi nhận.",
+    "summary": {
+      "days": "Ngày công:",
+      "hours": "Giờ làm:",
+      "late": "Đi trễ:"
+    },
+    "lateBadge": "Đi trễ",
+    "hoursLabel": "Giờ:"
+  },
+  "personalInfo": {
+    "title": "Thông tin cá nhân"
+  }
+}
