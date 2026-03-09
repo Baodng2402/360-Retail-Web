@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import logo from "@/assets/logo.png";
 
@@ -19,6 +20,14 @@ export const AuthFormLayout = ({
   backTo = "/login",
   backLabel = "Back to Login",
 }: AuthFormLayoutProps) => {
+  const { t } = useTranslation("auth");
+
+  const resolvedBackLabel =
+    backLabel ??
+    t("layout.backToLogin", {
+      defaultValue: "Back to Login",
+    });
+
   return (
     <div className="flex min-h-screen w-full bg-white text-gray-900">
       <div className="mx-auto flex w-full max-w-[1920px]">
@@ -46,7 +55,7 @@ export const AuthFormLayout = ({
                 className="inline-flex items-center gap-2 text-sm font-medium text-teal-600 transition-colors hover:text-teal-700"
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span>{backLabel}</span>
+                <span>{resolvedBackLabel}</span>
               </Link>
             </div>
 

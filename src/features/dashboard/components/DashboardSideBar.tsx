@@ -40,6 +40,8 @@ import {
   DialogDescription,
 } from "@/shared/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 interface DashboardSideBarProps {
   isCollapsed: boolean;
@@ -78,6 +80,7 @@ export const DashboardSideBar = ({
   isCollapsed,
   onToggle,
 }: DashboardSideBarProps) => {
+  const { t } = useTranslation("dashboard");
   const [newSaleOpen, setNewSaleOpen] = useState(false);
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -154,8 +157,8 @@ export const DashboardSideBar = ({
   const mainNavItems: NavItem[] = [
     {
       icon: LayoutDashboard,
-      label: "Dashboard 360°",
-      subLabel: "Tổng quan 360°",
+      label: t("sidebar.nav.dashboard.label"),
+      subLabel: t("sidebar.nav.dashboard.subLabel"),
       path: "/dashboard",
       end: true,
       requiresStore: false,
@@ -165,8 +168,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: MapPin,
-      label: "Timekeeping",
-      subLabel: "Chấm công GPS",
+      label: t("sidebar.nav.timekeeping.label"),
+      subLabel: t("sidebar.nav.timekeeping.subLabel"),
       path: "/dashboard/timekeeping",
       end: false,
       requiresStore: true,
@@ -175,8 +178,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: ListChecks,
-      label: "My Tasks",
-      subLabel: "Công việc của tôi",
+      label: t("sidebar.nav.myTasks.label"),
+      subLabel: t("sidebar.nav.myTasks.subLabel"),
       path: "/dashboard/my-tasks",
       end: false,
       requiresStore: true,
@@ -185,8 +188,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: Users,
-      label: "Staff",
-      subLabel: "Nhân viên",
+      label: t("sidebar.nav.staff.label"),
+      subLabel: t("sidebar.nav.staff.subLabel"),
       path: "/dashboard/staff",
       end: false,
       requiresStore: true,
@@ -194,8 +197,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: StoreIcon,
-      label: "Stores",
-      subLabel: "Cửa hàng",
+      label: t("sidebar.nav.stores.label"),
+      subLabel: t("sidebar.nav.stores.subLabel"),
       path: "/dashboard/stores",
       end: false,
       requiresStore: true,
@@ -204,8 +207,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: Package,
-      label: "Products",
-      subLabel: "Sản phẩm",
+      label: t("sidebar.nav.products.label"),
+      subLabel: t("sidebar.nav.products.subLabel"),
       path: "/dashboard/products",
       end: false,
       requiresStore: true,
@@ -213,8 +216,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: Warehouse,
-      label: "Inventory",
-      subLabel: "Nhập/Xuất kho",
+      label: t("sidebar.nav.inventory.label"),
+      subLabel: t("sidebar.nav.inventory.subLabel"),
       path: "/dashboard/inventory",
       end: false,
       requiresStore: true,
@@ -223,8 +226,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: ShoppingCart,
-      label: "Sales & POS",
-      subLabel: "Bán hàng",
+      label: t("sidebar.nav.sales.label"),
+      subLabel: t("sidebar.nav.sales.subLabel"),
       path: "/dashboard/sales",
       end: false,
       requiresStore: true,
@@ -232,8 +235,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: ClipboardCheck,
-      label: "Orders",
-      subLabel: "Đơn hàng",
+      label: t("sidebar.nav.orders.label"),
+      subLabel: t("sidebar.nav.orders.subLabel"),
       path: "/dashboard/orders",
       end: false,
       requiresStore: true,
@@ -241,8 +244,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: UserCircle,
-      label: "Customers",
-      subLabel: "Khách hàng",
+      label: t("sidebar.nav.customers.label"),
+      subLabel: t("sidebar.nav.customers.subLabel"),
       path: "/dashboard/customers",
       end: false,
       requiresStore: true,
@@ -250,8 +253,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: MessageSquare,
-      label: "CRM & Loyalty",
-      subLabel: "Điểm thưởng & Feedback",
+      label: t("sidebar.nav.crm.label"),
+      subLabel: t("sidebar.nav.crm.subLabel"),
       path: "/dashboard/crm",
       end: false,
       requiresStore: true,
@@ -260,8 +263,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: FileText,
-      label: "Reports",
-      subLabel: "Báo cáo",
+      label: t("sidebar.nav.reports.label"),
+      subLabel: t("sidebar.nav.reports.subLabel"),
       path: "/dashboard/reports",
       end: false,
       requiresStore: true,
@@ -270,8 +273,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: CreditCard,
-      label: "Subscription",
-      subLabel: "Gói dịch vụ",
+      label: t("sidebar.nav.subscription.label"),
+      subLabel: t("sidebar.nav.subscription.subLabel"),
       path: "/dashboard/subscription",
       end: false,
       requiresStore: true,
@@ -280,8 +283,8 @@ export const DashboardSideBar = ({
     },
     {
       icon: Settings,
-      label: "Settings",
-      subLabel: "Cài đặt",
+      label: t("sidebar.nav.settings.label"),
+      subLabel: t("sidebar.nav.settings.subLabel"),
       path: "/dashboard/settings",
       end: false,
       requiresStore: true,
@@ -292,20 +295,20 @@ export const DashboardSideBar = ({
   const quickActions = [
     {
       icon: Plus,
-      label: "Create Order",
-      subLabel: "Tạo đơn hàng",
+      label: t("sidebar.quickActions.createOrder.label"),
+      subLabel: t("sidebar.quickActions.createOrder.subLabel"),
       action: () => setNewSaleOpen(true),
     },
     {
       icon: ClipboardCheck,
-      label: "Staff Check-in",
-      subLabel: "Check-in nhân viên",
+      label: t("sidebar.quickActions.staffCheckIn.label"),
+      subLabel: t("sidebar.quickActions.staffCheckIn.subLabel"),
       action: () => setCheckInOpen(true),
     },
     {
       icon: MessageSquare,
-      label: "Record Feedback",
-      subLabel: "Ghi feedback",
+      label: t("sidebar.quickActions.recordFeedback.label"),
+      subLabel: t("sidebar.quickActions.recordFeedback.subLabel"),
       action: () => setFeedbackOpen(true),
     },
   ];
@@ -341,7 +344,7 @@ export const DashboardSideBar = ({
           willChange: "width",
         }}
       >
-        <div className={`h-[73px] flex items-center px-4 flex-shrink-0 border-b border-gray-200 dark:border-gray-800`}>
+        <div className="h-[73px] flex items-center px-4 flex-shrink-0 border-b border-gray-200 dark:border-gray-800">
           <div
             className={`flex items-center gap-3 w-full ${isCollapsed ? "justify-center" : ""
               }`}
@@ -360,13 +363,19 @@ export const DashboardSideBar = ({
             >
               <div className="whitespace-nowrap">
                 <h1 className="text-lg font-bold bg-gradient-to-r from-teal-500 to-blue-500 bg-clip-text text-transparent">
-                  Retail 360
+                  {t("sidebar.brandLine1", { defaultValue: "Retail 360" })}
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  SME Platform
+                  {t("sidebar.brandLine2", { defaultValue: "SME Platform" })}
                 </p>
               </div>
             </div>
+
+            {!isCollapsed && (
+              <div className="ml-auto flex items-center gap-2">
+                <LanguageSwitcher />
+              </div>
+            )}
           </div>
         </div>
 
@@ -417,9 +426,9 @@ export const DashboardSideBar = ({
                           y: rect.top + rect.height / 2,
                           lockHint:
                             lockedByPlanFeature || lockedByExpired
-                              ? "Nâng cấp gói để sử dụng"
+                              ? t("sidebar.locks.upgradePlan")
                               : lockedByNoStore
-                                ? "Thiết lập cửa hàng trước"
+                                ? t("sidebar.locks.setupStoreFirst")
                                 : undefined,
                         });
                       }
@@ -519,10 +528,10 @@ export const DashboardSideBar = ({
             )}
           </ul>
 
-          {!isCollapsed && canUseQuickActions && (
+        {!isCollapsed && canUseQuickActions && (
             <div className="mt-4">
               <h3 className="mb-2 px-3 text-xs font-semibold uppercase text-muted-foreground whitespace-nowrap">
-                Quick Actions
+              {t("sidebar.quickActionsSection")}
               </h3>
               <ul className="space-y-1">
                 {quickActions.map((action) => (
@@ -597,15 +606,15 @@ export const DashboardSideBar = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-amber-500" />
-              Thiết lập cửa hàng
+              {t("sidebar.setupStoreDialog.title")}
             </DialogTitle>
             <DialogDescription>
-              Bạn cần hoàn thành thiết lập cửa hàng trước khi sử dụng tính năng này.
+              {t("sidebar.setupStoreDialog.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 mt-4">
             <p className="text-sm text-muted-foreground">
-              Vui lòng hoàn thành thiết lập cửa hàng của bạn để bắt đầu quản lý doanh nghiệp.
+              {t("sidebar.setupStoreDialog.body")}
             </p>
             <div className="flex gap-3">
               <Button
@@ -613,7 +622,7 @@ export const DashboardSideBar = ({
                 className="flex-1"
                 onClick={() => setShowSetupDialog(false)}
               >
-                Để sau
+                {t("sidebar.setupStoreDialog.remindLater")}
               </Button>
               <Button
                 className="flex-1 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
@@ -622,7 +631,7 @@ export const DashboardSideBar = ({
                   navigate("/dashboard");
                 }}
               >
-                Thiết lập ngay
+                {t("sidebar.setupStoreDialog.setupNow")}
               </Button>
             </div>
           </div>

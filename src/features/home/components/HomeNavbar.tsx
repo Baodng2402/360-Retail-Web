@@ -4,6 +4,8 @@ import { Menu } from "lucide-react";
 import logoImage from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
 import ThemeMode from "@/shared/components/ui/themeMode";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 import {
   Accordion,
@@ -72,6 +74,25 @@ const HomeNavbar = ({
   },
   className,
 }: HomeNavbarProps) => {
+  const { t } = useTranslation("home");
+
+  const translatedLogo = {
+    ...logo,
+    alt: t("navbar.brandAlt", { defaultValue: logo.alt }),
+    title: t("navbar.brandTitle", { defaultValue: logo.title }),
+  };
+
+  const translatedAuth = {
+    login: {
+      ...auth.login,
+      title: t("navbar.login", { defaultValue: auth.login.title }),
+    },
+    signup: {
+      ...auth.signup,
+      title: t("navbar.signup", { defaultValue: auth.signup.title }),
+    },
+  };
+
   return (
     <section
       className={cn(
@@ -86,16 +107,16 @@ const HomeNavbar = ({
           <nav className="hidden items-center justify-between lg:flex">
             <div className="flex items-center gap-6">
               <a
-                href={logo.url}
+                href={translatedLogo.url}
                 className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-80"
               >
                 <img
-                  src={logo.src}
+                  src={translatedLogo.src}
                   className="h-9 w-auto rounded-xl bg-transparent transition-all duration-300"
-                  alt={logo.alt}
+                  alt={translatedLogo.alt}
                 />
                 <span className="text-lg font-semibold tracking-tight">
-                  {logo.title}
+                  {translatedLogo.title}
                 </span>
               </a>
 
@@ -115,12 +136,14 @@ const HomeNavbar = ({
                 <ThemeMode />
               </div>
 
+              <LanguageSwitcher />
+
               <Button asChild variant="outline" size="sm">
-                <a href={auth.login.url}>{auth.login.title}</a>
+                <a href={translatedAuth.login.url}>{translatedAuth.login.title}</a>
               </Button>
 
               <Button asChild size="sm">
-                <a href={auth.signup.url}>{auth.signup.title}</a>
+                <a href={translatedAuth.signup.url}>{translatedAuth.signup.title}</a>
               </Button>
             </div>
           </nav>
@@ -128,16 +151,16 @@ const HomeNavbar = ({
           <div className="block lg:hidden">
             <div className="flex items-center justify-between">
               <a
-                href={logo.url}
+                href={translatedLogo.url}
                 className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-80"
               >
                 <img
-                  src={logo.src}
+                  src={translatedLogo.src}
                   className="h-9 w-auto transition-all duration-300"
-                  alt={logo.alt}
+                  alt={translatedLogo.alt}
                 />
                 <span className="text-lg font-semibold tracking-tight">
-                  {logo.title}
+                  {translatedLogo.title}
                 </span>
               </a>
 
@@ -150,14 +173,14 @@ const HomeNavbar = ({
                   <SheetContent className="overflow-y-auto">
                     <SheetHeader>
                       <SheetTitle>
-                        <a href={logo.url} className="flex items-center gap-2">
+                        <a href={translatedLogo.url} className="flex items-center gap-2">
                           <img
-                            src={logo.src}
+                            src={translatedLogo.src}
                             className="h-8 w-auto transition-all duration-300"
-                            alt={logo.alt}
+                            alt={translatedLogo.alt}
                           />
                           <span className="text-base font-semibold">
-                            {logo.title}
+                            {translatedLogo.title}
                           </span>
                         </a>
                       </SheetTitle>
@@ -176,10 +199,10 @@ const HomeNavbar = ({
 
                       <div className="flex flex-col gap-3">
                         <Button asChild variant="outline">
-                          <a href={auth.login.url}>{auth.login.title}</a>
+                          <a href={translatedAuth.login.url}>{translatedAuth.login.title}</a>
                         </Button>
                         <Button asChild>
-                          <a href={auth.signup.url}>{auth.signup.title}</a>
+                          <a href={translatedAuth.signup.url}>{translatedAuth.signup.title}</a>
                         </Button>
                       </div>
                     </div>

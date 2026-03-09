@@ -1,0 +1,119 @@
+{
+  "page": {
+    "storeSelectorHint": "Chọn cửa hàng để xem feedback và cấu hình loyalty cho đúng chi nhánh."
+  },
+  "header": {
+    "title": "CRM Feedback & Loyalty",
+    "subtitle": "Tổng quan điểm đánh giá khách hàng và cấu hình quy tắc tích điểm{{storeSuffix}}.",
+    "storeSuffix": " cho {{storeName}}",
+    "totalRatings": "{{count, number}} lượt đánh giá"
+  },
+  "distribution": {
+    "title": "Phân bố điểm đánh giá",
+    "empty": "Chưa có dữ liệu đánh giá."
+  },
+  "loyalty": {
+    "title": "Quy tắc Loyalty hiện tại",
+    "addRule": "Thêm luật",
+    "loading": "Đang tải quy tắc loyalty...",
+    "empty": "Chưa có luật tích điểm nào. Bạn có thể cấu hình luật mới để bắt đầu chương trình khách hàng thân thiết.",
+    "minOrderLabel": "Đơn tối thiểu:",
+    "statusLabel": "Trạng thái:",
+    "statusActive": "Đang áp dụng",
+    "statusInactive": "Tạm tắt",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "earningRateBadge": "{{rate}} điểm / 1k",
+    "confirmDelete": "Bạn có chắc muốn xóa luật \"{{name}}\"?"
+  },
+  "quickActions": {
+    "title": "Thao tác nhanh",
+    "redeemPoints": "Đổi điểm thưởng",
+    "createStaffFeedback": "Tạo feedback hộ khách"
+  },
+  "filters": {
+    "title": "Lọc feedback khách hàng",
+    "total": "Tổng: {{count, number}} feedback",
+    "ratingLabel": "Điểm đánh giá",
+    "ratingPlaceholder": "Tất cả",
+    "all": "Tất cả",
+    "stars5": "5 sao",
+    "stars4": "4 sao",
+    "stars3": "3 sao",
+    "stars2": "2 sao",
+    "stars1": "1 sao",
+    "fromDate": "Từ ngày",
+    "toDate": "Đến ngày",
+    "reset": "Đặt lại bộ lọc"
+  },
+  "recentFeedback": {
+    "title": "Feedback gần đây của khách hàng",
+    "loading": "Đang tải danh sách feedback...",
+    "empty": "Chưa có feedback nào phù hợp với bộ lọc hiện tại.",
+    "contentFallback": "(Không có nội dung chi tiết)",
+    "sourceLabel": "Nguồn:",
+    "sourceUnknown": "Không rõ",
+    "timeLabel": "Thời gian:"
+  },
+  "dialogs": {
+    "rule": {
+      "editTitle": "Cập nhật luật tích điểm",
+      "createTitle": "Thêm luật tích điểm",
+      "nameLabel": "Tên luật",
+      "namePlaceholder": "VD: Tích điểm theo hóa đơn",
+      "typeLabel": "Kiểu luật (type)",
+      "earningRateLabel": "Tỷ lệ tích điểm (điểm/1k)",
+      "minSpendLabel": "Đơn tối thiểu (VNĐ)",
+      "statusLabel": "Trạng thái",
+      "statusActive": "Đang áp dụng",
+      "statusInactive": "Tạm tắt",
+      "cancel": "Hủy",
+      "save": "Lưu"
+    },
+    "redeem": {
+      "title": "Đổi điểm thưởng",
+      "description": "Nhập mã khách hàng và số điểm muốn đổi.",
+      "customerIdLabel": "Mã khách hàng (Customer ID)",
+      "customerIdPlaceholder": "Nhập ID khách hàng...",
+      "quickSearchLabel": "Tìm khách hàng nhanh",
+      "searchPlaceholder": "Nhập tên, số điện thoại hoặc email...",
+      "searching": "Đang tìm...",
+      "search": "Tìm",
+      "selectedCustomerToast": "Đã chọn khách hàng: {{name}}",
+      "pointsLabel": "Số điểm đổi",
+      "pointsPlaceholder": "Nhập số điểm...",
+      "descLabel": "Mô tả (tùy chọn)",
+      "descPlaceholder": "VD: Đổi voucher 50k",
+      "cancel": "Hủy",
+      "confirm": "Đổi điểm"
+    },
+    "staffFeedback": {
+      "title": "Tạo feedback hộ khách hàng",
+      "description": "Staff/Manager tạo feedback in-store thay cho khách.",
+      "customerIdLabel": "Mã khách hàng (Customer ID)",
+      "customerIdPlaceholder": "Nhập ID khách hàng...",
+      "quickSearchLabel": "Tìm khách hàng nhanh",
+      "searchPlaceholder": "Nhập tên, số điện thoại hoặc email...",
+      "searching": "Đang tìm...",
+      "search": "Tìm",
+      "selectedCustomerToast": "Đã chọn khách hàng: {{name}}",
+      "ratingLabel": "Đánh giá",
+      "contentLabel": "Nội dung (tùy chọn)",
+      "contentPlaceholder": "Khách nhận xét...",
+      "cancel": "Hủy",
+      "confirm": "Tạo feedback"
+    }
+  },
+  "toasts": {
+    "ruleUpdateSuccess": "Cập nhật luật tích điểm thành công.",
+    "ruleCreateSuccess": "Tạo luật tích điểm mới thành công.",
+    "ruleSaveFailed": "Không thể lưu luật tích điểm.",
+    "ruleDeleteSuccess": "Đã xóa luật tích điểm.",
+    "ruleDeleteFailed": "Không thể xóa luật tích điểm.",
+    "redeemSuccess": "Đổi {{points, number}} điểm thành công!",
+    "redeemFailed": "Đổi điểm thất bại. Kiểm tra lại mã khách hàng và số điểm.",
+    "searchCustomerFailed": "Không thể tìm khách hàng. Vui lòng thử lại.",
+    "staffFeedbackSuccess": "Tạo feedback hộ khách thành công!",
+    "staffFeedbackFailed": "Tạo feedback thất bại."
+  }
+}

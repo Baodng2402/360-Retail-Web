@@ -11,6 +11,7 @@ import {
 import { authApi } from "@/shared/lib/authApi";
 import { UserStatus, isTrial, isActiveSubscription, type UserStatusType } from "@/shared/types/jwt-claims";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface TrialBannerProps {
   variant?: "banner" | "card";
@@ -30,6 +31,7 @@ export function TrialBanner({
   showUpgradeButton = true,
   className = "",
 }: TrialBannerProps) {
+  const { t } = useTranslation("dashboard");
   const navigate = useNavigate();
   const [state, setState] = useState<BannerState>({
     show: false,
@@ -58,7 +60,7 @@ export function TrialBanner({
             type: "expired",
             daysRemaining: null,
             message:
-              "Thời gian dùng thử đã hết. Vui lòng mua gói để tiếp tục sử dụng.",
+              t("trial.banner.expiredMessage"),
           });
         } else {
           setState({
@@ -66,8 +68,10 @@ export function TrialBanner({
             type: "trial",
             daysRemaining: user.trialDaysRemaining ?? null,
             message: user.trialDaysRemaining
-              ? `Bạn còn ${user.trialDaysRemaining} ngày dùng thử.`
-              : "Bạn đang trong thời gian dùng thử.",
+              ? t("trial.banner.trialMessageWithDays", {
+                  days: user.trialDaysRemaining,
+                })
+              : t("trial.banner.trialMessageGeneric"),
           });
         }
       } else if (
@@ -78,7 +82,7 @@ export function TrialBanner({
           show: true,
           type: "expired",
           daysRemaining: null,
-          message: "Bạn chưa có gói đăng ký. Vui lòng mua gói để sử dụng.",
+          message: t("trial.banner.noSubscriptionMessage"),
         });
       }
     } catch (error) {
@@ -105,28 +109,28 @@ export function TrialBanner({
       case "trial":
         return {
           icon: Clock,
-          title: "Dùng thử miễn phí",
+          title: t("trial.banner.trialTitle"),
           variant: "default" as const,
           className: "border-blue-200 bg-blue-50 text-blue-800",
         };
       case "expired":
         return {
           icon: AlertTriangle,
-          title: "Hết hạn dùng thử",
+          title: t("trial.banner.expiredTitle"),
           variant: "destructive" as const,
           className: "border-red-200 bg-red-50 text-red-800",
         };
       case "subscription_expired":
         return {
           icon: AlertTriangle,
-          title: "Hết hạn gói đăng ký",
+          title: t("trial.banner.subscriptionExpiredTitle"),
           variant: "destructive" as const,
           className: "border-red-200 bg-red-50 text-red-800",
         };
       default:
         return {
           icon: AlertTriangle,
-          title: "Thông báo",
+          title: t("trial.banner.noticeTitle"),
           variant: "default" as const,
           className: "",
         };
@@ -146,7 +150,7 @@ export function TrialBanner({
             {state.message}
             {state.daysRemaining !== null && state.type === "trial" && (
               <span className="block mt-1 font-medium">
-                Còn {state.daysRemaining} ngày
+                {t("trial.banner.daysRemaining", { days: state.daysRemaining })}
               </span>
             )}
           </AlertDescription>
@@ -154,7 +158,7 @@ export function TrialBanner({
         <div className="flex items-center gap-2 ml-4">
           {showUpgradeButton && (
             <Button size="sm" onClick={handleUpgrade} className="gap-1">
-              Nâng cấp
+              {t("trial.banner.upgrade")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           )}
@@ -185,7 +189,7 @@ export function TrialBanner({
               <span className="text-sm opacity-90">{state.message}</span>
               {state.daysRemaining !== null && state.type === "trial" && (
                 <span className="text-sm font-medium bg-white/50 px-2 py-0.5 rounded">
-                  Còn {state.daysRemaining} ngày
+                  {t("trial.banner.daysRemaining", { days: state.daysRemaining })}
                 </span>
               )}
             </div>
@@ -193,7 +197,7 @@ export function TrialBanner({
           <div className="flex items-center gap-2 flex-shrink-0">
             {showUpgradeButton && (
               <Button size="sm" onClick={handleUpgrade} className="gap-1">
-                Nâng cấp ngay
+                {t("trial.banner.upgradeNow")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
@@ -216,6 +220,7 @@ export function TrialBanner({
  * Compact trial warning for use in dashboard header
  */
 export function TrialWarningBadge() {
+  const { t } = useTranslation("dashboard");
   const [showWarning, setShowWarning] = useState(false);
   const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
 
@@ -254,7 +259,9 @@ export function TrialWarningBadge() {
       }`}
     >
       <Clock className="h-3 w-3" />
-      {daysRemaining !== null ? `Còn ${daysRemaining} ngày` : "Hết hạn"}
+      {daysRemaining !== null
+        ? t("trial.badges.daysLeft", { days: daysRemaining })
+        : t("trial.badges.expired")}
     </div>
   );
 }
@@ -263,6 +270,7 @@ export function TrialWarningBadge() {
  * Subscription status indicator for active users
  */
 export function SubscriptionStatusBadge() {
+  const { t } = useTranslation("dashboard");
   const [status, setStatus] = useState<UserStatusType | null>(null);
 
   useEffect(() => {
@@ -284,7 +292,7 @@ export function SubscriptionStatusBadge() {
     return (
       <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
         <CheckCircle className="h-3 w-3" />
-        Đang hoạt động
+        {t("trial.badges.active")}
       </div>
     );
   }
@@ -293,7 +301,7 @@ export function SubscriptionStatusBadge() {
     return (
       <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
         <Clock className="h-3 w-3" />
-        Dùng thử
+        {t("trial.badges.trial")}
       </div>
     );
   }

@@ -61,6 +61,7 @@ import AddProductModal from "@/features/dashboard/components/modals/AddProductMo
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
 import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type ProductDisplay = {
   id: string;
@@ -78,6 +79,7 @@ interface CartItem {
 }
 
 const SalePostPage = () => {
+  const { t } = useTranslation(["sale"]);
   const { currentStore } = useStoreStore();
   const navigate = useNavigate();
   const emitOrderCreated = useDashboardEventsStore(
@@ -119,7 +121,7 @@ const SalePostPage = () => {
         } catch (storeError) {
           setProducts([]);
           toast.error(
-            "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+            t("sale:toasts.noStore"),
           );
           return;
         }
@@ -151,15 +153,15 @@ const SalePostPage = () => {
 
       if (isStoreError) {
         toast.error(
-          "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+          t("sale:toasts.noStore"),
         );
       } else if (isCategoryError) {
         toast.error(
-          "Vui lòng tạo ít nhất một danh mục trước khi thêm sản phẩm.",
+          t("sale:toasts.needCategoryFirst"),
         );
       } else {
         toast.error(
-          msg || "Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.",
+          msg || t("sale:toasts.loadProductsError"),
         );
       }
       setProducts([]);
@@ -203,7 +205,7 @@ const SalePostPage = () => {
     return apiProducts.map((p) => ({
       id: p.id,
       name: p.productName,
-      category: p.categoryName || "Uncategorized",
+      category: p.categoryName || t("sale:misc.uncategorized"),
       price: p.price,
       stock: p.stockQuantity,
       barcode: p.barCode || "",
@@ -250,7 +252,7 @@ const SalePostPage = () => {
       return (
         <img
           src={image}
-          alt="Product"
+          alt={t("sale:misc.productAlt")}
           className={imageClasses[size]}
           onError={() => handleImageError(productId)}
         />
@@ -325,7 +327,7 @@ const SalePostPage = () => {
 
   const handleCompleteOrder = async () => {
     if (cart.length === 0) {
-      toast.error("Giỏ hàng trống!");
+      toast.error(t("sale:toasts.cartEmpty"));
       return;
     }
 
@@ -348,7 +350,7 @@ const SalePostPage = () => {
       });
 
       emitOrderCreated(orderId);
-      toast.success("Đơn hàng đã được tạo thành công!");
+      toast.success(t("sale:toasts.orderCreated"));
       setCart([]);
       setSelectedCustomer("");
       if (orderId) {
@@ -356,7 +358,7 @@ const SalePostPage = () => {
       }
     } catch (error) {
       console.error("Failed to create order:", error);
-      toast.error("Không thể tạo đơn hàng. Vui lòng thử lại!");
+      toast.error(t("sale:toasts.orderCreateFailed"));
     }
   };
 
@@ -372,12 +374,12 @@ const SalePostPage = () => {
 
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Chuyển đổi để bán hàng cho cửa hàng khác" />
+      <StoreSelector pageDescription={t("sale:page.storeSelectorHint")} />
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="pos">POS / Bán hàng</TabsTrigger>
-          <TabsTrigger value="inventory">Inventory / Kho</TabsTrigger>
-          <TabsTrigger value="reports">Reports / Báo cáo</TabsTrigger>
+          <TabsTrigger value="pos">{t("sale:tabs.pos")}</TabsTrigger>
+          <TabsTrigger value="inventory">{t("sale:tabs.inventory")}</TabsTrigger>
+          <TabsTrigger value="reports">{t("sale:tabs.reports")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pos" className="space-y-4">
@@ -388,7 +390,7 @@ const SalePostPage = () => {
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search by name, barcode / Tìm theo tên, mã vạch..."
+                      placeholder={t("sale:search.placeholder")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pl-10"
@@ -396,23 +398,23 @@ const SalePostPage = () => {
                   </div>
                   <Button variant="outline">
                     <Barcode className="h-4 w-4 mr-2" />
-                    Scan
+                    {t("sale:actions.scan")}
                   </Button>
                 </div>
 
                 <ScrollArea className="h-[600px]">
                   {loading ? (
                     <div className="flex items-center justify-center h-48 text-muted-foreground">
-                      Đang tải sản phẩm...
+                      {t("sale:states.loadingProducts")}
                     </div>
                   ) : filteredProducts.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
                       <Package className="h-14 w-14 text-muted-foreground mb-4" />
                       <p className="font-medium text-foreground mb-1">
-                        Chưa có sản phẩm
+                        {t("sale:states.noProductsTitle")}
                       </p>
                       <p className="text-sm text-muted-foreground max-w-sm">
-                        Tạo danh mục (Sản phẩm → Danh mục) rồi thêm sản phẩm để bán hàng.
+                        {t("sale:states.noProductsBody")}
                       </p>
                       <Button
                         className="mt-4"
@@ -420,7 +422,7 @@ const SalePostPage = () => {
                         onClick={() => setAddProductModalOpen(true)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Thêm sản phẩm
+                        {t("sale:actions.addProduct")}
                       </Button>
                     </div>
                   ) : (
@@ -447,7 +449,7 @@ const SalePostPage = () => {
                             }
                             className="text-xs"
                           >
-                            {product.stock} left
+                            {t("sale:misc.left", { count: product.stock })}
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between">
@@ -473,9 +475,9 @@ const SalePostPage = () => {
               <Card className="p-6 sticky top-20">
                 <div className="flex items-center gap-2 mb-6">
                   <ShoppingCart className="h-5 w-5" />
-                  <h3 className="text-lg font-bold">Cart / Giỏ hàng</h3>
+                  <h3 className="text-lg font-bold">{t("sale:cart.title")}</h3>
                   <Badge variant="secondary" className="ml-auto">
-                    {cart.length} items
+                    {t("sale:cart.itemsCount", { count: cart.length })}
                   </Badge>
                 </div>
 
@@ -483,7 +485,7 @@ const SalePostPage = () => {
                   <div className="text-center py-12">
                     <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                     <p className="text-sm text-muted-foreground">
-                      Cart is empty / Giỏ hàng trống
+                      {t("sale:cart.empty")}
                     </p>
                   </div>
                 ) : (
@@ -550,16 +552,16 @@ const SalePostPage = () => {
 
                     <div className="space-y-4 pt-4 border-t">
                       <div className="space-y-2">
-                        <Label className="text-xs">Customer / Khách hàng</Label>
+                        <Label className="text-xs">{t("sale:cart.customerLabel")}</Label>
                         <Input
-                          placeholder="Search customer / Tìm khách..."
+                          placeholder={t("sale:cart.customerPlaceholder")}
                           value={selectedCustomer}
                           onChange={(e) => setSelectedCustomer(e.target.value)}
                         />
                       </div>
 
                       <div className="flex items-center justify-between text-lg font-bold">
-                        <span>Total / Tổng:</span>
+                        <span>{t("sale:cart.total")}:</span>
                         <span className="text-primary">
                           {calculateTotal().toLocaleString("vi-VN")} ₫
                         </span>
@@ -571,7 +573,7 @@ const SalePostPage = () => {
                         onClick={handleCompleteOrder}
                       >
                         <DollarSign className="h-5 w-5 mr-2" />
-                        Complete Order / Hoàn tất
+                        {t("sale:actions.completeOrder")}
                       </Button>
                     </div>
                   </>
@@ -585,14 +587,14 @@ const SalePostPage = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold">
-                Product Inventory / Danh sách sản phẩm
+                {t("sale:inventory.title")}
               </h3>
               <Button
                 onClick={() => setAddProductModalOpen(true)}
                 className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Product / Thêm sản phẩm
+                {t("sale:actions.addProduct")}
               </Button>
             </div>
 
@@ -600,14 +602,14 @@ const SalePostPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Product / Sản phẩm</TableHead>
-                    <TableHead>Category / Danh mục</TableHead>
-                    <TableHead>Price / Giá</TableHead>
+                    <TableHead>{t("sale:table.product")}</TableHead>
+                    <TableHead>{t("sale:table.category")}</TableHead>
+                    <TableHead>{t("sale:table.price")}</TableHead>
                     <TableHead className="text-center">
-                      Stock / Tồn kho
+                      {t("sale:table.stock")}
                     </TableHead>
-                    <TableHead>Barcode</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t("sale:table.barcode")}</TableHead>
+                    <TableHead className="text-right">{t("sale:table.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -652,7 +654,7 @@ const SalePostPage = () => {
                               setShowStockModal(true);
                             }}
                           >
-                            Stock In / Nhập
+                            {t("sale:actions.stockIn")}
                           </Button>
                           <Button
                             size="sm"
@@ -663,7 +665,7 @@ const SalePostPage = () => {
                               setShowStockModal(true);
                             }}
                           >
-                            Stock Out / Xuất
+                            {t("sale:actions.stockOut")}
                           </Button>
                           <Button size="sm" variant="ghost">
                             <Edit className="h-4 w-4" />
@@ -683,17 +685,17 @@ const SalePostPage = () => {
             <div className="flex items-center gap-2 mb-6">
               <TrendingUp className="h-5 w-5" />
               <h3 className="text-lg font-bold">
-                Best Selling Products / Sản phẩm bán chạy
+                {t("sale:reports.title")}
               </h3>
             </div>
 
             {reportLoading ? (
               <div className="flex items-center justify-center h-64 text-muted-foreground">
-                Đang tải báo cáo bán chạy...
+                {t("sale:states.loadingBestSelling")}
               </div>
             ) : reportProducts.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Chưa có dữ liệu bán hàng đủ để hiển thị báo cáo.
+                {t("sale:states.noReportData")}
               </p>
             ) : (
               <>
@@ -706,13 +708,13 @@ const SalePostPage = () => {
                       <Tooltip
                         formatter={(value: number, name: string) =>
                           name === "sold"
-                            ? [value, "Sold"]
-                            : [`${value.toLocaleString("vi-VN")} ₫`, "Revenue"]
+                            ? [value, t("sale:reports.sold")]
+                            : [`${value.toLocaleString("vi-VN")} ₫`, t("sale:reports.revenue")]
                         }
                       />
                       <Legend />
-                      <Bar dataKey="sold" fill="#007BFF" name="Quantity" />
-                      <Bar dataKey="revenue" fill="#28a745" name="Revenue" />
+                      <Bar dataKey="sold" fill="#007BFF" name={t("sale:reports.quantityLegend")} />
+                      <Bar dataKey="revenue" fill="#28a745" name={t("sale:reports.revenueLegend")} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -721,15 +723,15 @@ const SalePostPage = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Product / Sản phẩm</TableHead>
+                        <TableHead>{t("sale:table.product")}</TableHead>
                         <TableHead className="text-right">
-                          Quantity Sold / Số lượng
+                          {t("sale:reports.quantitySold")}
                         </TableHead>
                         <TableHead className="text-right">
-                          Revenue / Doanh thu
+                          {t("sale:reports.revenue")}
                         </TableHead>
                         <TableHead className="text-right">
-                          Avg Price / Giá TB
+                          {t("sale:reports.avgPrice")}
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -767,11 +769,11 @@ const SalePostPage = () => {
           <DialogHeader>
             <DialogTitle>
               {stockOperation === "in"
-                ? "Stock In / Nhập kho"
-                : "Stock Out / Xuất kho"}
+                ? t("sale:stock.stockInTitle")
+                : t("sale:stock.stockOutTitle")}
             </DialogTitle>
             <DialogDescription>
-              {selectedProduct ? selectedProduct.name : "No product selected"}
+              {selectedProduct ? selectedProduct.name : t("sale:stock.noProductSelected")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -787,19 +789,21 @@ const SalePostPage = () => {
                 <div className="flex-1">
                   <p className="font-medium">{selectedProduct.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    Current stock: {selectedProduct.stock}
+                    {t("sale:stock.currentStock", { stock: selectedProduct.stock })}
                   </p>
                 </div>
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="stock-amount">
-                Amount / Số lượng {stockOperation === "in" ? "nhập" : "xuất"}
+                {t("sale:stock.amountLabel", {
+                  mode: stockOperation === "in" ? t("sale:actions.stockIn") : t("sale:actions.stockOut"),
+                })}
               </Label>
               <Input
                 id="stock-amount"
                 type="number"
-                placeholder="Enter amount..."
+                placeholder={t("sale:stock.amountPlaceholder")}
                 value={stockAmount}
                 onChange={(e) => setStockAmount(e.target.value)}
               />
@@ -807,11 +811,11 @@ const SalePostPage = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowStockModal(false)}>
-              Cancel
+              {t("sale:actions.cancel")}
             </Button>
             <Button onClick={handleStockOperation}>
               <Package className="h-4 w-4 mr-2" />
-              Confirm / Xác nhận
+              {t("sale:actions.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -833,15 +837,11 @@ const SalePostPage = () => {
       >
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
-            <DialogTitle>Xóa sản phẩm cuối cùng</DialogTitle>
+            <DialogTitle>{t("sale:confirmRemoveLast.title")}</DialogTitle>
             <DialogDescription>
-              Bạn đang xóa sản phẩm cuối cùng trong giỏ{" "}
-              {pendingRemoveProductName ? (
-                <>
-                  (<strong>{pendingRemoveProductName}</strong>)
-                </>
-              ) : null}
-              . Bạn có chắc muốn tiếp tục?
+              {t("sale:confirmRemoveLast.description", {
+                name: pendingRemoveProductName ? `(${pendingRemoveProductName})` : "",
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -852,7 +852,7 @@ const SalePostPage = () => {
                 setPendingRemoveProductId(null);
               }}
             >
-              Hủy
+              {t("sale:confirmRemoveLast.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -866,7 +866,7 @@ const SalePostPage = () => {
                 setPendingRemoveProductId(null);
               }}
             >
-              Xóa
+              {t("sale:confirmRemoveLast.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -20,15 +20,31 @@ import type {
   OrderStatus,
 } from "@/shared/types/orders";
 import { formatVnd } from "@/shared/utils/formatMoney";
+import { useTranslation } from "react-i18next";
 
 type StatusFilter = OrderStatus | "All";
 
-const statusLabels: Record<OrderStatus, string> = {
-  Pending: "Chờ xử lý",
-  Processing: "Đang xử lý",
-  Completed: "Hoàn thành",
-  Cancelled: "Đã hủy",
-  Refunded: "Hoàn tiền",
+const ORDER_STATUSES = [
+  "Pending",
+  "Processing",
+  "Completed",
+  "Cancelled",
+  "Refunded",
+] as const satisfies readonly OrderStatus[];
+
+const STATUS_LABEL_KEYS: Record<
+  OrderStatus,
+  | "statusLabels.Pending"
+  | "statusLabels.Processing"
+  | "statusLabels.Completed"
+  | "statusLabels.Cancelled"
+  | "statusLabels.Refunded"
+> = {
+  Pending: "statusLabels.Pending",
+  Processing: "statusLabels.Processing",
+  Completed: "statusLabels.Completed",
+  Cancelled: "statusLabels.Cancelled",
+  Refunded: "statusLabels.Refunded",
 };
 
 const statusColorClasses: Record<OrderStatus, string> = {
@@ -39,24 +55,8 @@ const statusColorClasses: Record<OrderStatus, string> = {
   Refunded: "bg-purple-500/10 text-purple-700 border-purple-500/30",
 };
 
-const formatOrderTime = (dateStr: string) => {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHour / 24);
-
-  if (diffSec < 60) return "Vừa xong";
-  if (diffMin < 60) return `${diffMin} phút trước`;
-  if (diffHour < 24) return `${diffHour} giờ trước`;
-  if (diffDay === 1) return "Hôm qua";
-  if (diffDay < 7) return `${diffDay} ngày trước`;
-  return date.toLocaleString("vi-VN");
-};
-
 const OrdersPage = () => {
+  const { t: tOrders, i18n } = useTranslation("orders");
   const navigate = useNavigate();
   const [status, setStatus] = useState<StatusFilter>("All");
   const [fromDate, setFromDate] = useState("");
@@ -119,29 +119,51 @@ const OrdersPage = () => {
     navigate(`/dashboard/orders/${order.id}`);
   };
 
+  const formatOrderTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+
+    if (diffSec < 60) return tOrders("time.justNow");
+    if (diffMin < 60) return tOrders("time.minutesAgo", { count: diffMin });
+    if (diffHour < 24) return tOrders("time.hoursAgo", { count: diffHour });
+    if (diffDay === 1) return tOrders("time.yesterday");
+    if (diffDay < 7) return tOrders("time.daysAgo", { count: diffDay });
+
+    const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(date);
+  };
+
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Quản lý các đơn hàng POS của cửa hàng" />
+      <StoreSelector pageDescription={tOrders("page.storeSelectorHint")} />
 
       <Card className="p-4 md:p-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold text-foreground">
-              Order Management / Quản lý đơn hàng
+              {tOrders("page.title")}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Xem, lọc và truy cập chi tiết các đơn hàng đã tạo.
+              {tOrders("page.subtitle")}
             </p>
           </div>
           <div className="text-sm text-muted-foreground">
-            Tổng số đơn:{" "}
+            {tOrders("page.totalOrdersLabel")}{" "}
             <span className="font-semibold text-foreground">{totalCount}</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
           <div className="space-y-1">
-            <Label>Trạng thái</Label>
+            <Label>{tOrders("filters.statusLabel")}</Label>
             <Select
               value={status}
               onValueChange={(val) => {
@@ -150,29 +172,21 @@ const OrdersPage = () => {
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Tất cả trạng thái" />
+                <SelectValue placeholder={tOrders("filters.statusPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="All">Tất cả</SelectItem>
-                <SelectItem value="Pending">{statusLabels.Pending}</SelectItem>
-                <SelectItem value="Processing">
-                  {statusLabels.Processing}
-                </SelectItem>
-                <SelectItem value="Completed">
-                  {statusLabels.Completed}
-                </SelectItem>
-                <SelectItem value="Cancelled">
-                  {statusLabels.Cancelled}
-                </SelectItem>
-                <SelectItem value="Refunded">
-                  {statusLabels.Refunded}
-                </SelectItem>
+                <SelectItem value="All">{tOrders("filters.all")}</SelectItem>
+                {ORDER_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {tOrders(STATUS_LABEL_KEYS[s])}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-1">
-            <Label>Từ ngày</Label>
+            <Label>{tOrders("filters.fromDate")}</Label>
             <Input
               type="date"
               value={fromDate}
@@ -184,7 +198,7 @@ const OrdersPage = () => {
           </div>
 
           <div className="space-y-1">
-            <Label>Đến ngày</Label>
+            <Label>{tOrders("filters.toDate")}</Label>
             <Input
               type="date"
               value={toDate}
@@ -202,7 +216,7 @@ const OrdersPage = () => {
               onClick={handleResetFilters}
               disabled={loading}
             >
-              Đặt lại
+              {tOrders("filters.reset")}
             </Button>
           </div>
         </div>
@@ -210,32 +224,34 @@ const OrdersPage = () => {
         <div className="border rounded-lg overflow-hidden">
           {loading ? (
             <div className="p-8 text-center text-muted-foreground text-sm">
-              Đang tải danh sách đơn hàng...
+              {tOrders("states.loadingList")}
             </div>
           ) : orders.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground text-sm">
-              Không có đơn hàng nào phù hợp với bộ lọc hiện tại.
+              {tOrders("states.emptyList")}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted/50 border-b">
                   <tr className="text-xs text-muted-foreground">
-                    <th className="text-left px-4 py-2 font-medium">Mã đơn</th>
                     <th className="text-left px-4 py-2 font-medium">
-                      Khách hàng
+                      {tOrders("table.orderCode")}
                     </th>
                     <th className="text-left px-4 py-2 font-medium">
-                      Tổng tiền
+                      {tOrders("table.customer")}
                     </th>
                     <th className="text-left px-4 py-2 font-medium">
-                      Trạng thái
+                      {tOrders("table.total")}
                     </th>
                     <th className="text-left px-4 py-2 font-medium">
-                      Phương thức thanh toán
+                      {tOrders("table.status")}
+                    </th>
+                    <th className="text-left px-4 py-2 font-medium">
+                      {tOrders("table.paymentMethod")}
                     </th>
                     <th className="text-right px-4 py-2 font-medium">
-                      Thời gian
+                      {tOrders("table.time")}
                     </th>
                   </tr>
                 </thead>
@@ -250,7 +266,7 @@ const OrdersPage = () => {
                         {order.code || order.id.slice(0, 8)}
                       </td>
                       <td className="px-4 py-2">
-                        {order.customerName || "Khách lẻ"}
+                        {order.customerName || tOrders("table.walkInCustomer")}
                       </td>
                       <td className="px-4 py-2 font-semibold text-foreground">
                         {formatVnd(order.totalAmount)}
@@ -260,7 +276,7 @@ const OrdersPage = () => {
                           variant="outline"
                           className={statusColorClasses[order.status]}
                         >
-                          {statusLabels[order.status]}
+                          {tOrders(STATUS_LABEL_KEYS[order.status])}
                         </Badge>
                       </td>
                       <td className="px-4 py-2 text-muted-foreground">
@@ -279,7 +295,7 @@ const OrdersPage = () => {
 
         <div className="flex items-center justify-between gap-3 pt-2 text-xs sm:text-sm text-muted-foreground">
           <span>
-            Trang{" "}
+            {tOrders("pagination.pageLabel")}{" "}
             <span className="font-semibold text-foreground">{page}</span> /{" "}
             <span className="font-semibold text-foreground">{totalPages}</span>
           </span>
@@ -290,7 +306,7 @@ const OrdersPage = () => {
               disabled={page <= 1 || loading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Trước
+              {tOrders("pagination.prev")}
             </Button>
             <Button
               variant="outline"
@@ -298,7 +314,7 @@ const OrdersPage = () => {
               disabled={page >= totalPages || loading}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              Sau
+              {tOrders("pagination.next")}
             </Button>
           </div>
         </div>

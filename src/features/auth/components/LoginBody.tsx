@@ -4,6 +4,7 @@ import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";
+import { useTranslation } from "react-i18next";
 
 import logo from "@/assets/logo.png";
 import googleIcon from "@/assets/icon/google-icon.svg";
@@ -13,18 +14,24 @@ import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 import { authApi } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 const socialButtons = [{ src: googleIcon, alt: "Google" }] as const;
 
-const loginSchema = z.object({
-  email: z.string().min(1, "Vui lòng nhập email.").email("Email không hợp lệ."),
-  password: z
-    .string()
-    .min(1, "Vui lòng nhập mật khẩu.")
-    .min(6, "Mật khẩu phải có ít nhất 6 ký tự."),
-});
-
 const LoginBody = () => {
+  const { t } = useTranslation(["auth", "common"]);
+
+  const loginSchema = z.object({
+    email: z
+      .string()
+      .min(1, t("common:validation.required"))
+      .email(t("common:validation.invalidEmail")),
+    password: z
+      .string()
+      .min(1, t("common:validation.required"))
+      .min(6, t("common:validation.minLength", { min: 6 })),
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState("");
@@ -37,7 +44,7 @@ const LoginBody = () => {
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     const idToken = credentialResponse.credential;
     if (!idToken) {
-      toast.error("Không thể lấy thông tin từ Google.");
+      toast.error(t("auth:login.googleLoginError"));
       return;
     }
     try {
@@ -55,20 +62,20 @@ const LoginBody = () => {
       if (res.isNewUser) {
         sessionStorage.setItem("pendingGoogleNewUser", "1");
       }
-      toast.success("Đăng nhập thành công!");
+      toast.success(t("auth:login.googleLoginSuccess"));
       navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
       console.error("Google login error", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Đăng nhập Google thất bại. Vui lòng thử lại.";
+          ?.message || t("auth:login.googleLoginError");
       setError(message);
       toast.error(message);
     }
   };
 
   const handleGoogleError = () => {
-    toast.error("Đăng nhập Google bị hủy hoặc có lỗi.");
+    toast.error(t("auth:login.googleLoginCanceled"));
   };
 
   useEffect(() => {
@@ -95,7 +102,7 @@ const LoginBody = () => {
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
       const firstError =
-        parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";
+        parsed.error.issues[0]?.message ?? t("common:states.error");
       setError(firstError);
       return;
     }
@@ -119,14 +126,14 @@ const LoginBody = () => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      toast.success("Đăng nhập thành công!");
+      toast.success(t("auth:login.googleLoginSuccess"));
 
       navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
       console.error("Login error", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+          ?.message || t("common:states.error");
       setError(message);
       toast.error(message);
     } finally {
@@ -140,20 +147,23 @@ const LoginBody = () => {
         <div className="relative flex w-[45%] flex-col items-center justify-center bg-white dark:bg-white px-16 py-14 text-gray-900 dark:text-gray-900">
           <div className="pointer-events-none absolute left-0 top-0 h-[531.85px] w-[531.85px] -ml-[121.8px] -mt-[124.6px] rounded-full bg-gradient-to-br from-[rgba(13,148,136,0.18)] to-[rgba(13,148,136,0)] blur-[32px] rotate-[36.47deg]" />
 
-          <div className="absolute left-16 top-10 z-20">
+          <div className="absolute left-16 top-10 z-20 flex items-center gap-3">
             <img
               src={logo}
               alt="360 Retail"
               className="h-24 w-auto object-contain"
             />
+            <LanguageSwitcher />
           </div>
 
           <div className="relative z-10 w-full max-w-md mt-24">
             <div className="mb-3">
               <h1 className="mb-2 text-[35px] font-bold leading-[40px] tracking-[-0.9px] text-teal-600">
-                Sign In
+                {t("auth:login.title")}
               </h1>
-              <p className="text-sm text-gray-600">Welcome 360 Retail</p>
+              <p className="text-sm text-gray-600">
+                {t("auth:login.subtitle")}
+              </p>
             </div>
 
             <div className="mb-8">
@@ -162,7 +172,7 @@ const LoginBody = () => {
                 className="inline-flex items-center gap-2 text-sm font-medium text-teal-600 transition-colors hover:text-teal-700"
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span>Back to Home</span>
+                <span>{t("common:actions.backToHome")}</span>
               </Link>
             </div>
 
@@ -172,14 +182,14 @@ const LoginBody = () => {
                   htmlFor="email"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Email
+                  {t("auth:login.email")}
                 </Label>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Your email address"
+                    placeholder={t("auth:signup.emailPlaceholder")}
                     className="h-12 !bg-white text-gray-900 placeholder:text-gray-500 border-gray-200 pl-11 dark:!bg-white [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#111827] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -194,14 +204,14 @@ const LoginBody = () => {
                   htmlFor="password"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Password
+                  {t("auth:login.password")}
                 </Label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Your password"
+                    placeholder={t("auth:signup.passwordPlaceholder")}
                     className="login-password-input h-12 !bg-white text-gray-900 placeholder:text-gray-500 border-gray-200 pl-11 pr-11 dark:!bg-white"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -236,7 +246,7 @@ const LoginBody = () => {
                   htmlFor="remember"
                   className="cursor-pointer text-sm font-medium text-gray-700"
                 >
-                  Remember me
+                  {t("auth:login.rememberMe")}
                 </Label>
               </div>
 
@@ -247,7 +257,7 @@ const LoginBody = () => {
                 disabled={loading}
                 className="h-12 w-full bg-[#0D9488] text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0D9488]/90 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {loading ? "ĐANG ĐĂNG NHẬP..." : "LOGIN"}
+                {loading ? t("auth:login.submitting") : t("auth:login.submit")}
               </Button>
 
               <div className="space-y-6">
@@ -256,24 +266,26 @@ const LoginBody = () => {
                     to="/forgot-password"
                     className="text-gray-500 hover:text-teal-600 underline-offset-4 hover:underline"
                   >
-                    Forgot password
+                    {t("auth:login.forgotPassword")}
                   </Link>
                   <div className="text-right">
                     <span className="text-gray-600 mr-1">
-                      Don&apos;t have an account?
+                      {t("auth:login.noAccount")}
                     </span>
                     <Link
                       to="/signup"
                       className="font-medium text-[#0D9488] hover:underline"
                     >
-                      Sign up
+                      {t("auth:login.goToSignup")}
                     </Link>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 text-xs text-gray-400">
                   <div className="h-px flex-1 bg-gray-200" />
-                  <span className="uppercase tracking-[0.2em]">Or</span>
+                  <span className="uppercase tracking-[0.2em]">
+                    {t("auth:signup.or")}
+                  </span>
                   <div className="h-px flex-1 bg-gray-200" />
                 </div>
 

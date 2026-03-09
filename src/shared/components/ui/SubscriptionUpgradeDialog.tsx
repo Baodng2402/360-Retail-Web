@@ -11,8 +11,10 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { useFeatureGateStore } from "@/shared/store/featureGateStore";
+import { useTranslation } from "react-i18next";
 
 export function SubscriptionUpgradeDialog() {
+  const { t } = useTranslation("featureGate");
   const navigate = useNavigate();
   const {
     isOpen,
@@ -39,10 +41,10 @@ export function SubscriptionUpgradeDialog() {
 
   const title =
     errorType === "TrialExpired"
-      ? "Thời gian dùng thử đã hết"
+      ? t("upgradeDialog.title.trialExpired")
       : errorType === "SubscriptionExpired"
-        ? "Gói dịch vụ đã hết hạn"
-        : "Tính năng không khả dụng trong gói hiện tại";
+        ? t("upgradeDialog.title.subscriptionExpired")
+        : t("upgradeDialog.title.featureNotAvailable");
 
   return (
     <Dialog open onOpenChange={(open) => !open && handleClose()}>
@@ -60,22 +62,17 @@ export function SubscriptionUpgradeDialog() {
               <p className="text-sm text-muted-foreground">
                 {currentPlan && (
                   <>
-                    Gói hiện tại của bạn:{" "}
-                    <span className="font-semibold">{currentPlan}</span>.{" "}
+                    {t("upgradeDialog.currentPlan", { plan: currentPlan })}{" "}
                   </>
                 )}
-                Để sử dụng
-                {feature ? (
-                  <>
-                    {" "}
-                    tính năng <span className="font-semibold">{feature}</span>
-                  </>
-                ) : (
-                  " tính năng này"
-                )}
-                , vui lòng nâng cấp lên gói{" "}
-                <span className="font-semibold">{requiredPlan}</span> hoặc cao
-                hơn.
+                {feature
+                  ? t("upgradeDialog.toUseFeature", {
+                      feature,
+                      requiredPlan,
+                    })
+                  : t("upgradeDialog.toUseFeatureFallback", {
+                      requiredPlan,
+                    })}
               </p>
             )}
           </DialogDescription>
@@ -83,13 +80,13 @@ export function SubscriptionUpgradeDialog() {
 
         <div className="mt-4 flex justify-end gap-3">
           <Button variant="outline" onClick={handleClose}>
-            Để sau
+            {t("upgradeDialog.later")}
           </Button>
           <Button
             onClick={handleUpgrade}
             className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
           >
-            Nâng cấp gói ngay
+            {t("upgradeDialog.upgradeNow")}
             <ArrowRight className="ml-1.5 h-4 w-4" />
           </Button>
         </div>

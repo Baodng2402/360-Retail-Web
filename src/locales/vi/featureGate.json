@@ -1,0 +1,15 @@
+{
+  "upgradeDialog": {
+    "title": {
+      "trialExpired": "Thời gian dùng thử đã hết",
+      "subscriptionExpired": "Gói dịch vụ đã hết hạn",
+      "featureNotAvailable": "Tính năng không khả dụng trong gói hiện tại"
+    },
+    "currentPlan": "Gói hiện tại của bạn: {{plan}}.",
+    "toUseFeature": "Để sử dụng tính năng {{feature}}, vui lòng nâng cấp lên gói {{requiredPlan}} hoặc cao hơn.",
+    "toUseFeatureFallback": "Để sử dụng tính năng này, vui lòng nâng cấp lên gói {{requiredPlan}} hoặc cao hơn.",
+    "later": "Để sau",
+    "upgradeNow": "Nâng cấp gói ngay"
+  }
+}
+

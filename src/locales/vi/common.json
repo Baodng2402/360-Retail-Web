@@ -1,0 +1,41 @@
+{
+  "appName": "360 Retail",
+  "smePlatform": "Nền tảng cho SME",
+  "actions": {
+    "save": "Lưu",
+    "saveChanges": "Lưu thay đổi",
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "back": "Quay lại",
+    "backToHome": "Về trang chủ",
+    "backToLogin": "Quay lại đăng nhập",
+    "confirm": "Xác nhận",
+    "retry": "Thử lại",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "create": "Tạo mới"
+  },
+  "states": {
+    "loading": "Đang tải...",
+    "saving": "Đang lưu...",
+    "deleting": "Đang xóa...",
+    "noData": "Không có dữ liệu",
+    "error": "Đã xảy ra lỗi. Vui lòng thử lại."
+  },
+  "formats": {
+    "date": "{{value, datetime}}",
+    "number": "{{value, number}}",
+    "currency": "{{value, currency}}"
+  },
+  "validation": {
+    "required": "Vui lòng nhập thông tin.",
+    "invalidEmail": "Email không hợp lệ.",
+    "minLength": "Vui lòng nhập ít nhất {{min}} ký tự.",
+    "passwordMismatch": "Mật khẩu xác nhận không khớp."
+  },
+  "toast": {
+    "unknownError": "Đã xảy ra lỗi không xác định. Vui lòng thử lại.",
+    "networkError": "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng."
+  }
+}
+

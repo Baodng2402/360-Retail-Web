@@ -7,23 +7,33 @@ import type { Task, TaskStatus } from "@/shared/types/task";
 import { Loader2, ListChecks } from "lucide-react";
 import { useAuthStore } from "@/shared/store/authStore";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 type StatusFilter = TaskStatus | "All";
 
-const statusLabels: Record<TaskStatus, string> = {
-  Pending: "Chờ xử lý",
-  InProgress: "Đang làm",
-  Completed: "Hoàn thành",
-  Cancelled: "Đã hủy",
+const TASK_STATUSES = [
+  "Pending",
+  "InProgress",
+  "Completed",
+  "Cancelled",
+] as const satisfies readonly TaskStatus[];
+
+const STATUS_LABEL_KEYS: Record<
+  TaskStatus,
+  | "statusLabels.Pending"
+  | "statusLabels.InProgress"
+  | "statusLabels.Completed"
+  | "statusLabels.Cancelled"
+> = {
+  Pending: "statusLabels.Pending",
+  InProgress: "statusLabels.InProgress",
+  Completed: "statusLabels.Completed",
+  Cancelled: "statusLabels.Cancelled",
 };
 
-const priorityLabels = {
-  Low: "Thấp",
-  Medium: "Trung bình",
-  High: "Cao",
-} as const;
-
 const MyTasksPage = () => {
+  const { t: tTasks, i18n } = useTranslation("tasks");
+  const { t: tCommon } = useTranslation("common");
   const { user } = useAuthStore();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +47,7 @@ const MyTasksPage = () => {
       setTasks(res);
     } catch (err) {
       console.error("Failed to load my tasks:", err);
-      toast.error("Không thể tải danh sách công việc của bạn.");
+      toast.error(tTasks("toasts.loadFailed"));
       setTasks([]);
     } finally {
       setLoading(false);
@@ -61,19 +71,26 @@ const MyTasksPage = () => {
       setTasks((prev) =>
         prev.map((t) => (t.id === task.id ? updated : t)),
       );
-      toast.success("Cập nhật trạng thái công việc thành công.");
+      toast.success(tTasks("toasts.updateSuccess"));
     } catch (err) {
       console.error("Failed to update task status:", err);
-      toast.error("Không thể cập nhật trạng thái công việc.");
+      toast.error(tTasks("toasts.updateFailed"));
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const headerTitle =
-    user?.role === "StoreOwner" || user?.role === "Manager"
-      ? "My Tasks / Công việc của tôi"
-      : "Công việc được giao cho bạn";
+  const headerTitle = (user?.role === "StoreOwner" || user?.role === "Manager")
+    ? tTasks("page.titleOwner")
+    : tTasks("page.titleStaff");
+
+  const formatDeadline = (value: string) => {
+    const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(new Date(value));
+  };
 
   return (
     <div className="space-y-6">
@@ -86,33 +103,28 @@ const MyTasksPage = () => {
                 {headerTitle}
               </h1>
               <p className="text-xs md:text-sm text-muted-foreground">
-                Xem và cập nhật tiến độ các công việc HR được giao cho bạn.
+                {tTasks("page.subtitle")}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <span className="hidden sm:inline text-xs text-muted-foreground">
-              Lọc theo trạng thái:
+              {tTasks("filters.label")}
             </span>
             <Select
               value={statusFilter}
               onValueChange={(val) => setStatusFilter(val as StatusFilter)}
             >
               <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Tất cả" />
+                <SelectValue placeholder={tTasks("filters.placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="All">Tất cả</SelectItem>
-                <SelectItem value="Pending">{statusLabels.Pending}</SelectItem>
-                <SelectItem value="InProgress">
-                  {statusLabels.InProgress}
-                </SelectItem>
-                <SelectItem value="Completed">
-                  {statusLabels.Completed}
-                </SelectItem>
-                <SelectItem value="Cancelled">
-                  {statusLabels.Cancelled}
-                </SelectItem>
+                <SelectItem value="All">{tTasks("filters.all")}</SelectItem>
+                {TASK_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {tTasks(STATUS_LABEL_KEYS[s])}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -121,11 +133,11 @@ const MyTasksPage = () => {
         {loading ? (
           <div className="py-10 flex items-center justify-center text-muted-foreground text-sm gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Đang tải công việc...</span>
+            <span>{tTasks("states.loading")}</span>
           </div>
         ) : !filteredTasks.length ? (
           <div className="py-10 text-center text-muted-foreground text-sm">
-            Hiện tại bạn chưa có công việc nào phù hợp với bộ lọc.
+            {tTasks("states.empty")}
           </div>
         ) : (
           <div className="space-y-3">
@@ -143,8 +155,8 @@ const MyTasksPage = () => {
                       variant="outline"
                       className="text-xs border-slate-300 bg-slate-50 dark:bg-slate-900/40"
                     >
-                      Ưu tiên:{" "}
-                      {priorityLabels[task.priority] ?? task.priority}
+                      {tTasks("priority.label")}{" "}
+                      {tTasks(`priority.${task.priority}` as "priority.Low" | "priority.Medium" | "priority.High")}
                     </Badge>
                   </div>
                   {task.description && (
@@ -155,19 +167,12 @@ const MyTasksPage = () => {
                   <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
                     {task.deadline && (
                       <span>
-                        Hạn:{" "}
-                        {new Date(task.deadline).toLocaleString("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {tTasks("meta.deadline")} {formatDeadline(task.deadline)}
                       </span>
                     )}
                     <span>
-                      Người giao:{" "}
-                      {task.assigneeName || "Quản lý / Chủ cửa hàng"}
+                      {tTasks("meta.assignedBy")}{" "}
+                      {task.assigneeName || tTasks("meta.assignedByFallback")}
                     </span>
                   </div>
                 </div>
@@ -176,7 +181,7 @@ const MyTasksPage = () => {
                     variant="outline"
                     className="text-xs border-teal-500/40 bg-teal-50/70 text-teal-700"
                   >
-                    {statusLabels[task.status]}
+                    {tTasks(STATUS_LABEL_KEYS[task.status])}
                   </Badge>
                   <Select
                     value={task.status}
@@ -186,26 +191,19 @@ const MyTasksPage = () => {
                     disabled={updatingId === task.id}
                   >
                     <SelectTrigger className="w-[150px] h-8 text-xs">
-                      <SelectValue placeholder="Cập nhật trạng thái" />
+                      <SelectValue placeholder={tTasks("actions.updateStatusPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Pending">
-                        {statusLabels.Pending}
-                      </SelectItem>
-                      <SelectItem value="InProgress">
-                        {statusLabels.InProgress}
-                      </SelectItem>
-                      <SelectItem value="Completed">
-                        {statusLabels.Completed}
-                      </SelectItem>
-                      <SelectItem value="Cancelled">
-                        {statusLabels.Cancelled}
-                      </SelectItem>
+                      {TASK_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {tTasks(STATUS_LABEL_KEYS[s])}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   {updatingId === task.id && (
                     <span className="text-[11px] text-muted-foreground">
-                      Đang lưu...
+                      {tCommon("states.saving")}
                     </span>
                   )}
                 </div>
@@ -215,8 +213,7 @@ const MyTasksPage = () => {
         )}
 
         <div className="pt-2 text-[11px] text-muted-foreground">
-          Lưu ý: Bạn chỉ có thể cập nhật trạng thái cho các công việc được giao
-          cho tài khoản hiện tại.
+          {tTasks("helper.note")}
         </div>
       </Card>
     </div>

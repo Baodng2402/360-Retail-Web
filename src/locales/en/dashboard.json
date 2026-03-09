@@ -1,0 +1,363 @@
+{
+  "sidebar": {
+    "brandLine1": "Retail 360",
+    "brandLine2": "SME Platform",
+    "nav": {
+      "dashboard": {
+        "label": "Dashboard 360°",
+        "subLabel": "360° overview"
+      },
+      "timekeeping": {
+        "label": "Timekeeping",
+        "subLabel": "GPS check-in"
+      },
+      "myTasks": {
+        "label": "My Tasks",
+        "subLabel": "My work"
+      },
+      "staff": {
+        "label": "Staff",
+        "subLabel": "Employees"
+      },
+      "stores": {
+        "label": "Stores",
+        "subLabel": "Branches"
+      },
+      "products": {
+        "label": "Products",
+        "subLabel": "Products"
+      },
+      "inventory": {
+        "label": "Inventory",
+        "subLabel": "Stock in/out"
+      },
+      "sales": {
+        "label": "Sales & POS",
+        "subLabel": "Point of sale"
+      },
+      "orders": {
+        "label": "Orders",
+        "subLabel": "Orders"
+      },
+      "customers": {
+        "label": "Customers",
+        "subLabel": "Customers"
+      },
+      "crm": {
+        "label": "CRM & Loyalty",
+        "subLabel": "Points & feedback"
+      },
+      "reports": {
+        "label": "Reports",
+        "subLabel": "Reports"
+      },
+      "subscription": {
+        "label": "Subscription",
+        "subLabel": "Plans"
+      },
+      "settings": {
+        "label": "Settings",
+        "subLabel": "Settings"
+      }
+    },
+    "quickActionsSection": "Quick actions",
+    "quickActions": {
+      "createOrder": {
+        "label": "Create Order",
+        "subLabel": "Create order"
+      },
+      "staffCheckIn": {
+        "label": "Staff Check-in",
+        "subLabel": "Staff check-in"
+      },
+      "recordFeedback": {
+        "label": "Record Feedback",
+        "subLabel": "Record feedback"
+      },
+      "noStoreHint": "Please set up a store first.",
+      "upgradePlanHint": "Please upgrade your plan to use this feature."
+    },
+    "locks": {
+      "upgradePlan": "Upgrade plan to use this feature",
+      "setupStoreFirst": "Set up store first"
+    },
+    "setupStoreDialog": {
+      "title": "Set up your store",
+      "description": "You need to complete store setup before using this feature.",
+      "body": "Please complete your store setup to start managing your business.",
+      "remindLater": "Later",
+      "setupNow": "Set up now"
+    }
+  },
+  "dashboardPage": {
+    "noStore": {
+      "title": "Welcome to 360 Retail!",
+      "description": "You need to create a store before you can start managing your business.",
+      "ctaHighlight": "Sign up now to get {{days}} days free trial!",
+      "benefitsTitle": "You will get:",
+      "benefits": {
+        "trial": "7-day free trial - no credit card required",
+        "store": "Create a store and manage products instantly",
+        "features": "Access all sales management features"
+      },
+      "primaryCta": "Create store now (7-day free trial)",
+      "note": "After 7 days, you can upgrade to a paid plan to continue using the service."
+    },
+    "overviewSection": {
+      "title": "Sales overview",
+      "rangeToday": "Today",
+      "range7d": "7 days",
+      "range30d": "30 days",
+      "rangeLabel": {
+        "today": "Today",
+        "7d": "Last 7 days",
+        "30d": "Last 30 days"
+      },
+      "stats": {
+        "todayRevenue": {
+          "label": "Today Revenue",
+          "subLabel": "Today revenue"
+        },
+        "totalRevenue": {
+          "label": "Total Revenue",
+          "subLabel": "Revenue ({{range}})"
+        },
+        "totalOrders": {
+          "label": "Total Orders",
+          "subLabel": "Orders ({{range}})"
+        },
+        "avgOrderValue": {
+          "label": "Avg. Order Value",
+          "subLabel": "Average order value"
+        },
+        "activeStaff": {
+          "label": "Active Staff",
+          "subLabel": "Staff online"
+        }
+      },
+      "charts": {
+        "topProductsTitle": "Top 5 best-selling products"
+      }
+    },
+    "subscriptionExpiry": {
+      "warningTitle": "Your subscription is about to expire!",
+      "warningBody": "{{days}} day(s) left{{endDate, datetime}}. Please renew to avoid service interruption.",
+      "badge": "{{days}} days"
+    }
+  },
+  "trial": {
+    "banner": {
+      "trialTitle": "Free trial",
+      "expiredTitle": "Trial expired",
+      "subscriptionExpiredTitle": "Subscription expired",
+      "noticeTitle": "Notice",
+      "expiredMessage": "Your trial has ended. Please purchase a plan to continue.",
+      "trialMessageWithDays": "You have {{days}} day(s) left in your trial.",
+      "trialMessageGeneric": "You are currently in the trial period.",
+      "noSubscriptionMessage": "You don't have a subscription plan yet. Please purchase a plan to continue.",
+      "daysRemaining": "{{days}} day(s) left",
+      "upgrade": "Upgrade",
+      "upgradeNow": "Upgrade now"
+    },
+    "badges": {
+      "daysLeft": "{{days}} day(s) left",
+      "expired": "Expired",
+      "active": "Active",
+      "trial": "Trial"
+    }
+  }
+  ,
+  "header": {
+    "greeting": "Hi, {{name}}",
+    "pages": {
+      "dashboard": { "name": "Dashboard", "title": "360° overview" },
+      "staff": { "name": "Staff", "title": "Staff management" },
+      "stores": { "name": "Stores", "title": "Store management" },
+      "sales": { "name": "Sales & POS", "title": "Sales management" },
+      "customers": { "name": "Customers", "title": "Customer management" },
+      "reports": { "name": "Reports", "title": "Reports" },
+      "settings": { "name": "Settings", "title": "Settings" },
+      "timekeeping": { "name": "Timekeeping", "title": "GPS & selfie check-in" }
+    }
+  },
+  "settingsPage": {
+    "storeSelectorHint": "Switch to configure another store",
+    "tabs": {
+      "store": "Store info",
+      "notifications": "Notifications",
+      "loyalty": "Loyalty rules",
+      "security": "Security"
+    },
+    "store": {
+      "title": "Store information",
+      "saveHint": "Store information will be saved to the server when you click <strong>Save changes</strong>.",
+      "loading": "Loading...",
+      "actions": {
+        "saveChanges": "Save changes",
+        "saving": "Saving..."
+      },
+      "fields": {
+        "nameLabel": "Store name",
+        "namePlaceholder": "Enter store name...",
+        "addressLabel": "Address",
+        "addressPlaceholder": "Enter address...",
+        "addressSuggesting": "Suggesting addresses...",
+        "phoneLabel": "Phone number"
+      },
+      "gps": {
+        "mapPreviewLabel": "GPS location (map preview)",
+        "mapPreviewHint": "Click directly on the map to choose the store coordinates. The marker will move automatically and update Latitude/Longitude above.",
+        "optionalLabel": "GPS location (optional)",
+        "useCurrentLocation": "Use current location",
+        "gettingLocation": "Getting location...",
+        "optionalHint": "If you provide GPS coordinates, the system will use them to verify distance during staff check-in."
+      }
+    },
+    "notifications": {
+      "title": "Notification preferences",
+      "description": "Notification settings are saved on your device. Server sync will be available later.",
+      "lowStockEmail": {
+        "title": "Send low-stock alert emails",
+        "description": "The system will check products at or below the threshold and email an alert to the store owner.",
+        "action": "Check low stock (threshold {{threshold}})",
+        "toasts": {
+          "success": "Low-stock check completed and alert emails were sent (if applicable).",
+          "failed": "Unable to run low-stock check. Please try again."
+        }
+      }
+    },
+    "loyalty": {
+      "title": "Loyalty rules",
+      "description": "Configure how customers earn points. Each rule defines how spending converts into rewards.",
+      "note": "Rules are applied in the priority order defined by the backend.",
+      "states": {
+        "loading": "Loading loyalty rules...",
+        "emptyManage": "No loyalty rules yet. Add your first rule to get started.",
+        "emptyReadOnly": "No loyalty rules yet. You can view rules once a manager configures them."
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "addRule": "Add rule",
+        "edit": "Edit",
+        "activate": "Activate",
+        "deactivate": "Deactivate"
+      },
+      "ruleSummary": "Earn {{earningRate}} point(s) per {{minSpend, currency}} spent.",
+      "form": {
+        "editTitle": "Edit rule",
+        "createTitle": "Create / update rule",
+        "nameLabel": "Rule name",
+        "namePlaceholder": "Earn 1 point / 10,000₫",
+        "earningRateLabel": "Earning rate",
+        "minSpendLabel": "Minimum spend",
+        "statusLabel": "Status",
+        "reset": "Reset form",
+        "saving": "Saving...",
+        "saveChanges": "Save changes",
+        "create": "Create rule"
+      },
+      "toasts": {
+        "loadFailed": "Unable to load loyalty rules.",
+        "toggleFailed": "Unable to update loyalty rule status.",
+        "nameRequired": "Please enter a rule name.",
+        "updateSuccess": "Loyalty rule updated.",
+        "createSuccess": "New loyalty rule created.",
+        "saveFailed": "Unable to save loyalty rule. Please try again."
+      }
+    },
+    "toasts": {
+      "loadStoreFailed": "Unable to load store information",
+      "saveStoreSuccess": "Store information saved!",
+      "saveStoreFailed": "Unable to save store information",
+      "invalidLatitude": "Invalid latitude",
+      "invalidLongitude": "Invalid longitude",
+      "browserNoGps": "Your browser does not support GPS/location.",
+      "useCurrentLocationSuccess": "Current location applied to this store.",
+      "useCurrentLocationFailed": "Unable to get current location. Please enable Location for your browser.",
+      "keepExistingCoords": "Kept the existing store coordinates."
+    },
+    "gpsDistanceWarning": {
+      "title": "You're far from the store",
+      "description": "Your current location is about {{distance}} away from the store location. Do you want to update the store GPS to your current location?",
+      "keepExisting": "Keep existing"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Password changes are saved to the system. After a successful change, you need to sign in again.",
+      "fields": {
+        "currentPasswordLabel": "Current password",
+        "currentPasswordPlaceholder": "Enter current password",
+        "newPasswordLabel": "New password",
+        "newPasswordPlaceholder": "Enter new password (min 8 characters)",
+        "confirmPasswordLabel": "Confirm new password",
+        "confirmPasswordPlaceholder": "Re-enter new password"
+      },
+      "actions": {
+        "processing": "Processing...",
+        "changePassword": "Change password"
+      },
+      "validation": {
+        "passwordMismatch": "Password confirmation does not match.",
+        "passwordMinLength": "New password must be at least {{min}} characters."
+      },
+      "toasts": {
+        "changePasswordSuccess": "Password changed successfully. Please sign in again.",
+        "changePasswordFailed": "Unable to change password. Please check your current password."
+      }
+    }
+  },
+  "dashboardPage": {
+    "range": {
+      "today": "Today",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days"
+    },
+    "onboarding": {
+      "welcomeTitle": "Welcome to 360 Retail!",
+      "needStore": "You need to create a store first to start managing your business.",
+      "trialCta": "Sign up now to get a <strong>7-day free trial</strong>!",
+      "benefitsTitle": "You'll get:",
+      "benefits": {
+        "noCard": "7-day free trial - No credit card required",
+        "setupStore": "Create a store and manage products instantly",
+        "fullAccess": "Access all sales management features"
+      },
+      "createStore": "Create a store now (7-day free trial)",
+      "afterTrialNote": "After 7 days, you can upgrade to a paid plan to continue using the service"
+    },
+    "expiry": {
+      "title": "Your subscription is about to expire!",
+      "remainingWithEndDate": "<strong>{{days, number}}</strong> day(s) left (expires {{endDate, datetime}}). Please renew to avoid service interruption.",
+      "remainingNoEndDate": "<strong>{{days, number}}</strong> day(s) left. Please renew to avoid service interruption.",
+      "badgeDays": "{{days, number}} day(s)"
+    },
+    "sections": {
+      "salesOverview": "Sales overview"
+    },
+    "stats": {
+      "totalRevenueLabel": "Total revenue",
+      "totalRevenueSubLabel": "Revenue ({{range}})",
+      "totalOrdersLabel": "Total orders",
+      "totalOrdersSubLabel": "Orders ({{range}})",
+      "avgOrderValueLabel": "Average order value",
+      "avgOrderValueSubLabel": "Average order value",
+      "activeEmployeesLabel": "Employees",
+      "activeEmployeesSubLabel": "Employees on duty",
+      "todayRevenueLabel": "Today's revenue",
+      "todayRevenueSubLabel": "Today's revenue"
+    },
+    "charts": {
+      "productsSold": "Products sold",
+      "topProductsTitle": "Top 5 best-selling products"
+    },
+    "actions": {
+      "today": "Today",
+      "days7": "7 days",
+      "days30": "30 days"
+    }
+  }
+}
+

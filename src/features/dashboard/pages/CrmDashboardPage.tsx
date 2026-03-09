@@ -30,8 +30,11 @@ import { Label } from "@/shared/components/ui/label";
 import toast from "react-hot-toast";
 import { useStoreStore } from "@/shared/store/storeStore";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
+import { useTranslation } from "react-i18next";
 
 const CrmDashboardPage = () => {
+  const { t: tCrm, i18n } = useTranslation("crm");
+  const { t: tCommon } = useTranslation("common");
   const { user } = useAuthStore();
   const { currentStore } = useStoreStore();
   const canManageRules =
@@ -180,16 +183,16 @@ const CrmDashboardPage = () => {
         setRules((prev) =>
           prev.map((r) => (r.id === editingRule.id ? updated : r)),
         );
-        toast.success("Cập nhật luật tích điểm thành công.");
+        toast.success(tCrm("toasts.ruleUpdateSuccess"));
       } else {
         const created = await loyaltyApi.createRule(ruleForm);
         setRules((prev) => [created, ...prev]);
-        toast.success("Tạo luật tích điểm mới thành công.");
+        toast.success(tCrm("toasts.ruleCreateSuccess"));
       }
       setRuleDialogOpen(false);
     } catch (err) {
       console.error("Failed to save loyalty rule:", err);
-      toast.error("Không thể lưu luật tích điểm.");
+      toast.error(tCrm("toasts.ruleSaveFailed"));
     } finally {
       setRuleSaving(false);
     }
@@ -197,16 +200,16 @@ const CrmDashboardPage = () => {
 
   const handleDeleteRule = async (rule: LoyaltyRule) => {
     if (!canManageRules) return;
-    if (!window.confirm(`Bạn có chắc muốn xóa luật "${rule.name}"?`)) {
+    if (!window.confirm(tCrm("loyalty.confirmDelete", { name: rule.name }))) {
       return;
     }
     try {
       await loyaltyApi.deleteRule(rule.id);
       setRules((prev) => prev.filter((r) => r.id !== rule.id));
-      toast.success("Đã xóa luật tích điểm.");
+      toast.success(tCrm("toasts.ruleDeleteSuccess"));
     } catch (err) {
       console.error("Failed to delete loyalty rule:", err);
-      toast.error("Không thể xóa luật tích điểm.");
+      toast.error(tCrm("toasts.ruleDeleteFailed"));
     }
   };
 
@@ -218,14 +221,14 @@ const CrmDashboardPage = () => {
         points: redeemPoints,
         description: redeemDesc || undefined,
       });
-      toast.success(`Đổi ${redeemPoints} điểm thành công!`);
+      toast.success(tCrm("toasts.redeemSuccess", { points: redeemPoints }));
       setRedeemOpen(false);
       setRedeemCustomerId("");
       setRedeemPoints(0);
       setRedeemDesc("");
     } catch (err) {
       console.error("Failed to redeem points:", err);
-      toast.error("Đổi điểm thất bại. Kiểm tra lại mã khách hàng và số điểm.");
+      toast.error(tCrm("toasts.redeemFailed"));
     } finally {
       setRedeemLoading(false);
     }
@@ -243,7 +246,7 @@ const CrmDashboardPage = () => {
       setRedeemSearchResults(res.items);
     } catch (err) {
       console.error("Failed to search customers for redeem:", err);
-      toast.error("Không thể tìm khách hàng. Vui lòng thử lại.");
+      toast.error(tCrm("toasts.searchCustomerFailed"));
     } finally {
       setRedeemSearchLoading(false);
     }
@@ -258,14 +261,14 @@ const CrmDashboardPage = () => {
         rating: staffFbRating,
         content: staffFbContent || undefined,
       });
-      toast.success("Tạo feedback hộ khách thành công!");
+      toast.success(tCrm("toasts.staffFeedbackSuccess"));
       setStaffFbOpen(false);
       setStaffFbCustomerId("");
       setStaffFbRating(5);
       setStaffFbContent("");
     } catch (err) {
       console.error("Failed to create staff feedback:", err);
-      toast.error("Tạo feedback thất bại.");
+      toast.error(tCrm("toasts.staffFeedbackFailed"));
     } finally {
       setStaffFbLoading(false);
     }
@@ -283,7 +286,7 @@ const CrmDashboardPage = () => {
       setStaffSearchResults(res.items);
     } catch (err) {
       console.error("Failed to search customers for staff feedback:", err);
-      toast.error("Không thể tìm khách hàng. Vui lòng thử lại.");
+      toast.error(tCrm("toasts.searchCustomerFailed"));
     } finally {
       setStaffSearchLoading(false);
     }
@@ -291,7 +294,7 @@ const CrmDashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Chọn cửa hàng để xem feedback và cấu hình loyalty cho đúng chi nhánh." />
+      <StoreSelector pageDescription={tCrm("page.storeSelectorHint")} />
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="p-4 md:p-6 lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between gap-3">
@@ -299,11 +302,16 @@ const CrmDashboardPage = () => {
               <MessageSquare className="h-5 w-5 text-teal-600" />
               <div>
                 <h1 className="text-lg md:text-xl font-semibold text-foreground">
-                  CRM Feedback &amp; Loyalty
+                  {tCrm("header.title")}
                 </h1>
                 <p className="text-xs md:text-sm text-muted-foreground">
-                  Tổng quan điểm đánh giá khách hàng và cấu hình quy tắc tích điểm
-                  {currentStore ? ` cho ${currentStore.storeName}` : ""}.
+                  {tCrm("header.subtitle", {
+                    storeSuffix: currentStore
+                      ? tCrm("header.storeSuffix", {
+                          storeName: currentStore.storeName,
+                        })
+                      : "",
+                  })}
                 </p>
               </div>
             </div>
@@ -316,7 +324,7 @@ const CrmDashboardPage = () => {
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {summary.totalCount} lượt đánh giá
+                  {tCrm("header.totalRatings", { count: summary.totalCount })}
                 </span>
               </div>
             ) : null}
@@ -328,7 +336,7 @@ const CrmDashboardPage = () => {
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 text-amber-500" />
                   <span className="text-sm font-semibold text-foreground">
-                    Phân bố điểm đánh giá
+                    {tCrm("distribution.title")}
                   </span>
                 </div>
                 {summaryLoading && (
@@ -337,7 +345,7 @@ const CrmDashboardPage = () => {
               </div>
               {!summary ? (
                 <p className="text-xs text-muted-foreground">
-                  Chưa có dữ liệu đánh giá.
+                  {tCrm("distribution.empty")}
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -374,7 +382,7 @@ const CrmDashboardPage = () => {
                 <div className="flex items-center gap-2">
                   <Gift className="h-4 w-4 text-teal-600" />
                   <span className="text-sm font-semibold text-foreground">
-                    Quy tắc Loyalty hiện tại
+                    {tCrm("loyalty.title")}
                   </span>
                 </div>
                 {canManageRules && (
@@ -383,18 +391,17 @@ const CrmDashboardPage = () => {
                     className="h-8 px-3 text-xs bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700"
                     onClick={openCreateRule}
                   >
-                    Thêm luật
+                    {tCrm("loyalty.addRule")}
                   </Button>
                 )}
               </div>
               {rulesLoading ? (
                 <div className="py-4 text-xs text-muted-foreground">
-                  Đang tải quy tắc loyalty...
+                  {tCrm("loyalty.loading")}
                 </div>
               ) : !rules.length ? (
                 <div className="py-4 text-xs text-muted-foreground">
-                  Chưa có luật tích điểm nào. Bạn có thể cấu hình luật mới để bắt
-                  đầu chương trình khách hàng thân thiết.
+                  {tCrm("loyalty.empty")}
                 </div>
               ) : (
                 <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
@@ -412,18 +419,22 @@ const CrmDashboardPage = () => {
                             variant="outline"
                             className="border-teal-500/40 bg-teal-50/70 text-teal-700"
                           >
-                            {rule.earningRate} điểm / 1k
+                            {tCrm("loyalty.earningRateBadge", {
+                              rate: rule.earningRate,
+                            })}
                           </Badge>
                         </div>
                         <div className="text-[11px] text-muted-foreground">
-                          Đơn tối thiểu:{" "}
+                          {tCrm("loyalty.minOrderLabel")}{" "}
                           <span className="font-medium">
                             {rule.minSpend.toLocaleString("vi-VN")}₫
                           </span>
                           {" • "}
-                          Trạng thái:{" "}
+                          {tCrm("loyalty.statusLabel")}{" "}
                           <span className="font-medium">
-                            {rule.status === 1 ? "Đang áp dụng" : "Tạm tắt"}
+                            {rule.status === 1
+                              ? tCrm("loyalty.statusActive")
+                              : tCrm("loyalty.statusInactive")}
                           </span>
                         </div>
                       </div>
@@ -435,14 +446,14 @@ const CrmDashboardPage = () => {
                             className="h-7 px-2 text-[11px]"
                             onClick={() => openEditRule(rule)}
                           >
-                            Sửa
+                            {tCrm("loyalty.edit")}
                           </Button>
                           <button
                             type="button"
                             className="text-red-500 hover:underline"
                             onClick={() => handleDeleteRule(rule)}
                           >
-                            Xóa
+                            {tCrm("loyalty.delete")}
                           </button>
                         </div>
                       )}
@@ -458,7 +469,7 @@ const CrmDashboardPage = () => {
         <Card className="p-4 md:p-6">
           <div className="flex items-center justify-between gap-2 mb-3">
             <h2 className="text-sm md:text-base font-semibold text-foreground">
-              Thao tác nhanh
+              {tCrm("quickActions.title")}
             </h2>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -469,7 +480,7 @@ const CrmDashboardPage = () => {
                 onClick={() => setRedeemOpen(true)}
               >
                 <Coins className="h-4 w-4 text-amber-500" />
-                Đổi điểm thưởng
+                {tCrm("quickActions.redeemPoints")}
               </Button>
             )}
             <Button
@@ -478,7 +489,7 @@ const CrmDashboardPage = () => {
               onClick={() => setStaffFbOpen(true)}
             >
               <PenLine className="h-4 w-4 text-teal-500" />
-              Tạo feedback hộ khách
+              {tCrm("quickActions.createStaffFeedback")}
             </Button>
           </div>
         </Card>
@@ -486,35 +497,35 @@ const CrmDashboardPage = () => {
         <Card className="p-4 md:p-6 space-y-4">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">
-              Lọc feedback khách hàng
+              {tCrm("filters.title")}
             </h2>
             <span className="text-[11px] text-muted-foreground">
-              Tổng: {feedbackTotal} feedback
+              {tCrm("filters.total", { count: feedbackTotal })}
             </span>
           </div>
           <div className="space-y-3 text-xs">
             <div className="space-y-1">
-              <Label>Điểm đánh giá</Label>
+              <Label>{tCrm("filters.ratingLabel")}</Label>
               <Select
                 value={ratingFilter}
                 onValueChange={(val) => setRatingFilter(val)}
               >
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Tất cả" />
+                  <SelectValue placeholder={tCrm("filters.ratingPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="All">Tất cả</SelectItem>
-                  <SelectItem value="5">5 sao</SelectItem>
-                  <SelectItem value="4">4 sao</SelectItem>
-                  <SelectItem value="3">3 sao</SelectItem>
-                  <SelectItem value="2">2 sao</SelectItem>
-                  <SelectItem value="1">1 sao</SelectItem>
+                  <SelectItem value="All">{tCrm("filters.all")}</SelectItem>
+                  <SelectItem value="5">{tCrm("filters.stars5")}</SelectItem>
+                  <SelectItem value="4">{tCrm("filters.stars4")}</SelectItem>
+                  <SelectItem value="3">{tCrm("filters.stars3")}</SelectItem>
+                  <SelectItem value="2">{tCrm("filters.stars2")}</SelectItem>
+                  <SelectItem value="1">{tCrm("filters.stars1")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label>Từ ngày</Label>
+                <Label>{tCrm("filters.fromDate")}</Label>
                 <Input
                   type="date"
                   className="h-8"
@@ -523,7 +534,7 @@ const CrmDashboardPage = () => {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Đến ngày</Label>
+                <Label>{tCrm("filters.toDate")}</Label>
                 <Input
                   type="date"
                   className="h-8"
@@ -543,7 +554,7 @@ const CrmDashboardPage = () => {
               }}
               disabled={feedbackLoading}
             >
-              Đặt lại bộ lọc
+              {tCrm("filters.reset")}
             </Button>
           </div>
         </Card>
@@ -552,17 +563,17 @@ const CrmDashboardPage = () => {
       <Card className="p-4 md:p-6 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm md:text-base font-semibold text-foreground">
-            Feedback gần đây của khách hàng
+            {tCrm("recentFeedback.title")}
           </h2>
         </div>
         {feedbackLoading ? (
           <div className="py-6 text-sm text-muted-foreground flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Đang tải danh sách feedback...</span>
+            <span>{tCrm("recentFeedback.loading")}</span>
           </div>
         ) : !feedbacks.length ? (
           <div className="py-6 text-sm text-muted-foreground">
-            Chưa có feedback nào phù hợp với bộ lọc hiện tại.
+            {tCrm("recentFeedback.empty")}
           </div>
         ) : (
           <div className="space-y-3">
@@ -582,24 +593,21 @@ const CrmDashboardPage = () => {
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-2 max-w-xl">
-                    {fb.content || "(Không có nội dung chi tiết)"}
+                    {fb.content || tCrm("recentFeedback.contentFallback")}
                   </p>
                   <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
                     <span>
-                      Nguồn:{" "}
+                      {tCrm("recentFeedback.sourceLabel")}{" "}
                       <span className="font-medium">
-                        {fb.source || "Không rõ"}
+                        {fb.source || tCrm("recentFeedback.sourceUnknown")}
                       </span>
                     </span>
                     <span>
-                      Thời gian:{" "}
-                      {new Date(fb.createdAt).toLocaleString("vi-VN", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {tCrm("recentFeedback.timeLabel")}{" "}
+                      {new Intl.DateTimeFormat(
+                        i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN",
+                        { dateStyle: "short", timeStyle: "short" },
+                      ).format(new Date(fb.createdAt))}
                     </span>
                   </div>
                 </div>
@@ -614,23 +622,25 @@ const CrmDashboardPage = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Gift className="h-4 w-4 text-teal-600" />
-              {editingRule ? "Cập nhật luật tích điểm" : "Thêm luật tích điểm"}
+              {editingRule
+                ? tCrm("dialogs.rule.editTitle")
+                : tCrm("dialogs.rule.createTitle")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div className="space-y-1">
-              <Label>Tên luật</Label>
+              <Label>{tCrm("dialogs.rule.nameLabel")}</Label>
               <Input
                 value={ruleForm.name}
                 onChange={(e) =>
                   setRuleForm((prev) => ({ ...prev, name: e.target.value }))
                 }
-                placeholder="VD: Tích điểm theo hóa đơn"
+                placeholder={tCrm("dialogs.rule.namePlaceholder")}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label>Kiểu luật (type)</Label>
+                <Label>{tCrm("dialogs.rule.typeLabel")}</Label>
                 <Input
                   type="number"
                   min={1}
@@ -645,7 +655,7 @@ const CrmDashboardPage = () => {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Tỷ lệ tích điểm (điểm/1k)</Label>
+                <Label>{tCrm("dialogs.rule.earningRateLabel")}</Label>
                 <Input
                   type="number"
                   min={0}
@@ -662,7 +672,7 @@ const CrmDashboardPage = () => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label>Đơn tối thiểu (VNĐ)</Label>
+                <Label>{tCrm("dialogs.rule.minSpendLabel")}</Label>
                 <Input
                   type="number"
                   min={0}
@@ -676,7 +686,7 @@ const CrmDashboardPage = () => {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Trạng thái</Label>
+                <Label>{tCrm("dialogs.rule.statusLabel")}</Label>
                 <Select
                   value={String(ruleForm.status)}
                   onValueChange={(val) =>
@@ -690,8 +700,8 @@ const CrmDashboardPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Đang áp dụng</SelectItem>
-                    <SelectItem value="0">Tạm tắt</SelectItem>
+                    <SelectItem value="1">{tCrm("dialogs.rule.statusActive")}</SelectItem>
+                    <SelectItem value="0">{tCrm("dialogs.rule.statusInactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -703,7 +713,7 @@ const CrmDashboardPage = () => {
               onClick={() => setRuleDialogOpen(false)}
               disabled={ruleSaving}
             >
-              Hủy
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               onClick={handleSaveRule}
@@ -717,7 +727,7 @@ const CrmDashboardPage = () => {
               {ruleSaving && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Lưu
+              {tCommon("actions.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -729,33 +739,33 @@ const CrmDashboardPage = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Coins className="h-5 w-5 text-amber-500" />
-              Đổi điểm thưởng
+              {tCrm("dialogs.redeem.title")}
             </DialogTitle>
             <DialogDescription>
-              Nhập mã khách hàng và số điểm muốn đổi.
+              {tCrm("dialogs.redeem.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div className="space-y-1">
-              <Label>Mã khách hàng (Customer ID)</Label>
+              <Label>{tCrm("dialogs.redeem.customerIdLabel")}</Label>
               <Input
                 value={redeemCustomerId}
                 onChange={(e) => setRedeemCustomerId(e.target.value)}
-                placeholder="Nhập ID khách hàng..."
+                placeholder={tCrm("dialogs.redeem.customerIdPlaceholder")}
               />
             </div>
             <div className="space-y-1 rounded-md border bg-muted/40 p-2">
               <div className="flex items-center justify-between gap-2">
                 <Label className="text-[11px] flex items-center gap-1">
                   <Search className="h-3 w-3" />
-                  Tìm khách hàng nhanh
+                  {tCrm("dialogs.redeem.quickSearchLabel")}
                 </Label>
               </div>
               <div className="mt-1 flex items-center gap-2">
                 <Input
                   value={redeemSearch}
                   onChange={(e) => setRedeemSearch(e.target.value)}
-                  placeholder="Nhập tên, số điện thoại hoặc email..."
+                  placeholder={tCrm("dialogs.redeem.searchPlaceholder")}
                   className="h-8 text-xs"
                 />
                 <Button
@@ -766,7 +776,9 @@ const CrmDashboardPage = () => {
                   disabled={redeemSearchLoading}
                   onClick={() => void handleRedeemSearchCustomers()}
                 >
-                  {redeemSearchLoading ? "Đang tìm..." : "Tìm"}
+                  {redeemSearchLoading
+                    ? tCrm("dialogs.redeem.searching")
+                    : tCrm("dialogs.redeem.search")}
                 </Button>
               </div>
               {redeemSearchResults.length > 0 && (
@@ -779,7 +791,11 @@ const CrmDashboardPage = () => {
                       onClick={() => {
                         setRedeemCustomerId(c.id);
                         setRedeemSearchResults([]);
-                        toast.success(`Đã chọn khách hàng: ${c.fullName}`);
+                        toast.success(
+                          tCrm("dialogs.redeem.selectedCustomerToast", {
+                            name: c.fullName,
+                          }),
+                        );
                       }}
                     >
                       <span className="font-medium">{c.fullName}</span>
@@ -794,27 +810,27 @@ const CrmDashboardPage = () => {
               )}
             </div>
             <div className="space-y-1">
-              <Label>Số điểm đổi</Label>
+              <Label>{tCrm("dialogs.redeem.pointsLabel")}</Label>
               <Input
                 type="number"
                 min={1}
                 value={redeemPoints || ""}
                 onChange={(e) => setRedeemPoints(Number(e.target.value) || 0)}
-                placeholder="Nhập số điểm..."
+                placeholder={tCrm("dialogs.redeem.pointsPlaceholder")}
               />
             </div>
             <div className="space-y-1">
-              <Label>Mô tả (tùy chọn)</Label>
+              <Label>{tCrm("dialogs.redeem.descLabel")}</Label>
               <Input
                 value={redeemDesc}
                 onChange={(e) => setRedeemDesc(e.target.value)}
-                placeholder="VD: Đổi voucher 50k"
+                placeholder={tCrm("dialogs.redeem.descPlaceholder")}
               />
             </div>
           </div>
           <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setRedeemOpen(false)} disabled={redeemLoading}>
-              Hủy
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               onClick={() => void handleRedeemPoints()}
@@ -822,7 +838,7 @@ const CrmDashboardPage = () => {
               className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
             >
               {redeemLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Đổi điểm
+              {tCrm("dialogs.redeem.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -834,33 +850,33 @@ const CrmDashboardPage = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <PenLine className="h-5 w-5 text-teal-500" />
-              Tạo feedback hộ khách hàng
+              {tCrm("dialogs.staffFeedback.title")}
             </DialogTitle>
             <DialogDescription>
-              Staff/Manager tạo feedback in-store thay cho khách.
+              {tCrm("dialogs.staffFeedback.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div className="space-y-1">
-              <Label>Mã khách hàng (Customer ID)</Label>
+              <Label>{tCrm("dialogs.staffFeedback.customerIdLabel")}</Label>
               <Input
                 value={staffFbCustomerId}
                 onChange={(e) => setStaffFbCustomerId(e.target.value)}
-                placeholder="Nhập ID khách hàng..."
+                placeholder={tCrm("dialogs.staffFeedback.customerIdPlaceholder")}
               />
             </div>
             <div className="space-y-1 rounded-md border bg-muted/40 p-2">
               <div className="flex items-center justify-between gap-2">
                 <Label className="text-[11px] flex items-center gap-1">
                   <Search className="h-3 w-3" />
-                  Tìm khách hàng nhanh
+                  {tCrm("dialogs.staffFeedback.quickSearchLabel")}
                 </Label>
               </div>
               <div className="mt-1 flex items-center gap-2">
                 <Input
                   value={staffSearch}
                   onChange={(e) => setStaffSearch(e.target.value)}
-                  placeholder="Nhập tên, số điện thoại hoặc email..."
+                  placeholder={tCrm("dialogs.staffFeedback.searchPlaceholder")}
                   className="h-8 text-xs"
                 />
                 <Button
@@ -871,7 +887,9 @@ const CrmDashboardPage = () => {
                   disabled={staffSearchLoading}
                   onClick={() => void handleStaffSearchCustomers()}
                 >
-                  {staffSearchLoading ? "Đang tìm..." : "Tìm"}
+                  {staffSearchLoading
+                    ? tCrm("dialogs.staffFeedback.searching")
+                    : tCrm("dialogs.staffFeedback.search")}
                 </Button>
               </div>
               {staffSearchResults.length > 0 && (
@@ -884,7 +902,11 @@ const CrmDashboardPage = () => {
                       onClick={() => {
                         setStaffFbCustomerId(c.id);
                         setStaffSearchResults([]);
-                        toast.success(`Đã chọn khách hàng: ${c.fullName}`);
+                        toast.success(
+                          tCrm("dialogs.staffFeedback.selectedCustomerToast", {
+                            name: c.fullName,
+                          }),
+                        );
                       }}
                     >
                       <span className="font-medium">{c.fullName}</span>
@@ -899,7 +921,7 @@ const CrmDashboardPage = () => {
               )}
             </div>
             <div className="space-y-1">
-              <Label>Đánh giá</Label>
+              <Label>{tCrm("dialogs.staffFeedback.ratingLabel")}</Label>
               <Select
                 value={String(staffFbRating)}
                 onValueChange={(v) => setStaffFbRating(Number(v))}
@@ -917,18 +939,18 @@ const CrmDashboardPage = () => {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Nội dung (tùy chọn)</Label>
+              <Label>{tCrm("dialogs.staffFeedback.contentLabel")}</Label>
               <textarea
                 className="flex w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                 value={staffFbContent}
                 onChange={(e) => setStaffFbContent(e.target.value)}
-                placeholder="Khách nhận xét..."
+                placeholder={tCrm("dialogs.staffFeedback.contentPlaceholder")}
               />
             </div>
           </div>
           <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setStaffFbOpen(false)} disabled={staffFbLoading}>
-              Hủy
+              {tCommon("actions.cancel")}
             </Button>
             <Button
               onClick={() => void handleStaffFeedback()}
@@ -936,7 +958,7 @@ const CrmDashboardPage = () => {
               className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white"
             >
               {staffFbLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Tạo feedback
+              {tCrm("dialogs.staffFeedback.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

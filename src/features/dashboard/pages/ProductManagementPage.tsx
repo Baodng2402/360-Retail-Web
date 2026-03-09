@@ -57,6 +57,7 @@ import { useStoreStore } from "@/shared/store/storeStore";
 import type { Category } from "@/shared/types/categories";
 import type { Product, ProductVariant } from "@/shared/types/products";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
+import { useTranslation } from "react-i18next";
 
 interface ExtendedCategory extends Category {
   color?: string;
@@ -146,6 +147,7 @@ const addOpacityToColor = (color: string | undefined, opacity: number): string =
 };
 
 export default function ProductManagementPage() {
+  const { t } = useTranslation("product");
   const { currentStore } = useStoreStore();
   const storeId = currentStore?.id;
 
@@ -856,7 +858,7 @@ export default function ProductManagementPage() {
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <Package className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
         <p className="text-lg font-medium text-muted-foreground mb-2">
-          Vui lòng chọn cửa hàng để quản lý sản phẩm
+          {t("page.selectStoreFirst")}
         </p>
       </div>
     );
@@ -864,14 +866,14 @@ export default function ProductManagementPage() {
 
   return (
     <div className="space-y-6">
-      <StoreSelector pageDescription="Chuyển đổi để quản lý sản phẩm và danh mục của cửa hàng khác" />
+      <StoreSelector pageDescription={t("page.storeSelectorHint")} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-6 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background border-blue-200 dark:border-blue-900">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Tổng sản phẩm
+                {t("stats.totalProducts")}
               </p>
               <h3 className="text-2xl font-bold text-foreground">
                 {totalProducts}
@@ -886,7 +888,7 @@ export default function ProductManagementPage() {
         <Card className="p-6 bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200 dark:border-green-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Giá trị kho</p>
+              <p className="text-sm text-muted-foreground mb-1">{t("stats.inventoryValue")}</p>
               <h3 className="text-2xl font-bold text-foreground">
                 {totalValue.toLocaleString("vi-VN")}đ
               </h3>
@@ -901,7 +903,7 @@ export default function ProductManagementPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Cảnh báo tồn kho
+                {t("stats.lowStockAlerts")}
               </p>
               <h3 className="text-2xl font-bold text-foreground">
                 {lowStockProducts}
@@ -917,7 +919,7 @@ export default function ProductManagementPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Lợi nhuận trung bình
+                {t("stats.avgMargin")}
               </p>
               <h3 className="text-2xl font-bold text-foreground">
                 {averageMargin}%
@@ -934,11 +936,11 @@ export default function ProductManagementPage() {
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="products" className="gap-2">
             <Package className="h-4 w-4" />
-            Sản phẩm
+            {t("tabs.products")}
           </TabsTrigger>
           <TabsTrigger value="categories" className="gap-2">
             <FolderTree className="h-4 w-4" />
-            Danh mục
+            {t("tabs.categories")}
           </TabsTrigger>
         </TabsList>
 
@@ -948,7 +950,7 @@ export default function ProductManagementPage() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Tìm sản phẩm..."
+                  placeholder={t("search.productsPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"

@@ -1,0 +1,363 @@
+{
+  "sidebar": {
+    "brandLine1": "Retail 360",
+    "brandLine2": "Nền tảng SME",
+    "nav": {
+      "dashboard": {
+        "label": "Dashboard 360°",
+        "subLabel": "Tổng quan 360°"
+      },
+      "timekeeping": {
+        "label": "Chấm công",
+        "subLabel": "Chấm công GPS"
+      },
+      "myTasks": {
+        "label": "Công việc",
+        "subLabel": "Công việc của tôi"
+      },
+      "staff": {
+        "label": "Nhân viên",
+        "subLabel": "Nhân viên"
+      },
+      "stores": {
+        "label": "Cửa hàng",
+        "subLabel": "Chi nhánh"
+      },
+      "products": {
+        "label": "Sản phẩm",
+        "subLabel": "Sản phẩm"
+      },
+      "inventory": {
+        "label": "Kho hàng",
+        "subLabel": "Nhập/Xuất kho"
+      },
+      "sales": {
+        "label": "Sales & POS",
+        "subLabel": "Bán hàng"
+      },
+      "orders": {
+        "label": "Đơn hàng",
+        "subLabel": "Đơn hàng"
+      },
+      "customers": {
+        "label": "Khách hàng",
+        "subLabel": "Khách hàng"
+      },
+      "crm": {
+        "label": "CRM & Loyalty",
+        "subLabel": "Điểm thưởng & Feedback"
+      },
+      "reports": {
+        "label": "Báo cáo",
+        "subLabel": "Báo cáo"
+      },
+      "subscription": {
+        "label": "Gói dịch vụ",
+        "subLabel": "Subscription"
+      },
+      "settings": {
+        "label": "Cài đặt",
+        "subLabel": "Cài đặt"
+      }
+    },
+    "quickActionsSection": "Tác vụ nhanh",
+    "quickActions": {
+      "createOrder": {
+        "label": "Tạo đơn hàng",
+        "subLabel": "Tạo đơn hàng"
+      },
+      "staffCheckIn": {
+        "label": "Chấm công",
+        "subLabel": "Check-in nhân viên"
+      },
+      "recordFeedback": {
+        "label": "Ghi feedback",
+        "subLabel": "Ghi feedback"
+      },
+      "noStoreHint": "Vui lòng thiết lập cửa hàng trước.",
+      "upgradePlanHint": "Vui lòng nâng cấp gói để sử dụng tính năng này."
+    },
+    "locks": {
+      "upgradePlan": "Nâng cấp gói để sử dụng",
+      "setupStoreFirst": "Thiết lập cửa hàng trước"
+    },
+    "setupStoreDialog": {
+      "title": "Thiết lập cửa hàng",
+      "description": "Bạn cần hoàn thành thiết lập cửa hàng trước khi sử dụng tính năng này.",
+      "body": "Vui lòng hoàn thành thiết lập cửa hàng của bạn để bắt đầu quản lý doanh nghiệp.",
+      "remindLater": "Để sau",
+      "setupNow": "Thiết lập ngay"
+    }
+  },
+  "dashboardPage": {
+    "noStore": {
+      "title": "Chào mừng bạn đến với 360 Retail!",
+      "description": "Bạn cần tạo cửa hàng trước để bắt đầu quản lý doanh nghiệp của mình.",
+      "ctaHighlight": "Đăng ký ngay để nhận {{days}} ngày dùng thử miễn phí!",
+      "benefitsTitle": "Bạn sẽ được:",
+      "benefits": {
+        "trial": "7 ngày dùng thử miễn phí - Không cần thẻ tín dụng",
+        "store": "Tạo cửa hàng và quản lý sản phẩm ngay lập tức",
+        "features": "Truy cập tất cả tính năng quản lý bán hàng"
+      },
+      "primaryCta": "Tạo cửa hàng ngay (Miễn phí 7 ngày)",
+      "note": "Sau 7 ngày, bạn có thể nâng cấp lên gói trả phí để tiếp tục sử dụng"
+    },
+    "overviewSection": {
+      "title": "Tổng quan bán hàng",
+      "rangeToday": "Hôm nay",
+      "range7d": "7 ngày",
+      "range30d": "30 ngày",
+      "rangeLabel": {
+        "today": "Hôm nay",
+        "7d": "7 ngày gần đây",
+        "30d": "30 ngày gần đây"
+      },
+      "stats": {
+        "todayRevenue": {
+          "label": "Doanh thu hôm nay",
+          "subLabel": "Doanh thu hôm nay"
+        },
+        "totalRevenue": {
+          "label": "Total Revenue",
+          "subLabel": "Doanh thu ({{range}})"
+        },
+        "totalOrders": {
+          "label": "Total Orders",
+          "subLabel": "Đơn hàng ({{range}})"
+        },
+        "avgOrderValue": {
+          "label": "Avg. Order Value",
+          "subLabel": "Giá trị đơn trung bình"
+        },
+        "activeStaff": {
+          "label": "Active Staff",
+          "subLabel": "Nhân viên đang làm"
+        }
+      },
+      "charts": {
+        "topProductsTitle": "Top 5 sản phẩm bán chạy"
+      }
+    },
+    "subscriptionExpiry": {
+      "warningTitle": "Gói subscription sắp hết hạn!",
+      "warningBody": "Còn lại {{days}} ngày{{endDate, datetime}}. Vui lòng gia hạn để không bị gián đoạn dịch vụ.",
+      "badge": "{{days}} ngày"
+    }
+  },
+  "trial": {
+    "banner": {
+      "trialTitle": "Dùng thử miễn phí",
+      "expiredTitle": "Hết hạn dùng thử",
+      "subscriptionExpiredTitle": "Hết hạn gói đăng ký",
+      "noticeTitle": "Thông báo",
+      "expiredMessage": "Thời gian dùng thử đã hết. Vui lòng mua gói để tiếp tục sử dụng.",
+      "trialMessageWithDays": "Bạn còn {{days}} ngày dùng thử.",
+      "trialMessageGeneric": "Bạn đang trong thời gian dùng thử.",
+      "noSubscriptionMessage": "Bạn chưa có gói đăng ký. Vui lòng mua gói để sử dụng.",
+      "daysRemaining": "Còn {{days}} ngày",
+      "upgrade": "Nâng cấp",
+      "upgradeNow": "Nâng cấp ngay"
+    },
+    "badges": {
+      "daysLeft": "Còn {{days}} ngày",
+      "expired": "Hết hạn",
+      "active": "Đang hoạt động",
+      "trial": "Dùng thử"
+    }
+  }
+  ,
+  "header": {
+    "greeting": "Xin chào, {{name}}",
+    "pages": {
+      "dashboard": { "name": "Dashboard", "title": "Tổng quan 360°" },
+      "staff": { "name": "Nhân viên", "title": "Quản lý Nhân viên" },
+      "stores": { "name": "Cửa hàng", "title": "Quản lý Cửa hàng" },
+      "sales": { "name": "Sales & POS", "title": "Quản lý Bán hàng" },
+      "customers": { "name": "Khách hàng", "title": "Quản lý Khách hàng" },
+      "reports": { "name": "Báo cáo", "title": "Báo cáo" },
+      "settings": { "name": "Cài đặt", "title": "Cài đặt" },
+      "timekeeping": { "name": "Chấm công", "title": "Chấm công GPS & Selfie" }
+    }
+  },
+  "settingsPage": {
+    "storeSelectorHint": "Chuyển đổi để cấu hình cửa hàng khác",
+    "tabs": {
+      "store": "Thông tin cửa hàng",
+      "notifications": "Thông báo",
+      "loyalty": "Tích điểm",
+      "security": "Bảo mật"
+    },
+    "store": {
+      "title": "Thông tin cửa hàng",
+      "saveHint": "Lưu thông tin cửa hàng xuống máy chủ khi bạn nhấn <strong>Lưu thay đổi</strong>.",
+      "loading": "Đang tải...",
+      "actions": {
+        "saveChanges": "Lưu thay đổi",
+        "saving": "Đang lưu..."
+      },
+      "fields": {
+        "nameLabel": "Tên cửa hàng",
+        "namePlaceholder": "Nhập tên cửa hàng...",
+        "addressLabel": "Địa chỉ",
+        "addressPlaceholder": "Nhập địa chỉ...",
+        "addressSuggesting": "Đang gợi ý địa chỉ...",
+        "phoneLabel": "Số điện thoại"
+      },
+      "gps": {
+        "mapPreviewLabel": "Vị trí GPS (xem bản đồ)",
+        "mapPreviewHint": "Bạn có thể bấm trực tiếp trên bản đồ để chọn tọa độ cho cửa hàng. Marker sẽ tự động di chuyển và cập nhật Latitude/Longitude phía trên.",
+        "optionalLabel": "Vị trí GPS (tùy chọn)",
+        "useCurrentLocation": "Dùng vị trí hiện tại",
+        "gettingLocation": "Đang lấy vị trí...",
+        "optionalHint": "Nếu bạn nhập tọa độ GPS, hệ thống sẽ dùng để kiểm tra khoảng cách khi nhân viên chấm công."
+      }
+    },
+    "notifications": {
+      "title": "Tùy chọn thông báo",
+      "description": "Cài đặt thông báo được lưu trên thiết bị của bạn. Tính năng đồng bộ lên máy chủ sẽ được cập nhật sau.",
+      "lowStockEmail": {
+        "title": "Gửi email cảnh báo tồn kho thấp",
+        "description": "Hệ thống sẽ kiểm tra các sản phẩm có tồn kho nhỏ hơn hoặc bằng ngưỡng và gửi email cảnh báo cho chủ cửa hàng.",
+        "action": "Kiểm tra tồn kho thấp (ngưỡng {{threshold}})",
+        "toasts": {
+          "success": "Đã chạy kiểm tra tồn kho thấp và gửi email cảnh báo (nếu có).",
+          "failed": "Không thể chạy kiểm tra tồn kho thấp. Vui lòng thử lại."
+        }
+      }
+    },
+    "loyalty": {
+      "title": "Cấu hình tích điểm",
+      "description": "Thiết lập quy tắc tích điểm cho khách hàng. Mỗi quy tắc định nghĩa cách quy đổi doanh thu sang điểm thưởng.",
+      "note": "Các quy tắc sẽ được áp dụng theo thứ tự ưu tiên do backend quy định.",
+      "states": {
+        "loading": "Đang tải loyalty rules...",
+        "emptyManage": "Chưa có loyalty rule nào. Bạn có thể thêm quy tắc đầu tiên.",
+        "emptyReadOnly": "Chưa có loyalty rule nào. Bạn chỉ có quyền xem khi quản lý đã cấu hình."
+      },
+      "status": {
+        "active": "Đang áp dụng",
+        "inactive": "Tạm tắt"
+      },
+      "actions": {
+        "addRule": "Thêm quy tắc",
+        "edit": "Chỉnh sửa",
+        "activate": "Kích hoạt",
+        "deactivate": "Tạm tắt"
+      },
+      "ruleSummary": "Tích {{earningRate}} điểm mỗi {{minSpend, currency}} chi tiêu.",
+      "form": {
+        "editTitle": "Chỉnh sửa quy tắc",
+        "createTitle": "Tạo mới / cập nhật quy tắc",
+        "nameLabel": "Tên quy tắc",
+        "namePlaceholder": "Tích 1 điểm / 10,000đ",
+        "earningRateLabel": "Tỷ lệ điểm (earningRate)",
+        "minSpendLabel": "Mức chi tối thiểu (minSpend)",
+        "statusLabel": "Trạng thái",
+        "reset": "Xóa form",
+        "saving": "Đang lưu...",
+        "saveChanges": "Lưu thay đổi",
+        "create": "Tạo quy tắc"
+      },
+      "toasts": {
+        "loadFailed": "Không thể tải danh sách loyalty rules.",
+        "toggleFailed": "Không thể cập nhật trạng thái loyalty rule.",
+        "nameRequired": "Vui lòng nhập tên quy tắc.",
+        "updateSuccess": "Đã cập nhật loyalty rule.",
+        "createSuccess": "Đã tạo loyalty rule mới.",
+        "saveFailed": "Không thể lưu loyalty rule. Vui lòng thử lại."
+      }
+    },
+    "toasts": {
+      "loadStoreFailed": "Không thể tải thông tin cửa hàng",
+      "saveStoreSuccess": "Đã lưu thông tin cửa hàng!",
+      "saveStoreFailed": "Không thể lưu thông tin cửa hàng",
+      "invalidLatitude": "Latitude không hợp lệ",
+      "invalidLongitude": "Longitude không hợp lệ",
+      "browserNoGps": "Trình duyệt không hỗ trợ GPS/location.",
+      "useCurrentLocationSuccess": "Đã lấy tọa độ hiện tại cho cửa hàng.",
+      "useCurrentLocationFailed": "Không thể lấy vị trí hiện tại. Vui lòng bật Location cho trình duyệt.",
+      "keepExistingCoords": "Đã giữ nguyên toạ độ cửa hàng."
+    },
+    "gpsDistanceWarning": {
+      "title": "Vị trí hiện tại cách xa cửa hàng",
+      "description": "Vị trí hiện tại của bạn đang cách vị trí cửa hàng khoảng {{distance}}. Bạn có chắc muốn cập nhật GPS cửa hàng theo vị trí hiện tại?",
+      "keepExisting": "Giữ nguyên"
+    },
+    "security": {
+      "title": "Bảo mật",
+      "description": "Đổi mật khẩu được lưu vào hệ thống. Sau khi đổi thành công, bạn cần đăng nhập lại.",
+      "fields": {
+        "currentPasswordLabel": "Mật khẩu hiện tại",
+        "currentPasswordPlaceholder": "Nhập mật khẩu hiện tại",
+        "newPasswordLabel": "Mật khẩu mới",
+        "newPasswordPlaceholder": "Nhập mật khẩu mới (tối thiểu 8 ký tự)",
+        "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+        "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới"
+      },
+      "actions": {
+        "processing": "Đang xử lý...",
+        "changePassword": "Đổi mật khẩu"
+      },
+      "validation": {
+        "passwordMismatch": "Mật khẩu xác nhận không khớp",
+        "passwordMinLength": "Mật khẩu mới phải từ {{min}} ký tự trở lên"
+      },
+      "toasts": {
+        "changePasswordSuccess": "Đổi mật khẩu thành công. Vui lòng đăng nhập lại.",
+        "changePasswordFailed": "Không thể đổi mật khẩu. Kiểm tra mật khẩu hiện tại."
+      }
+    }
+  },
+  "dashboardPage": {
+    "range": {
+      "today": "Hôm nay",
+      "7d": "7 ngày gần đây",
+      "30d": "30 ngày gần đây"
+    },
+    "onboarding": {
+      "welcomeTitle": "Chào mừng bạn đến với 360 Retail!",
+      "needStore": "Bạn cần tạo cửa hàng trước để bắt đầu quản lý doanh nghiệp của mình.",
+      "trialCta": "Đăng ký ngay để nhận <strong>7 ngày dùng thử miễn phí</strong>!",
+      "benefitsTitle": "Bạn sẽ được:",
+      "benefits": {
+        "noCard": "7 ngày dùng thử miễn phí - Không cần thẻ tín dụng",
+        "setupStore": "Tạo cửa hàng và quản lý sản phẩm ngay lập tức",
+        "fullAccess": "Truy cập tất cả tính năng quản lý bán hàng"
+      },
+      "createStore": "Tạo cửa hàng ngay (Miễn phí 7 ngày)",
+      "afterTrialNote": "Sau 7 ngày, bạn có thể nâng cấp lên gói trả phí để tiếp tục sử dụng"
+    },
+    "expiry": {
+      "title": "Gói subscription sắp hết hạn!",
+      "remainingWithEndDate": "Còn lại <strong>{{days, number}}</strong> ngày (hết hạn {{endDate, datetime}}). Vui lòng gia hạn để không bị gián đoạn dịch vụ.",
+      "remainingNoEndDate": "Còn lại <strong>{{days, number}}</strong> ngày. Vui lòng gia hạn để không bị gián đoạn dịch vụ.",
+      "badgeDays": "{{days, number}} ngày"
+    },
+    "sections": {
+      "salesOverview": "Tổng quan bán hàng"
+    },
+    "stats": {
+      "totalRevenueLabel": "Tổng doanh thu",
+      "totalRevenueSubLabel": "Doanh thu ({{range}})",
+      "totalOrdersLabel": "Tổng đơn hàng",
+      "totalOrdersSubLabel": "Đơn hàng ({{range}})",
+      "avgOrderValueLabel": "Giá trị đơn trung bình",
+      "avgOrderValueSubLabel": "Giá trị đơn trung bình",
+      "activeEmployeesLabel": "Nhân sự",
+      "activeEmployeesSubLabel": "Nhân viên đang làm",
+      "todayRevenueLabel": "Doanh thu hôm nay",
+      "todayRevenueSubLabel": "Doanh thu hôm nay"
+    },
+    "charts": {
+      "productsSold": "Sản phẩm đã bán",
+      "topProductsTitle": "Top 5 sản phẩm bán chạy"
+    },
+    "actions": {
+      "today": "Hôm nay",
+      "days7": "7 ngày",
+      "days30": "30 ngày"
+    }
+  }
+}
+

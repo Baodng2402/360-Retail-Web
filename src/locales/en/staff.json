@@ -1,0 +1,73 @@
+{
+  "page": {
+    "storeSelectorHint": "Switch to manage staff from another store"
+  },
+  "actions": {
+    "createTask": "Create task",
+    "addStaff": "Add staff"
+  },
+  "list": {
+    "title": "Staff list",
+    "searchPlaceholder": "Search staff...",
+    "loading": "Loading...",
+    "noTask": "None"
+  },
+  "stats": {
+    "totalStaff": {
+      "label": "Total staff",
+      "subLabel": "Total staff"
+    },
+    "activeStaff": {
+      "label": "Active staff",
+      "subLabel": "Active"
+    },
+    "activeTasks": {
+      "label": "Active tasks",
+      "subLabel": "In progress"
+    },
+    "inactive": {
+      "label": "Inactive",
+      "subLabel": "Inactive"
+    }
+  },
+  "detail": {
+    "loading": "Loading staff details...",
+    "notFound": "Staff member not found.",
+    "backToList": "Back to staff list",
+    "positionFallback": "Position not set",
+    "joinDateLabel": "Join date:",
+    "sectionTitle": "Staff info & permissions",
+    "actions": {
+      "deactivate": "Remove staff",
+      "saveChanges": "Save changes"
+    },
+    "form": {
+      "fullName": "Full name",
+      "position": "Position",
+      "positionModePreset": "Pick from list",
+      "positionModeCustom": "Custom input",
+      "positionPlaceholder": "Select a position",
+      "customPositionPlaceholder": "e.g. Sales associate",
+      "baseSalary": "Base salary (VND)",
+      "workStatusTitle": "Employment status",
+      "activeHint": "This staff member is active and can sign in and use timekeeping.",
+      "inactiveHint": "This staff member is inactive and cannot access the system."
+    },
+    "dialog": {
+      "title": "Deactivate staff member",
+      "description": "Are you sure you want to deactivate <strong>{{name}}</strong>? They will no longer be able to sign in or use timekeeping.",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "toasts": {
+      "loadFailed": "Unable to load staff information.",
+      "invalidBaseSalary": "Invalid base salary.",
+      "positionRequired": "Please select a position.",
+      "updateSuccess": "Staff information updated.",
+      "updateFailed": "Unable to update staff information.",
+      "deactivateSuccess": "Staff member deactivated.",
+      "deactivateFailed": "Unable to deactivate staff member. Please try again."
+    }
+  }
+}
+

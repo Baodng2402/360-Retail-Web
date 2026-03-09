@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, KeyRound, Lock, Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -10,24 +11,35 @@ import { Label } from "@/shared/components/ui/label";
 import { authApi } from "@/shared/lib/authApi";
 import { AuthFormLayout } from "@/features/auth/components/AuthFormLayout";
 
-const resetSchema = z
-  .object({
-    email: z.string().min(1, "Vui lòng nhập email.").email("Email không hợp lệ."),
-    code: z
-      .string()
-      .min(6, "Mã xác nhận gồm 6 số.")
-      .max(6, "Mã xác nhận gồm 6 số."),
-    newPassword: z
-      .string()
-      .min(8, "Mật khẩu mới phải từ 8 ký tự trở lên."),
-    confirmPassword: z.string().min(1, "Vui lòng nhập lại mật khẩu."),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Mật khẩu xác nhận không khớp.",
-    path: ["confirmPassword"],
-  });
-
 const ForgotPasswordResetPage = () => {
+  const { t } = useTranslation(["auth", "common"]);
+
+  const resetSchema = z
+    .object({
+      email: z
+        .string()
+        .min(1, t("common:validation.required"))
+        .email(t("common:validation.invalidEmail")),
+      code: z
+        .string()
+        .min(
+          6,
+          t("auth:verify.codeLength", { defaultValue: "Verification code must be 6 digits." }),
+        )
+        .max(
+          6,
+          t("auth:verify.codeLength", { defaultValue: "Verification code must be 6 digits." }),
+        ),
+      newPassword: z
+        .string()
+        .min(8, t("common:validation.minLength", { min: 8 })),
+      confirmPassword: z.string().min(1, t("common:validation.required")),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: t("common:validation.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
+
   const [searchParams] = useSearchParams();
   const initialEmail = searchParams.get("email") ?? "";
 
@@ -55,7 +67,7 @@ const ForgotPasswordResetPage = () => {
 
     if (!parsed.success) {
       const firstError =
-        parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";
+        parsed.error.issues[0]?.message ?? t("common:states.error");
       setError(firstError);
       return;
     }
@@ -67,14 +79,21 @@ const ForgotPasswordResetPage = () => {
         resetCode: code,
         newPassword,
       });
-      toast.success(message || "Mật khẩu đã được đặt lại thành công.");
+      toast.success(
+        message ||
+          t("auth:forgotPassword.reset.success", {
+            defaultValue: "Password has been reset successfully.",
+          }),
+      );
       navigate("/login", { replace: true });
     } catch (err: unknown) {
       console.error("Reset password error", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
-        "Không thể đặt lại mật khẩu. Vui lòng kiểm tra lại mã xác nhận.";
+        t("auth:forgotPassword.reset.error", {
+          defaultValue: "Unable to reset password. Please check the verification code.",
+        });
       setError(message);
       toast.error(message);
     } finally {
@@ -84,13 +103,16 @@ const ForgotPasswordResetPage = () => {
 
   return (
     <AuthFormLayout
-      title="Đặt lại mật khẩu"
-      description="Nhập mã 6 số được gửi tới email và thiết lập mật khẩu mới cho tài khoản của bạn."
+      title={t("auth:forgotPassword.reset.title", { defaultValue: "Reset password" })}
+      description={t("auth:forgotPassword.reset.description", {
+        defaultValue:
+          "Enter the 6-digit code sent to your email and set a new password for your account.",
+      })}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Email
+            {t("auth:login.email")}
           </Label>
           <div className="relative">
             <Mail className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -107,7 +129,7 @@ const ForgotPasswordResetPage = () => {
 
         <div className="space-y-2">
           <Label htmlFor="code" className="text-sm font-medium text-gray-700">
-            Mã xác nhận (6 số)
+            {t("auth:verify.codeLabel", { defaultValue: "Verification code (6 digits)" })}
           </Label>
           <div className="relative">
             <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -127,7 +149,7 @@ const ForgotPasswordResetPage = () => {
 
         <div className="space-y-2">
           <Label htmlFor="newPassword" className="text-sm font-medium text-gray-700">
-            Mật khẩu mới
+            {t("auth:forgotPassword.reset.newPassword", { defaultValue: "New password" })}
           </Label>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -137,14 +159,16 @@ const ForgotPasswordResetPage = () => {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="h-12 pl-11 pr-11 bg-white text-gray-900 border-gray-200 placeholder:text-gray-500"
-              placeholder="Tối thiểu 8 ký tự"
+              placeholder={t("auth:forgotPassword.reset.newPasswordPlaceholder", {
+                defaultValue: "At least 8 characters",
+              })}
               autoComplete="new-password"
             />
             <button
               type="button"
               onClick={() => setShowNewPassword((prev) => !prev)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-600 transition-colors"
-              aria-label={showNewPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              aria-label={showNewPassword ? "Hide password" : "Show password"}
             >
               {showNewPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -157,7 +181,7 @@ const ForgotPasswordResetPage = () => {
 
         <div className="space-y-2">
           <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-            Xác nhận mật khẩu mới
+            {t("auth:forgotPassword.reset.confirmPassword", { defaultValue: "Confirm new password" })}
           </Label>
           <div className="relative">
             <Input
@@ -166,14 +190,16 @@ const ForgotPasswordResetPage = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="h-12 pr-11 bg-white text-gray-900 border-gray-200 placeholder:text-gray-500"
-              placeholder="Nhập lại mật khẩu mới"
+              placeholder={t("auth:forgotPassword.reset.confirmPasswordPlaceholder", {
+                defaultValue: "Re-enter new password",
+              })}
               autoComplete="new-password"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword((prev) => !prev)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-600 transition-colors"
-              aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
             >
               {showConfirmPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -191,7 +217,9 @@ const ForgotPasswordResetPage = () => {
           disabled={submitting}
           className="h-12 w-full bg-[#0D9488] text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0D9488]/90 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {submitting ? "ĐANG XỬ LÝ..." : "ĐẶT LẠI MẬT KHẨU"}
+          {submitting
+            ? t("auth:forgotPassword.reset.submitting", { defaultValue: "PROCESSING..." })
+            : t("auth:forgotPassword.reset.submit", { defaultValue: "RESET PASSWORD" })}
         </Button>
       </form>
     </AuthFormLayout>

@@ -1,0 +1,54 @@
+{
+  "setup": {
+    "bannerTitle": "Set up your store",
+    "bannerSubtitle": "Complete store details to start selling today",
+    "setupNowLong": "Set up now",
+    "setupNowShort": "Set up",
+    "compactTitle": "You don't have a store yet",
+    "compactSubtitle": "Set up a store to get started",
+    "dismiss": "Later",
+    "dialog": {
+      "title": "Create a store",
+      "subtitle": "Set up your store to start selling",
+      "storeNameLabel": "Store name *",
+      "storeNamePlaceholder": "Enter store name",
+      "addressLabel": "Address",
+      "addressPlaceholder": "Enter store address",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "Enter phone number",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "create": "Create store"
+    },
+    "validation": {
+      "storeNameRequired": "Please enter a store name."
+    },
+    "toast": {
+      "createTrialSuccess": "Store created successfully!",
+      "createTrialError": "Unable to create store."
+    }
+  },
+  "trial": {
+    "start": {
+      "title": "Start a 7-day free trial",
+      "subtitle": "Create your store to start using 360 Retail",
+      "benefits": {
+        "trial": "7-day free trial - no credit card required",
+        "instant": "Create a store and manage products instantly",
+        "premium": "Access all premium features"
+      },
+      "defaultStoreName": "{{name}}'s store",
+      "storeNameLabel": "Store name",
+      "storeNamePlaceholder": "Enter store name",
+      "storeNameHint": "If left blank, we'll generate: \"{{storeName}}\"",
+      "later": "Later",
+      "creating": "Creating...",
+      "startNow": "Start trial",
+      "note": "After 7 days, you can upgrade to a paid plan to continue using the service.",
+      "close": "Close",
+      "toastSuccess": "Trial store created successfully!",
+      "toastError": "Unable to create a trial store."
+    }
+  }
+}
+

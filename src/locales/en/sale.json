@@ -1,0 +1,85 @@
+{
+  "page": {
+    "storeSelectorHint": "Switch to sell for another store"
+  },
+  "tabs": {
+    "pos": "POS / Sales",
+    "inventory": "Inventory / Products",
+    "reports": "Reports"
+  },
+  "search": {
+    "placeholder": "Search by name, barcode, category..."
+  },
+  "actions": {
+    "scan": "Scan",
+    "addProduct": "Add product",
+    "stockIn": "Stock in",
+    "stockOut": "Stock out",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "completeOrder": "Complete order"
+  },
+  "states": {
+    "loadingProducts": "Loading products...",
+    "noProductsTitle": "No products yet",
+    "noProductsBody": "Create a category (Products → Categories) then add products to start selling.",
+    "loadingBestSelling": "Loading best-selling report...",
+    "noReportData": "Not enough sales data to show the report."
+  },
+  "cart": {
+    "title": "Cart",
+    "itemsCount": "{{count}} item(s)",
+    "empty": "Cart is empty",
+    "customerLabel": "Customer",
+    "customerPlaceholder": "Search customer...",
+    "total": "Total"
+  },
+  "inventory": {
+    "title": "Product list"
+  },
+  "table": {
+    "product": "Product",
+    "category": "Category",
+    "price": "Price",
+    "stock": "Stock",
+    "barcode": "Barcode",
+    "actions": "Actions"
+  },
+  "stock": {
+    "stockInTitle": "Stock in",
+    "stockOutTitle": "Stock out",
+    "noProductSelected": "No product selected",
+    "currentStock": "Current stock: {{stock}}",
+    "amountLabel": "Amount to {{mode}}",
+    "amountPlaceholder": "Enter amount..."
+  },
+  "confirmRemoveLast": {
+    "title": "Remove last item",
+    "description": "You are removing the last item from your cart {{name}}. Do you want to continue?",
+    "cancel": "Cancel",
+    "delete": "Remove"
+  },
+  "toasts": {
+    "noStore": "No store found. Please sign in again or start a trial to assign a store.",
+    "needCategoryFirst": "Please create at least one category before adding products.",
+    "loadProductsError": "Unable to load products. Please try again later.",
+    "cartEmpty": "Your cart is empty!",
+    "orderCreated": "Order created successfully!",
+    "orderCreateFailed": "Unable to create order. Please try again!"
+  },
+  "misc": {
+    "uncategorized": "Uncategorized",
+    "productAlt": "Product",
+    "left": "{{count}} left"
+  },
+  "reports": {
+    "title": "Best selling products",
+    "sold": "Sold",
+    "revenue": "Revenue",
+    "quantityLegend": "Quantity",
+    "revenueLegend": "Revenue",
+    "avgPrice": "Avg price",
+    "quantitySold": "Quantity sold"
+  }
+}
+

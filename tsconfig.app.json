@@ -21,6 +21,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* JSON & i18n types */
+    "resolveJsonModule": true,
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

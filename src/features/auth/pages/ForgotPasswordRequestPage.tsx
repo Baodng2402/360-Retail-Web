@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import { Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -10,11 +11,15 @@ import { Label } from "@/shared/components/ui/label";
 import { authApi } from "@/shared/lib/authApi";
 import { AuthFormLayout } from "@/features/auth/components/AuthFormLayout";
 
-const forgotSchema = z.object({
-  email: z.string().min(1, "Vui lòng nhập email.").email("Email không hợp lệ."),
-});
-
 const ForgotPasswordRequestPage = () => {
+  const { t } = useTranslation(["auth", "common"]);
+  const forgotSchema = z.object({
+    email: z
+      .string()
+      .min(1, t("common:validation.required"))
+      .email(t("common:validation.invalidEmail")),
+  });
+
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +32,7 @@ const ForgotPasswordRequestPage = () => {
     const parsed = forgotSchema.safeParse({ email });
     if (!parsed.success) {
       const firstError =
-        parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";
+        parsed.error.issues[0]?.message ?? t("common:states.error");
       setError(firstError);
       return;
     }
@@ -37,7 +42,10 @@ const ForgotPasswordRequestPage = () => {
       const message = await authApi.requestPasswordReset({ email });
       toast.success(
         message ||
-          "Nếu email tồn tại, mã xác nhận đã được gửi. Vui lòng kiểm tra hộp thư.",
+          t("auth:forgotPassword.request.success", {
+            defaultValue:
+              "If the email exists, a verification code has been sent. Please check your inbox.",
+          }),
       );
       navigate(`/reset-password?email=${encodeURIComponent(email)}`);
     } catch (err: unknown) {
@@ -45,7 +53,10 @@ const ForgotPasswordRequestPage = () => {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
-        "Không thể gửi mã đặt lại mật khẩu. Vui lòng thử lại sau.";
+        t("auth:forgotPassword.request.error", {
+          defaultValue:
+            "Unable to send reset code. Please try again later.",
+        });
       setError(message);
       toast.error(message);
     } finally {
@@ -55,20 +66,25 @@ const ForgotPasswordRequestPage = () => {
 
   return (
     <AuthFormLayout
-      title="Quên mật khẩu"
-      description="Nhập email tài khoản của bạn, chúng tôi sẽ gửi mã xác nhận 6 số để đặt lại mật khẩu."
+      title={t("auth:forgotPassword.request.title", { defaultValue: "Forgot password" })}
+      description={t("auth:forgotPassword.request.description", {
+        defaultValue:
+          "Enter your account email. We'll send a 6-digit verification code to reset your password.",
+      })}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Email
+            {t("auth:login.email")}
           </Label>
           <div className="relative">
             <Mail className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <Input
               id="email"
               type="email"
-              placeholder="your@email.com"
+              placeholder={t("auth:forgotPassword.request.emailPlaceholder", {
+                defaultValue: "your@email.com",
+              })}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="h-12 bg-white text-gray-900 placeholder:text-gray-500 border-gray-200 pl-11"
@@ -84,12 +100,16 @@ const ForgotPasswordRequestPage = () => {
           disabled={submitting}
           className="h-12 w-full bg-[#0D9488] text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0D9488]/90 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {submitting ? "ĐANG GỬI..." : "GỬI MÃ XÁC NHẬN"}
+          {submitting
+            ? t("auth:forgotPassword.request.submitting", { defaultValue: "SENDING..." })
+            : t("auth:forgotPassword.request.submit", { defaultValue: "SEND CODE" })}
         </Button>
 
         <p className="text-xs text-gray-500">
-          Để bảo mật, thông báo sẽ luôn hiển thị chung chung ngay cả khi email
-          không tồn tại trong hệ thống.
+          {t("auth:forgotPassword.request.securityNote", {
+            defaultValue:
+              "For security, we always show a generic message even if the email does not exist in the system.",
+          })}
         </p>
       </form>
     </AuthFormLayout>

@@ -1,0 +1,93 @@
+{
+  "page": {
+    "storeSelectorHint": "Manage POS orders for this store",
+    "title": "Order management",
+    "subtitle": "View, filter, and open order details.",
+    "totalOrdersLabel": "Total orders:"
+  },
+  "filters": {
+    "statusLabel": "Status",
+    "statusPlaceholder": "All statuses",
+    "all": "All",
+    "fromDate": "From",
+    "toDate": "To",
+    "reset": "Reset"
+  },
+  "states": {
+    "loadingList": "Loading orders...",
+    "emptyList": "No orders match the current filters."
+  },
+  "table": {
+    "orderCode": "Order",
+    "customer": "Customer",
+    "total": "Total",
+    "status": "Status",
+    "paymentMethod": "Payment method",
+    "time": "Time",
+    "walkInCustomer": "Walk-in"
+  },
+  "pagination": {
+    "pageLabel": "Page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "time": {
+    "justNow": "Just now",
+    "yesterday": "Yesterday",
+    "minutesAgo_one": "{{count}} minute ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago"
+  },
+  "statusLabels": {
+    "Pending": "Pending",
+    "Processing": "Processing",
+    "Completed": "Completed",
+    "Cancelled": "Cancelled",
+    "Refunded": "Refunded"
+  },
+  "detail": {
+    "backToList": "Back to list",
+    "notFound": "Order not found.",
+    "title": "Order {{code}}",
+    "createdAtLabel": "Created at",
+    "newStatusPlaceholder": "New status",
+    "save": "Save",
+    "cancelOrder": "Cancel order",
+    "customerLabel": "Customer",
+    "paymentLabel": "Payment",
+    "paymentUnknown": "Unknown",
+    "totalLabel": "Total",
+    "feedbackQrTitle": "Customer feedback QR",
+    "feedbackQrDescription": "This QR leads to the feedback page for this order. You can print it on the receipt or let the customer scan it at the counter.",
+    "feedbackUrlLabel": "Feedback URL:",
+    "feedbackUnavailable": "This order is not associated with a specific customer or store, so a feedback QR cannot be generated. Please attach a customer when creating the order to use this feature.",
+    "feedbackQrHint": "Customers can scan this code to submit feedback for the order.",
+    "itemsTitle": "Items",
+    "itemsTable": {
+      "product": "Product",
+      "barcodeSku": "Barcode / SKU",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "lineTotal": "Line total",
+      "sizeLabel": "Size: {{size}}",
+      "colorLabel": "Color: {{color}}"
+    },
+    "cancelDialog": {
+      "title": "Confirm order cancellation",
+      "description": "Are you sure you want to cancel order <strong>{{code}}</strong>? This action cannot be undone.",
+      "no": "No",
+      "confirm": "Cancel order",
+      "cancelling": "Cancelling..."
+    },
+    "toasts": {
+      "loadFailed": "Unable to load order details.",
+      "updateStatusSuccess": "Order status updated successfully.",
+      "updateStatusFailed": "Unable to update order status.",
+      "cancelSuccess": "Order cancelled successfully.",
+      "cancelFailed": "Unable to cancel order."
+    }
+  }
+}

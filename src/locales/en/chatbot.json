@@ -1,0 +1,19 @@
+{
+  "widget": {
+    "title": "360Retail Assistant",
+    "subtitle": "Ask about pricing, features, and 360Retail plans",
+    "closeLabel": "Close chatbot",
+    "emptyState": "Start by choosing a suggested question below or type your own question about Trial, Basic, Pro, Yearly plans, payments, etc.",
+    "typing": "Writing an answer...",
+    "sourceLabel": "Source: {{source}}",
+    "sourceFaq": "FAQ",
+    "sourceAi": "AI",
+    "clearConversation": "Clear this conversation",
+    "inputPlaceholder": "Ask about pricing, features, trial...",
+    "openButtonLabel": "Open 360Retail chatbot"
+  },
+  "errors": {
+    "cannotConnect": "Cannot connect to chatbot. Please try again later."
+  }
+}
+

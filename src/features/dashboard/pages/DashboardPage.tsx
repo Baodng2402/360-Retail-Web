@@ -31,12 +31,10 @@ import { Card } from "@/shared/components/ui/card";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { Badge } from "@/shared/components/ui/badge";
 import { AlertCircle } from "lucide-react";
-
-const chartConfig = {
-  values: { label: "Products Sold" },
-} satisfies ChartConfig;
+import { useTranslation } from "react-i18next";
 
 const DashboardPage = () => {
+  const { t: tDashboard } = useTranslation("dashboard");
   const [restockModalOpen, setRestockModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState({
     name: "",
@@ -76,6 +74,14 @@ const DashboardPage = () => {
   // Subscription expiry warning
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [expiryInfo, setExpiryInfo] = useState<any>(null);
+
+  const chartConfig = useMemo(
+    () =>
+      ({
+        values: { label: tDashboard("dashboardPage.charts.productsSold") },
+      }) satisfies ChartConfig,
+    [tDashboard],
+  );
 
   const checkUserStoreStatus = async () => {
     try {
@@ -216,15 +222,17 @@ const DashboardPage = () => {
 
     const rangeLabel =
       dateRange === "today"
-        ? "Hôm nay"
+        ? tDashboard("dashboardPage.range.today")
         : dateRange === "7d"
-          ? "7 ngày gần đây"
-          : "30 ngày gần đây";
+          ? tDashboard("dashboardPage.range.7d")
+          : tDashboard("dashboardPage.range.30d");
 
     const items: StatItem[] = [
       {
-        label: "Total Revenue",
-        subLabel: `Doanh thu (${rangeLabel})`,
+        label: tDashboard("dashboardPage.stats.totalRevenueLabel"),
+        subLabel: tDashboard("dashboardPage.stats.totalRevenueSubLabel", {
+          range: rangeLabel,
+        }),
         value: formatVnd(overview.totalRevenue),
         change:
           hasRevenueGrowth && dateRange !== "today"
@@ -234,8 +242,10 @@ const DashboardPage = () => {
         color: "bg-teal-100 text-black",
       },
       {
-        label: "Total Orders",
-        subLabel: `Đơn hàng (${rangeLabel})`,
+        label: tDashboard("dashboardPage.stats.totalOrdersLabel"),
+        subLabel: tDashboard("dashboardPage.stats.totalOrdersSubLabel", {
+          range: rangeLabel,
+        }),
         value: String(overview.totalOrders),
         change:
           hasOrderGrowth && dateRange !== "today"
@@ -245,16 +255,16 @@ const DashboardPage = () => {
         color: "bg-purple-100 text-black",
       },
       {
-        label: "Avg. Order Value",
-        subLabel: "Giá trị đơn trung bình",
+        label: tDashboard("dashboardPage.stats.avgOrderValueLabel"),
+        subLabel: tDashboard("dashboardPage.stats.avgOrderValueSubLabel"),
         value: formatVnd(overview.avgOrderValue),
         change: null,
         icon: DollarSign,
         color: "bg-teal-100 text-black",
       },
       {
-        label: "Active Staff",
-        subLabel: "Nhân viên đang làm",
+        label: tDashboard("dashboardPage.stats.activeEmployeesLabel"),
+        subLabel: tDashboard("dashboardPage.stats.activeEmployeesSubLabel"),
         value: `${activeEmployees.length}/${employees.length}`,
         change: undefined,
         icon: Users,
@@ -264,8 +274,8 @@ const DashboardPage = () => {
 
     if (todayOverview) {
       items.unshift({
-        label: "Today Revenue",
-        subLabel: "Doanh thu hôm nay",
+        label: tDashboard("dashboardPage.stats.todayRevenueLabel"),
+        subLabel: tDashboard("dashboardPage.stats.todayRevenueSubLabel"),
         value: formatVnd(todayOverview.totalRevenue),
         change: null,
         icon: DollarSign,
@@ -313,29 +323,41 @@ const DashboardPage = () => {
           </div>
 
           <h1 className="text-3xl font-bold text-foreground mb-4">
-            Chào mừng bạn đến với 360 Retail!
+            {tDashboard("dashboardPage.onboarding.welcomeTitle")}
           </h1>
 
           <p className="text-muted-foreground text-lg mb-8">
-            Bạn cần tạo cửa hàng trước để bắt đầu quản lý doanh nghiệp của mình.
+            {tDashboard("dashboardPage.onboarding.needStore")}
             <br />
-            Đăng ký ngay để nhận <strong>7 ngày dùng thử miễn phí</strong>!
+            <span
+              dangerouslySetInnerHTML={{
+                __html: tDashboard("dashboardPage.onboarding.trialCta"),
+              }}
+            />
           </p>
 
           <div className="bg-muted/50 rounded-xl p-6 mb-8 text-left">
-            <h3 className="font-semibold mb-4">Bạn sẽ được:</h3>
+            <h3 className="font-semibold mb-4">
+              {tDashboard("dashboardPage.onboarding.benefitsTitle")}
+            </h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-3">
                 <Gift className="h-5 w-5 text-teal-500" />
-                <span>7 ngày dùng thử miễn phí - Không cần thẻ tín dụng</span>
+                <span>
+                  {tDashboard("dashboardPage.onboarding.benefits.noCard")}
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Store className="h-5 w-5 text-blue-500" />
-                <span>Tạo cửa hàng và quản lý sản phẩm ngay lập tức</span>
+                <span>
+                  {tDashboard("dashboardPage.onboarding.benefits.setupStore")}
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <ArrowRight className="h-5 w-5 text-purple-500" />
-                <span>Truy cập tất cả tính năng quản lý bán hàng</span>
+                <span>
+                  {tDashboard("dashboardPage.onboarding.benefits.fullAccess")}
+                </span>
               </li>
             </ul>
           </div>
@@ -345,11 +367,11 @@ const DashboardPage = () => {
             className="h-12 w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-lg font-semibold"
           >
             <Gift className="mr-2 h-5 w-5" />
-            Tạo cửa hàng ngay (Miễn phí 7 ngày)
+            {tDashboard("dashboardPage.onboarding.createStore")}
           </Button>
 
           <p className="text-xs text-muted-foreground mt-4">
-            Sau 7 ngày, bạn có thể nâng cấp lên gói trả phí để tiếp tục sử dụng
+            {tDashboard("dashboardPage.onboarding.afterTrialNote")}
           </p>
 
           <StartTrialDialog
@@ -375,16 +397,28 @@ const DashboardPage = () => {
           <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
           <div className="flex-1 text-sm">
             <span className="font-medium text-amber-900 dark:text-amber-200">
-              Gói subscription sắp hết hạn!
+              {tDashboard("dashboardPage.expiry.title")}
             </span>{" "}
             <span className="text-amber-800 dark:text-amber-300">
-              Còn lại <strong>{expiryInfo.daysRemaining}</strong> ngày
-              {expiryInfo.endDate && ` (hết hạn ${new Date(expiryInfo.endDate).toLocaleDateString("vi-VN")})`}.
-              Vui lòng gia hạn để không bị gián đoạn dịch vụ.
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: tDashboard(
+                    expiryInfo.endDate
+                      ? "dashboardPage.expiry.remainingWithEndDate"
+                      : "dashboardPage.expiry.remainingNoEndDate",
+                    {
+                      days: expiryInfo.daysRemaining,
+                      endDate: expiryInfo.endDate,
+                    },
+                  ),
+                }}
+              />
             </span>
           </div>
           <Badge className="bg-amber-500 text-white shrink-0">
-            {expiryInfo.daysRemaining} ngày
+            {tDashboard("dashboardPage.expiry.badgeDays", {
+              days: expiryInfo.daysRemaining,
+            })}
           </Badge>
         </Card>
       )}
@@ -392,7 +426,7 @@ const DashboardPage = () => {
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-foreground">
-            Tổng quan bán hàng
+            {tDashboard("dashboardPage.sections.salesOverview")}
           </h2>
           <div className="inline-flex rounded-md border bg-background p-1 text-xs sm:text-sm">
             <button
@@ -403,7 +437,7 @@ const DashboardPage = () => {
                 }`}
               onClick={() => setDateRange("today")}
             >
-              Hôm nay
+              {tDashboard("dashboardPage.actions.today")}
             </button>
             <button
               type="button"
@@ -413,7 +447,7 @@ const DashboardPage = () => {
                 }`}
               onClick={() => setDateRange("7d")}
             >
-              7 ngày
+              {tDashboard("dashboardPage.actions.days7")}
             </button>
             <button
               type="button"
@@ -423,7 +457,7 @@ const DashboardPage = () => {
                 }`}
               onClick={() => setDateRange("30d")}
             >
-              30 ngày
+              {tDashboard("dashboardPage.actions.days30")}
             </button>
           </div>
         </div>
@@ -440,7 +474,7 @@ const DashboardPage = () => {
             <ChartBar
               chartData={chartBarData}
               chartConfig={chartConfig}
-              title="Top 5 sản phẩm bán chạy"
+              title={tDashboard("dashboardPage.charts.topProductsTitle")}
             />
             <ChartLineDefault data={chartLineData} isLoading={dashboardLoading} />
           </div>
