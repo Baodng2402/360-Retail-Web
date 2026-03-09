@@ -18,6 +18,13 @@ import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 const socialButtons = [{ src: googleIcon, alt: "Google" }] as const;
 
+const getDefaultPathByRole = (role?: string | null) => {
+  const r = (role ?? "").toLowerCase();
+  if (r === "superadmin") return "/admin";
+  if (r === "customer") return "/customer";
+  return "/dashboard";
+};
+
 const LoginBody = () => {
   const { t } = useTranslation(["auth", "common"]);
 
@@ -63,7 +70,7 @@ const LoginBody = () => {
         sessionStorage.setItem("pendingGoogleNewUser", "1");
       }
       toast.success(t("auth:login.googleLoginSuccess"));
-      navigate("/dashboard", { replace: true });
+      navigate(getDefaultPathByRole(userWithAvatar.role), { replace: true });
     } catch (err: unknown) {
       console.error("Google login error", err);
       const message =
@@ -128,7 +135,7 @@ const LoginBody = () => {
 
       toast.success(t("auth:login.googleLoginSuccess"));
 
-      navigate("/dashboard", { replace: true });
+      navigate(getDefaultPathByRole(user.role), { replace: true });
     } catch (err: unknown) {
       console.error("Login error", err);
       const message =

@@ -219,7 +219,19 @@ export const subscriptionApi = {
    * POST /saas/subscriptions/check-expiry
    */
   async checkExpiry(days = 7): Promise<void> {
-    await saasApi.post(`saas/subscriptions/check-expiry?days=${days}`);
+    // Backend naming differs across environments: days vs daysAhead.
+    try {
+      await saasApi.post(`saas/subscriptions/check-expiry?days=${days}`);
+      return;
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      // Retry only on likely "wrong query param / route" cases.
+      if (status && status >= 400 && status < 500) {
+        await saasApi.post(`saas/subscriptions/check-expiry?daysAhead=${days}`);
+        return;
+      }
+      throw err;
+    }
   },
 
   /**

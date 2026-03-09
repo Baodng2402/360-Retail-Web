@@ -1,2 +1,193 @@
-{}
+{
+  "header": {
+    "dashboard": {
+      "title": "SuperAdmin Dashboard",
+      "subtitle": "System overview (users, plans, reviews, stores)."
+    },
+    "users": {
+      "title": "User Management",
+      "subtitle": "CRUD users (SuperAdmin)."
+    },
+    "reviews": {
+      "title": "Plan Reviews",
+      "subtitle": "Moderate SaaS plan reviews."
+    },
+    "fallback": {
+      "title": "SuperAdmin",
+      "subtitle": "System administration area."
+    },
+    "logout": "Sign out"
+  },
+  "sidebar": {
+    "brand": {
+      "title": "SuperAdmin",
+      "subtitle": "System Console"
+    },
+    "nav": {
+      "dashboard": {
+        "label": "Dashboard",
+        "subLabel": "KPI & charts"
+      },
+      "users": {
+        "label": "Users",
+        "subLabel": "CRUD users"
+      },
+      "reviews": {
+        "label": "Reviews",
+        "subLabel": "Plan reviews admin"
+      }
+    }
+  },
+  "stores": {
+    "title": "Stores management",
+    "badge": "SuperAdmin",
+    "description": "View and manage all stores (including inactive).",
+    "searchPlaceholder": "Search by name or address...",
+    "includeInactive": "Show inactive stores",
+    "columns": {
+      "name": "Store name",
+      "address": "Address",
+      "phone": "Phone",
+      "status": "Status",
+      "createdAt": "Created at"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "noData": "No stores."
+  },
+  "dashboard": {
+    "badge": "SuperAdmin",
+    "caption": "System overview dashboard",
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "groupBy": "Group by",
+      "groupByOptions": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      },
+      "refresh": "Refresh",
+      "refreshLoading": "Loading"
+    },
+    "kpis": {
+      "totalRevenue": "Total revenue",
+      "mrr": "MRR",
+      "activeStores": "Active stores",
+      "trialStores": "Trial stores",
+      "expiredStores": "Expired stores",
+      "conversionRate": "Conversion rate"
+    },
+    "revenueChart": {
+      "title": "Revenue chart",
+      "tooltipLabel": "Revenue"
+    },
+    "planDistribution": {
+      "title": "Plan distribution",
+      "badge": "Plans",
+      "empty": "No data.",
+      "label": "Stores"
+    },
+    "funnel": {
+      "title": "Funnel Landing → Signup",
+      "badge": "Identity",
+      "landing": "Landing",
+      "signup": "Signup",
+      "conversion": "Conversion"
+    },
+    "registrations": {
+      "title": "New registrations by day",
+      "badge": "Registrations",
+      "label": "Registrations"
+    },
+    "states": {
+      "loading": "Loading..."
+    },
+    "toast": {
+      "loadError": "Failed to load SuperAdmin dashboard data."
+    }
+  },
+  "users": {
+    "badge": "SuperAdmin",
+    "caption": "User Management",
+    "description": "CRUD via identity/super-admin/users",
+    "searchPlaceholder": "Search by email or id...",
+    "create": "Create user",
+    "listTitle": "Users",
+    "noData": "No data.",
+    "columns": {
+      "email": "Email",
+      "roles": "Roles",
+      "status": "Status",
+      "activated": "Activated",
+      "storeId": "StoreId",
+      "actions": "Actions"
+    },
+    "activated": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "pagination": {
+      "summary": "Showing {{from}} - {{to}} of {{total}} users",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "dialog": {
+      "titleCreate": "Create user",
+      "titleEdit": "Update user",
+      "descriptionCreate": "Create a new user (SuperAdmin role is not allowed here).",
+      "descriptionEdit": "Update activation/status. Current role/email are not changed by this API.",
+      "fields": {
+        "email": "Email",
+        "password": "Password",
+        "role": "Role",
+        "status": "Status",
+        "activated": "Activated"
+      },
+      "cancel": "Cancel",
+      "save": "Save",
+      "create": "Create"
+    },
+    "deleteDialog": {
+      "title": "Confirm delete",
+      "description": "Are you sure you want to delete {{email}}?",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "toast": {
+      "loadError": "Failed to load users (SuperAdmin).",
+      "createSuccess": "User created.",
+      "updateSuccess": "User updated.",
+      "deleteSuccess": "User deleted.",
+      "saveError": "Failed to save user.",
+      "deleteError": "Failed to delete user."
+    }
+  },
+  "profile": {
+    "title": "SuperAdmin profile",
+    "subtitle": "Manage your system admin account.",
+    "section": {
+      "account": "Account",
+      "security": "Security"
+    },
+    "fields": {
+      "email": "Email",
+      "role": "Role"
+    },
+    "changePassword": {
+      "title": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "submit": "Update password",
+      "submitting": "Updating..."
+    },
+    "toast": {
+      "success": "Password updated successfully.",
+      "error": "Failed to update password. Please try again."
+    }
+  }
+}
 
