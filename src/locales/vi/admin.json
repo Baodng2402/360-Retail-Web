@@ -32,6 +32,18 @@
         "label": "Users",
         "subLabel": "CRUD users"
       },
+      "plans": {
+        "label": "Plans",
+        "subLabel": "CRUD gói dịch vụ"
+      },
+      "subscriptions": {
+        "label": "Subscriptions",
+        "subLabel": "Danh sách & thao tác"
+      },
+      "payments": {
+        "label": "Payments",
+        "subLabel": "Danh sách thanh toán"
+      },
       "reviews": {
         "label": "Reviews",
         "subLabel": "Plan reviews admin"

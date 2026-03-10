@@ -38,8 +38,12 @@ import AdminDashboardPage from "@/features/admin/pages/AdminDashboardPage";
 import AdminUsersPage from "@/features/admin/pages/AdminUsersPage";
 import AdminUserDetailPage from "@/features/admin/pages/AdminUserDetailPage";
 import AdminStoresPage from "@/features/admin/pages/AdminStoresPage";
+import AdminStoreDetailPage from "@/features/admin/pages/AdminStoreDetailPage";
 import AdminReviewsPage from "@/features/admin/pages/AdminReviewsPage";
 import AdminProfilePage from "@/features/admin/pages/AdminProfilePage";
+import AdminPlansPage from "@/features/admin/pages/AdminPlansPage";
+import AdminSubscriptionsPage from "@/features/admin/pages/AdminSubscriptionsPage";
+import AdminPaymentsPage from "@/features/admin/pages/AdminPaymentsPage";
 import EmployeeDetailPage from "@/features/dashboard/pages/EmployeeDetailPage";
 import MyTasksPage from "@/features/dashboard/pages/MyTasksPage";
 import CrmDashboardPage from "@/features/dashboard/pages/CrmDashboardPage";
@@ -48,9 +52,12 @@ import i18n from "@/i18n";
 import { useLanguageStore } from "@/shared/store/languageStore";
 import UnauthorizedPage from "@/shared/pages/UnauthorizedPage";
 import NotFoundPage from "@/shared/pages/NotFoundPage";
+import LoyaltyCheckPage from "@/features/loyalty/pages/LoyaltyCheckPage";
 
 function App() {
   const language = useLanguageStore((s) => s.language);
+  const googleMisconfigured =
+    !googleClientId || googleClientId.trim() === "" || googleClientId === "YOUR_GOOGLE_CLIENT_ID";
 
   useEffect(() => {
     void i18n.changeLanguage(language);
@@ -63,6 +70,14 @@ function App() {
         <Suspense fallback={<div className="p-4 text-sm">Loading...</div>}>
           <BrowserRouter>
             <SubscriptionUpgradeDialog />
+            {googleMisconfigured && (
+              <div className="bg-amber-100 text-amber-900 border-b border-amber-300 px-4 py-2 text-xs sm:text-sm">
+                <strong>Google Login chưa được cấu hình cho môi trường này.</strong>{" "}
+                Vui lòng thêm biến môi trường <code>VITE_GOOGLE_CLIENT_ID</code> trỏ đúng
+                OAuth Client của domain deploy (VD: 360retail.shop) trong dashboard deploy
+                (Vercel/hosting), rồi build lại frontend.
+              </div>
+            )}
             <Routes>
               <Route element={<HomeLayout />}>
                 <Route path="/" element={<HomePage />} />
@@ -74,6 +89,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPasswordRequestPage />} />
               <Route path="/reset-password" element={<ForgotPasswordResetPage />} />
               <Route path="/feedback/:orderId" element={<FeedbackPage />} />
+              <Route path="/loyalty" element={<LoyaltyCheckPage />} />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
               <Route path="/payment/failed" element={<PaymentFailedPage />} />
               <Route path="/unauthorized" element={<UnauthorizedPage />} />
@@ -144,9 +160,13 @@ function App() {
                 <Route element={<AdminLayout />}>
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
+                  <Route path="plans" element={<AdminPlansPage />} />
+                  <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
+                  <Route path="payments" element={<AdminPaymentsPage />} />
                   <Route path="users" element={<AdminUsersPage />} />
                   <Route path="users/:id" element={<AdminUserDetailPage />} />
                   <Route path="stores" element={<AdminStoresPage />} />
+                  <Route path="stores/:id" element={<AdminStoreDetailPage />} />
                   <Route path="reviews" element={<AdminReviewsPage />} />
                   <Route path="profile" element={<AdminProfilePage />} />
                 </Route>

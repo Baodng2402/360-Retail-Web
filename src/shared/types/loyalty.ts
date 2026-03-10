@@ -16,7 +16,7 @@ export interface CreateLoyaltyRuleDto {
   status: number;
 }
 
-export interface UpdateLoyaltyRuleDto extends CreateLoyaltyRuleDto {}
+export type UpdateLoyaltyRuleDto = CreateLoyaltyRuleDto;
 
 export interface LoyaltySummary {
   customerId: string;

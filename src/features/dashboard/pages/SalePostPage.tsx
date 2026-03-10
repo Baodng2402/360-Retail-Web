@@ -118,7 +118,7 @@ const SalePostPage = () => {
         try {
           const myStore = await storesApi.getMyStore();
           storeId = myStore.id;
-        } catch (storeError) {
+        } catch {
           setProducts([]);
           toast.error(
             t("sale:toasts.noStore"),

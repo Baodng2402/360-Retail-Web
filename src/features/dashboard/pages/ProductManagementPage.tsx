@@ -601,10 +601,13 @@ export default function ProductManagementPage() {
       setProductDialogOpen(false);
       setImagePreview(null);
       await loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving product:", error);
       const message =
-        error?.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại.";
+        (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ||
+        (error instanceof Error ? error.message : undefined) ||
+        "Có lỗi xảy ra. Vui lòng thử lại.";
       toast.error(message);
     } finally {
       setProductFormLoading(false);
@@ -662,10 +665,12 @@ export default function ProductManagementPage() {
       );
 
       await loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to toggle product active state:", error);
       const errorMessage =
-        error?.response?.data?.message ||
+        (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ||
+        (error instanceof Error ? error.message : undefined) ||
         "Không thể cập nhật trạng thái sản phẩm";
 
       toast.dismiss(loadingToast);
@@ -737,10 +742,13 @@ export default function ProductManagementPage() {
       setCategoryDialogOpen(false);
       await loadCategories();
       await loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving category:", error);
       const message =
-        error?.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại.";
+        (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ||
+        (error instanceof Error ? error.message : undefined) ||
+        "Có lỗi xảy ra. Vui lòng thử lại.";
       toast.error(message);
     } finally {
       setCategoryFormLoading(false);
@@ -793,10 +801,12 @@ export default function ProductManagementPage() {
       );
 
       await loadCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to toggle category active state:", error);
       const errorMessage =
-        error?.response?.data?.message ||
+        (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ||
+        (error instanceof Error ? error.message : undefined) ||
         "Không thể cập nhật trạng thái danh mục";
 
       toast.dismiss(loadingToast);

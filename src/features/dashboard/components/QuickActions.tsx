@@ -89,11 +89,13 @@ const QuickActions = () => {
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const { user } = useAuthStore();
-  const role = user?.role ?? "";
+  type Role = NonNullable<QuickAction["visibleFor"]>[number];
+  const role = (user?.role ?? "") as Role | "";
 
   const filteredActions = quickActions.filter((action) => {
     if (!action.visibleFor) return true;
-    return action.visibleFor.includes(role as any);
+    if (!role) return false;
+    return action.visibleFor.includes(role);
   });
 
   if (!filteredActions.length) {

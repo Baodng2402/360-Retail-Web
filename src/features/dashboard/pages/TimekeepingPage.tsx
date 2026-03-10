@@ -375,7 +375,7 @@ const TimekeepingPage = () => {
     if (!history.length) {
       return { days: 0, hours: 0, late: 0 };
     }
-    let days = history.length;
+    const days = history.length;
     let hours = 0;
     let late = 0;
     for (const r of history) {

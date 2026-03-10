@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
-import { XCircle, Loader2, Home, CreditCard } from "lucide-react";
+import { XCircle, Home, CreditCard } from "lucide-react";
 import { FloatingParticles, GradientOrb, GlassCard } from "@/shared/components/ui/Globe3D";
 
 export default function PaymentFailedPage() {
@@ -11,14 +11,10 @@ export default function PaymentFailedPage() {
   const navigate = useNavigate();
 
   const paymentId = searchParams.get("paymentId");
-  const [status, setStatus] = useState<"loading" | "failed">("loading");
-  const [message, setMessage] = useState("Đang xử lý thông tin thanh toán...");
-
-  useEffect(() => {
-    setStatus("failed");
-    setMessage(
+  const message = useMemo(() => {
+    return (
       searchParams.get("message") ||
-        "Giao dịch thanh toán không thành công. Vui lòng thử lại hoặc chọn phương thức thanh toán khác."
+      "Giao dịch thanh toán không thành công. Vui lòng thử lại hoặc chọn phương thức thanh toán khác."
     );
   }, [searchParams]);
 
@@ -53,26 +49,13 @@ export default function PaymentFailedPage() {
             transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
             className="mb-6"
           >
-            {status === "loading" && (
-              <div className="w-20 h-20 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                >
-                  <Loader2 className="h-10 w-10 text-amber-500" />
-                </motion.div>
-              </div>
-            )}
-
-            {status === "failed" && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30"
-              >
-                <XCircle className="h-10 w-10 text-white" />
-              </motion.div>
-            )}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30"
+            >
+              <XCircle className="h-10 w-10 text-white" />
+            </motion.div>
           </motion.div>
 
           {/* Payment ID */}
@@ -96,7 +79,7 @@ export default function PaymentFailedPage() {
             transition={{ delay: 0.4 }}
             className="text-2xl font-bold mb-2 text-red-600 dark:text-red-400"
           >
-            {status === "loading" ? "Đang xử lý..." : "Thanh toán thất bại"}
+            Thanh toán thất bại
           </motion.h1>
 
           <motion.p

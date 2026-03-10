@@ -65,7 +65,7 @@ const hexToRgb = (hex: string): [number, number, number] => {
 export const GithubGlobe = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const globeRef = useRef<any>(null);
+    const globeRef = useRef<unknown | null>(null);
 
     // Interaction state
     const pointerInteracting = useRef<{ x: number; y: number; id: number } | null>(null);
@@ -87,7 +87,7 @@ export const GithubGlobe = () => {
 
         let phi = phiRef.current;
         let theta = thetaRef.current;
-        let width = GLOBE_SIZE * 2;
+        const width = GLOBE_SIZE * 2;
 
         // Initialize globe with Vietnam markers
         const globe = createGlobe(canvasRef.current, {

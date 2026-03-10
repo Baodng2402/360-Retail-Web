@@ -1,6 +1,5 @@
-import { useMemo } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Shield, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { LogOut, Shield } from "lucide-react";
 
 import { useAuthStore } from "@/shared/store/authStore";
 import { Button } from "@/shared/components/ui/button";
@@ -24,42 +23,7 @@ interface AdminHeaderProps {
 export function AdminHeader({ isSidebarCollapsed }: AdminHeaderProps) {
   const { t } = useTranslation("admin");
   const { user, logout } = useAuthStore();
-  const location = useLocation();
   const navigate = useNavigate();
-
-  const page = useMemo(() => {
-    if (location.pathname === "/admin/dashboard") {
-      return {
-        title: t("header.dashboard.title"),
-        subtitle: t("header.dashboard.subtitle"),
-      };
-    }
-    if (location.pathname === "/admin/users") {
-      return {
-        title: t("header.users.title"),
-        subtitle: t("header.users.subtitle"),
-      };
-    }
-    if (location.pathname === "/admin/reviews") {
-      return {
-        title: t("header.reviews.title"),
-        subtitle: t("header.reviews.subtitle"),
-      };
-    }
-    if (location.pathname === "/admin/profile") {
-      return {
-        title: t("profile.title"),
-        subtitle: t("profile.subtitle"),
-      };
-    }
-    if (location.pathname.startsWith("/admin")) {
-      return {
-        title: t("header.fallback.title"),
-        subtitle: t("header.fallback.subtitle"),
-      };
-    }
-    return { title: "", subtitle: "" };
-  }, [location.pathname, t]);
 
   const initials = (user?.name || user?.email || "SA")
     .trim()
@@ -69,27 +33,20 @@ export function AdminHeader({ isSidebarCollapsed }: AdminHeaderProps) {
     .join("");
 
   return (
-    <header className="border-b border-gray-200 dark:border-gray-700 bg-background sticky top-0 z-50 h-[73px] flex items-center">
+    <header className="border-b border-gray-200 dark:border-gray-700 bg-background sticky top-0 z-50 h-[56px] flex items-center">
       <div
         className={`flex items-center justify-between w-full transition-all duration-300 ${
           isSidebarCollapsed ? "px-4" : "container mx-auto px-4"
         }`}
       >
-        <div className="flex items-center gap-4 min-w-0">
-          <Link to="/admin/dashboard" className="hidden sm:flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white">
-              <Shield className="h-5 w-5" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="hidden sm:flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white">
+              <Shield className="h-4 w-4" />
             </div>
-          </Link>
-          <div className="flex flex-col min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">
-              {page.title}
-            </h1>
-            {page.subtitle && (
-              <p className="text-sm text-muted-foreground truncate">
-                {page.subtitle}
-              </p>
-            )}
+            <span className="text-sm font-semibold text-muted-foreground">
+              SuperAdmin
+            </span>
           </div>
         </div>
 

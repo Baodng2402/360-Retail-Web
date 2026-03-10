@@ -128,6 +128,7 @@ const SettingPage = () => {
         };
       }
     } catch {
+      void 0;
     }
     return {
       emailNotifications: true,
@@ -149,6 +150,7 @@ const SettingPage = () => {
       try {
         localStorage.setItem(NOTIFICATION_KEY, JSON.stringify(next));
       } catch {
+        void 0;
       }
       return next;
     });

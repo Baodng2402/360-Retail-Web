@@ -32,6 +32,18 @@
         "label": "Users",
         "subLabel": "CRUD users"
       },
+      "plans": {
+        "label": "Plans",
+        "subLabel": "Manage plans"
+      },
+      "subscriptions": {
+        "label": "Subscriptions",
+        "subLabel": "List & actions"
+      },
+      "payments": {
+        "label": "Payments",
+        "subLabel": "Payments list"
+      },
       "reviews": {
         "label": "Reviews",
         "subLabel": "Plan reviews admin"

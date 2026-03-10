@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 
 interface GlobeProps {
@@ -95,25 +95,43 @@ export function Globe({ className = "", size = 600 }: GlobeProps) {
 
 // Simple animated dots background
 export function AnimatedDots({ className = "" }: { className?: string }) {
+  const [dots, setDots] = useState<
+    { left: string; top: string; duration: number; delay: number }[]
+  >([]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setDots(
+        Array.from({ length: 20 }, () => ({
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          duration: 2 + Math.random() * 2,
+          delay: Math.random() * 2,
+        })),
+      );
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
+
   return (
     <div className={`relative overflow-hidden ${className}`}>
       <div className="absolute inset-0 flex items-center justify-center">
-        {[...Array(20)].map((_, i) => (
+        {dots.map((d, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-primary rounded-full opacity-30"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: d.left,
+              top: d.top,
             }}
             animate={{
               opacity: [0.1, 0.5, 0.1],
               scale: [1, 1.5, 1],
             }}
             transition={{
-              duration: 2 + Math.random() * 2,
+              duration: d.duration,
               repeat: Infinity,
-              delay: Math.random() * 2,
+              delay: d.delay,
             }}
           />
         ))}
@@ -124,25 +142,50 @@ export function AnimatedDots({ className = "" }: { className?: string }) {
 
 // Floating particles
 export function FloatingParticles({ className = "" }: { className?: string }) {
+  const [particles, setParticles] = useState<
+    {
+      left: string;
+      top: string;
+      driftX: number;
+      duration: number;
+      delay: number;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setParticles(
+        Array.from({ length: 15 }, () => ({
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          driftX: Math.random() * 50 - 25,
+          duration: 5 + Math.random() * 5,
+          delay: Math.random() * 5,
+        })),
+      );
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
+
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {[...Array(15)].map((_, i) => (
+      {particles.map((p, i) => (
         <motion.div
           key={i}
           className="absolute w-2 h-2 rounded-full bg-gradient-to-r from-teal-400 to-blue-500 opacity-20"
           style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
+            left: p.left,
+            top: p.top,
           }}
           animate={{
             y: [0, -100, 0],
-            x: [0, Math.random() * 50 - 25, 0],
+            x: [0, p.driftX, 0],
             opacity: [0, 0.3, 0],
           }}
           transition={{
-            duration: 5 + Math.random() * 5,
+            duration: p.duration,
             repeat: Infinity,
-            delay: Math.random() * 5,
+            delay: p.delay,
             ease: "easeInOut",
           }}
         />

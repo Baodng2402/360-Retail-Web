@@ -5,23 +5,26 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { storesApi } from "@/shared/lib/storesApi";
-import type { Store } from "@/shared/types/stores";
+import { superAdminSaasApi } from "@/shared/lib/superAdminSaasApi";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
 
 export default function AdminStoresPage() {
   const { t, i18n } = useTranslation("admin");
-  const [items, setItems] = useState<Store[]>([]);
+  const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [includeInactive, setIncludeInactive] = useState(true);
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+  const [rawOpen, setRawOpen] = useState(false);
+  const [rawTitle, setRawTitle] = useState("Raw JSON");
+  const [rawValue, setRawValue] = useState<unknown>(null);
 
   const load = async () => {
     try {
       setLoading(true);
-      const res = await storesApi.getStores(includeInactive);
+      const res = await superAdminSaasApi.listDashboardStores();
       setItems(res);
     } catch (err) {
       console.error("Failed to load stores:", err);
@@ -33,16 +36,16 @@ export default function AdminStoresPage() {
 
   useEffect(() => {
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [includeInactive]);
+  }, []);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     if (!term) return items;
     return items.filter((s) => {
-      const name = s.storeName?.toLowerCase() ?? "";
-      const address = s.address?.toLowerCase() ?? "";
-      return name.includes(term) || address.includes(term);
+      const name = String(s.storeName ?? s.name ?? "").toLowerCase();
+      const address = String(s.address ?? "").toLowerCase();
+      const id = String(s.id ?? "").toLowerCase();
+      return name.includes(term) || address.includes(term) || id.includes(term);
     });
   }, [items, q]);
 
@@ -55,6 +58,12 @@ export default function AdminStoresPage() {
     } catch {
       return value;
     }
+  };
+
+  const isActiveStore = (s: Record<string, unknown>) => {
+    const v = s.isActive ?? s.is_active ?? s.active;
+    if (typeof v === "boolean") return v;
+    return true;
   };
 
   return (
@@ -119,36 +128,55 @@ export default function AdminStoresPage() {
                   <TableHead>{t("stores.columns.phone")}</TableHead>
                   <TableHead>{t("stores.columns.status")}</TableHead>
                   <TableHead>{t("stores.columns.createdAt")}</TableHead>
+                  <TableHead className="text-right">Raw</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((s) => (
+                {filtered
+                  .filter((s) => (includeInactive ? true : isActiveStore(s)))
+                  .map((s) => (
                   <TableRow
-                    key={s.id}
+                    key={String(s.id ?? "")}
                     className="cursor-pointer hover:bg-muted/60"
-                    onClick={() => navigate(`/dashboard/settings?storeId=${s.id}`)}
+                    onClick={() => {
+                      const id = String(s.id ?? "");
+                      if (id) navigate(`/admin/stores/${id}`);
+                    }}
                   >
                     <TableCell className="max-w-[220px] truncate">
-                      {s.storeName}
+                      {String(s.storeName ?? s.name ?? "—")}
                     </TableCell>
                     <TableCell className="max-w-[260px] truncate">
-                      {s.address ?? "—"}
+                      {String(s.address ?? "—")}
                     </TableCell>
                     <TableCell className="max-w-[160px] truncate">
-                      {s.phone ?? "—"}
+                      {String(s.phone ?? "—")}
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={s.isActive ? "outline" : "destructive"}
+                        variant={isActiveStore(s) ? "outline" : "destructive"}
                         className="text-xs"
                       >
-                        {s.isActive
+                        {isActiveStore(s)
                           ? t("stores.status.active")
                           : t("stores.status.inactive")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(s.createdAt)}
+                      {formatDate(String(s.createdAt ?? ""))}
+                    </TableCell>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setRawTitle(`Store raw: ${String(s.id ?? "—")}`);
+                          setRawValue(s);
+                          setRawOpen(true);
+                        }}
+                      >
+                        Raw
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -157,6 +185,13 @@ export default function AdminStoresPage() {
           )}
         </div>
       </Card>
+
+      <JsonViewerDialog
+        open={rawOpen}
+        onOpenChange={setRawOpen}
+        title={rawTitle}
+        value={rawValue}
+      />
     </div>
   );
 }

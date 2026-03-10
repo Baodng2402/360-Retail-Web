@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { Button } from "@/shared/components/ui/button";
@@ -18,38 +18,7 @@ export default function PaymentSuccessPage() {
   const [message, setMessage] = useState("Đang xác nhận thanh toán...");
   const [planName, setPlanName] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!paymentId) {
-      setStatus("error");
-      setMessage("Không tìm thấy mã thanh toán");
-      return;
-    }
-
-    verifyPayment();
-  }, [paymentId]);
-
-  const verifyPayment = async () => {
-    try {
-      // 1. Verify payment với backend
-      // Có thể gọi API verify nếu có, hoặc dùng redirectUrl từ response trước đó
-      
-      // 2. Refresh token để cập nhật subscription status
-      await refreshUserData();
-      
-      // 3. Lấy thông tin subscription mới
-      const subscriptionStatus = await authApi.checkStoreTrial();
-      setPlanName(subscriptionStatus.planName);
-      
-      setStatus("success");
-      setMessage("Thanh toán thành công! Gói dịch vụ đã được kích hoạt.");
-    } catch (error) {
-      console.error("Payment verification failed:", error);
-      setStatus("error");
-      setMessage("Xác nhận thanh toán thất bại. Vui lòng liên hệ hỗ trợ.");
-    }
-  };
-
-  const refreshUserData = async () => {
+  const refreshUserData = useCallback(async () => {
     try {
       // Gọi refresh access để lấy token mới với subscription đã update
       await authApi.refreshAccess();
@@ -61,7 +30,36 @@ export default function PaymentSuccessPage() {
       console.error("Failed to refresh user data:", error);
       // Vẫn tiếp tục vì payment có thể đã thành công
     }
-  };
+  }, [setUser]);
+
+  const verifyPayment = useCallback(async () => {
+    if (!paymentId) {
+      setStatus("error");
+      setMessage("Không tìm thấy mã thanh toán");
+      return;
+    }
+    try {
+      // 1. Verify payment (hiện backend chưa expose endpoint verify riêng trong Swagger)
+      // 2. Refresh token để cập nhật subscription status
+      await refreshUserData();
+      // 3. Lấy thông tin subscription mới
+      const subscriptionStatus = await authApi.checkStoreTrial();
+      setPlanName(subscriptionStatus.planName);
+      setStatus("success");
+      setMessage("Thanh toán thành công! Gói dịch vụ đã được kích hoạt.");
+    } catch (error) {
+      console.error("Payment verification failed:", error);
+      setStatus("error");
+      setMessage("Xác nhận thanh toán thất bại. Vui lòng liên hệ hỗ trợ.");
+    }
+  }, [paymentId, refreshUserData]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      void verifyPayment();
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [verifyPayment]);
 
   const handleGoToDashboard = () => {
     navigate("/dashboard");

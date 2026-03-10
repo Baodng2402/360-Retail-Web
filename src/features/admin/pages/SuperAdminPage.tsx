@@ -180,18 +180,18 @@ const SuperAdminPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 space-y-6">
-      <Card className="p-6 flex items-center justify-between gap-4">
+    <div className="space-y-6">
+      <Card className="p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white">
             <Shield className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-foreground">
-              SuperAdmin Console
+            <h1 className="text-base md:text-lg font-semibold text-foreground">
+              Plan Reviews & hệ thống
             </h1>
-            <p className="text-xs text-muted-foreground">
-              Khu vực quản trị hệ thống: users, gói dịch vụ, stores và reviews.
+            <p className="text-[11px] md:text-xs text-muted-foreground">
+              Giám sát đánh giá các gói SaaS và kiểm tra nhanh expiry subscriptions.
             </p>
           </div>
         </div>
@@ -216,7 +216,7 @@ const SuperAdminPage = () => {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Users section */}
-        <Card className="p-6 space-y-3 lg:col-span-1">
+        <Card className="p-5 space-y-3 lg:col-span-1">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-teal-600" />
@@ -289,7 +289,7 @@ const SuperAdminPage = () => {
         </Card>
 
         {/* Reviews section */}
-        <Card className="p-6 space-y-3 lg:col-span-2">
+        <Card className="p-5 space-y-3 lg:col-span-2">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-teal-600" />

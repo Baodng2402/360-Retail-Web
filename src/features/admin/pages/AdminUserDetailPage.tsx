@@ -9,7 +9,7 @@ import { storesApi } from "@/shared/lib/storesApi";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import type { Store } from "@/shared/types/stores";
 import type { SubscriptionStatus } from "@/shared/types/subscription";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Store as StoreIcon, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
@@ -83,7 +83,7 @@ export default function AdminUserDetailPage() {
   const primaryRole = user.roles?.[0] ?? "—";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Button
         variant="ghost"
         size="sm"
@@ -94,88 +94,108 @@ export default function AdminUserDetailPage() {
         {t("common:actions.back")}
       </Button>
 
-      <Card className="p-5 space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h2 className="text-xl font-semibold break-all">{user.email}</h2>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span>ID: {user.id}</span>
-              {user.storeId && <span>• StoreId: {user.storeId}</span>}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)]">
+        <Card className="relative overflow-hidden p-6">
+          <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-blue-500/10 pointer-events-none" />
+
+          <div className="relative flex items-start gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-blue-500 text-white shadow-lg">
+              <User className="h-6 w-6" />
             </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <Badge variant="outline">{primaryRole}</Badge>
-            <div className="flex items-center gap-2">
-              {user.status && (
+            <div className="space-y-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-lg md:text-xl font-semibold break-all">
+                  {user.email}
+                </h1>
                 <Badge variant="outline" className="text-xs">
-                  {user.status}
+                  {primaryRole}
                 </Badge>
-              )}
-              {user.isActivated ? (
-                <Badge className="bg-emerald-600 text-white gap-1 text-xs">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  {t("users.activated.yes")}
-                </Badge>
-              ) : (
-                <Badge variant="destructive" className="text-xs">
-                  {t("users.activated.no")}
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Roles
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {(user.roles ?? []).length === 0 ? (
-                <span className="text-sm text-muted-foreground">—</span>
-              ) : (
-                (user.roles ?? []).map((r) => (
-                  <Badge key={r} variant="outline" className="text-xs">
-                    {r}
+                {user.status && (
+                  <Badge variant="outline" className="text-xs">
+                    {user.status}
                   </Badge>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Store
-            </div>
-            {user.storeId ? (
-              <div className="space-y-1 text-sm text-muted-foreground">
-                <div className="font-medium text-foreground">
-                  {store?.storeName ?? user.storeId}
-                </div>
-                {store?.address && <div>{store.address}</div>}
-                {store?.phone && <div>{store.phone}</div>}
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <Badge variant={store?.isActive ? "outline" : "destructive"}>
-                    {store?.isActive ? "Active" : "Inactive"}
+                )}
+                {user.isActivated ? (
+                  <Badge className="bg-emerald-600 text-white gap-1 text-xs">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    {t("users.activated.yes")}
                   </Badge>
-                  {storeSub && storeSub.planName && (
-                    <Badge variant="outline">
-                      {storeSub.planName}
-                    </Badge>
-                  )}
-                  {storeSub && typeof storeSub.daysRemaining === "number" && (
-                    <span>
-                      {storeSub.daysRemaining} days remaining
-                    </span>
-                  )}
-                </div>
+                ) : (
+                  <Badge variant="destructive" className="text-xs">
+                    {t("users.activated.no")}
+                  </Badge>
+                )}
               </div>
-            ) : (
-              <div className="text-sm text-muted-foreground">—</div>
-            )}
+              <p className="text-xs text-muted-foreground">
+                ID: <span className="font-mono break-all">{user.id}</span>
+              </p>
+            </div>
           </div>
-        </div>
-      </Card>
+
+          <div className="relative mt-5 grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Roles
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(user.roles ?? []).length === 0 ? (
+                  <span className="text-sm text-muted-foreground">—</span>
+                ) : (
+                  (user.roles ?? []).map((r) => (
+                    <Badge key={r} variant="outline" className="text-xs">
+                      {r}
+                    </Badge>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <StoreIcon className="h-3.5 w-3.5" />
+                Store gắn với user
+              </div>
+              {user.storeId ? (
+                <div className="space-y-1 text-sm text-muted-foreground rounded-lg border bg-background/60 px-3 py-2">
+                  <div className="font-medium text-foreground">
+                    {store?.storeName ?? user.storeId}
+                  </div>
+                  {store?.address && <div>{store.address}</div>}
+                  {store?.phone && <div>{store.phone}</div>}
+                  <div className="flex flex-wrap items-center gap-2 text-xs mt-1">
+                    <Badge variant={store?.isActive ? "outline" : "destructive"}>
+                      {store?.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                    {storeSub?.planName && (
+                      <Badge variant="outline">{storeSub.planName}</Badge>
+                    )}
+                    {typeof storeSub?.daysRemaining === "number" && (
+                      <span>{storeSub.daysRemaining} ngày còn lại</span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">Không gắn với store nào.</div>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold">Ghi chú cho SuperAdmin</h2>
+            <Badge variant="outline" className="text-[11px]">
+              System view
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Khi backend bổ sung nhiều metadata hơn (số lần đăng nhập, thời gian tạo, lịch sử
+            subscription theo user, v.v.) card này có thể mở rộng để hiển thị thêm insight về
+            tài khoản. Hiện tại trang này tập trung giúp bạn xem nhanh roles, trạng thái kích
+            hoạt và store/gói dịch vụ mà user đang gắn với.
+          </p>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -157,8 +157,8 @@ export function ChatbotWidget() {
             transition={{ duration: 0.2 }}
             className="fixed bottom-28 right-6 z-40 w-full max-w-md md:max-w-lg"
           >
-            <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/95 via-slate-950/95 to-slate-900/95 shadow-[0_20px_60px_rgba(8,47,73,0.8)] overflow-hidden flex flex-col h-[500px] backdrop-blur-xl">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-gradient-to-r from-teal-500 to-blue-500 text-white">
+            <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-gradient-to-b dark:from-slate-900/95 dark:via-slate-950/95 dark:to-slate-900/95 shadow-[0_20px_60px_rgba(8,47,73,0.16)] dark:shadow-[0_20px_60px_rgba(8,47,73,0.8)] overflow-hidden flex flex-col h-[500px] backdrop-blur-xl">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-teal-500 to-blue-500 text-white">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-white/15 shadow-inner">
                     <Bot className="h-4 w-4 shrink-0" />
@@ -182,13 +182,13 @@ export function ChatbotWidget() {
                 </button>
               </div>
 
-              <div className="flex-1 flex flex-col min-h-0 bg-slate-950/60">
+              <div className="flex-1 flex flex-col min-h-0 bg-slate-50/90 dark:bg-slate-950/60">
                 <div
                   ref={messagesContainerRef}
                   className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
                 >
                   {!hasMessages && (
-                    <div className="rounded-2xl bg-slate-900/80 border border-slate-800 px-4 py-3 text-xs md:text-sm text-slate-300">
+                    <div className="rounded-2xl bg-slate-100 border border-slate-200 px-4 py-3 text-xs md:text-sm text-slate-700 dark:bg-slate-900/80 dark:border-slate-800 dark:text-slate-300">
                       {t("widget.emptyState")}
                     </div>
                   )}
@@ -206,12 +206,12 @@ export function ChatbotWidget() {
                         className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                           msg.role === "user"
                             ? "bg-teal-600 text-white rounded-br-sm shadow-[0_0_18px_rgba(45,212,191,0.4)]"
-                            : "bg-slate-900/90 text-slate-50 border border-slate-800 rounded-bl-sm"
+                            : "bg-white text-slate-900 border border-slate-200 rounded-bl-sm shadow-sm dark:bg-slate-900/90 dark:text-slate-50 dark:border-slate-800"
                         }`}
                       >
                         {msg.role === "bot" ? (
                           <div
-                            className="prose prose-sm dark:prose-invert max-w-none [&_strong]:text-amber-300"
+                            className="prose prose-sm text-slate-900 dark:prose-invert max-w-none [&_strong]:text-amber-500 dark:[&_strong]:text-amber-300"
                             dangerouslySetInnerHTML={{
                               __html: renderMarkdownBasic(msg.content),
                             }}
@@ -254,7 +254,7 @@ export function ChatbotWidget() {
                 )}
 
                 {quickSuggestions.length > 0 && (
-                  <div className="border-t border-slate-800 px-4 py-3 flex flex-wrap gap-2 bg-slate-950/60">
+                  <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-3 flex flex-wrap gap-2 bg-slate-50/90 dark:bg-slate-950/60">
                     {quickSuggestions.map((sugg) => (
                       <button
                         key={sugg.question}

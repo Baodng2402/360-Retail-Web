@@ -101,11 +101,7 @@ export const DashboardSideBar = ({
   const location = useLocation();
   const openUpgradeModal = useFeatureGateStore((s) => s.openUpgradeModal);
 
-  useEffect(() => {
-    checkUserStoreStatus();
-  }, []);
-
-  const checkUserStoreStatus = async () => {
+  async function checkUserStoreStatus() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -123,11 +119,21 @@ export const DashboardSideBar = ({
         setUserStatus("hasStore");
       }
 
-      subscriptionApi.getAllowedFeatures().then(setAllowedFeatures).catch(() => setAllowedFeatures(null));
+      subscriptionApi
+        .getAllowedFeatures()
+        .then(setAllowedFeatures)
+        .catch(() => setAllowedFeatures(null));
     } catch {
       setUserStatus("noStore");
     }
-  };
+  }
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      void checkUserStoreStatus();
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
 
   const handleNavClick = (item: NavItem) => {
     const lockedByNoStore = item.requiresStore && userStatus === "noStore";

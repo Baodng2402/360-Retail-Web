@@ -234,7 +234,9 @@ export function StoreLocationPicker({
               <LocationSelector />
             </MapContainer>
           ) : (
-            <div className="h-full w-full bg-muted animate-pulse" />
+            <div className="flex h-full w-full items-center justify-center bg-muted text-xs text-muted-foreground">
+              Đang khởi tạo bản đồ...
+            </div>
           )}
         </div>
       </div>

@@ -185,8 +185,18 @@ export default function AdminUsersPage() {
     try {
       setDeleting(true);
       await superAdminUsersApi.remove(deleteConfirm.id);
-      setItems((prev) => prev.filter((u) => u.id !== deleteConfirm.id));
-      toast.success("Đã xoá user.");
+      setItems((prev) =>
+        prev.map((u) =>
+          u.id === deleteConfirm.id
+            ? {
+                ...u,
+                isActivated: false,
+                status: u.status ?? "Inactive",
+              }
+            : u,
+        ),
+      );
+      toast.success("Đã vô hiệu hóa user (soft delete).");
       setDeleteConfirm(null);
     } catch (err) {
       console.error("Failed to delete user:", err);
