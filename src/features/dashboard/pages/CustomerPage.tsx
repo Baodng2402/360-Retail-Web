@@ -144,9 +144,14 @@ const CustomerPage = () => {
   };
 
   const openCreateForm = () => {
-    setEditingCustomer(null);
-    setFormState(emptyForm);
-    setFormOpen(true);
+    try {
+      setEditingCustomer(null);
+      setFormState({ ...emptyForm });
+      setFormOpen(true);
+    } catch (e) {
+      console.error("Open create customer form error:", e);
+      toast.error(tCustomer("errors.loadFormFailed", { defaultValue: "Không mở được form. Vui lòng thử lại." }));
+    }
   };
 
   const openEditForm = (customer: Customer) => {
@@ -172,9 +177,7 @@ const CustomerPage = () => {
           phoneNumber: formState.phoneNumber.trim(),
           email: formState.email.trim() || undefined,
         });
-        setCustomers((prev) =>
-          prev.map((c) => (c.id === updated.id ? updated : c)),
-        );
+        await loadCustomers();
         if (selectedCustomer?.id === updated.id) {
           setSelectedCustomer(updated);
         }
@@ -185,13 +188,29 @@ const CustomerPage = () => {
           phoneNumber: formState.phoneNumber.trim(),
           email: formState.email.trim() || undefined,
         });
-        setCustomers((prev) => [created, ...prev]);
+        if (created?.id) {
+          await loadCustomers();
+        }
         toast.success(tCustomer("toasts.createSuccess"));
       }
       setFormOpen(false);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to save customer:", error);
-      toast.error(tCustomer("errors.saveCustomerFailed"));
+      const res = (error as { response?: { status?: number; data?: { error?: string; message?: string } } })?.response;
+      const status = res?.status;
+      const serverMsg = res?.data?.error || res?.data?.message || "";
+
+      if (status === 409) {
+        toast.error(
+          serverMsg ||
+            tCustomer("errors.customerPhoneExists", {
+              defaultValue: "Số điện thoại này đã tồn tại trong cửa hàng.",
+            }),
+        );
+        return;
+      }
+
+      toast.error(serverMsg || tCustomer("errors.saveCustomerFailed"));
     } finally {
       setSaving(false);
     }
@@ -312,11 +331,13 @@ const CustomerPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredCustomers.map((c) => {
+                    {filteredCustomers.map((c, index) => {
                       const isSelected = selectedCustomer?.id === c.id;
+                      const shortId = (c.id || "").slice(0, 8);
+                      const rowKey = c.id || `${c.fullName}-${index}`;
                       return (
                         <tr
-                          key={c.id}
+                          key={rowKey}
                           className={`cursor-pointer border-t text-sm transition-colors ${
                             isSelected
                               ? "bg-teal-50/70 dark:bg-teal-950/30"
@@ -330,7 +351,8 @@ const CustomerPage = () => {
                                 {c.fullName}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {tCustomer("table.idPrefix")} {c.id.slice(0, 8)}...
+                                {tCustomer("table.idPrefix")}{" "}
+                                {shortId ? `${shortId}...` : "—"}
                               </span>
                             </div>
                           </td>
@@ -547,7 +569,13 @@ const CustomerPage = () => {
         </Card>
       </motion.div>
 
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+      <Dialog
+        open={formOpen}
+        onOpenChange={(open) => {
+          setFormOpen(open);
+          if (!open) setEditingCustomer(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>

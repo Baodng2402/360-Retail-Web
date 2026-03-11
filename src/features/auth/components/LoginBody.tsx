@@ -301,18 +301,27 @@ const LoginBody = () => {
                     social.alt === "Google" ? (
                       <div
                         key={social.alt}
-                        className="relative flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] items-center justify-center rounded-[22px] border border-gray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
+                        className="relative flex h-[72px] w-[72px] sm:h-[84px] sm:w-[84px] min-w-[72px] min-h-[72px] items-center justify-center rounded-[22px] border border-gray-200 bg-white shadow-sm overflow-visible hover:bg-gray-50"
+                        style={{ isolation: "isolate" }}
                       >
                         <img
                           src={googleIcon}
                           alt="Google"
                           className="pointer-events-none absolute inset-0 z-10 m-auto h-9 w-9 object-contain sm:h-11 sm:w-11"
                         />
-                        <div className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center opacity-0">
-                          <div className="scale-[5]">
+                        {/* Trên production: thêm domain vào Google Cloud Console > Authorized JavaScript origins; server gửi Cross-Origin-Opener-Policy: same-origin-allow-popups */}
+                        <div
+                          className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center opacity-0"
+                          aria-hidden="true"
+                        >
+                          <div className="scale-[4] origin-center">
                             <GoogleLogin
                               onSuccess={handleGoogleSuccess}
                               onError={handleGoogleError}
+                              useOneTap={false}
+                              size="large"
+                              theme="outline"
+                              shape="rectangular"
                             />
                           </div>
                         </div>

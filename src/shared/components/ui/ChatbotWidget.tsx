@@ -188,7 +188,7 @@ export function ChatbotWidget() {
                   className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
                 >
                   {!hasMessages && (
-                    <div className="rounded-2xl bg-slate-100 border border-slate-200 px-4 py-3 text-xs md:text-sm text-slate-700 dark:bg-slate-900/80 dark:border-slate-800 dark:text-slate-300">
+                    <div className="rounded-2xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 px-4 py-3 text-xs md:text-sm text-slate-800 dark:text-slate-200">
                       {t("widget.emptyState")}
                     </div>
                   )}
@@ -206,12 +206,12 @@ export function ChatbotWidget() {
                         className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                           msg.role === "user"
                             ? "bg-teal-600 text-white rounded-br-sm shadow-[0_0_18px_rgba(45,212,191,0.4)]"
-                            : "bg-white text-slate-900 border border-slate-200 rounded-bl-sm shadow-sm dark:bg-slate-900/90 dark:text-slate-50 dark:border-slate-800"
+                            : "bg-white dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-bl-sm shadow-sm"
                         }`}
                       >
                         {msg.role === "bot" ? (
                           <div
-                            className="prose prose-sm text-slate-900 dark:prose-invert max-w-none [&_strong]:text-amber-500 dark:[&_strong]:text-amber-300"
+                            className="prose prose-sm max-w-none text-slate-900 dark:text-slate-100 [&_strong]:text-amber-600 dark:[&_strong]:text-amber-400 [&_code]:bg-slate-200 dark:[&_code]:bg-slate-700 [&_code]:text-slate-900 dark:[&_code]:text-slate-100 [&_code]:px-1 [&_code]:rounded"
                             dangerouslySetInnerHTML={{
                               __html: renderMarkdownBasic(msg.content),
                             }}
@@ -220,7 +220,7 @@ export function ChatbotWidget() {
                           <span>{msg.content}</span>
                         )}
                         {msg.role === "bot" && msg.source && (
-                          <div className="mt-1 text-[10px] opacity-70">
+                          <div className="mt-1 text-[10px] text-slate-600 dark:text-slate-400 opacity-90">
                             {t("widget.sourceLabel", {
                               source:
                                 msg.source === "faq"
@@ -234,7 +234,7 @@ export function ChatbotWidget() {
                   ))}
 
                   {loading && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+                    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 px-1">
                       <div className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
                       {t("widget.typing")}
                     </div>
@@ -246,7 +246,7 @@ export function ChatbotWidget() {
                     <button
                       type="button"
                       onClick={handleClear}
-                      className="text-[11px] md:text-xs text-slate-400 hover:text-slate-200 hover:underline"
+                      className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:underline"
                     >
                       {t("widget.clearConversation")}
                     </button>
@@ -254,13 +254,13 @@ export function ChatbotWidget() {
                 )}
 
                 {quickSuggestions.length > 0 && (
-                  <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-3 flex flex-wrap gap-2 bg-slate-50/90 dark:bg-slate-950/60">
+                  <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-3 flex flex-wrap gap-2 bg-slate-100/90 dark:bg-slate-950/60">
                     {quickSuggestions.map((sugg) => (
                       <button
                         key={sugg.question}
                         type="button"
                         onClick={() => handleSend(sugg.question)}
-                        className="rounded-full border border-slate-700 px-3 py-1.5 text-[11px] md:text-xs text-slate-200 bg-slate-900/70 hover:bg-slate-800 hover:border-teal-500 transition-colors"
+                        className="rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-[11px] md:text-xs text-slate-700 dark:text-slate-200 bg-slate-200/80 dark:bg-slate-900/70 hover:bg-slate-300 dark:hover:bg-slate-800 hover:border-teal-500 transition-colors"
                       >
                         {sugg.text}
                       </button>
@@ -273,14 +273,14 @@ export function ChatbotWidget() {
                     e.preventDefault();
                     void handleSend();
                   }}
-                  className="border-t border-slate-800 px-4 py-3 flex items-end gap-2 bg-slate-950/95"
+                  className="border-t border-slate-200 dark:border-slate-800 px-4 py-3 flex items-end gap-2 bg-slate-100 dark:bg-slate-950/95"
                 >
                   <Textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     rows={2}
                     placeholder={t("widget.inputPlaceholder")}
-                    className="resize-none text-sm max-h-24 bg-slate-900/80 border-slate-700 focus-visible:ring-teal-500"
+                    className="resize-none text-sm max-h-24 bg-slate-200/90 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-visible:ring-teal-500"
                   />
                   <Button
                     type="submit"

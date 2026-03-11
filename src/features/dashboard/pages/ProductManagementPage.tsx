@@ -90,6 +90,24 @@ type ProductFormState = {
   isActive: boolean;
 };
 
+const CATEGORY_COLOR_STORAGE_KEY = "360retail-category-color-";
+
+const getStoredCategoryColor = (categoryId: string): string | null => {
+  try {
+    return localStorage.getItem(CATEGORY_COLOR_STORAGE_KEY + categoryId);
+  } catch {
+    return null;
+  }
+};
+
+const setStoredCategoryColor = (categoryId: string, color: string): void => {
+  try {
+    localStorage.setItem(CATEGORY_COLOR_STORAGE_KEY + categoryId, color);
+  } catch {
+    // ignore
+  }
+};
+
 const generateCategoryColor = (_categoryName: string, index: number): string => {
   const colorPalette = [
     "hsl(210, 100%, 50%)",
@@ -282,7 +300,9 @@ export default function ProductManagementPage() {
       const data = await categoriesApi.getCategories(storeId, includeInactive);
       const categoriesWithColors = data.map((cat, index) => ({
         ...cat,
-        color: generateCategoryColor(cat.categoryName, index),
+        color:
+          getStoredCategoryColor(cat.id) ||
+          generateCategoryColor(cat.categoryName, index),
         productCount: 0,
         isActive: cat.isActive ?? true,
       }));
@@ -730,12 +750,14 @@ export default function ProductManagementPage() {
           parentId: categoryForm.parentId || undefined,
           isActive: categoryForm.isActive,
         });
+        setStoredCategoryColor(editingCategory.id, categoryForm.color);
         toast.success("Cập nhật danh mục thành công!");
       } else {
-        await categoriesApi.createCategory({
+        const created = await categoriesApi.createCategory({
           categoryName: categoryForm.categoryName,
           parentId: categoryForm.parentId || undefined,
         });
+        setStoredCategoryColor(created.id, categoryForm.color);
         toast.success("Thêm danh mục thành công!");
       }
 

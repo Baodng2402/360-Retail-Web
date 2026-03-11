@@ -63,6 +63,15 @@ import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+type ProductVariantDisplay = {
+  id?: string;
+  variantName?: string;
+  size?: string;
+  color?: string;
+  stockQuantity?: number;
+  priceOverride?: number;
+};
+
 type ProductDisplay = {
   id: string;
   name: string;
@@ -71,11 +80,14 @@ type ProductDisplay = {
   stock: number;
   barcode: string;
   image: string;
+  hasVariants?: boolean;
+  variants?: ProductVariantDisplay[];
 };
 
 interface CartItem {
   product: ProductDisplay;
   quantity: number;
+  productVariantId?: string;
 }
 
 const SalePostPage = () => {
@@ -104,9 +116,12 @@ const SalePostPage = () => {
   const [reportLoading, setReportLoading] = useState(false);
   const [removeLastConfirmOpen, setRemoveLastConfirmOpen] = useState(false);
   const [pendingRemoveProductId, setPendingRemoveProductId] = useState<string | null>(null);
+  const [variantPickerProduct, setVariantPickerProduct] = useState<ProductDisplay | null>(null);
+  const [variantQuantity, setVariantQuantity] = useState(1);
   const pendingRemoveProductName =
     pendingRemoveProductId
-      ? cart.find((c) => c.product.id === pendingRemoveProductId)?.product.name
+      ? cart.find((c) => cartItemKey(c) === pendingRemoveProductId)?.product
+          .name
       : null;
 
   const loadProducts = useCallback(async () => {
@@ -202,15 +217,36 @@ const SalePostPage = () => {
   }, []);
 
   const transformProducts = (apiProducts: Product[]): ProductDisplay[] => {
-    return apiProducts.map((p) => ({
-      id: p.id,
-      name: p.productName,
-      category: p.categoryName || t("sale:misc.uncategorized"),
-      price: p.price,
-      stock: p.stockQuantity,
-      barcode: p.barCode || "",
-      image: p.imageUrl || "📦",
-    }));
+    return apiProducts.map((p) => {
+      const hasVariants = p.hasVariants || (p.variants && p.variants.length > 0);
+      const variantStock = (p.variants ?? []).reduce(
+        (sum, v) => sum + (v.stockQuantity ?? 0),
+        0,
+      );
+      const stock =
+        p.totalStock ??
+        (hasVariants ? variantStock : undefined) ??
+        p.stockQuantity ??
+        0;
+      return {
+        id: p.id,
+        name: p.productName,
+        category: p.categoryName || t("sale:misc.uncategorized"),
+        price: p.price,
+        stock,
+        barcode: p.barCode || "",
+        image: p.imageUrl || "📦",
+        hasVariants: hasVariants || undefined,
+        variants: p.variants?.map((v) => ({
+          id: v.id,
+          variantName: v.variantName,
+          size: v.size,
+          color: v.color,
+          stockQuantity: v.stockQuantity,
+          priceOverride: v.priceOverride,
+        })),
+      };
+    });
   };
 
   const isImageUrl = (str: string): boolean => {
@@ -272,28 +308,56 @@ const SalePostPage = () => {
       product.category.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const addToCart = (product: ProductDisplay) => {
-    const existingItem = cart.find((item) => item.product.id === product.id);
+  const addToCart = (product: ProductDisplay, productVariantId?: string) => {
+    const existingItem = cart.find(
+      (item) =>
+        item.product.id === product.id &&
+        (item.productVariantId ?? "") === (productVariantId ?? ""),
+    );
     if (existingItem) {
       setCart(
         cart.map((item) =>
-          item.product.id === product.id
+          item.product.id === product.id &&
+          (item.productVariantId ?? "") === (productVariantId ?? "")
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         ),
       );
     } else {
-      setCart([...cart, { product, quantity: 1 }]);
+      setCart([
+        ...cart,
+        { product, quantity: 1, productVariantId: productVariantId ?? undefined },
+      ]);
     }
   };
 
-  const updateQuantity = (productId: string, delta: number) => {
-    const target = cart.find((i) => i.product.id === productId);
+  const handleProductClick = (product: ProductDisplay) => {
+    if (product.stock === 0) return;
+    if (product.hasVariants && product.variants && product.variants.length > 0) {
+      setVariantPickerProduct(product);
+      setVariantQuantity(1);
+      return;
+    }
+    addToCart(product);
+  };
+
+  const cartItemKey = (item: CartItem) =>
+    `${item.product.id}-${item.productVariantId ?? "base"}`;
+
+  const updateQuantity = (
+    productId: string,
+    delta: number,
+    productVariantId?: string,
+  ) => {
+    const target = cart.find(
+      (i) =>
+        i.product.id === productId &&
+        (i.productVariantId ?? "") === (productVariantId ?? ""),
+    );
     if (!target) return;
 
-    // Nếu user giảm về 0 và đây là sản phẩm cuối cùng trong giỏ -> hỏi xác nhận
     if (delta < 0 && target.quantity <= 1 && cart.length === 1) {
-      setPendingRemoveProductId(productId);
+      setPendingRemoveProductId(cartItemKey(target));
       setRemoveLastConfirmOpen(true);
       return;
     }
@@ -301,7 +365,8 @@ const SalePostPage = () => {
     setCart(
       cart
         .map((item) =>
-          item.product.id === productId
+          item.product.id === productId &&
+          (item.productVariantId ?? "") === (productVariantId ?? "")
             ? { ...item, quantity: Math.max(0, item.quantity + delta) }
             : item,
         )
@@ -309,18 +374,39 @@ const SalePostPage = () => {
     );
   };
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = (productId: string, productVariantId?: string) => {
+    const target = cart.find(
+      (i) =>
+        i.product.id === productId &&
+        (i.productVariantId ?? "") === (productVariantId ?? ""),
+    );
+    if (!target) return;
     if (cart.length === 1) {
-      setPendingRemoveProductId(productId);
+      setPendingRemoveProductId(cartItemKey(target));
       setRemoveLastConfirmOpen(true);
       return;
     }
-    setCart(cart.filter((item) => item.product.id !== productId));
+    setCart(
+      cart.filter(
+        (item) =>
+          !(
+            item.product.id === productId &&
+            (item.productVariantId ?? "") === (productVariantId ?? "")
+          ),
+      ),
+    );
+  };
+
+  const getItemUnitPrice = (item: CartItem): number => {
+    const v = item.productVariantId
+      ? item.product.variants?.find((x) => x.id === item.productVariantId)
+      : undefined;
+    return v?.priceOverride ?? item.product.price;
   };
 
   const calculateTotal = () => {
     return cart.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum, item) => sum + getItemUnitPrice(item) * item.quantity,
       0,
     );
   };
@@ -339,7 +425,7 @@ const SalePostPage = () => {
       const orderItems = cart.map((item) => ({
         productId: item.product.id,
         quantity: item.quantity,
-        productVariantId: undefined as string | undefined,
+        productVariantId: item.productVariantId,
       }));
 
       const orderId = await ordersApi.createOrder({
@@ -430,8 +516,12 @@ const SalePostPage = () => {
                     {filteredProducts.map((product) => (
                       <Card
                         key={product.id}
-                        className="p-4 hover:shadow-lg transition-all cursor-pointer group"
-                        onClick={() => addToCart(product)}
+                        className={`p-4 transition-all group ${
+                          product.stock === 0
+                            ? "opacity-60 cursor-not-allowed"
+                            : "hover:shadow-lg cursor-pointer"
+                        }`}
+                        onClick={() => handleProductClick(product)}
                       >
                         <div className="mb-3 text-center min-h-[128px] flex items-center justify-center">
                           {renderProductImage(product.id, product.image, "md")}
@@ -445,11 +535,17 @@ const SalePostPage = () => {
                           </span>
                           <Badge
                             variant={
-                              product.stock < 10 ? "destructive" : "secondary"
+                              product.stock === 0
+                                ? "destructive"
+                                : product.stock < 10
+                                  ? "secondary"
+                                  : "secondary"
                             }
                             className="text-xs"
                           >
-                            {t("sale:misc.left", { count: product.stock })}
+                            {product.stock === 0
+                              ? t("sale:misc.outOfStock", { defaultValue: "Hết hàng" })
+                              : t("sale:misc.left", { count: product.stock })}
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between">
@@ -494,7 +590,7 @@ const SalePostPage = () => {
                       <div className="space-y-3">
                         {cart.map((item) => (
                           <div
-                            key={item.product.id}
+                            key={cartItemKey(item)}
                             className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                           >
                             <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
@@ -507,9 +603,25 @@ const SalePostPage = () => {
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-sm truncate">
                                 {item.product.name}
+                                {item.productVariantId &&
+                                  (() => {
+                                    const v = item.product.variants?.find(
+                                      (x) => x.id === item.productVariantId,
+                                    );
+                                    return v
+                                      ? ` (${[v.size, v.color]
+                                          .filter(Boolean)
+                                          .join(" / ") || v.variantName || "Biến thể"})`
+                                      : "";
+                                  })()}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {item.product.price.toLocaleString("vi-VN")} ₫
+                                {(item.product.variants?.find(
+                                  (x) => x.id === item.productVariantId,
+                                )?.priceOverride ?? item.product.price).toLocaleString(
+                                  "vi-VN",
+                                )}{" "}
+                                ₫
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -518,7 +630,11 @@ const SalePostPage = () => {
                                 variant="outline"
                                 className="h-6 w-6"
                                 onClick={() =>
-                                  updateQuantity(item.product.id, -1)
+                                  updateQuantity(
+                                    item.product.id,
+                                    -1,
+                                    item.productVariantId,
+                                  )
                                 }
                               >
                                 <Minus className="h-3 w-3" />
@@ -531,7 +647,11 @@ const SalePostPage = () => {
                                 variant="outline"
                                 className="h-6 w-6"
                                 onClick={() =>
-                                  updateQuantity(item.product.id, 1)
+                                  updateQuantity(
+                                    item.product.id,
+                                    1,
+                                    item.productVariantId,
+                                  )
                                 }
                               >
                                 <Plus className="h-3 w-3" />
@@ -541,7 +661,12 @@ const SalePostPage = () => {
                               size="icon"
                               variant="ghost"
                               className="h-6 w-6"
-                              onClick={() => removeFromCart(item.product.id)}
+                              onClick={() =>
+                                removeFromCart(
+                                  item.product.id,
+                                  item.productVariantId,
+                                )
+                              }
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
@@ -829,6 +954,84 @@ const SalePostPage = () => {
       />
 
       <Dialog
+        open={!!variantPickerProduct}
+        onOpenChange={(open) => !open && setVariantPickerProduct(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {variantPickerProduct?.name} – {t("sale:misc.chooseVariant", { defaultValue: "Chọn biến thể" })}
+            </DialogTitle>
+            <DialogDescription>
+              {t("sale:misc.chooseVariantHint", {
+                defaultValue: "Chọn một biến thể để thêm vào giỏ.",
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <Label className="text-xs">
+                  {t("sale:misc.quantity", { defaultValue: "Số lượng" })}
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={variantQuantity}
+                  onChange={(e) => {
+                    const n = Number(e.target.value);
+                    setVariantQuantity(Number.isFinite(n) ? Math.max(1, n) : 1);
+                  }}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setVariantQuantity(1)}
+              >
+                Reset
+              </Button>
+            </div>
+
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+            {variantPickerProduct?.variants?.map((v) => {
+              const inStock = (v.stockQuantity ?? 0) > 0;
+              return (
+                <Button
+                  key={v.id ?? `${v.size}-${v.color}`}
+                  variant="outline"
+                  className="w-full justify-between h-auto py-3"
+                  disabled={!inStock}
+                  onClick={() => {
+                    if (!variantPickerProduct || !v.id) return;
+                    for (let i = 0; i < Math.max(1, variantQuantity); i += 1) {
+                      addToCart(variantPickerProduct, v.id);
+                    }
+                    setVariantPickerProduct(null);
+                  }}
+                >
+                  <span>
+                    {[v.variantName, v.size, v.color].filter(Boolean).join(" / ") || "Biến thể"}
+                    {v.priceOverride != null && (
+                      <span className="ml-2 text-muted-foreground">
+                        {v.priceOverride.toLocaleString("vi-VN")} ₫
+                      </span>
+                    )}
+                  </span>
+                  <Badge variant={inStock ? "secondary" : "destructive"}>
+                    {inStock
+                      ? t("sale:misc.left", { count: v.stockQuantity ?? 0 })
+                      : t("sale:misc.outOfStock", { defaultValue: "Hết" })}
+                  </Badge>
+                </Button>
+              );
+            })}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
         open={removeLastConfirmOpen}
         onOpenChange={(open) => {
           setRemoveLastConfirmOpen(open);
@@ -859,7 +1062,9 @@ const SalePostPage = () => {
               onClick={() => {
                 if (pendingRemoveProductId) {
                   setCart((prev) =>
-                    prev.filter((i) => i.product.id !== pendingRemoveProductId),
+                    prev.filter(
+                      (i) => cartItemKey(i) !== pendingRemoveProductId,
+                    ),
                   );
                 }
                 setRemoveLastConfirmOpen(false);
