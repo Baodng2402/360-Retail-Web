@@ -41,7 +41,6 @@ import {
 } from "@/shared/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 interface DashboardSideBarProps {
   isCollapsed: boolean;
@@ -95,7 +94,7 @@ export const DashboardSideBar = ({
   const [userRole, setUserRole] = useState<string | null>(null);
   const [trialExpired, setTrialExpired] = useState(false);
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
-  const [allowedFeatures, setAllowedFeatures] = useState<string[] | null>(null);
+  const [allowedFeatures, setAllowedFeatures] = useState<string[]>([]);
   const [showSetupDialog, setShowSetupDialog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -122,7 +121,7 @@ export const DashboardSideBar = ({
       subscriptionApi
         .getAllowedFeatures()
         .then(setAllowedFeatures)
-        .catch(() => setAllowedFeatures(null));
+        .catch(() => setAllowedFeatures([]));
     } catch {
       setUserStatus("noStore");
     }
@@ -140,9 +139,7 @@ export const DashboardSideBar = ({
     const lockedByExpired =
       (trialExpired || subscriptionExpired) && !item.allowWhenExpired;
     const lockedByPlanFeature =
-      item.featureKey != null &&
-      allowedFeatures !== null &&
-      !allowedFeatures.includes(item.featureKey);
+      item.featureKey != null && !allowedFeatures.includes(item.featureKey);
 
     if (lockedByNoStore) {
       setShowSetupDialog(true);
@@ -359,10 +356,11 @@ export const DashboardSideBar = ({
               <img src={logo} alt="logo" className="w-full h-full object-contain" />
             </div>
             <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isCollapsed
                   ? "w-0 opacity-0 scale-95"
                   : "w-auto opacity-100 scale-100 min-w-0"
-                }`}
+              }`}
               style={{
                 transitionDelay: isCollapsed ? "0ms" : "100ms",
               }}
@@ -376,12 +374,6 @@ export const DashboardSideBar = ({
                 </p>
               </div>
             </div>
-
-            {!isCollapsed && (
-              <div className="ml-auto flex items-center gap-2">
-                <LanguageSwitcher />
-              </div>
-            )}
           </div>
         </div>
 

@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
-import { Edit, Save, X } from "lucide-react";
+import { Edit, Save, X, Loader2 } from "lucide-react";
+import { employeesApi } from "@/shared/lib/employeesApi";
+import { useAuthStore } from "@/shared/store/authStore";
+import toast from "react-hot-toast";
 
 // Types
 export interface UserProfile {
@@ -19,7 +22,9 @@ interface EditProfileFormProps {
 }
 
 export function EditProfileForm({ user }: EditProfileFormProps) {
+  const setUser = useAuthStore((s) => s.setUser);
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -27,19 +32,44 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
     role: user?.role || "",
   });
 
+  useEffect(() => {
+    setFormData({
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      role: user?.role || "",
+    });
+  }, [user?.name, user?.email, user?.phone, user?.role]);
+
   const handleChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    // TODO: Gọi API để update profile
-    console.log("Saving profile:", formData);
-    alert("Profile updated successfully! / Cập nhật thông tin thành công!");
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      const updated = await employeesApi.updateMe({
+        fullName: formData.name.trim(),
+        phoneNumber: formData.phone.trim() || undefined,
+        userName: formData.name.trim() || undefined,
+      });
+      setUser({
+        ...user,
+        name: updated.fullName,
+      });
+      toast.success("Cập nhật thông tin thành công!");
+      setIsEditing(false);
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Cập nhật thất bại. Vui lòng thử lại.";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
-    // Reset form data
     setFormData({
       name: user?.name || "",
       email: user?.email || "",
@@ -56,11 +86,16 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
         {isEditing ? (
           <>
             <Button
-              onClick={handleSave}
+              onClick={() => void handleSave()}
+              disabled={saving}
               className="gap-2 bg-teal-400 text-white hover:bg-teal-500"
             >
-              <Save className="h-4 w-4 " />
-              Save / Lưu
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {saving ? "Đang lưu..." : "Save / Lưu"}
             </Button>
             <Button variant="outline" onClick={handleCancel} className="gap-2">
               <X className="h-4 w-4" />
@@ -97,9 +132,11 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
             <Input
               id="email"
               type="email"
-              value={isEditing ? formData.email : user?.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              disabled={!isEditing}
+              value={formData.email}
+              disabled
+              readOnly
+              className="bg-muted cursor-not-allowed"
+              title="Email không thể thay đổi"
             />
           </div>
           <div className="space-y-2">
