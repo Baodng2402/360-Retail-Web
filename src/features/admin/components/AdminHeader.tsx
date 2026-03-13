@@ -33,7 +33,7 @@ export function AdminHeader({ isSidebarCollapsed }: AdminHeaderProps) {
     .join("");
 
   return (
-    <header className="border-b border-gray-200 dark:border-gray-700 bg-background sticky top-0 z-50 h-[56px] flex items-center">
+    <header className="border-b border-gray-200 dark:border-gray-700 bg-background sticky top-0 z-50 h-[73px] flex items-center">
       <div
         className={`flex items-center justify-between w-full transition-all duration-300 ${
           isSidebarCollapsed ? "px-4" : "container mx-auto px-4"

@@ -31,10 +31,6 @@ const toRad = (value: number) => (value * Math.PI) / 180;
 const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-const CARTO_TILE_URL =
-  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://carto.com/attributions">CARTO</a> contributors';
 
 const getDistanceMeters = (
   lat1: number,
@@ -99,14 +95,12 @@ const SettingPage = () => {
   const [addressLoading, setAddressLoading] = useState(false);
   const [addressSearchEnabled, setAddressSearchEnabled] = useState(false);
   const [usingCurrentLocation, setUsingCurrentLocation] = useState(false);
-  // Một số mạng/chính sách có thể chặn OSM tiles → fallback sang CARTO.
-  const [tileUrl, setTileUrl] = useState(CARTO_TILE_URL);
-  const [tileAttribution, setTileAttribution] = useState(CARTO_ATTRIBUTION);
-  const [tileFailed, setTileFailed] = useState(false);
   const parsedLatitude = Number(storeLatitude.trim());
   const parsedLongitude = Number(storeLongitude.trim());
   const hasValidCoords =
-    !Number.isNaN(parsedLatitude) && !Number.isNaN(parsedLongitude);
+    !Number.isNaN(parsedLatitude) &&
+    !Number.isNaN(parsedLongitude) &&
+    !(parsedLatitude === 0 && parsedLongitude === 0);
   const currentPosition: LatLngExpression = hasValidCoords
     ? [parsedLatitude, parsedLongitude]
     : [21.0278, 105.8342]; // Hà Nội mặc định
@@ -593,31 +587,12 @@ const SettingPage = () => {
                         className="h-full w-full"
                       >
                         <TileLayer
-                          url={tileUrl}
-                          attribution={tileAttribution}
-                          eventHandlers={{
-                            tileload: () => setTileFailed(false),
-                            tileerror: () => {
-                              setTileFailed(true);
-                              // Thử đổi provider khi tile bị lỗi (mạng/adblock/cors)
-                              if (tileUrl === CARTO_TILE_URL) {
-                                setTileUrl(OSM_TILE_URL);
-                                setTileAttribution(OSM_ATTRIBUTION);
-                              } else {
-                                setTileUrl(CARTO_TILE_URL);
-                                setTileAttribution(CARTO_ATTRIBUTION);
-                              }
-                            },
-                          }}
+                          url={OSM_TILE_URL}
+                          attribution={OSM_ATTRIBUTION}
                         />
                         <LocationSelector />
                       </MapContainer>
                     </div>
-                    {tileFailed && (
-                      <p className="text-[11px] text-muted-foreground">
-                        Không tải được bản đồ (tiles). Hệ thống sẽ tự đổi nhà cung cấp bản đồ; nếu vẫn lỗi, vui lòng kiểm tra mạng/AdBlock hoặc thử VPN.
-                      </p>
-                    )}
                   </div>
 
                   <div className="space-y-2">

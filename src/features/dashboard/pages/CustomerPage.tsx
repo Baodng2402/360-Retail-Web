@@ -34,6 +34,7 @@ import type {
 import type { Feedback } from "@/shared/lib/feedbackApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { authApi } from "@/shared/lib/authApi";
+import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
@@ -72,9 +73,22 @@ const CustomerPage = () => {
   const [formState, setFormState] = useState<CustomerFormState>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [hasLoyaltyFeature, setHasLoyaltyFeature] = useState<boolean | null>(null);
 
   const canDelete =
     !!user && ["StoreOwner", "Manager"].includes(user.role ?? "");
+
+  useEffect(() => {
+    const loadFeatures = async () => {
+      try {
+        const features = await subscriptionApi.getAllowedFeatures();
+        setHasLoyaltyFeature(features.includes("has_loyalty"));
+      } catch {
+        setHasLoyaltyFeature(null);
+      }
+    };
+    void loadFeatures();
+  }, []);
 
   const loadCustomers = async () => {
     try {
@@ -140,7 +154,9 @@ const CustomerPage = () => {
     setLoyaltySummary(null);
     setLoyaltyTransactions([]);
     setFeedbacks([]);
-    await loadCustomerInsights(customer);
+    if (hasLoyaltyFeature) {
+      await loadCustomerInsights(customer);
+    }
   };
 
   const openCreateForm = () => {
@@ -177,10 +193,14 @@ const CustomerPage = () => {
           phoneNumber: formState.phoneNumber.trim(),
           email: formState.email.trim() || undefined,
         });
-        await loadCustomers();
+        setCustomers((prev) =>
+          prev.map((c) => (c.id === updated.id ? updated : c)),
+        );
         if (selectedCustomer?.id === updated.id) {
           setSelectedCustomer(updated);
         }
+        // Đồng bộ lại từ backend để khớp với bộ lọc store / phân trang
+        void loadCustomers();
         toast.success(tCustomer("toasts.updateSuccess"));
       } else {
         const created = await customersApi.createCustomer({
@@ -189,7 +209,10 @@ const CustomerPage = () => {
           email: formState.email.trim() || undefined,
         });
         if (created?.id) {
-          await loadCustomers();
+          // Hiển thị ngay khách mới trên UI
+          setCustomers((prev) => [created, ...prev]);
+          // Chọn luôn khách mới để hiển thị insights, không refetch ngay để tránh BE sort lại danh sách
+          void handleSelectCustomer(created);
         }
         toast.success(tCustomer("toasts.createSuccess"));
       }
@@ -443,6 +466,15 @@ const CustomerPage = () => {
           {!selectedCustomer ? (
             <div className="py-8 text-center text-muted-foreground text-sm">
               {tCustomer("insights.selectCustomerHint")}
+            </div>
+          ) : !hasLoyaltyFeature ? (
+            <div className="space-y-4 text-sm text-muted-foreground">
+              <p>
+                Tính năng "Tích điểm Loyalty" không khả dụng trong gói hiện tại của bạn.
+              </p>
+              <p>
+                Vui lòng nâng cấp lên gói Pro hoặc cao hơn để xem điểm thưởng, lịch sử giao dịch và phản hồi khách hàng trực tiếp tại đây.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">

@@ -186,7 +186,7 @@ const AddProductModal = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-[minmax(0,1.6fr)_auto] gap-4 items-end">
             <div className="space-y-2">
               <Label htmlFor="category">
                 Category / Danh mục <span className="text-red-500">*</span>
@@ -220,13 +220,18 @@ const AddProductModal = ({
             <div className="space-y-2">
               <Label htmlFor="image">Icon / Biểu tượng</Label>
               <Select value={image} onValueChange={setImage}>
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger className="w-16 justify-center">
+                  <SelectValue
+                    placeholder="📦"
+                    className="flex items-center justify-center"
+                  />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent align="end" className="w-32">
                   {emojiOptions.map((emoji) => (
                     <SelectItem key={emoji} value={emoji}>
-                      <span className="text-2xl">{emoji}</span>
+                      <span className="text-2xl flex items-center justify-center">
+                        {emoji}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

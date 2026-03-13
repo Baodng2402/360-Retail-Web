@@ -21,10 +21,6 @@ const DEFAULT_CENTER: LatLngExpression = [21.0278, 105.8342]; // Hà Nội
 const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-const CARTO_TILE_URL =
-  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://carto.com/attributions">CARTO</a> contributors';
 
 export function StoreLocationPicker({
   address,
@@ -43,14 +39,13 @@ export function StoreLocationPicker({
   >([]);
   const [addressLoading, setAddressLoading] = useState(false);
   const [addressSearchEnabled, setAddressSearchEnabled] = useState(false);
-  // Carto thường ổn định hơn trong môi trường bị chặn OSM
-  const [tileUrl, setTileUrl] = useState(CARTO_TILE_URL);
-  const [tileAttribution, setTileAttribution] = useState(CARTO_ATTRIBUTION);
 
   const parsedLat = Number(latitude.trim());
   const parsedLon = Number(longitude.trim());
   const hasValidCoords =
-    !Number.isNaN(parsedLat) && !Number.isNaN(parsedLon);
+    !Number.isNaN(parsedLat) &&
+    !Number.isNaN(parsedLon) &&
+    !(parsedLat === 0 && parsedLon === 0);
 
   const currentPosition: LatLngExpression = hasValidCoords
     ? [parsedLat, parsedLon]
@@ -214,22 +209,7 @@ export function StoreLocationPicker({
               scrollWheelZoom={false}
               className="h-full w-full"
             >
-              <TileLayer
-                url={tileUrl}
-                attribution={tileAttribution}
-                eventHandlers={{
-                  tileerror: () => {
-                    // Thử đổi provider khi tile bị lỗi (mạng/adblock/cors)
-                    if (tileUrl === CARTO_TILE_URL) {
-                      setTileUrl(OSM_TILE_URL);
-                      setTileAttribution(OSM_ATTRIBUTION);
-                    } else {
-                      setTileUrl(CARTO_TILE_URL);
-                      setTileAttribution(CARTO_ATTRIBUTION);
-                    }
-                  },
-                }}
-              />
+              <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
               <MapAutoResize />
               <LocationSelector />
             </MapContainer>
