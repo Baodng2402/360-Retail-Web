@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import {
   Select,
@@ -22,7 +21,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/shared/components/ui/chart";
-import { TrendingUp, Store, UserPlus, Layers, Percent, Loader2 } from "lucide-react";
+import { TrendingUp, Store, UserPlus, Layers, Percent } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
@@ -186,18 +185,19 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <Card className="p-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
               <Badge className="bg-gradient-to-r from-teal-500 to-blue-500 text-white">
                 {t("dashboard.badge")}
               </Badge>
-              <span className="text-sm text-muted-foreground">
-                {t("dashboard.caption")}
-              </span>
-            </div>
+              <span>System overview dashboard</span>
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {t("dashboard.caption")}
+            </p>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="space-y-1">
               <div className="text-xs text-muted-foreground">
                 {t("dashboard.filters.from")}
@@ -235,22 +235,6 @@ export default function AdminDashboardPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-end">
-              <Button
-                onClick={() => void loadAll()}
-                className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t("dashboard.filters.refreshLoading")}
-                  </>
-                ) : (
-                  t("dashboard.filters.refresh")
-                )}
-              </Button>
-            </div>
           </div>
         </div>
       </Card>
@@ -286,14 +270,27 @@ export default function AdminDashboardPage() {
               <div className="h-[240px] flex items-center justify-center text-muted-foreground">
                 {t("dashboard.states.loading")}
               </div>
+            ) : revenuePoints.length === 0 ? (
+              <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+                Không có dữ liệu doanh thu trong khoảng thời gian đã chọn.
+              </div>
             ) : (
               <ChartContainer config={revenueConfig} className="h-[260px] w-full">
-                <LineChart data={revenuePoints} margin={{ left: 12, right: 12, top: 8, bottom: 8 }}>
+                <LineChart
+                  data={revenuePoints}
+                  margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
+                >
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
                   <YAxis tickLine={false} axisLine={false} tickMargin={8} />
                   <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-                  <Line type="monotone" dataKey="revenue" stroke="var(--color-revenue)" strokeWidth={2} dot={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="var(--color-revenue)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
                 </LineChart>
               </ChartContainer>
             )}

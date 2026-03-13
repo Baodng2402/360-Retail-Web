@@ -41,12 +41,26 @@ export const customersApi = {
       }`;
 
     const res = await crmApi.get<
-      ApiResponse<{ items: Customer[]; total: number; page: number; pageSize: number }> |
-      Customer[]
+      | ApiResponse<{
+        items: Customer[];
+        total: number;
+        page: number;
+        pageSize: number;
+      }>
+      | ApiResponse<Customer[]>
+      | { data: Customer[]; meta?: { total?: number; page?: number; pageSize?: number } }
+      | Customer[]
     >(url);
 
-    if ("success" in res.data && res.data.success && res.data.data) {
-      const data = res.data.data;
+    const raw = res.data as
+      | ApiResponse<{ items: Customer[]; total: number; page: number; pageSize: number }>
+      | ApiResponse<Customer[]>
+      | { data?: unknown; meta?: { total?: number; page?: number; pageSize?: number } }
+      | Customer[];
+
+    // Case 1: chuẩn ApiResponse { success, data }
+    if ("success" in raw && raw.success && raw.data) {
+      const data = raw.data;
       if (Array.isArray((data as { items?: Customer[] }).items)) {
         const typed = data as {
           items: Customer[];
@@ -67,8 +81,21 @@ export const customersApi = {
       }
     }
 
-    if (Array.isArray(res.data)) {
-      const items = res.data as Customer[];
+    // Case 2: backend trả { data: [...], meta: { ... } } (không có success)
+    if (!("success" in raw) && "data" in raw && Array.isArray(raw.data)) {
+      const items = raw.data as Customer[];
+      const meta = raw.meta ?? {};
+      return {
+        items,
+        total: meta.total ?? items.length,
+        page: meta.page ?? 1,
+        pageSize: meta.pageSize ?? items.length,
+      };
+    }
+
+    // Case 3: backend trả thẳng mảng Customer[]
+    if (Array.isArray(raw)) {
+      const items = raw as Customer[];
       return { items, total: items.length, page: 1, pageSize: items.length };
     }
 
@@ -86,14 +113,24 @@ export const customersApi = {
   },
 
   async createCustomer(payload: CreateCustomerDto): Promise<Customer> {
-    const res = await crmApi.post<ApiResponse<Customer> | Customer>(
-      "crm/customers",
-      payload,
-    );
-    if ("success" in res.data && res.data.success && res.data.data) {
-      return res.data.data;
+    const res = await crmApi.post<
+      ApiResponse<Customer> | { data: Customer } | Customer
+    >("crm/customers", payload);
+
+    const raw = res.data as ApiResponse<Customer> | { data?: Customer } | Customer;
+
+    // Case 1: chuẩn ApiResponse { success, data }
+    if ("success" in raw && raw.success && raw.data) {
+      return raw.data;
     }
-    return res.data as Customer;
+
+    // Case 2: backend trả { data: customer }
+    if (!("success" in raw) && "data" in raw && raw.data) {
+      return raw.data as Customer;
+    }
+
+    // Case 3: backend trả thẳng Customer
+    return raw as Customer;
   },
 
   async updateCustomer(
