@@ -32,6 +32,7 @@ import {
 import {
   timekeepingApi,
   type TimekeepingHistoryRecord,
+  type TimekeepingSummary,
 } from "@/shared/lib/timekeepingApi";
 import { storesApi } from "@/shared/lib/storesApi";
 import { useAuthStore } from "@/shared/store/authStore";
@@ -68,7 +69,6 @@ const TimekeepingPage = () => {
   const { currentStore } = useStoreStore();
   const isStoreOwner = user?.role === "StoreOwner";
   const isManager = user?.role === "Manager";
-  const isStaff = user?.role === "Staff";
   const canViewSummary = isStoreOwner || isManager;
   const canTimekeep = !isStoreOwner;
 
@@ -210,20 +210,66 @@ const TimekeepingPage = () => {
   // Monthly summary state (Manager/StoreOwner)
   const [summaryMonth, setSummaryMonth] = useState(new Date().getMonth() + 1);
   const [summaryYear, setSummaryYear] = useState(new Date().getFullYear());
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [monthlySummary, setMonthlySummary] = useState<any>(null);
+  const [monthlySummary, setMonthlySummary] =
+    useState<TimekeepingSummary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [photoModalRecord, setPhotoModalRecord] =
     useState<TimekeepingHistoryRecord | null>(null);
 
   const loadMonthlySummary = async (month?: number, year?: number) => {
+    const m = month ?? summaryMonth;
+    const y = year ?? summaryYear;
     try {
       setSummaryLoading(true);
-      const res = await timekeepingApi.getSummary({
-        month: month ?? summaryMonth,
-        year: year ?? summaryYear,
+      const res = await timekeepingApi.getSummary({ month: m, year: y });
+
+      const hasApiData =
+        res &&
+        (res.totalEmployees != null ||
+          res.totalWorkDays != null ||
+          res.totalWorkHours != null ||
+          res.totalLateCount != null);
+
+      if (hasApiData) {
+        setMonthlySummary(res);
+        return;
+      }
+
+      // Fallback: tính từ lịch sử chấm công khi API summary trả rỗng / chưa có
+      const start = new Date(y, m - 1, 1, 0, 0, 0);
+      const end = new Date(y, m, 0, 23, 59, 59);
+      const from = start.toISOString();
+      const to = end.toISOString();
+
+      const records = await timekeepingApi.getHistory({
+        from,
+        to,
+        page: 1,
+        pageSize: 500,
       });
-      setMonthlySummary(res);
+
+      const uniqueEmployees = new Set(
+        records.map((r) => r.employeeId).filter(Boolean),
+      );
+      const uniqueDays = new Set(
+        records.map((r) => {
+          const d = r.checkInTime ? new Date(r.checkInTime) : null;
+          return d ? `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` : "";
+        }).filter(Boolean),
+      );
+      let totalWorkHours = 0;
+      let totalLateCount = 0;
+      for (const r of records) {
+        if (typeof r.workHours === "number") totalWorkHours += r.workHours;
+        if (r.isLate) totalLateCount += 1;
+      }
+
+      setMonthlySummary({
+        totalEmployees: uniqueEmployees.size,
+        totalWorkDays: uniqueDays.size,
+        totalWorkHours,
+        totalLateCount,
+      });
     } catch {
       setMonthlySummary(null);
     } finally {
@@ -385,8 +431,14 @@ const TimekeepingPage = () => {
     if (!history.length) return [];
     const role = user?.role as string;
     if (role === "StoreOwner") return history;
+
     const hasAnyStoreRole = history.some((r) => r.storeRole != null);
-    if (!hasAnyStoreRole) return history;
+
+    // Khi BE không trả storeRole: API đã phân quyền (Staff chỉ nhận record của mình). Hiển thị nguyên history.
+    if (!hasAnyStoreRole) {
+      return history;
+    }
+
     return history.filter((r) => {
       const recRole = r.storeRole;
       if (!recRole) return true;
@@ -753,7 +805,9 @@ const TimekeepingPage = () => {
                     {(canViewSummary ||
                       filteredHistory.some((r) => r.employeeName)) && (
                       <th className="text-left py-2 px-3 font-medium">
-                        {t("history.table.employee")}
+                        {t("history.table.employee", {
+                          defaultValue: "Nhân viên",
+                        })}
                       </th>
                     )}
                     <th className="text-left py-2 px-3 font-medium">
@@ -941,43 +995,53 @@ const TimekeepingPage = () => {
                 </Button>
               </div>
             </div>
-            {monthlySummary ? (
+            {summaryLoading ? (
+              <div className="py-4 text-sm text-muted-foreground flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> {t("monthly.loading")}
+              </div>
+            ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                 <div className="rounded-lg border px-3 py-2 bg-muted/60">
                   <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
                     {t("monthly.summary.totalEmployees")}
                   </span>
-                  <span className="font-semibold text-foreground">{monthlySummary.totalEmployees ?? "-"}</span>
+                  <span className="font-semibold text-foreground">
+                    {monthlySummary?.totalEmployees != null
+                      ? String(monthlySummary.totalEmployees)
+                      : "-"}
+                  </span>
                 </div>
                 <div className="rounded-lg border px-3 py-2 bg-muted/60">
                   <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
                     {t("monthly.summary.totalWorkDays")}
                   </span>
-                  <span className="font-semibold text-foreground">{monthlySummary.totalWorkDays ?? "-"}</span>
+                  <span className="font-semibold text-foreground">
+                    {monthlySummary?.totalWorkDays != null
+                      ? String(monthlySummary.totalWorkDays)
+                      : "-"}
+                  </span>
                 </div>
                 <div className="rounded-lg border px-3 py-2 bg-muted/60">
                   <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
                     {t("monthly.summary.totalWorkHours")}
                   </span>
                   <span className="font-semibold text-foreground">
-                    {typeof monthlySummary.totalWorkHours === "number" ? `${monthlySummary.totalWorkHours.toFixed(1)}h` : "-"}
+                    {monthlySummary?.totalWorkHours != null
+                      ? `${monthlySummary.totalWorkHours.toFixed(1)}h`
+                      : "-"}
                   </span>
                 </div>
                 <div className="rounded-lg border px-3 py-2 bg-muted/60">
                   <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
                     {t("monthly.summary.totalLateCount")}
                   </span>
-                  <span className="font-semibold text-foreground">{monthlySummary.totalLateCount ?? "-"}</span>
+                  <span className="font-semibold text-foreground">
+                    {monthlySummary?.totalLateCount != null
+                      ? String(monthlySummary.totalLateCount)
+                      : "-"}
+                  </span>
                 </div>
               </div>
-            ) : summaryLoading ? (
-              <div className="py-4 text-sm text-muted-foreground flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" /> {t("monthly.loading")}
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground py-4">
-                {t("monthly.hint")}
-              </p>
             )}
           </Card>
         </motion.div>

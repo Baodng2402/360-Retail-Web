@@ -5,6 +5,7 @@ export interface TodayTimekeepingRecord {
   id: string;
   employeeName: string;
   checkInTime: string;
+  checkOutTime?: string | null;
   isLate: boolean;
   workHours: number | null;
   warning: string | null;
@@ -20,6 +21,24 @@ export interface TodayTimekeepingResponse {
 
 export interface UploadSelfieResponse {
   imageUrl: string;
+}
+
+/** Kết quả tổng hợp chấm công tháng (BE có thể trả camelCase hoặc snake_case) */
+export interface TimekeepingSummary {
+  totalEmployees: number | null;
+  totalWorkDays: number | null;
+  totalWorkHours: number | null;
+  totalLateCount: number | null;
+}
+
+function normaliseNumber(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === "number" && !Number.isNaN(v)) return v;
+  if (typeof v === "string") {
+    const n = Number(v);
+    return Number.isNaN(n) ? null : n;
+  }
+  return null;
 }
 
 /** store_role từ BE: Owner | Manager | Staff - dùng filter theo quyền xem */
@@ -111,30 +130,37 @@ export const timekeepingApi = {
 
   /**
    * Get monthly timekeeping summary (Manager+)
-   * GET /hr/timekeeping/summary
+   * GET /hr/timekeeping/summary?month=&year=
+   * BE có thể trả camelCase hoặc snake_case.
    */
   async getSummary(params?: {
     month?: number;
     year?: number;
-  }): Promise<unknown> {
+  }): Promise<TimekeepingSummary | null> {
     const query = new URLSearchParams();
     if (params?.month) query.append("month", params.month.toString());
     if (params?.year) query.append("year", params.year.toString());
 
-    const url = `hr/timekeeping/summary${query.toString() ? `?${query.toString()}` : ""
-      }`;
+    const url = `hr/timekeeping/summary${query.toString() ? `?${query.toString()}` : ""}`;
 
-    const res = await hrApi.get<ApiResponse<unknown> | unknown>(url);
+    const res = await hrApi.get<ApiResponse<unknown> | Record<string, unknown>>(url);
 
-    if (
-      res.data &&
-      typeof res.data === "object" &&
-      "success" in res.data &&
-      (res.data as ApiResponse<unknown>).success
-    ) {
-      return (res.data as ApiResponse<unknown>).data;
+    let raw: unknown = null;
+    if (res.data && typeof res.data === "object" && "success" in res.data && (res.data as ApiResponse<unknown>).success) {
+      raw = (res.data as ApiResponse<unknown>).data;
+    } else if (res.data && typeof res.data === "object") {
+      raw = res.data;
     }
-    return res.data;
+
+    if (raw == null || typeof raw !== "object") return null;
+
+    const o = raw as Record<string, unknown>;
+    return {
+      totalEmployees: normaliseNumber(o.totalEmployees ?? o.total_employees),
+      totalWorkDays: normaliseNumber(o.totalWorkDays ?? o.total_work_days),
+      totalWorkHours: normaliseNumber(o.totalWorkHours ?? o.total_work_hours),
+      totalLateCount: normaliseNumber(o.totalLateCount ?? o.total_late_count),
+    };
   },
 };
 
