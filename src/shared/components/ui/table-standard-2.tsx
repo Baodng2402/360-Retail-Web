@@ -23,6 +23,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import type { Task } from "@/shared/types/task";
 
 export interface Staff {
   id: string;
@@ -48,12 +49,17 @@ interface StaffTableProps {
   data: Staff[];
   onViewStaff?: (staff: Staff) => void;
   onDeleteStaff?: (staff: Staff) => void;
+  /** Map staff id -> list of tasks (for "View tasks" click). */
+  tasksByStaffId?: Map<string, Task[]>;
+  onViewTasks?: (staff: Staff, tasks: Task[]) => void;
 }
 
 export const StaffTable = ({
   data,
   onViewStaff,
   onDeleteStaff,
+  tasksByStaffId,
+  onViewTasks,
 }: StaffTableProps) => {
   return (
     <div className="w-full rounded-md border bg-background shadow-sm">
@@ -98,8 +104,20 @@ export const StaffTable = ({
 
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <ListTodo className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{staff.task}</span>
+                  <ListTodo className="h-4 w-4 text-muted-foreground shrink-0" />
+                  {tasksByStaffId && onViewTasks && tasksByStaffId.get(staff.id)?.length ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onViewTasks(staff, tasksByStaffId.get(staff.id) ?? [])
+                      }
+                      className="text-sm text-left text-teal-600 hover:underline focus:outline-none focus:underline"
+                    >
+                      {staff.task}
+                    </button>
+                  ) : (
+                    <span className="text-sm">{staff.task}</span>
+                  )}
                 </div>
               </TableCell>
 

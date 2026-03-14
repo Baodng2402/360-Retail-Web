@@ -8,11 +8,14 @@ import {
 } from "lucide-react";
 import { DashboardStats } from "@/features/dashboard/components/DashboardStats";
 import type { StatItem } from "@/features/dashboard/components/DashboardStats";
-import DataTable, { type Staff } from "@/shared/components/ui/table-standard-2";
+import DataTable, {
+  type Staff,
+} from "@/shared/components/ui/table-standard-2";
 import { SearchInput } from "@/shared/components/ui/input-search";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
 import InviteStaffModal from "@/features/dashboard/components/modals/InviteStaffModal";
 import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
+import StaffTasksDetailModal from "@/features/dashboard/components/modals/StaffTasksDetailModal";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { employeesApi } from "@/shared/lib/employeesApi";
@@ -20,6 +23,7 @@ import { tasksApi } from "@/shared/lib/tasksApi";
 import type { Employee } from "@/shared/types/employee";
 import type { Task } from "@/shared/types/task";
 import { useStoreStore } from "@/shared/store/storeStore";
+import { timekeepingApi } from "@/shared/lib/timekeepingApi";
 import { useTranslation } from "react-i18next";
 
 const BUTTON_GRADIENT =
@@ -30,9 +34,15 @@ const StaffManagementPage = () => {
   const [query, setQuery] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [staffCheckins, setStaffCheckins] = useState<
+    Map<string, Date | null>
+  >(new Map());
   const [loading, setLoading] = useState(true);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+  const [tasksModalOpen, setTasksModalOpen] = useState(false);
+  const [tasksModalStaffName, setTasksModalStaffName] = useState("");
+  const [tasksModalTasks, setTasksModalTasks] = useState<Task[]>([]);
   const navigate = useNavigate();
   const { currentStore } = useStoreStore();
 
@@ -44,9 +54,52 @@ const StaffManagementPage = () => {
       // backend trả FeatureNotAvailable. Đánh dấu silentOnFeatureGate để không bật modal nâng cấp.
       tasksApi.getTasks(true, { silentOnFeatureGate: true }),
     ])
-      .then(([empRes, taskRes]) => {
+      .then(async ([empRes, taskRes]) => {
         setEmployees(empRes);
         setTasks(taskRes);
+
+        // Load today's timekeeping to show check-in status per staff.
+        try {
+          const today = new Date();
+          const start = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            0,
+            0,
+            0,
+          );
+          const end = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            23,
+            59,
+            59,
+          );
+
+          const toIso = (d: Date) => d.toISOString();
+          const history = await timekeepingApi.getHistory({
+            from: toIso(start),
+            to: toIso(end),
+            page: 1,
+            pageSize: 500,
+          });
+
+          const map = new Map<string, Date | null>();
+          for (const record of history) {
+            if (!record.employeeId || !record.checkInTime) continue;
+            const existing = map.get(record.employeeId);
+            const currentDate = new Date(record.checkInTime);
+            if (!existing || currentDate > existing) {
+              map.set(record.employeeId, currentDate);
+            }
+          }
+          setStaffCheckins(map);
+        } catch (err) {
+          console.error("Failed to load staff check-in summary:", err);
+          setStaffCheckins(new Map());
+        }
       })
       .catch((err) => {
         console.error("Failed to load staff/tasks:", err);
@@ -64,9 +117,13 @@ const StaffManagementPage = () => {
   }, [currentStore?.id]);
 
   const taskByAssignee = useMemo(() => {
-    const map = new Map<string, Task>();
+    const map = new Map<string, Task[]>();
     for (const t of tasks.filter((x) => x.status !== "Completed" && x.status !== "Cancelled")) {
-      if (!map.has(t.assigneeId)) map.set(t.assigneeId, t);
+      if (!map.has(t.assigneeId)) {
+        map.set(t.assigneeId, [t]);
+      } else {
+        map.get(t.assigneeId)!.push(t);
+      }
     }
     return map;
   }, [tasks]);
@@ -74,7 +131,14 @@ const StaffManagementPage = () => {
   const staffTableData: Staff[] = useMemo(
     () =>
       employees.map((emp) => {
-        const task = taskByAssignee.get(emp.id);
+        const employeeTasks = taskByAssignee.get(emp.id) ?? [];
+        const taskLabel =
+          employeeTasks.length === 0
+            ? t("list.noTask")
+            : employeeTasks.length === 1
+              ? employeeTasks[0].title
+              : `${employeeTasks[0].title} (+${employeeTasks.length - 1})`;
+        const checkinDate = staffCheckins.get(emp.id) ?? null;
         return {
           id: emp.id,
           avatar: emp.avatarUrl || "",
@@ -82,11 +146,11 @@ const StaffManagementPage = () => {
           role: emp.position,
           email: emp.email,
           phone: emp.phoneNumber || "-",
-          checkin: null,
-          task: task?.title ?? t("list.noTask"),
+          checkin: checkinDate,
+          task: taskLabel,
         };
       }),
-    [employees, taskByAssignee, t]
+    [employees, taskByAssignee, staffCheckins, t],
   );
 
   const filteredStaff = useMemo(() => {
@@ -144,6 +208,12 @@ const StaffManagementPage = () => {
     }
   };
 
+  const handleViewTasks = (staff: Staff, staffTasks: Task[]) => {
+    setTasksModalStaffName(staff.name);
+    setTasksModalTasks(staffTasks);
+    setTasksModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <StoreSelector pageDescription={t("page.storeSelectorHint")} />
@@ -189,6 +259,8 @@ const StaffManagementPage = () => {
             <DataTable
               data={filteredStaff}
               onViewStaff={handleViewStaff}
+              tasksByStaffId={taskByAssignee}
+              onViewTasks={handleViewTasks}
             />
           </div>
         )}
@@ -203,6 +275,12 @@ const StaffManagementPage = () => {
         open={createTaskModalOpen}
         onOpenChange={setCreateTaskModalOpen}
         onSuccess={loadData}
+      />
+      <StaffTasksDetailModal
+        open={tasksModalOpen}
+        onOpenChange={setTasksModalOpen}
+        staffName={tasksModalStaffName}
+        tasks={tasksModalTasks}
       />
     </div>
   );

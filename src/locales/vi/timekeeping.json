@@ -36,11 +36,16 @@
   },
   "actions": {
     "title": "Thao tác chấm công",
-    "hint": "Hệ thống sẽ sử dụng vị trí GPS hiện tại của bạn. Vui lòng cho phép trình duyệt truy cập Location khi được hỏi."
+    "hint": "Hệ thống sẽ sử dụng vị trí GPS hiện tại của bạn. Vui lòng cho phép trình duyệt truy cập Location khi được hỏi.",
+    "hintOwnerDisabled": "Chủ cửa hàng không cần chấm công.",
+    "ownerCannotCheckIn": "Chủ cửa hàng không cần check-in/check-out."
   },
   "history": {
     "title": "Lịch sử & tổng quan chấm công",
     "subtitle": "Dữ liệu chấm công của riêng bạn trong thời gian gần đây.",
+    "subtitleStaff": "Lịch sử chấm công của bạn và đồng nghiệp (Staff).",
+    "subtitleManager": "Lịch sử chấm công của Staff và Manager trong cửa hàng.",
+    "subtitleOwner": "Tổng quan chấm công toàn bộ nhân viên trong cửa hàng.",
     "daysWithData": "Số ngày có dữ liệu",
     "totalHours": "Tổng giờ làm (ước tính)",
     "lateCount": "Số buổi đi trễ",
@@ -48,9 +53,18 @@
     "empty": "Chưa có dữ liệu chấm công lịch sử.",
     "table": {
       "date": "Ngày",
+      "employee": "Nhân viên",
+      "photo": "Ảnh check-in",
+      "viewPhoto": "Xem ảnh",
+      "noPhoto": "—",
       "workHours": "Giờ làm",
       "late": "Trễ",
       "onTime": "Đúng giờ"
+    },
+    "photoModal": {
+      "title": "Ảnh check-in",
+      "employee": "Nhân viên",
+      "time": "Thời gian"
     }
   },
   "monthly": {

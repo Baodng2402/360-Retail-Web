@@ -20,6 +20,7 @@ import {
 } from "@/shared/components/ui/select";
 import { staffApi } from "@/shared/lib/staffApi";
 import { useStoreStore } from "@/shared/store/storeStore";
+import { useAuthStore } from "@/shared/store/authStore";
 
 interface InviteStaffModalProps {
   open: boolean;
@@ -33,6 +34,7 @@ const InviteStaffModal = ({
   onSuccess,
 }: InviteStaffModalProps) => {
   const { currentStore } = useStoreStore();
+  const { user } = useAuthStore();
   const storeId = currentStore?.id ?? undefined;
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("Staff");
@@ -91,7 +93,9 @@ const InviteStaffModal = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Staff">Staff / Nhân viên</SelectItem>
-                <SelectItem value="Manager">Manager / Quản lý</SelectItem>
+                {user?.role === "StoreOwner" && (
+                  <SelectItem value="Manager">Manager / Quản lý</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>

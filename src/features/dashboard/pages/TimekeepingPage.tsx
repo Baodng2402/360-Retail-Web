@@ -24,6 +24,12 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import {
   timekeepingApi,
   type TimekeepingHistoryRecord,
 } from "@/shared/lib/timekeepingApi";
@@ -60,8 +66,11 @@ const TimekeepingPage = () => {
   const { t } = useTranslation("timekeeping");
   const { user } = useAuthStore();
   const { currentStore } = useStoreStore();
-  const canViewSummary =
-    user?.role === "StoreOwner" || user?.role === "Manager";
+  const isStoreOwner = user?.role === "StoreOwner";
+  const isManager = user?.role === "Manager";
+  const isStaff = user?.role === "Staff";
+  const canViewSummary = isStoreOwner || isManager;
+  const canTimekeep = !isStoreOwner;
 
   const [loading, setLoading] = useState(true);
   const [today, setToday] = useState<
@@ -204,6 +213,8 @@ const TimekeepingPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [monthlySummary, setMonthlySummary] = useState<any>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [photoModalRecord, setPhotoModalRecord] =
+    useState<TimekeepingHistoryRecord | null>(null);
 
   const loadMonthlySummary = async (month?: number, year?: number) => {
     try {
@@ -228,13 +239,11 @@ const TimekeepingPage = () => {
   }, []);
 
   useEffect(() => {
-    void loadToday();
+    if (canTimekeep) void loadToday();
     void loadHistory();
-    if (canViewSummary) {
-      void loadMonthlySummary();
-    }
+    if (canViewSummary) void loadMonthlySummary();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStore?.id, canViewSummary]);
+  }, [currentStore?.id, canViewSummary, canTimekeep]);
 
   const getCurrentLocation = (): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -371,14 +380,34 @@ const TimekeepingPage = () => {
     }
   };
 
+  /** Filter history theo role khi BE trả storeRole: Staff (self+Staff), Manager (Staff+Manager), StoreOwner (all) */
+  const filteredHistory = useMemo(() => {
+    if (!history.length) return [];
+    const role = user?.role as string;
+    if (role === "StoreOwner") return history;
+    const hasAnyStoreRole = history.some((r) => r.storeRole != null);
+    if (!hasAnyStoreRole) return history;
+    return history.filter((r) => {
+      const recRole = r.storeRole;
+      if (!recRole) return true;
+      if (role === "Staff") {
+        return r.employeeId === user?.id || recRole === "Staff";
+      }
+      if (role === "Manager") {
+        return recRole === "Staff" || recRole === "Manager";
+      }
+      return true;
+    });
+  }, [history, user?.id, user?.role]);
+
   const historySummary = useMemo(() => {
-    if (!history.length) {
+    if (!filteredHistory.length) {
       return { days: 0, hours: 0, late: 0 };
     }
-    const days = history.length;
+    const days = filteredHistory.length;
     let hours = 0;
     let late = 0;
-    for (const r of history) {
+    for (const r of filteredHistory) {
       if (typeof r.workHours === "number") {
         hours += r.workHours;
       }
@@ -387,27 +416,51 @@ const TimekeepingPage = () => {
       }
     }
     return { days, hours, late };
-  }, [history]);
+  }, [filteredHistory]);
 
-  const formatDateTime = (value?: string | null) => {
+  const formatDate = (value?: string | null) => {
     if (!value) return "-";
+    let d: Date;
     try {
-      return new Date(value).toLocaleString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      d = new Date(value);
+      if (Number.isNaN(d.getTime())) return value;
     } catch {
       return value;
     }
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone: "Asia/Ho_Chi_Minh",
+    }).format(d);
   };
+
+  const formatTime = (value?: string | null) => {
+    if (!value) return "-";
+    let d: Date;
+    try {
+      d = new Date(value);
+      if (Number.isNaN(d.getTime())) return value;
+    } catch {
+      return value;
+    }
+    return new Intl.DateTimeFormat("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Asia/Ho_Chi_Minh",
+    }).format(d);
+  };
+
+  const historySubtitle = isStoreOwner
+    ? t("history.subtitleOwner", { defaultValue: "Tổng quan chấm công toàn bộ nhân viên trong cửa hàng." })
+    : isManager
+      ? t("history.subtitleManager", { defaultValue: "Lịch sử chấm công của Staff và Manager trong cửa hàng." })
+      : t("history.subtitleStaff", { defaultValue: "Lịch sử chấm công của bạn và đồng nghiệp (Staff)." });
 
   return (
     <div className="space-y-6">
       <StoreSelector pageDescription={t("page.storeSelectorHint")} />
-      {loading && !today ? (
+      {canTimekeep && loading && !today ? (
         <div className="flex min-h-[40vh] items-center justify-center">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -416,52 +469,75 @@ const TimekeepingPage = () => {
         </div>
       ) : null}
 
-      {today?.warning && (
+      {canTimekeep && today?.warning && (
         <Card className="border-amber-200 bg-amber-50 px-4 py-3 flex gap-3 items-start">
           <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
           <p className="text-sm text-amber-900">{today.warning}</p>
         </Card>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="lg:col-span-1"
-        >
-          <Card className="p-4 space-y-3 h-full">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-teal-600" />
-              <h2 className="text-base font-semibold text-foreground">
-                {t("today.title")}
-              </h2>
-            </div>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>
-                Check-in:{" "}
-                <span className="font-medium text-foreground">
-                  {today?.hasCheckedIn ? t("today.checkedIn") : t("today.notCheckedIn")}
-                </span>
-              </p>
-              <p>
-                Check-out:{" "}
-                <span className="font-medium text-foreground">
-                  {today?.hasCheckedOut ? t("today.checkedOut") : t("today.notCheckedOut")}
-                </span>
-              </p>
-              {today?.record && (
+      <div
+        className={
+          isStoreOwner ? "grid gap-6 lg:grid-cols-1" : "grid gap-6 lg:grid-cols-3"
+        }
+      >
+        {!isStoreOwner && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="lg:col-span-1"
+          >
+            <Card className="p-4 space-y-3 h-full">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-teal-600" />
+                <h2 className="text-base font-semibold text-foreground">
+                  {t("today.title")}
+                </h2>
+              </div>
+              <div className="text-sm text-muted-foreground space-y-1">
                 <p>
-                  {t("today.checkInTime")}{" "}
-                  <span className="font-medium text-foreground">
-                    {new Date(today.record.checkInTime).toLocaleString("vi-VN")}
+                  Check-in:{" "}
+                  <span className="font-semibold text-teal-600">
+                    {today?.hasCheckedIn ? t("today.checkedIn") : t("today.notCheckedIn")}
                   </span>
+                  {today?.record?.checkInTime && (
+                    <>
+                      {" "}
+                      <span className="text-xs text-muted-foreground">
+                        ({formatDate(today.record.checkInTime)}{" "}
+                        <span className="font-semibold text-teal-700">
+                          {formatTime(today.record.checkInTime)}
+                        </span>
+                        )
+                      </span>
+                    </>
+                  )}
                 </p>
-              )}
-            </div>
-          </Card>
-        </motion.div>
+                <p>
+                  Check-out:{" "}
+                  <span className="font-semibold text-teal-600">
+                    {today?.hasCheckedOut ? t("today.checkedOut") : t("today.notCheckedOut")}
+                  </span>
+                  {today?.record?.checkOutTime && (
+                    <>
+                      {" "}
+                      <span className="text-xs text-muted-foreground">
+                        ({formatDate(today.record.checkOutTime)}{" "}
+                        <span className="font-semibold text-teal-700">
+                          {formatTime(today.record.checkOutTime)}
+                        </span>
+                        )
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
+            </Card>
+          </motion.div>
+        )}
 
+        {!isStoreOwner && (
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -491,7 +567,7 @@ const TimekeepingPage = () => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
                   <Marker position={storePosition} />
-                  {userPosition && (
+                  {!isStoreOwner && userPosition && (
                     <CircleMarker
                       center={userPosition}
                       radius={8}
@@ -502,13 +578,15 @@ const TimekeepingPage = () => {
                       }}
                     />
                   )}
-                  {userPosition && distanceMeters !== null && (
-                    <FitBoundsToPositions
-                      storePos={storePosition}
-                      userPos={userPosition}
-                      distance={distanceMeters}
-                    />
-                  )}
+                  {!isStoreOwner &&
+                    userPosition &&
+                    distanceMeters !== null && (
+                      <FitBoundsToPositions
+                        storePos={storePosition}
+                        userPos={userPosition}
+                        distance={distanceMeters}
+                      />
+                    )}
                 </MapContainer>
               </div>
             ) : (
@@ -528,84 +606,87 @@ const TimekeepingPage = () => {
             )}
           </Card>
         </motion.div>
+        )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="p-4 space-y-4 h-full">
-            <div className="flex items-center gap-2">
-              <Camera className="h-5 w-5 text-teal-600" />
-              <h2 className="text-base font-semibold text-foreground">
-                {t("selfie.title")}
-              </h2>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t("selfie.hint")}
-            </p>
-            <div className="flex items-center gap-3">
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleSelfieChange}
-                className="text-sm"
-              />
-              {selfiePreview && (
-                <img
-                  src={selfiePreview}
-                  alt={t("selfie.title")}
-                  className="h-16 w-16 rounded-md object-cover border"
+      {canTimekeep && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="p-4 space-y-4 h-full">
+              <div className="flex items-center gap-2">
+                <Camera className="h-5 w-5 text-teal-600" />
+                <h2 className="text-base font-semibold text-foreground">
+                  {t("selfie.title")}
+                </h2>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t("selfie.hint")}
+              </p>
+              <div className="flex items-center gap-3">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleSelfieChange}
+                  className="text-sm"
                 />
-              )}
-            </div>
-          </Card>
-        </motion.div>
+                {selfiePreview && (
+                  <img
+                    src={selfiePreview}
+                    alt={t("selfie.title")}
+                    className="h-16 w-16 rounded-md object-cover border"
+                  />
+                )}
+              </div>
+            </Card>
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="p-4 space-y-3 h-full">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-teal-600" />
-              <h2 className="text-base font-semibold text-foreground">
-                {t("actions.title")}
-              </h2>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t("actions.hint")}
-            </p>
-            <div className="flex flex-wrap gap-3 pt-1">
-              <Button
-                onClick={handleCheckIn}
-                disabled={processingCheckIn || today?.hasCheckedIn}
-                className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
-              >
-                {processingCheckIn && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Check-in
-              </Button>
-              <Button
-                onClick={handleCheckOut}
-                disabled={
-                  processingCheckOut || !today?.hasCheckedIn || today?.hasCheckedOut
-                }
-                variant="outline"
-              >
-                {processingCheckOut && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Check-out
-              </Button>
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="p-4 space-y-3 h-full">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-teal-600" />
+                <h2 className="text-base font-semibold text-foreground">
+                  {t("actions.title")}
+                </h2>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t("actions.hint")}
+              </p>
+              <div className="flex flex-wrap gap-3 pt-1">
+                <Button
+                  onClick={handleCheckIn}
+                  disabled={processingCheckIn || today?.hasCheckedIn}
+                  className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+                >
+                  {processingCheckIn && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Check-in
+                </Button>
+                <Button
+                  onClick={handleCheckOut}
+                  disabled={
+                    processingCheckOut || !today?.hasCheckedIn || today?.hasCheckedOut
+                  }
+                  variant="outline"
+                >
+                  {processingCheckOut && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Check-out
+                </Button>
+              </div>
+            </Card>
+          </motion.div>
+        </div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -622,7 +703,7 @@ const TimekeepingPage = () => {
                 </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                {t("history.subtitle")}
+                {historySubtitle}
               </p>
             </div>
             <div className="flex flex-wrap gap-3 text-xs sm:text-sm">
@@ -657,7 +738,7 @@ const TimekeepingPage = () => {
             <div className="py-6 text-sm text-muted-foreground">
               {t("history.loading")}
             </div>
-          ) : !history.length ? (
+          ) : !filteredHistory.length ? (
             <div className="py-6 text-sm text-muted-foreground">
               {t("history.empty")}
             </div>
@@ -669,11 +750,22 @@ const TimekeepingPage = () => {
                     <th className="text-left py-2 pr-3 font-medium">
                       {t("history.table.date")}
                     </th>
+                    {(canViewSummary ||
+                      filteredHistory.some((r) => r.employeeName)) && (
+                      <th className="text-left py-2 px-3 font-medium">
+                        {t("history.table.employee")}
+                      </th>
+                    )}
                     <th className="text-left py-2 px-3 font-medium">
                       Check-in
                     </th>
                     <th className="text-left py-2 px-3 font-medium">
                       Check-out
+                    </th>
+                    <th className="text-center py-2 px-3 font-medium">
+                      {t("history.table.photo", {
+                        defaultValue: "Ảnh check-in",
+                      })}
                     </th>
                     <th className="text-right py-2 px-3 font-medium">
                       {t("history.table.workHours")}
@@ -684,19 +776,45 @@ const TimekeepingPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {history.slice(0, 30).map((r) => (
+                  {filteredHistory.slice(0, 30).map((r) => (
                     <tr
                       key={r.id}
                       className="border-b last:border-0 text-foreground/90"
                     >
                       <td className="py-2 pr-3">
-                        {formatDateTime(r.checkInTime).slice(0, 10)}
+                        {formatDate(r.checkInTime || r.checkOutTime)}
+                      </td>
+                      {(canViewSummary ||
+                        filteredHistory.some((x) => x.employeeName)) && (
+                        <td className="py-2 px-3">
+                          {r.employeeName ?? "—"}
+                        </td>
+                      )}
+                      <td className="py-2 px-3">
+                        {formatTime(r.checkInTime)}
                       </td>
                       <td className="py-2 px-3">
-                        {formatDateTime(r.checkInTime).slice(11)}
+                        {formatTime(r.checkOutTime)}
                       </td>
-                      <td className="py-2 px-3">
-                        {formatDateTime(r.checkOutTime).slice(11)}
+                      <td className="py-2 px-3 text-center">
+                        {r.checkInImageUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => setPhotoModalRecord(r)}
+                            className="inline-flex items-center gap-1 rounded border border-teal-200 bg-teal-50 px-2 py-1 text-[11px] text-teal-700 hover:bg-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                          >
+                            <Camera className="h-3.5 w-3.5" />
+                            {t("history.table.viewPhoto", {
+                              defaultValue: "Xem ảnh",
+                            })}
+                          </button>
+                        ) : (
+                          <span className="text-muted-foreground text-[11px]">
+                            {t("history.table.noPhoto", {
+                              defaultValue: "—",
+                            })}
+                          </span>
+                        )}
                       </td>
                       <td className="py-2 px-3 text-right">
                         {typeof r.workHours === "number"
@@ -722,6 +840,57 @@ const TimekeepingPage = () => {
           )}
         </Card>
       </motion.div>
+
+      {/* Modal xem ảnh check-in (Manager / StoreOwner / Staff xem ảnh của mình) */}
+      <Dialog
+        open={!!photoModalRecord}
+        onOpenChange={(open) => !open && setPhotoModalRecord(null)}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5 text-teal-600" />
+              {t("history.photoModal.title", {
+                defaultValue: "Ảnh check-in",
+              })}
+            </DialogTitle>
+          </DialogHeader>
+          {photoModalRecord && (
+            <div className="space-y-3">
+              {canViewSummary && photoModalRecord.employeeName && (
+                <p className="text-sm text-muted-foreground">
+                  {t("history.photoModal.employee", {
+                    defaultValue: "Nhân viên",
+                  })}
+                  :{" "}
+                  <span className="font-medium text-foreground">
+                    {photoModalRecord.employeeName}
+                  </span>
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">
+                {t("history.photoModal.time", {
+                  defaultValue: "Thời gian",
+                })}
+                :{" "}
+                <span className="font-medium text-foreground">
+                  {formatDate(photoModalRecord.checkInTime)}{" "}
+                  {formatTime(photoModalRecord.checkInTime)}
+                </span>
+              </p>
+              {photoModalRecord.checkInImageUrl && (
+                <div className="rounded-lg border bg-muted/30 overflow-hidden">
+                  <img
+                    src={photoModalRecord.checkInImageUrl}
+                    alt="Check-in selfie"
+                    className="w-full h-auto max-h-[70vh] object-contain"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Monthly Summary for Manager/StoreOwner */}
       {canViewSummary && (

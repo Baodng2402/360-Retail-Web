@@ -22,14 +22,19 @@ export interface UploadSelfieResponse {
   imageUrl: string;
 }
 
+/** store_role từ BE: Owner | Manager | Staff - dùng filter theo quyền xem */
 export interface TimekeepingHistoryRecord {
   id: string;
+  employeeId?: string;
   employeeName?: string;
+  storeRole?: "Owner" | "Manager" | "Staff";
   checkInTime: string;
   checkOutTime?: string | null;
   isLate?: boolean;
   workHours?: number | null;
   warning?: string | null;
+  checkInImageUrl?: string | null;
+  locationGps?: string | null;
 }
 
 export const timekeepingApi = {
@@ -45,10 +50,25 @@ export const timekeepingApi = {
     return res.data as TodayTimekeepingResponse;
   },
 
-  async getHistory(): Promise<TimekeepingHistoryRecord[]> {
+  async getHistory(params?: {
+    employeeId?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<TimekeepingHistoryRecord[]> {
+    const query = new URLSearchParams();
+    if (params?.employeeId) query.append("employeeId", params.employeeId);
+    if (params?.from) query.append("from", params.from);
+    if (params?.to) query.append("to", params.to);
+    if (params?.page) query.append("page", params.page.toString());
+    if (params?.pageSize) query.append("pageSize", params.pageSize.toString());
+
+    const url = `hr/timekeeping${query.toString() ? `?${query.toString()}` : ""}`;
+
     const res = await hrApi.get<
       ApiResponse<TimekeepingHistoryRecord[]> | TimekeepingHistoryRecord[]
-    >("hr/timekeeping");
+    >(url);
 
     if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
       return res.data.data;

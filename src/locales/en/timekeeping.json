@@ -36,11 +36,16 @@
   },
   "actions": {
     "title": "Timekeeping actions",
-    "hint": "The system uses your current GPS location. Please allow Location access when prompted."
+    "hint": "The system uses your current GPS location. Please allow Location access when prompted.",
+    "hintOwnerDisabled": "Store owner does not need to timekeep.",
+    "ownerCannotCheckIn": "Store owner does not need to check in/out."
   },
   "history": {
     "title": "History & overview",
     "subtitle": "Your recent timekeeping history.",
+    "subtitleStaff": "Your and colleagues' (Staff) timekeeping history.",
+    "subtitleManager": "Staff and Manager timekeeping history in store.",
+    "subtitleOwner": "Overall timekeeping for all staff in store.",
     "daysWithData": "Days with data",
     "totalHours": "Total hours (estimated)",
     "lateCount": "Late check-ins",
@@ -48,9 +53,18 @@
     "empty": "No historical timekeeping data.",
     "table": {
       "date": "Date",
+      "employee": "Employee",
+      "photo": "Check-in photo",
+      "viewPhoto": "View photo",
+      "noPhoto": "—",
       "workHours": "Work hours",
       "late": "Late",
       "onTime": "On time"
+    },
+    "photoModal": {
+      "title": "Check-in photo",
+      "employee": "Employee",
+      "time": "Time"
     }
   },
   "monthly": {

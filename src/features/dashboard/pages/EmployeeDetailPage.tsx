@@ -36,6 +36,16 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
+/** Normalize role check: backend may return "StoreOwner", "Store Owner", "storeowner", or comma-separated. */
+const hasRole = (roleValue: unknown, target: string): boolean => {
+  if (!roleValue) return false;
+  const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "");
+  const r = String(roleValue).trim();
+  const t = target;
+  if (normalize(r) === normalize(t)) return true;
+  return r.split(/[,]/).some((part) => normalize(part.trim()) === normalize(t));
+};
+
 export default function EmployeeDetailPage() {
   const { t: tStaff, i18n } = useTranslation("staff");
   const { t: tCommon } = useTranslation("common");
@@ -43,7 +53,8 @@ export default function EmployeeDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const role = user?.role ?? "";
-  const canEdit = role === "StoreOwner" || role === "Manager";
+  const canEdit =
+    hasRole(role, "StoreOwner") || hasRole(role, "Manager");
 
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);

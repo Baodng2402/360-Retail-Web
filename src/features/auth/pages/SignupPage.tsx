@@ -176,18 +176,26 @@ const SignupPage = () => {
                     social.alt === "Google" ? (
                       <div
                         key={social.alt + index}
-                        className="relative flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] cursor-pointer items-center justify-center rounded-[24px] border border-gray-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50"
+                        className="relative flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] min-h-[80px] min-w-[80px] items-center justify-center rounded-[24px] border border-gray-200 bg-white shadow-sm overflow-visible hover:bg-gray-50"
+                        style={{ isolation: "isolate" }}
                       >
                         <img
                           src={googleIcon}
                           alt="Google"
                           className="pointer-events-none absolute inset-0 z-10 m-auto h-10 w-10 object-contain sm:h-12 sm:w-12"
                         />
-                        <div className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center opacity-0 overflow-hidden">
-                          <div className="scale-[5]">
+                        <div
+                          className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center opacity-0"
+                          aria-hidden="true"
+                        >
+                          <div className="scale-[4] origin-center">
                             <GoogleLogin
                               onSuccess={handleGoogleSuccess}
                               onError={handleGoogleError}
+                              useOneTap={false}
+                              size="large"
+                              theme="outline"
+                              shape="rectangular"
                             />
                           </div>
                         </div>

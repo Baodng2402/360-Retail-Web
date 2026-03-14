@@ -13,9 +13,10 @@ import {
   Star,
   Percent,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
+import L from "leaflet";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { storesApi } from "@/shared/lib/storesApi";
@@ -79,12 +80,8 @@ const SettingPage = () => {
     return false;
   };
 
-  const canEditStoreInfo =
-    hasRole(user?.role as unknown, "StoreOwner") ||
-    hasRole(user?.role as unknown, "Manager");
-  const canManageLoyaltyRules =
-    hasRole(user?.role as unknown, "StoreOwner") ||
-    hasRole(user?.role as unknown, "Manager");
+  const canEditStoreInfo = hasRole(user?.role as unknown, "StoreOwner");
+  const canManageLoyaltyRules = hasRole(user?.role as unknown, "StoreOwner");
 
   const NOTIFICATION_KEY = "360retail-notification-settings";
   const STORE_GPS_KEY_PREFIX = "360retail-store-gps-";
@@ -105,6 +102,22 @@ const SettingPage = () => {
     ? [parsedLatitude, parsedLongitude]
     : [21.0278, 105.8342]; // Hà Nội mặc định
 
+  /** Pin nhọn xuống = địa điểm cửa hàng (không dùng hình tròn để tránh nhầm với vị trí người dùng) */
+  const storeMarkerIcon = useMemo(
+    () =>
+      L.divIcon({
+        className: "store-pin-icon",
+        html: `
+          <svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));">
+            <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.268 21.732 0 14 0z" fill="#0d9488"/>
+            <circle cx="14" cy="14" r="6" fill="white"/>
+          </svg>`,
+        iconSize: [28, 36],
+        iconAnchor: [14, 36],
+      }),
+    [],
+  );
+
   const LocationSelector = () => {
     useMapEvents({
       click(e) {
@@ -114,7 +127,9 @@ const SettingPage = () => {
         setStoreLongitude(String(lng));
       },
     });
-    return hasValidCoords ? <Marker position={currentPosition} /> : null;
+    return hasValidCoords ? (
+      <Marker position={currentPosition} icon={storeMarkerIcon} />
+    ) : null;
   };
 
   const loadNotificationsFromStorage = () => {
@@ -576,8 +591,8 @@ const SettingPage = () => {
                   <div className="space-y-2">
                     <Label>GPS Location (map preview)</Label>
                     <p className="text-xs text-muted-foreground">
-                      Bạn có thể bấm trực tiếp trên bản đồ để chọn tọa độ cho cửa hàng. Marker
-                      sẽ tự động di chuyển và cập nhật Latitude/Longitude phía trên.
+                      Bạn có thể bấm trực tiếp trên bản đồ để chọn tọa độ cho cửa hàng. Pin
+                      (mũi nhọn) là vị trí cửa hàng; Latitude/Longitude phía trên sẽ được cập nhật.
                     </p>
                     <div className="h-56 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
                       <MapContainer
