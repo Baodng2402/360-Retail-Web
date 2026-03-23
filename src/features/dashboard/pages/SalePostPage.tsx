@@ -57,6 +57,7 @@ import { salesDashboardApi } from "@/shared/lib/salesDashboardApi";
 import { inventoryApi } from "@/shared/lib/inventoryApi";
 import type { TopProduct } from "@/shared/lib/salesDashboardApi";
 import { useStoreStore } from "@/shared/store/storeStore";
+import { useAuthStore } from "@/shared/store/authStore";
 import type { Product } from "@/shared/types/products";
 import AddProductModal from "@/features/dashboard/components/modals/AddProductModal";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
@@ -94,10 +95,15 @@ interface CartItem {
 const SalePostPage = () => {
   const { t } = useTranslation(["sale"]);
   const { currentStore } = useStoreStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const emitOrderCreated = useDashboardEventsStore(
     (state) => state.emitOrderCreated,
   );
+
+  // Staff không có quyền stock in/out
+  const canManageInventory = user?.role === "StoreOwner" || user?.role === "Manager";
+
   const [activeTab, setActiveTab] = useState("pos");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -806,33 +812,35 @@ const SalePostPage = () => {
                         {product.barcode}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setStockOperation("in");
-                              setShowStockModal(true);
-                            }}
-                          >
-                            {t("sale:actions.stockIn")}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setStockOperation("out");
-                              setShowStockModal(true);
-                            }}
-                          >
-                            {t("sale:actions.stockOut")}
-                          </Button>
-                          <Button size="sm" variant="ghost">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {canManageInventory && (
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setStockOperation("in");
+                                setShowStockModal(true);
+                              }}
+                            >
+                              {t("sale:actions.stockIn")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setStockOperation("out");
+                                setShowStockModal(true);
+                              }}
+                            >
+                              {t("sale:actions.stockOut")}
+                            </Button>
+                            <Button size="sm" variant="ghost">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
