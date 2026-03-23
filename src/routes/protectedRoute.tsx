@@ -1,6 +1,5 @@
 import { useAuthStore } from "@/shared/store/authStore";
 import { Navigate, Outlet } from "react-router-dom";
-import { UserStatus } from "@/shared/types/jwt-claims";
 
 interface ProtectedRouteProps {
   allowedRoles: string[];
@@ -8,19 +7,18 @@ interface ProtectedRouteProps {
 
 /**
  * Protected route component that checks authentication and role-based access.
- * Also handles PotentialOwner redirect to /create-store
+ * User sẽ được redirect về /dashboard, dashboard sẽ xử lý onboarding nếu chưa có store.
  */
 export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, user, status, storeId } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Handle PotentialOwner - user đã đăng ký nhưng chưa start trial
-  if (user?.role === "PotentialOwner" || status === UserStatus.Registered) {
-    return <Navigate to="/create-store" replace />;
-  }
+  // KHÔNG redirect PotentialOwner về /create-store ở đây
+  // Dashboard sẽ tự kiểm tra và hiển thị onboarding state
+  // User sẽ được redirect về /dashboard và thấy màn hình "Bạn cần tạo cửa hàng"
 
   const normalizedAllowedRoles = (allowedRoles ?? [])
     .filter((role) => typeof role === "string")

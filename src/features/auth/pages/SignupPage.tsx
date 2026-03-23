@@ -14,24 +14,15 @@ import { Label } from "@/shared/components/ui/label";
 import { authApi, decodeTokenToUser } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
-import { getRedirectPathByAuthState } from "@/shared/types/jwt-claims";
 
 const socialButtons = [{ src: googleIcon, alt: "Google" }] as const;
 
 /**
- * Get redirect path based on JWT claims
+ * Get redirect path after login.
+ * Luôn redirect về /dashboard - Dashboard sẽ kiểm tra và hiển thị onboarding nếu chưa có store.
  */
-const getRedirectPathAfterLogin = (token: string): string => {
-  try {
-    const user = decodeTokenToUser(token);
-    return getRedirectPathByAuthState({
-      role: user.role,
-      status: user.status,
-      storeId: user.storeId,
-    });
-  } catch {
-    return "/dashboard";
-  }
+const getRedirectPathAfterLogin = (): string => {
+  return "/dashboard";
 };
 
 const SignupPage = () => {
@@ -93,9 +84,8 @@ const SignupPage = () => {
       }
       toast.success(t("auth:login.googleLoginSuccess"));
 
-      // Redirect dựa trên role và status
-      const redirectPath = getRedirectPathAfterLogin(res.accessToken);
-      navigate(redirectPath, { replace: true });
+      // Redirect về /dashboard - Dashboard sẽ kiểm tra và hiển thị onboarding nếu chưa có store
+      navigate(getRedirectPathAfterLogin(), { replace: true });
     } catch (err: unknown) {
       console.error("Google signup/login error", err);
       const message =

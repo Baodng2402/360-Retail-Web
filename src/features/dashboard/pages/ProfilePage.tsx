@@ -154,7 +154,13 @@ export function ProfilePage() {
         tasksApi.getMyTasks(true, { silentOnFeatureGate: true }).catch(
           () => [],
         ),
-        timekeepingApi.getHistory().catch(() => []),
+        // Timekeeping: Trial không có has_gps_checkin nên cũng cần silent
+        timekeepingApi.getHistory().catch((err: unknown) => {
+          // Nếu là lỗi feature gate (403), bỏ qua và trả mảng rỗng
+          const status = (err as { response?: { status?: number } }).response?.status;
+          if (status === 403) return [];
+          throw err;
+        }),
       ]);
       setMyTasks(tasks);
       setTimeHistory(history);
