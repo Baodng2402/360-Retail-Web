@@ -11,17 +11,27 @@ import googleIcon from "@/assets/icon/google-icon.svg";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { authApi } from "@/shared/lib/authApi";
+import { authApi, decodeTokenToUser } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
+import { getRedirectPathByAuthState } from "@/shared/types/jwt-claims";
 
 const socialButtons = [{ src: googleIcon, alt: "Google" }] as const;
 
-const getDefaultPathByRole = (role?: string | null) => {
-  const r = (role ?? "").toLowerCase();
-  if (r === "superadmin") return "/admin";
-  if (r === "customer") return "/customer";
-  return "/dashboard";
+/**
+ * Get redirect path based on JWT claims
+ */
+const getRedirectPathAfterLogin = (token: string): string => {
+  try {
+    const user = decodeTokenToUser(token);
+    return getRedirectPathByAuthState({
+      role: user.role,
+      status: user.status,
+      storeId: user.storeId,
+    });
+  } catch {
+    return "/dashboard";
+  }
 };
 
 const SignupPage = () => {
@@ -54,7 +64,7 @@ const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setAuth } = useAuthStore();
+  const { setAuthFromToken } = useAuthStore();
 
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     const idToken = credentialResponse.credential;
@@ -69,16 +79,23 @@ const SignupPage = () => {
         throw new Error("Access token không hợp lệ từ server");
       }
       localStorage.setItem("token", res.accessToken);
-      const user = await authApi.me();
+
+      // Decode token để lấy full user info
+      const user = decodeTokenToUser(res.accessToken);
       const userWithAvatar = res.profilePictureUrl
         ? { ...user, avatar: res.profilePictureUrl }
         : user;
-      setAuth(userWithAvatar, res.accessToken);
+
+      setAuthFromToken(userWithAvatar, res.accessToken);
+
       if (res.isNewUser) {
         sessionStorage.setItem("pendingGoogleNewUser", "1");
       }
       toast.success(t("auth:login.googleLoginSuccess"));
-      navigate(getDefaultPathByRole(userWithAvatar.role), { replace: true });
+
+      // Redirect dựa trên role và status
+      const redirectPath = getRedirectPathAfterLogin(res.accessToken);
+      navigate(redirectPath, { replace: true });
     } catch (err: unknown) {
       console.error("Google signup/login error", err);
       const message =
