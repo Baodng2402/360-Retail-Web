@@ -174,14 +174,28 @@ export function ProfilePage() {
 
   const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
 
+  const roleLabels: Record<string, string> = {
+    StoreOwner: "StoreOwner",
+    Manager: "Manager",
+    Staff: "Staff",
+    PotentialOwner: "PotentialOwner",
+  };
+
   const formatRole = (roleValue: string | undefined) => {
     if (!roleValue) return tProfile("roles.member");
-    const key = `roles.${roleValue}` as
-      | "roles.StoreOwner"
-      | "roles.Manager"
-      | "roles.Staff"
-      | "roles.PotentialOwner";
-    return tProfile(key, { defaultValue: roleValue });
+
+    // Get translation key based on role
+    const translationKey = `roles.${roleValue}`;
+    const translation = tProfile(translationKey);
+
+    // If translation exists and is not the key itself, return it
+    // Otherwise return the role label
+    if (translation && translation !== translationKey) {
+      return translation;
+    }
+    return tProfile(`roles.${roleLabels[roleValue] ?? roleValue}`, {
+      defaultValue: roleValue,
+    });
   };
 
   const currentStoreSubscription = currentStore
