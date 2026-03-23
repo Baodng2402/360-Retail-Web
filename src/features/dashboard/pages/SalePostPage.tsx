@@ -60,7 +60,6 @@ import type { Product } from "@/shared/types/products";
 import AddProductModal from "@/features/dashboard/components/modals/AddProductModal";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
 import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
-import { useFeatureGateStore } from "@/shared/store/featureGateStore";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -98,7 +97,6 @@ const SalePostPage = () => {
   const emitOrderCreated = useDashboardEventsStore(
     (state) => state.emitOrderCreated,
   );
-  const openUpgradeModal = useFeatureGateStore((s) => s.openUpgradeModal);
   const [activeTab, setActiveTab] = useState("pos");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -466,17 +464,7 @@ const SalePostPage = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="pos">{t("sale:tabs.pos")}</TabsTrigger>
-          <TabsTrigger
-            value="inventory"
-            onClick={() => {
-              openUpgradeModal({
-                errorType: "FeatureNotAvailable",
-                feature: "Inventory tickets",
-                message:
-                  "Tính năng phiếu nhập/xuất kho đang bị khóa cho gói hiện tại. Vui lòng nâng cấp gói để sử dụng module kho chi tiết.",
-              });
-            }}
-          >
+          <TabsTrigger value="inventory">
             {t("sale:tabs.inventory")}
           </TabsTrigger>
           <TabsTrigger value="reports">{t("sale:tabs.reports")}</TabsTrigger>
