@@ -54,6 +54,7 @@ import { productsApi } from "@/shared/lib/productsApi";
 import { ordersApi } from "@/shared/lib/ordersApi";
 import { storesApi } from "@/shared/lib/storesApi";
 import { salesDashboardApi } from "@/shared/lib/salesDashboardApi";
+import { inventoryApi } from "@/shared/lib/inventoryApi";
 import type { TopProduct } from "@/shared/lib/salesDashboardApi";
 import { useStoreStore } from "@/shared/store/storeStore";
 import type { Product } from "@/shared/types/products";
@@ -448,14 +449,48 @@ const SalePostPage = () => {
     }
   };
 
-  const handleStockOperation = () => {
-    console.log("Stock operation:", {
-      product: selectedProduct,
-      operation: stockOperation,
-      amount: stockAmount,
-    });
-    setShowStockModal(false);
-    setStockAmount("");
+  const handleStockOperation = async () => {
+    if (!selectedProduct || !stockAmount || Number(stockAmount) <= 0) {
+      toast.error(t("sale:toasts.invalidQuantity"));
+      return;
+    }
+
+    try {
+      // Tạo phiếu kho
+      const ticketId = await inventoryApi.createTicket({
+        type: stockOperation === "in" ? "Import" : "Export",
+        note: `${stockOperation === "in" ? "Nhập" : "Xuất"} kho: ${selectedProduct.name}`,
+        items: [
+          {
+            productId: selectedProduct.id,
+            quantity: Number(stockAmount),
+            productVariantId: undefined,
+          },
+        ],
+      });
+
+      // Confirm phiếu kho để cập nhật tồn kho
+      await inventoryApi.confirmTicket(ticketId);
+
+      toast.success(
+        stockOperation === "in"
+          ? t("sale:toasts.stockInSuccess")
+          : t("sale:toasts.stockOutSuccess"),
+      );
+
+      // Reload products để cập nhật số tồn
+      await loadProducts();
+
+      setShowStockModal(false);
+      setStockAmount("");
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error("Stock operation failed:", error);
+      toast.error(
+        t("sale:toasts.stockOperationFailed") ||
+          "Không thể thực hiện thao tác kho",
+      );
+    }
   };
 
   return (
