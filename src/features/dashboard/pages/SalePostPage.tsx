@@ -757,13 +757,15 @@ const SalePostPage = () => {
               <h3 className="text-lg font-bold">
                 {t("sale:inventory.title")}
               </h3>
-              <Button
-                onClick={() => setAddProductModalOpen(true)}
-                className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {t("sale:actions.addProduct")}
-              </Button>
+              {canManageInventory && (
+                <Button
+                  onClick={() => setAddProductModalOpen(true)}
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t("sale:actions.addProduct")}
+                </Button>
+              )}
             </div>
 
             <div className="rounded-lg border">
