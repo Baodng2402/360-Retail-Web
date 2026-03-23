@@ -48,7 +48,7 @@ const LoginBody = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setAuth, setAuthFromToken } = useAuthStore();
+  const { setAuthFromToken } = useAuthStore();
 
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     const idToken = credentialResponse.credential;

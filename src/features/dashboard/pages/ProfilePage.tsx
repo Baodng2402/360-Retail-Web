@@ -186,7 +186,8 @@ export function ProfilePage() {
 
     // Get translation key based on role
     const translationKey = `roles.${roleValue}`;
-    const translation = tProfile(translationKey);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const translation = tProfile(translationKey as any);
 
     // If translation exists and is not the key itself, return it
     // Otherwise return the role label
@@ -275,7 +276,7 @@ export function ProfilePage() {
                   {user?.name || tProfile("user.nameFallback")}
                 </h2>
                 <Badge className="bg-gradient-to-r from-teal-500 to-blue-500 text-white border-0">
-                  {formatRole(user?.role)}
+                  {String(formatRole(user?.role))}
                 </Badge>
                 {subscriptionInfo?.planName && (
                   <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700">

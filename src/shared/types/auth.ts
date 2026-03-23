@@ -1,4 +1,4 @@
-import { UserStatus, UserStatusType } from "@/shared/types/jwt-claims";
+import type { UserStatusType } from "@/shared/types/jwt-claims";
 
 export interface User {
   id: string;

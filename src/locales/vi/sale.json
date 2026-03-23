@@ -65,7 +65,11 @@
     "loadProductsError": "Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.",
     "cartEmpty": "Giỏ hàng trống!",
     "orderCreated": "Đơn hàng đã được tạo thành công!",
-    "orderCreateFailed": "Không thể tạo đơn hàng. Vui lòng thử lại!"
+    "orderCreateFailed": "Không thể tạo đơn hàng. Vui lòng thử lại!",
+    "invalidQuantity": "Số lượng không hợp lệ!",
+    "stockInSuccess": "Nhập kho thành công!",
+    "stockOutSuccess": "Xuất kho thành công!",
+    "stockOperationFailed": "Không thể thực hiện thao tác kho"
   },
   "misc": {
     "uncategorized": "Chưa phân loại",
