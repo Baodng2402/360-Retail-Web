@@ -68,3 +68,67 @@ export const parseDaysRemaining = (value: string | null | undefined): number | n
   const parsed = parseInt(value, 10);
   return isNaN(parsed) ? null : parsed;
 };
+
+/**
+ * Check if user is a PotentialOwner (newly registered, no store)
+ */
+export const isPotentialOwner = (role?: string | null): boolean => {
+  if (!role) return false;
+  return role === "PotentialOwner";
+};
+
+/**
+ * Check if user has a store (is StoreOwner, Manager, Staff)
+ */
+export const hasStore = (storeId?: string | null): boolean => {
+  return !!storeId && storeId.length > 0;
+};
+
+/**
+ * Get redirect path based on user status and store ownership
+ * Backend flow:
+ * - Registered/PotentialOwner -> redirect to /create-store (start trial)
+ * - Trial/Active with store -> redirect to /dashboard
+ */
+export const getRedirectPathByAuthState = (params: {
+  role?: string | null;
+  status?: UserStatusType | string | null;
+  storeId?: string | null;
+}): string => {
+  const { role, status, storeId } = params;
+
+  // User chưa start trial (PotentialOwner)
+  if (role === "PotentialOwner" || status === UserStatus.Registered) {
+    return "/create-store";
+  }
+
+  // User đã có store (Trial hoặc Active)
+  if (hasStore(storeId)) {
+    return "/dashboard";
+  }
+
+  // Fallback - không có store
+  return "/create-store";
+};
+
+/**
+ * Role hierarchy for determining access level
+ */
+export const RoleHierarchy: Record<string, number> = {
+  SuperAdmin: 100,
+  StoreOwner: 50,
+  Manager: 40,
+  Staff: 30,
+  Customer: 10,
+  PotentialOwner: 0,
+};
+
+/**
+ * Check if user role has required access level
+ */
+export const hasRoleAccess = (userRole: string | null | undefined, minRole: string): boolean => {
+  if (!userRole) return false;
+  const userLevel = RoleHierarchy[userRole] ?? -1;
+  const requiredLevel = RoleHierarchy[minRole] ?? -1;
+  return userLevel >= requiredLevel;
+};

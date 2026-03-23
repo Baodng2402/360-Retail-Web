@@ -12,16 +12,18 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
-import { authApi } from "@/shared/lib/authApi";
+import { authApi, decodeTokenToUser } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 const socialButtons = [{ src: googleIcon, alt: "Google" }] as const;
 
-const getDefaultPathByRole = (role?: string | null) => {
-  const r = (role ?? "").toLowerCase();
-  if (r === "superadmin") return "/admin";
-  if (r === "customer") return "/customer";
+/**
+ * Get redirect path after login.
+ * Luôn redirect về /dashboard - Dashboard sẽ kiểm tra và hiển thị onboarding nếu chưa có store.
+ * Theo luồng MVP: Login -> Dashboard -> (nếu chưa có store) hiện onboarding + StartTrialDialog
+ */
+const getRedirectPathAfterLogin = (): string => {
   return "/dashboard";
 };
 
@@ -46,7 +48,7 @@ const LoginBody = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setAuth } = useAuthStore();
+  const { setAuth, setAuthFromToken } = useAuthStore();
 
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     const idToken = credentialResponse.credential;
@@ -61,16 +63,22 @@ const LoginBody = () => {
         throw new Error("Access token không hợp lệ từ server");
       }
       localStorage.setItem("token", res.accessToken);
-      const user = await authApi.me();
+
+      // Decode token để lấy full user info (role, status, store_id)
+      const user = decodeTokenToUser(res.accessToken);
       const userWithAvatar = res.profilePictureUrl
         ? { ...user, avatar: res.profilePictureUrl }
         : user;
-      setAuth(userWithAvatar, res.accessToken);
+
+      setAuthFromToken(userWithAvatar, res.accessToken);
+
       if (res.isNewUser) {
         sessionStorage.setItem("pendingGoogleNewUser", "1");
       }
       toast.success(t("auth:login.googleLoginSuccess"));
-      navigate(getDefaultPathByRole(userWithAvatar.role), { replace: true });
+
+      // Redirect về /dashboard - Dashboard sẽ kiểm tra và hiển thị onboarding nếu chưa có store
+      navigate(getRedirectPathAfterLogin(), { replace: true });
     } catch (err: unknown) {
       console.error("Google login error", err);
       const message =
@@ -124,8 +132,9 @@ const LoginBody = () => {
 
       localStorage.setItem("token", loginRes.accessToken);
 
-      const user = await authApi.me();
-      setAuth(user, loginRes.accessToken);
+      // Decode token để lấy full user info (role, status, store_id)
+      const user = decodeTokenToUser(loginRes.accessToken);
+      setAuthFromToken(user, loginRes.accessToken);
 
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", email);
@@ -133,9 +142,10 @@ const LoginBody = () => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      toast.success(t("auth:login.googleLoginSuccess"));
+      toast.success(t("auth:login.loginSuccess", { defaultValue: "Login successful!" }));
 
-      navigate(getDefaultPathByRole(user.role), { replace: true });
+      // Redirect về /dashboard - Dashboard sẽ kiểm tra và hiển thị onboarding nếu chưa có store
+      navigate(getRedirectPathAfterLogin(), { replace: true });
     } catch (err: unknown) {
       console.error("Login error", err);
       const message =

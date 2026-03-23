@@ -54,13 +54,14 @@ import { productsApi } from "@/shared/lib/productsApi";
 import { ordersApi } from "@/shared/lib/ordersApi";
 import { storesApi } from "@/shared/lib/storesApi";
 import { salesDashboardApi } from "@/shared/lib/salesDashboardApi";
+import { inventoryApi } from "@/shared/lib/inventoryApi";
 import type { TopProduct } from "@/shared/lib/salesDashboardApi";
 import { useStoreStore } from "@/shared/store/storeStore";
+import { useAuthStore } from "@/shared/store/authStore";
 import type { Product } from "@/shared/types/products";
 import AddProductModal from "@/features/dashboard/components/modals/AddProductModal";
 import StoreSelector from "@/features/dashboard/components/StoreSelector";
 import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
-import { useFeatureGateStore } from "@/shared/store/featureGateStore";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -94,11 +95,15 @@ interface CartItem {
 const SalePostPage = () => {
   const { t } = useTranslation(["sale"]);
   const { currentStore } = useStoreStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const emitOrderCreated = useDashboardEventsStore(
     (state) => state.emitOrderCreated,
   );
-  const openUpgradeModal = useFeatureGateStore((s) => s.openUpgradeModal);
+
+  // Staff không có quyền stock in/out
+  const canManageInventory = user?.role === "StoreOwner" || user?.role === "Manager";
+
   const [activeTab, setActiveTab] = useState("pos");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -450,14 +455,48 @@ const SalePostPage = () => {
     }
   };
 
-  const handleStockOperation = () => {
-    console.log("Stock operation:", {
-      product: selectedProduct,
-      operation: stockOperation,
-      amount: stockAmount,
-    });
-    setShowStockModal(false);
-    setStockAmount("");
+  const handleStockOperation = async () => {
+    if (!selectedProduct || !stockAmount || Number(stockAmount) <= 0) {
+      toast.error(t("sale:toasts.invalidQuantity"));
+      return;
+    }
+
+    try {
+      // Tạo phiếu kho
+      const ticketId = await inventoryApi.createTicket({
+        type: stockOperation === "in" ? "Import" : "Export",
+        note: `${stockOperation === "in" ? "Nhập" : "Xuất"} kho: ${selectedProduct.name}`,
+        items: [
+          {
+            productId: selectedProduct.id,
+            quantity: Number(stockAmount),
+            productVariantId: undefined,
+          },
+        ],
+      });
+
+      // Confirm phiếu kho để cập nhật tồn kho
+      await inventoryApi.confirmTicket(ticketId);
+
+      toast.success(
+        stockOperation === "in"
+          ? t("sale:toasts.stockInSuccess")
+          : t("sale:toasts.stockOutSuccess"),
+      );
+
+      // Reload products để cập nhật số tồn
+      await loadProducts();
+
+      setShowStockModal(false);
+      setStockAmount("");
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error("Stock operation failed:", error);
+      toast.error(
+        t("sale:toasts.stockOperationFailed") ||
+          "Không thể thực hiện thao tác kho",
+      );
+    }
   };
 
   return (
@@ -466,17 +505,7 @@ const SalePostPage = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="pos">{t("sale:tabs.pos")}</TabsTrigger>
-          <TabsTrigger
-            value="inventory"
-            onClick={() => {
-              openUpgradeModal({
-                errorType: "FeatureNotAvailable",
-                feature: "Inventory tickets",
-                message:
-                  "Tính năng phiếu nhập/xuất kho đang bị khóa cho gói hiện tại. Vui lòng nâng cấp gói để sử dụng module kho chi tiết.",
-              });
-            }}
-          >
+          <TabsTrigger value="inventory">
             {t("sale:tabs.inventory")}
           </TabsTrigger>
           <TabsTrigger value="reports">{t("sale:tabs.reports")}</TabsTrigger>
@@ -728,13 +757,15 @@ const SalePostPage = () => {
               <h3 className="text-lg font-bold">
                 {t("sale:inventory.title")}
               </h3>
-              <Button
-                onClick={() => setAddProductModalOpen(true)}
-                className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {t("sale:actions.addProduct")}
-              </Button>
+              {canManageInventory && (
+                <Button
+                  onClick={() => setAddProductModalOpen(true)}
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t("sale:actions.addProduct")}
+                </Button>
+              )}
             </div>
 
             <div className="rounded-lg border">
@@ -783,33 +814,35 @@ const SalePostPage = () => {
                         {product.barcode}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setStockOperation("in");
-                              setShowStockModal(true);
-                            }}
-                          >
-                            {t("sale:actions.stockIn")}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setStockOperation("out");
-                              setShowStockModal(true);
-                            }}
-                          >
-                            {t("sale:actions.stockOut")}
-                          </Button>
-                          <Button size="sm" variant="ghost">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {canManageInventory && (
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setStockOperation("in");
+                                setShowStockModal(true);
+                              }}
+                            >
+                              {t("sale:actions.stockIn")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setStockOperation("out");
+                                setShowStockModal(true);
+                              }}
+                            >
+                              {t("sale:actions.stockOut")}
+                            </Button>
+                            <Button size="sm" variant="ghost">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
