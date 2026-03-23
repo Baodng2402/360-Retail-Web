@@ -53,6 +53,7 @@ import { useLanguageStore } from "@/shared/store/languageStore";
 import UnauthorizedPage from "@/shared/pages/UnauthorizedPage";
 import NotFoundPage from "@/shared/pages/NotFoundPage";
 import LoyaltyCheckPage from "@/features/loyalty/pages/LoyaltyCheckPage";
+import CreateStorePage from "@/features/auth/pages/CreateStorePage";
 
 function App() {
   const language = useLanguageStore((s) => s.language);
@@ -93,6 +94,7 @@ function App() {
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
               <Route path="/payment/failed" element={<PaymentFailedPage />} />
               <Route path="/unauthorized" element={<UnauthorizedPage />} />
+              <Route path="/create-store" element={<CreateStorePage />} />
               <Route
                 element={
                   <ProtectedRoute
