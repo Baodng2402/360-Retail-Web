@@ -74,8 +74,10 @@ interface DecodedToken {
   trial_days_remaining?: string;
   subscription_expired?: string;
   email?: string;
-  role?: string;
-  [key: string]: string | undefined;
+  role?: string | string[];
+  /** Primary role - extracted from role claim, priority: SuperAdmin > StoreOwner > Manager > Staff > PotentialOwner */
+  primary_role?: string;
+  [key: string]: string | string[] | undefined;
 }
 
 function base64UrlDecode(str: string): string {
@@ -125,22 +127,116 @@ function mapClaimsToUser(claims: Claim[]): User {
 }
 
 /**
+ * Role priority for determining the primary role
+ * Higher number = higher priority
+ */
+const ROLE_PRIORITY: Record<string, number> = {
+  SuperAdmin: 100,
+  StoreOwner: 50,
+  Manager: 40,
+  Staff: 30,
+  Customer: 20,
+  PotentialOwner: 10,
+};
+
+/**
+ * Extract primary role from role claim (can be string, comma-separated, or array)
+ * Returns the role with highest priority
+ */
+function extractPrimaryRole(roleClaim: string | string[] | undefined): string {
+  if (!roleClaim) return "";
+  
+  // Convert to array of roles
+  let roles: string[];
+  if (Array.isArray(roleClaim)) {
+    roles = roleClaim;
+  } else if (typeof roleClaim === "string") {
+    // Handle comma-separated roles like "SuperAdmin,SuperAdmin,SuperAdmin,SuperAdmin"
+    roles = roleClaim.split(",").map((r) => r.trim()).filter((r) => r.length > 0);
+  } else {
+    return "";
+  }
+  
+  if (roles.length === 0) return "";
+  
+  // Deduplicate and find highest priority role
+  const uniqueRoles = [...new Set(roles)];
+  let primaryRole = uniqueRoles[0];
+  let highestPriority = ROLE_PRIORITY[primaryRole] ?? 0;
+  
+  for (const role of uniqueRoles) {
+    const priority = ROLE_PRIORITY[role] ?? 0;
+    if (priority > highestPriority) {
+      highestPriority = priority;
+      primaryRole = role;
+    }
+  }
+  
+  return primaryRole;
+}
+
+/**
+ * Normalize role string for comparison (lowercase, no spaces)
+ */
+export function normalizeRole(role: string | undefined | null): string {
+  if (!role) return "";
+  return role.toLowerCase().replace(/\s+/g, "");
+}
+
+/**
+ * Check if user has a specific role
+ */
+export function hasRole(userRole: string | undefined | null, targetRole: string): boolean {
+  if (!userRole) return false;
+  return normalizeRole(userRole) === normalizeRole(targetRole);
+}
+
+/**
+ * Check if user has any of the specified roles
+ */
+export function hasAnyRole(userRole: string | undefined | null, targetRoles: string[]): boolean {
+  if (!userRole) return false;
+  const normalizedUserRole = normalizeRole(userRole);
+  return targetRoles.some((role) => normalizeRole(role) === normalizedUserRole);
+}
+
+/**
  * Decode JWT token and return claims as User object with extended info
  * Used after login to get full user info including store_id, status, role from token
  */
 export const decodeTokenToUser = (token: string): ExtendedUser => {
   const decoded = decodeJwtToken(token);
 
-  const getClaim = (type: string) => decoded[type] ?? "";
-  const getStandardClaim = (type: string) =>
-    decoded[type] ||
-    decoded[`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/${type}`] ||
-    decoded[`http://schemas.microsoft.com/ws/2008/06/identity/claims/${type}`] ||
-    "";
+  const getClaim = (type: string): string => {
+    const value = decoded[type];
+    if (Array.isArray(value)) return value.join(",");
+    return value ?? "";
+  };
+  const getStandardClaim = (type: string): string => {
+    const direct = decoded[type];
+    if (direct !== undefined) {
+      if (Array.isArray(direct)) return direct[0] ?? ""; // Take first role from array
+      return direct;
+    }
+    const xmlns = decoded[`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/${type}`];
+    if (xmlns !== undefined) {
+      if (Array.isArray(xmlns)) return xmlns[0] ?? "";
+      return xmlns;
+    }
+    const ms = decoded[`http://schemas.microsoft.com/ws/2008/06/identity/claims/${type}`];
+    if (ms !== undefined) {
+      if (Array.isArray(ms)) return ms[0] ?? "";
+      return ms;
+    }
+    return "";
+  };
 
   const id = getStandardClaim("nameidentifier") || getClaim("sub");
   const email = getStandardClaim("emailaddress") || getClaim("email") || "";
-  const role = getStandardClaim("role") || getClaim("role") || "";
+  
+  // Extract primary role from the role claim (handles array, comma-separated, or single string)
+  const rawRole = decoded.role ?? decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+  const role = extractPrimaryRole(rawRole);
 
   // Generate name from email if not available
   const name = email ? email.split("@")[0] : id;

@@ -175,28 +175,32 @@ export function ProfilePage() {
   const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
 
   const roleLabels: Record<string, string> = {
+    SuperAdmin: "SuperAdmin",
     StoreOwner: "StoreOwner",
     Manager: "Manager",
     Staff: "Staff",
     PotentialOwner: "PotentialOwner",
+    Customer: "Customer",
   };
 
   const formatRole = (roleValue: string | undefined) => {
     if (!roleValue) return tProfile("roles.member");
 
+    // roleValue should already be normalized by decodeTokenToUser
+    // But handle edge cases like comma-separated roles
+    const normalizedRole = roleValue.split(",")[0].trim();
+    
     // Get translation key based on role
-    const translationKey = `roles.${roleValue}`;
+    const translationKey = `roles.${normalizedRole}`;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const translation = tProfile(translationKey as any);
 
     // If translation exists and is not the key itself, return it
-    // Otherwise return the role label
     if (translation && translation !== translationKey) {
       return translation;
     }
-    return tProfile(`roles.${roleLabels[roleValue] ?? roleValue}`, {
-      defaultValue: roleValue,
-    });
+    // Fallback to role label
+    return roleLabels[normalizedRole] ?? normalizedRole;
   };
 
   const currentStoreSubscription = currentStore

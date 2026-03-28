@@ -40,6 +40,16 @@ const PAGE_NAME = {
   },
 } as const;
 
+/** Role display labels */
+const ROLE_DISPLAY_LABELS: Record<string, string> = {
+  SuperAdmin: "SuperAdmin",
+  StoreOwner: "StoreOwner",
+  Manager: "Manager",
+  Staff: "Staff",
+  PotentialOwner: "PotentialOwner",
+  Customer: "Customer",
+};
+
 interface DashboardHeaderProps {
   isSidebarCollapsed: boolean;
 }
@@ -51,6 +61,15 @@ export const DashboardHeader = ({
   const { user } = useAuthStore();
   const location = useLocation();
   const pageName = PAGE_NAME[location.pathname as keyof typeof PAGE_NAME];
+  
+  // Get display role (handle comma-separated roles)
+  const displayRole = (() => {
+    const role = user?.role;
+    if (!role) return "User";
+    // role is already normalized by decodeTokenToUser
+    return ROLE_DISPLAY_LABELS[role] ?? role;
+  })();
+  
   return (
     <header className="border-b border-gray-200 dark:border-gray-700 bg-background sticky top-0 z-50 h-[73px] flex items-center">
       <div
@@ -79,9 +98,7 @@ export const DashboardHeader = ({
               {t("header.greeting", { name: user?.name || "User" })}
             </span>
             <span className="text-sm text-muted-foreground">
-              {typeof user?.role === "string"
-                ? user.role.replace(/([A-Z])/g, " $1").trim()
-                : "Store Owner"}{" "}
+              {displayRole}
             </span>
           </div>
         </div>

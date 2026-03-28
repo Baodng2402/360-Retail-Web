@@ -4,10 +4,12 @@
   },
   "roles": {
     "member": "Thành viên",
+    "SuperAdmin": "Quản trị viên",
     "StoreOwner": "Chủ cửa hàng",
     "Manager": "Quản lý",
     "Staff": "Nhân viên",
-    "PotentialOwner": "Chủ cửa hàng (chờ kích hoạt)"
+    "PotentialOwner": "Chủ cửa hàng (chờ kích hoạt)",
+    "Customer": "Khách hàng"
   },
   "user": {
     "nameFallback": "Người dùng",

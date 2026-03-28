@@ -4,10 +4,12 @@
   },
   "roles": {
     "member": "Member",
+    "SuperAdmin": "Super Admin",
     "StoreOwner": "Store owner",
     "Manager": "Manager",
     "Staff": "Staff",
-    "PotentialOwner": "Store owner (pending)"
+    "PotentialOwner": "Store owner (pending)",
+    "Customer": "Customer"
   },
   "user": {
     "nameFallback": "User",
