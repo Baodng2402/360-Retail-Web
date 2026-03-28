@@ -64,7 +64,8 @@ export interface Claim {
   value: string;
 }
 
-interface DecodedToken {
+/** Extended index signature to support dynamic claims that can be arrays (like role) */
+interface DecodedTokenBase {
   sub?: string;
   store_id?: string;
   store_role?: string;
@@ -88,13 +89,13 @@ function base64UrlDecode(str: string): string {
   );
 }
 
-function decodeJwtToken(token: string): DecodedToken {
+function decodeJwtToken(token: string): DecodedTokenBase {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) {
       throw new Error("Invalid token format");
     }
-    const payload = JSON.parse(base64UrlDecode(parts[1])) as DecodedToken;
+    const payload = JSON.parse(base64UrlDecode(parts[1])) as DecodedTokenBase;
     return payload;
   } catch {
     console.error("Failed to decode JWT token");
@@ -397,61 +398,8 @@ export const authApi = {
       throw new Error("No token found");
     }
 
-    const decoded = decodeJwtToken(token);
-
-    const getClaim = (type: string) => decoded[type] ?? "";
-    const getStandardClaim = (type: string) =>
-      decoded[type] ||
-      decoded[`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/${type}`] ||
-      decoded[`http://schemas.microsoft.com/ws/2008/06/identity/claims/${type}`] ||
-      "";
-
-    const id = getStandardClaim("nameidentifier") || getClaim("sub");
-    const email =
-      getStandardClaim("emailaddress") || getClaim("email") || "";
-    const role = getStandardClaim("role") || getClaim("role") || "";
-
-    // Generate name from email if not available
-    const name = email ? email.split("@")[0] : id;
-
-    const statusValue = getClaim(JwtClaimTypes.Status);
-    const validStatuses = Object.values(UserStatus) as string[];
-    const status = validStatuses.includes(statusValue || "")
-      ? (statusValue as UserStatusType)
-      : UserStatus.Registered;
-
-    const trialExpiredValue = getClaim(JwtClaimTypes.TrialExpired);
-    const trialExpired =
-      trialExpiredValue?.toLowerCase() === "true" ||
-      trialExpiredValue === "True";
-
-    const trialDaysRemaining = getClaim(JwtClaimTypes.TrialDaysRemaining);
-    const parsedDaysRemaining = trialDaysRemaining
-      ? parseInt(trialDaysRemaining, 10)
-      : null;
-
-    const storeId = getClaim(JwtClaimTypes.StoreId) || undefined;
-    const storeRole = getClaim(JwtClaimTypes.StoreRole) || undefined;
-
-    return {
-      id,
-      email,
-      role,
-      name,
-      storeId,
-      storeRole,
-      status,
-      trialExpired,
-      trialEndDate: getClaim(JwtClaimTypes.TrialEndDate) || undefined,
-      trialDaysRemaining:
-        parsedDaysRemaining !== null && !isNaN(parsedDaysRemaining)
-          ? parsedDaysRemaining
-          : undefined,
-      subscriptionExpired:
-        getClaim(JwtClaimTypes.SubscriptionExpired)?.toLowerCase() === "true" ||
-        getClaim(JwtClaimTypes.SubscriptionExpired) === "True" ||
-        false,
-    };
+    // Reuse decodeTokenToUser which handles role array/string properly
+    return decodeTokenToUser(token);
   },
 
   /**
