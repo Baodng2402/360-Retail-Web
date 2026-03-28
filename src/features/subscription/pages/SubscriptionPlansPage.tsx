@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { planReviewsApi } from "@/shared/lib/planReviewsApi";
-import { authApi } from "@/shared/lib/authApi";
+import { authApi, decodeTokenToUser } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { formatPriceVnd, type SePayPaymentData } from "@/shared/types/subscription";
 import type { Plan, MySubscription, SubscriptionStatus } from "@/shared/types/subscription";
@@ -157,8 +157,9 @@ export default function SubscriptionPlansPage() {
       }
 
       localStorage.setItem("token", refreshRes.accessToken);
-      const userWithSub = await authApi.meWithSubscription();
-      setAuth(userWithSub, refreshRes.accessToken);
+      // Decode the new token to get updated role, store_id, etc.
+      const newUser = decodeTokenToUser(refreshRes.accessToken);
+      setAuth(newUser, refreshRes.accessToken);
 
       toast.success("Đã làm mới quyền và gói dịch vụ.");
       setSepayDialogOpen(false);

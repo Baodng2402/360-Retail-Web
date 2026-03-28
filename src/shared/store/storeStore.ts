@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { Store } from "@/shared/types/stores";
-import { authApi } from "@/shared/lib/authApi";
+import { authApi, decodeTokenToUser } from "@/shared/lib/authApi";
 import { useAuthStore } from "./authStore";
 
 interface StoreState {
@@ -28,11 +28,9 @@ export const useStoreStore = create<StoreState>()(
           if (refreshRes.accessToken) {
             // Update token in localStorage
             localStorage.setItem("token", refreshRes.accessToken);
-            // Update auth store
-            const authStore = useAuthStore.getState();
-            if (authStore.user) {
-              authStore.setAuth(authStore.user, refreshRes.accessToken);
-            }
+            // Decode the new token to get updated role, store_id, etc.
+            const newUser = decodeTokenToUser(refreshRes.accessToken);
+            useAuthStore.getState().setAuthFromToken(newUser, refreshRes.accessToken);
             // Update current store
             set({ currentStore: store });
           }

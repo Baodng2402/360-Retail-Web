@@ -4,15 +4,15 @@ import { motion } from "motion/react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { CheckCircle, XCircle, Loader2, ArrowRight, Home, CreditCard } from "lucide-react";
-import { authApi } from "@/shared/lib/authApi";
+import { authApi, decodeTokenToUser } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { GradientOrb, FloatingParticles, GlassCard } from "@/shared/components/ui/Globe3D";
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
-  
+  const { setAuthFromToken } = useAuthStore();
+
   const paymentId = searchParams.get("paymentId");
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Đang xác nhận thanh toán...");
@@ -21,16 +21,18 @@ export default function PaymentSuccessPage() {
   const refreshUserData = useCallback(async () => {
     try {
       // Gọi refresh access để lấy token mới với subscription đã update
-      await authApi.refreshAccess();
+      const refreshRes = await authApi.refreshAccess();
+      if (!refreshRes.accessToken) return;
       
-      // Cập nhật user store
-      const userData = await authApi.meWithSubscription();
-      setUser(userData);
+      localStorage.setItem("token", refreshRes.accessToken);
+      // Decode the new token to get updated role, store_id, subscription status
+      const newUser = decodeTokenToUser(refreshRes.accessToken);
+      setAuthFromToken(newUser, refreshRes.accessToken);
     } catch (error) {
       console.error("Failed to refresh user data:", error);
       // Vẫn tiếp tục vì payment có thể đã thành công
     }
-  }, [setUser]);
+  }, [setAuthFromToken]);
 
   const verifyPayment = useCallback(async () => {
     if (!paymentId) {
