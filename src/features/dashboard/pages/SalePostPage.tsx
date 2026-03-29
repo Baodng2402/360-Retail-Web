@@ -554,9 +554,9 @@ const SalePostPage = () => {
                       <Card
                         key={product.id}
                         className={cn(
-                          "transition-all group",
+                          "p-4 transition-all group",
                           product.hasVariants
-                            ? "cursor-pointer hover:ring-2 hover:ring-[#FF7B21]/50"
+                            ? "cursor-pointer hover:shadow-[0_0_0_2px_#FF7B21]"
                             : product.stock === 0
                               ? "opacity-60 cursor-not-allowed"
                               : "hover:shadow-lg",
@@ -1101,7 +1101,8 @@ const SalePostPage = () => {
             {variantPickerProduct?.variants?.map((v) => {
               const vid = v.id ?? `${v.size}-${v.color}`;
               const inStock = (v.stockQuantity ?? 0) > 0;
-              const qty = variantQty[vid] ?? 1;
+              const qty = variantQty[vid] ?? 0;
+              const hasQty = qty > 0;
               return (
                 <div
                   key={vid}
@@ -1109,7 +1110,9 @@ const SalePostPage = () => {
                     "flex items-center gap-3 p-3 rounded-xl border transition-all",
                     !inStock
                       ? "border-destructive/30 bg-destructive/5 opacity-60"
-                      : "border-border bg-muted/30 hover:bg-muted/50",
+                      : hasQty
+                        ? "border-[#FF7B21]/40 bg-[#FF7B21]/5"
+                        : "border-border bg-muted/30 hover:bg-muted/50",
                   )}
                 >
                   {/* info */}
@@ -1136,23 +1139,26 @@ const SalePostPage = () => {
                       size="icon"
                       variant="outline"
                       className="h-8 w-8"
-                      disabled={qty <= 1 || !inStock}
-                      onClick={() => setVariantQty((p) => ({ ...p, [vid]: Math.max(1, (p[vid] ?? 1) - 1) }))}
+                      disabled={qty <= 0 || !inStock}
+                      onClick={() => setVariantQty((p) => ({ ...p, [vid]: Math.max(0, (p[vid] ?? 0) - 1) }))}
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
                     <Input
                       type="number"
-                      min={1}
-                      max={v.stockQuantity ?? 1}
+                      min={0}
+                      max={v.stockQuantity ?? 0}
                       value={qty}
                       disabled={!inStock}
                       onChange={(e) => {
                         const n = Number(e.target.value);
-                        const val = Number.isFinite(n) ? Math.max(1, n) : 1;
+                        const val = Number.isFinite(n) ? Math.max(0, n) : 0;
                         setVariantQty((p) => ({ ...p, [vid]: val }));
                       }}
-                      className="h-8 w-14 text-center"
+                      className={cn(
+                        "h-8 w-14 text-center",
+                        hasQty && inStock && "border-[#FF7B21]/50 bg-[#FF7B21]/5 font-semibold",
+                      )}
                     />
                     <Button
                       size="icon"
@@ -1162,7 +1168,7 @@ const SalePostPage = () => {
                       onClick={() =>
                         setVariantQty((p) => ({
                           ...p,
-                          [vid]: Math.min((v.stockQuantity ?? 0) > 0 ? v.stockQuantity! : 1, (p[vid] ?? 1) + 1),
+                          [vid]: Math.min((v.stockQuantity ?? 0) > 0 ? v.stockQuantity! : 0, (p[vid] ?? 0) + 1),
                         }))
                       }
                     >
@@ -1178,15 +1184,7 @@ const SalePostPage = () => {
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => {
-                if (!variantPickerProduct) return;
-                const init: Record<string, number> = {};
-                for (const v of variantPickerProduct.variants ?? []) {
-                  const vid = v.id ?? `${v.size}-${v.color}`;
-                  init[vid] = 1;
-                }
-                setVariantQty(init);
-              }}
+              onClick={() => setVariantQty({})}
             >
               Reset
             </Button>
@@ -1197,7 +1195,7 @@ const SalePostPage = () => {
                 let added = 0;
                 for (const v of variantPickerProduct.variants ?? []) {
                   const vid = v.id ?? `${v.size}-${v.color}`;
-                  const qty = variantQty[vid] ?? 1;
+                  const qty = variantQty[vid] ?? 0;
                   if (qty <= 0) continue;
                   const stock = v.stockQuantity ?? 0;
                   if (stock <= 0) continue;
