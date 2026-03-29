@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
+import { motion } from "motion/react";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
@@ -55,13 +57,14 @@ interface TicketItemForm {
 
 // ── Component ──────────────────────────────────────────────────────
 const InventoryManagementPage = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     // ── State ──────────────────────────────────────────────────────
     const [tickets, setTickets] = useState<InventoryTicket[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState<InventoryTicketType | "all">("all");
     const [filterStatus, setFilterStatus] = useState<InventoryTicketStatus | "all">("all");
     const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [, setTotalPages] = useState(1);
 
     // Detail dialog
     const [detailTicket, setDetailTicket] = useState<InventoryTicket | null>(null);
@@ -106,6 +109,39 @@ const InventoryManagementPage = () => {
     useEffect(() => {
         void fetchTickets();
     }, [fetchTickets]);
+
+    // Mở chi tiết phiếu kho khi vào từ dashboard (recent activity)
+    const ticketIdFromUrl = searchParams.get("ticketId");
+    useEffect(() => {
+        if (!ticketIdFromUrl) return;
+        let cancelled = false;
+        void (async () => {
+            try {
+                const ticket = await inventoryApi.getTicketById(ticketIdFromUrl);
+                if (cancelled) return;
+                setDetailTicket(ticket);
+                setDetailOpen(true);
+            } catch {
+                if (!cancelled) {
+                    toast.error("Không tìm thấy phiếu kho");
+                }
+            } finally {
+                if (!cancelled) {
+                    setSearchParams(
+                        (prev) => {
+                            const next = new URLSearchParams(prev);
+                            next.delete("ticketId");
+                            return next;
+                        },
+                        { replace: true },
+                    );
+                }
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [ticketIdFromUrl, setSearchParams]);
 
     // ── Load products for create dialog ────────────────────────────
     const loadProducts = async () => {
@@ -316,11 +352,21 @@ const InventoryManagementPage = () => {
 
     // ── Render ─────────────────────────────────────────────────────
     return (
-        <div className="container mx-auto py-6 px-4 space-y-5">
+        <motion.div
+            className="container mx-auto py-6 px-4 space-y-5"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+        >
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <motion.div
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+            >
                 <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white shadow-md">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/20">
                         <Warehouse className="h-5 w-5" />
                     </div>
                     <div>
@@ -334,62 +380,73 @@ const InventoryManagementPage = () => {
                 </div>
                 <Button
                     onClick={handleOpenCreate}
-                    className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white gap-2"
+                    className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
                 >
                     <Plus className="h-4 w-4" />
                     Tạo phiếu kho
                 </Button>
-            </div>
+            </motion.div>
 
             {/* Filters */}
-            <Card className="p-4">
-                <div className="flex flex-wrap gap-3 items-center">
-                    <div className="flex items-center gap-2">
-                        <Label className="text-sm text-muted-foreground whitespace-nowrap">Loại:</Label>
-                        <Select
-                            value={filterType}
-                            onValueChange={(v) => {
-                                setFilterType(v as InventoryTicketType | "all");
-                                setPage(1);
-                            }}
-                        >
-                            <SelectTrigger className="w-[140px] h-9">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Tất cả</SelectItem>
-                                <SelectItem value="Import">Nhập kho</SelectItem>
-                                <SelectItem value="Export">Xuất kho</SelectItem>
-                            </SelectContent>
-                        </Select>
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+            >
+                <Card className="p-4 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div className="flex flex-wrap gap-3 items-center">
+                        <div className="flex items-center gap-2">
+                            <Label className="text-sm text-muted-foreground whitespace-nowrap">Loại:</Label>
+                            <Select
+                                value={filterType}
+                                onValueChange={(v) => {
+                                    setFilterType(v as InventoryTicketType | "all");
+                                    setPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-[140px] h-9 bg-background/80 backdrop-blur-sm">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tất cả</SelectItem>
+                                    <SelectItem value="Import">Nhập kho</SelectItem>
+                                    <SelectItem value="Export">Xuất kho</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Label className="text-sm text-muted-foreground whitespace-nowrap">
+                                Trạng thái:
+                            </Label>
+                            <Select
+                                value={filterStatus}
+                                onValueChange={(v) => {
+                                    setFilterStatus(v as InventoryTicketStatus | "all");
+                                    setPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-[150px] h-9 bg-background/80 backdrop-blur-sm">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tất cả</SelectItem>
+                                    <SelectItem value="Draft">Nháp</SelectItem>
+                                    <SelectItem value="Confirmed">Đã xác nhận</SelectItem>
+                                    <SelectItem value="Cancelled">Đã hủy</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Label className="text-sm text-muted-foreground whitespace-nowrap">
-                            Trạng thái:
-                        </Label>
-                        <Select
-                            value={filterStatus}
-                            onValueChange={(v) => {
-                                setFilterStatus(v as InventoryTicketStatus | "all");
-                                setPage(1);
-                            }}
-                        >
-                            <SelectTrigger className="w-[150px] h-9">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Tất cả</SelectItem>
-                                <SelectItem value="Draft">Nháp</SelectItem>
-                                <SelectItem value="Confirmed">Đã xác nhận</SelectItem>
-                                <SelectItem value="Cancelled">Đã hủy</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-            </Card>
+                </Card>
+            </motion.div>
 
             {/* Table */}
-            <Card className="overflow-hidden">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+            >
+                <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
                 {loading ? (
                     <div className="flex items-center justify-center py-16">
                         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -407,20 +464,23 @@ const InventoryManagementPage = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b bg-muted/50">
-                                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mã phiếu</th>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Loại</th>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Trạng thái</th>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Ghi chú</th>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Ngày tạo</th>
-                                    <th className="text-right px-4 py-3 font-medium text-muted-foreground">Thao tác</th>
+                                <tr className="border-b bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5">
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Mã phiếu</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Loại</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Trạng thái</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Ghi chú</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Ngày tạo</th>
+                                    <th className="text-right px-4 py-3 font-semibold text-muted-foreground">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {tickets.map((ticket) => (
-                                    <tr
+                                {tickets.map((ticket, index) => (
+                                    <motion.tr
                                         key={ticket.id}
-                                        className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                                        className="border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 0.3, delay: index * 0.03 }}
                                     >
                                         <td className="px-4 py-3 font-mono text-xs font-medium">
                                             {ticket.code}
@@ -449,7 +509,7 @@ const InventoryManagementPage = () => {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700"
+                                                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
                                                             title="Xác nhận phiếu"
                                                             onClick={() => {
                                                                 setActionTicketId(ticket.id);
@@ -461,7 +521,7 @@ const InventoryManagementPage = () => {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 text-amber-600 hover:text-amber-700"
+                                                            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-all duration-200"
                                                             title="Hủy phiếu"
                                                             onClick={() => {
                                                                 setActionTicketId(ticket.id);
@@ -477,7 +537,7 @@ const InventoryManagementPage = () => {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 text-red-500 hover:text-red-600"
+                                                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
                                                             title="Xóa phiếu"
                                                             onClick={() => {
                                                                 setActionTicketId(ticket.id);
@@ -489,38 +549,14 @@ const InventoryManagementPage = () => {
                                                     )}
                                             </div>
                                         </td>
-                                    </tr>
+                                    </motion.tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
                 )}
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 py-4 border-t">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={page <= 1}
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        >
-                            Trước
-                        </Button>
-                        <span className="text-sm text-muted-foreground">
-                            Trang {page} / {totalPages}
-                        </span>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={page >= totalPages}
-                            onClick={() => setPage((p) => p + 1)}
-                        >
-                            Sau
-                        </Button>
-                    </div>
-                )}
             </Card>
+            </motion.div>
 
             {/* ── Create Ticket Dialog ────────────────────────────────── */}
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -895,7 +931,7 @@ const InventoryManagementPage = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+        </motion.div>
     );
 };
 

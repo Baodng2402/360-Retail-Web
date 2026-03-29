@@ -4,6 +4,7 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import { Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -72,13 +73,26 @@ const ForgotPasswordRequestPage = () => {
           "Enter your account email. We'll send a 6-digit verification code to reset your password.",
       })}
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+      <motion.form
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.5 }}
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.6 }}
+          className="space-y-2"
+        >
+          <Label htmlFor="email" className="text-sm font-semibold text-foreground">
             {t("auth:login.email")}
           </Label>
-          <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
+              <Mail className="h-5 w-5 text-[#FF7B21]" />
+            </div>
             <Input
               id="email"
               type="email"
@@ -87,31 +101,46 @@ const ForgotPasswordRequestPage = () => {
               })}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-12 bg-white text-gray-900 placeholder:text-gray-500 border-gray-200 pl-11"
+              className="h-12 pl-14 pr-4 bg-white text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
               autoComplete="off"
             />
           </div>
-        </div>
+        </motion.div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-sm text-red-500 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20"
+          >
+            {error}
+          </motion.p>
+        )}
 
-        <Button
-          type="submit"
-          disabled={submitting}
-          className="h-12 w-full bg-[#0D9488] text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0D9488]/90 disabled:opacity-70 disabled:cursor-not-allowed"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.7 }}
+          className="space-y-4"
         >
-          {submitting
-            ? t("auth:forgotPassword.request.submitting", { defaultValue: "SENDING..." })
-            : t("auth:forgotPassword.request.submit", { defaultValue: "SEND CODE" })}
-        </Button>
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="h-12 w-full bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-sm font-bold uppercase tracking-wide text-white hover:shadow-xl hover:shadow-[#FF7B21]/30 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 rounded-xl"
+          >
+            {submitting
+              ? t("auth:forgotPassword.request.submitting", { defaultValue: "SENDING..." })
+              : t("auth:forgotPassword.request.submit", { defaultValue: "SEND CODE" })}
+          </Button>
 
-        <p className="text-xs text-gray-500">
-          {t("auth:forgotPassword.request.securityNote", {
-            defaultValue:
-              "For security, we always show a generic message even if the email does not exist in the system.",
-          })}
-        </p>
-      </form>
+          <p className="text-xs text-muted-foreground bg-muted/50 px-4 py-3 rounded-xl">
+            {t("auth:forgotPassword.request.securityNote", {
+              defaultValue:
+                "For security, we always show a generic message even if the email does not exist in the system.",
+            })}
+          </p>
+        </motion.div>
+      </motion.form>
     </AuthFormLayout>
   );
 };

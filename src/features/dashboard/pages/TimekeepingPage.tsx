@@ -522,10 +522,16 @@ const TimekeepingPage = () => {
       ) : null}
 
       {canTimekeep && today?.warning && (
-        <Card className="border-amber-200 bg-amber-50 px-4 py-3 flex gap-3 items-start">
-          <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
-          <p className="text-sm text-amber-900">{today.warning}</p>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="border-amber-200 bg-amber-50 px-4 py-3 flex gap-3 items-start rounded-xl shadow-sm">
+            <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
+            <p className="text-sm text-amber-900">{today.warning}</p>
+          </Card>
+        </motion.div>
       )}
 
       <div
@@ -715,7 +721,7 @@ const TimekeepingPage = () => {
                 <Button
                   onClick={handleCheckIn}
                   disabled={processingCheckIn || today?.hasCheckedIn}
-                  className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+                  className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
                 >
                   {processingCheckIn && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -728,6 +734,7 @@ const TimekeepingPage = () => {
                     processingCheckOut || !today?.hasCheckedIn || today?.hasCheckedOut
                   }
                   variant="outline"
+                  className="hover:bg-[#FF7B21]/10 hover:border-[#FF7B21]/30 hover:text-[#FF7B21] transition-all duration-200"
                 >
                   {processingCheckOut && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -956,7 +963,7 @@ const TimekeepingPage = () => {
           <Card className="p-4 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-indigo-600" />
+                <BarChart3 className="h-5 w-5 text-[#FF7B21]" />
                 <h2 className="text-base font-semibold text-foreground">
                   {t("monthly.title")}
                 </h2>

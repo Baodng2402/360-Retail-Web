@@ -35,19 +35,30 @@ export interface ChartLineDataItem {
 interface ChartLineDefaultProps {
   data?: ChartLineDataItem[];
   isLoading?: boolean;
+  chartClassName?: string;
+  title?: string;
 }
 
-const ChartLineDefault = ({ data = defaultChartData, isLoading }: ChartLineDefaultProps) => (
-  <div className="w-full rounded-md border border-border bg-card p-4">
-    <h3 className="text-base md:text-lg font-semibold pb-4 md:pb-5">
-      Revenue Trend / Xu hướng doanh thu
-    </h3>
+const ChartLineDefault = ({
+  data = defaultChartData,
+  isLoading,
+  chartClassName,
+  title = "Revenue Trend / Xu hướng doanh thu",
+}: ChartLineDefaultProps) => (
+  <div className="w-full rounded-md border border-border bg-card p-3 sm:p-4 min-w-0">
+    <h3 className="text-sm sm:text-base font-semibold pb-2">{title}</h3>
     {isLoading ? (
       <div className="h-[200px] flex items-center justify-center text-muted-foreground">
         Đang tải...
       </div>
     ) : (
-    <ChartContainer config={chartConfig}>
+    <ChartContainer
+      config={chartConfig}
+      className={
+        chartClassName ??
+        "aspect-auto h-[200px] w-full min-h-[180px] max-h-[240px]"
+      }
+    >
       <LineChart
         accessibilityLayer
         data={data}

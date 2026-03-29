@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
 import { Card } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Input } from "@/shared/components/ui/input";
@@ -131,7 +132,7 @@ export default function AdminDashboardPage() {
       title: t("dashboard.kpis.totalRevenue"),
       icon: TrendingUp,
       value: overview ? formatVnd(overview.totalRevenue) : "—",
-      tone: "from-emerald-500 to-teal-500",
+      tone: "from-[#FF7B21] to-[#19D6C8]",
     },
     {
       key: "mrr",
@@ -145,7 +146,7 @@ export default function AdminDashboardPage() {
       title: t("dashboard.kpis.activeStores"),
       icon: Store,
       value: overview ? overview.activeStores.toLocaleString() : "—",
-      tone: "from-blue-500 to-cyan-500",
+      tone: "from-emerald-500 to-teal-500",
     },
     {
       key: "trialStores",
@@ -183,237 +184,282 @@ export default function AdminDashboardPage() {
   } as const;
 
   return (
-    <div className="space-y-6">
-      <Card className="p-4">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Badge className="bg-gradient-to-r from-teal-500 to-blue-500 text-white">
-                {t("dashboard.badge")}
-              </Badge>
-              <span>System overview dashboard</span>
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {t("dashboard.caption")}
-            </p>
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="p-4 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
+                  {t("dashboard.badge")}
+                </Badge>
+                <span>System overview dashboard</span>
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {t("dashboard.caption")}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">
+                  {t("dashboard.filters.from")}
+                </div>
+                <Input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="bg-background/80 backdrop-blur-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">
+                  {t("dashboard.filters.to")}
+                </div>
+                <Input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="bg-background/80 backdrop-blur-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">
+                  {t("dashboard.filters.groupBy")}
+                </div>
+                <Select value={groupBy} onValueChange={(v) => setGroupBy(v as SuperAdminGroupBy)}>
+                  <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                    <SelectValue placeholder="Chọn..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groupByOptions.map((opt) => (
+                      <SelectItem key={opt} value={opt}>
+                        {t(`dashboard.filters.groupByOptions.${opt}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">
-                {t("dashboard.filters.from")}
-              </div>
-              <Input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">
-                {t("dashboard.filters.to")}
-              </div>
-              <Input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">
-                {t("dashboard.filters.groupBy")}
-              </div>
-              <Select value={groupBy} onValueChange={(v) => setGroupBy(v as SuperAdminGroupBy)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {groupByOptions.map((opt) => (
-                    <SelectItem key={opt} value={opt}>
-                      {t(`dashboard.filters.groupByOptions.${opt}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
 
       <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-        {kpis.map((k) => (
-          <Card key={k.key} className="p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-xs text-muted-foreground">{k.title}</div>
-                <div className="mt-1 text-lg font-semibold truncate">
-                  {loading && !overview ? <Skeleton className="h-6 w-24" /> : k.value}
+        {kpis.map((k, index) => (
+          <motion.div
+            key={k.key}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
+            whileHover={{ scale: 1.02, y: -2 }}
+          >
+            <Card className="p-4 hover:shadow-lg transition-all duration-300">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">{k.title}</div>
+                  <div className="mt-1 text-lg font-semibold truncate">
+                    {loading && !overview ? <Skeleton className="h-6 w-24" /> : k.value}
+                  </div>
+                </div>
+                <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${k.tone} flex items-center justify-center text-white shadow-lg`}>
+                  <k.icon className="h-5 w-5" />
                 </div>
               </div>
-              <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${k.tone} flex items-center justify-center text-white`}>
-                <k.icon className="h-5 w-5" />
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="p-4 lg:col-span-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold">
-              {t("dashboard.revenueChart.title")}
-            </h3>
-            <Badge variant="outline">{groupBy}</Badge>
-          </div>
-          <div className="mt-3">
-            {loading && revenuePoints.length === 0 ? (
-              <div className="h-[240px] flex items-center justify-center text-muted-foreground">
-                {t("dashboard.states.loading")}
-              </div>
-            ) : revenuePoints.length === 0 ? (
-              <div className="h-[240px] flex items-center justify-center text-muted-foreground">
-                Không có dữ liệu doanh thu trong khoảng thời gian đã chọn.
-              </div>
-            ) : (
-              <ChartContainer config={revenueConfig} className="h-[260px] w-full">
-                <LineChart
-                  data={revenuePoints}
-                  margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                  <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="var(--color-revenue)"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ChartContainer>
-            )}
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold">
-              {t("dashboard.planDistribution.title")}
-            </h3>
-            <Badge variant="outline">
-              {t("dashboard.planDistribution.badge")}
-            </Badge>
-          </div>
-          <div className="mt-3">
-            {loading && planDistribution.length === 0 ? (
-              <div className="h-[240px] flex items-center justify-center text-muted-foreground">
-                {t("dashboard.states.loading")}
-              </div>
-            ) : planDistribution.length === 0 ? (
-              <div className="h-[240px] flex items-center justify-center text-muted-foreground">
-                {t("dashboard.planDistribution.empty")}
-              </div>
-            ) : (
-              <ChartContainer config={planConfig} className="h-[260px] w-full">
-                <PieChart>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Pie
-                    data={planDistribution}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={55}
-                    outerRadius={90}
-                    paddingAngle={2}
-                  />
-                </PieChart>
-              </ChartContainer>
-            )}
-          </div>
-          {planDistribution.length > 0 && (
-            <div className="mt-3 grid gap-2">
-              {planDistribution.slice(0, 6).map((p) => (
-                <div key={p.name} className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{p.name}</span>
-                  <span className="font-medium">{p.value.toLocaleString()}</span>
-                </div>
-              ))}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card className="p-4 lg:col-span-2 hover:shadow-lg transition-shadow duration-300">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold">
+                {t("dashboard.revenueChart.title")}
+              </h3>
+              <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">{groupBy}</Badge>
             </div>
-          )}
-        </Card>
+            <div className="mt-3">
+              {loading && revenuePoints.length === 0 ? (
+                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+                  {t("dashboard.states.loading")}
+                </div>
+              ) : revenuePoints.length === 0 ? (
+                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+                  Không có dữ liệu doanh thu trong khoảng thời gian đã chọn.
+                </div>
+              ) : (
+                <ChartContainer config={revenueConfig} className="h-[260px] w-full">
+                  <LineChart
+                    data={revenuePoints}
+                    margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                    <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+                    <Line
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="var(--color-revenue)"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ChartContainer>
+              )}
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold">
+                {t("dashboard.planDistribution.title")}
+              </h3>
+              <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
+                {t("dashboard.planDistribution.badge")}
+              </Badge>
+            </div>
+            <div className="mt-3">
+              {loading && planDistribution.length === 0 ? (
+                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+                  {t("dashboard.states.loading")}
+                </div>
+              ) : planDistribution.length === 0 ? (
+                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+                  {t("dashboard.planDistribution.empty")}
+                </div>
+              ) : (
+                <ChartContainer config={planConfig} className="h-[260px] w-full">
+                  <PieChart>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Pie
+                      data={planDistribution}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={55}
+                      outerRadius={90}
+                      paddingAngle={2}
+                    />
+                  </PieChart>
+                </ChartContainer>
+              )}
+            </div>
+            {planDistribution.length > 0 && (
+              <div className="mt-3 grid gap-2">
+                {planDistribution.slice(0, 6).map((p) => (
+                  <div key={p.name} className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{p.name}</span>
+                    <span className="font-medium">{p.value.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </motion.div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold">
-              {t("dashboard.funnel.title")}
-            </h3>
-            <Badge variant="outline">
-              {t("dashboard.funnel.badge")}
-            </Badge>
-          </div>
-          <div className="mt-4 grid gap-3">
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <span className="text-sm text-muted-foreground">
-                {t("dashboard.funnel.landing")}
-              </span>
-              <span className="text-sm font-semibold">
-                {funnel ? funnel.landing.toLocaleString() : "—"}
-              </span>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold">
+                {t("dashboard.funnel.title")}
+              </h3>
+              <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
+                {t("dashboard.funnel.badge")}
+              </Badge>
             </div>
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <span className="text-sm text-muted-foreground">
-                {t("dashboard.funnel.signup")}
-              </span>
-              <span className="text-sm font-semibold">
-                {funnel ? funnel.signup.toLocaleString() : "—"}
-              </span>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <span className="text-sm text-muted-foreground">
-                {t("dashboard.funnel.conversion")}
-              </span>
-              <span className="text-sm font-semibold">
-                {funnel && funnel.landing > 0
-                  ? `${((funnel.signup / funnel.landing) * 100).toFixed(2)}%`
-                  : "—"}
-              </span>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 lg:col-span-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold">
-              {t("dashboard.registrations.title")}
-            </h3>
-            <Badge variant="outline" className="gap-1">
-              <UserPlus className="h-3.5 w-3.5" />
-              {t("dashboard.registrations.badge")}
-            </Badge>
-          </div>
-          <div className="mt-3">
-            {loading && registrations.length === 0 ? (
-              <div className="h-[240px] flex items-center justify-center text-muted-foreground">
-                {t("dashboard.states.loading")}
+            <div className="mt-4 grid gap-3">
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <span className="text-sm text-muted-foreground">
+                  {t("dashboard.funnel.landing")}
+                </span>
+                <span className="text-sm font-semibold">
+                  {funnel ? funnel.landing.toLocaleString() : "—"}
+                </span>
               </div>
-            ) : (
-              <ChartContainer config={registrationsConfig} className="h-[260px] w-full">
-                <BarChart data={registrations} margin={{ left: 12, right: 12, top: 8, bottom: 8 }}>
-                  <CartesianGrid vertical={false} />
-                  <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                  <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-                  <Bar dataKey="count" fill="var(--color-count)" radius={6} />
-                </BarChart>
-              </ChartContainer>
-            )}
-          </div>
-        </Card>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <span className="text-sm text-muted-foreground">
+                  {t("dashboard.funnel.signup")}
+                </span>
+                <span className="text-sm font-semibold">
+                  {funnel ? funnel.signup.toLocaleString() : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <span className="text-sm text-muted-foreground">
+                  {t("dashboard.funnel.conversion")}
+                </span>
+                <span className="text-sm font-semibold">
+                  {funnel && funnel.landing > 0
+                    ? `${((funnel.signup / funnel.landing) * 100).toFixed(2)}%`
+                    : "—"}
+                </span>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <Card className="p-4 lg:col-span-2 hover:shadow-lg transition-shadow duration-300">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold">
+                {t("dashboard.registrations.title")}
+              </h3>
+              <Badge variant="outline" className="gap-1 border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
+                <UserPlus className="h-3.5 w-3.5" />
+                {t("dashboard.registrations.badge")}
+              </Badge>
+            </div>
+            <div className="mt-3">
+              {loading && registrations.length === 0 ? (
+                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+                  {t("dashboard.states.loading")}
+                </div>
+              ) : (
+                <ChartContainer config={registrationsConfig} className="h-[260px] w-full">
+                  <BarChart data={registrations} margin={{ left: 12, right: 12, top: 8, bottom: 8 }}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                    <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={6} />
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+          </Card>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

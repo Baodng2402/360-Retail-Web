@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
 import toast from "react-hot-toast";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -252,153 +253,185 @@ export default function AdminPlansPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="p-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-gradient-to-r from-teal-500 to-blue-500 text-white">
-                {t("sidebar.brand.title")}
-              </Badge>
-              <span className="text-sm text-muted-foreground">CRUD gói dịch vụ (Plans)</span>
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="p-4 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
+                  {t("sidebar.brand.title")}
+                </Badge>
+                <span className="text-sm text-muted-foreground">CRUD gói dịch vụ (Plans)</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Tìm theo tên hoặc id..."
+                className="w-full sm:w-[320px] bg-background/80 backdrop-blur-sm"
+              />
+              <Button
+                onClick={openCreate}
+                className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
+              >
+                <Plus className="h-4 w-4" />
+                Tạo gói
+              </Button>
             </div>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Tìm theo tên hoặc id..."
-              className="w-full sm:w-[320px]"
-            />
-            <Button
-              onClick={openCreate}
-              className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Tạo gói
-            </Button>
+        </Card>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold flex items-center gap-2">
+              <Package className="h-4 w-4 text-[#FF7B21]" />
+              Danh sách Plans
+            </h3>
+            <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
+              {filtered.length.toLocaleString()}
+            </Badge>
           </div>
-        </div>
-      </Card>
 
-      <Card className="p-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold flex items-center gap-2">
-            <Package className="h-4 w-4 text-teal-600" />
-            Danh sách Plans
-          </h3>
-          <Badge variant="outline">{filtered.length.toLocaleString()}</Badge>
-        </div>
-
-        <div className="mt-4">
-          {loading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-10 text-center text-sm text-muted-foreground">
-              Chưa có plan nào.
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead
-                    className="cursor-pointer select-none"
-                    onClick={() => {
-                      setSortBy("name");
-                      setSortDir((prev) =>
-                        sortBy === "name" && prev === "asc" ? "desc" : "asc",
-                      );
-                    }}
-                  >
-                    Tên
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none"
-                    onClick={() => {
-                      setSortBy("price");
-                      setSortDir((prev) =>
-                        sortBy === "price" && prev === "asc" ? "desc" : "asc",
-                      );
-                    }}
-                  >
-                    Giá
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none"
-                    onClick={() => {
-                      setSortBy("duration");
-                      setSortDir((prev) =>
-                        sortBy === "duration" && prev === "asc" ? "desc" : "asc",
-                      );
-                    }}
-                  >
-                    Thời hạn
-                  </TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none"
-                    onClick={() => {
-                      setSortBy("subs");
-                      setSortDir((prev) =>
-                        sortBy === "subs" && prev === "asc" ? "desc" : "asc",
-                      );
-                    }}
-                  >
-                    Active subs
-                  </TableHead>
-                  <TableHead className="text-right">Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paged.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="max-w-[260px] truncate">
-                      <div className="font-medium">{p.planName}</div>
-                      <div className="text-xs text-muted-foreground truncate">{p.id}</div>
-                    </TableCell>
-                    <TableCell>{formatVnd(p.price ?? 0)}</TableCell>
-                    <TableCell>{(p.durationDays ?? 0).toLocaleString()} ngày</TableCell>
-                    <TableCell>
-                      <Badge variant={p.isActive ? "outline" : "destructive"}>
-                        {p.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{(p.activeSubscriptions ?? 0).toLocaleString()}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="inline-flex items-center gap-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-blue-600 hover:text-blue-700"
-                          onClick={() => openEdit(p)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-red-600 hover:text-red-700"
-                          onClick={() => setDeleteConfirm(p)}
-                          disabled={!p.isActive}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
-      </Card>
+          <div className="mt-4">
+            {loading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="py-10 text-center text-sm text-muted-foreground">
+                Chưa có plan nào.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5 hover:bg-gradient-to-r">
+                      <TableHead
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setSortBy("name");
+                          setSortDir((prev) =>
+                            sortBy === "name" && prev === "asc" ? "desc" : "asc",
+                          );
+                        }}
+                      >
+                        Tên
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setSortBy("price");
+                          setSortDir((prev) =>
+                            sortBy === "price" && prev === "asc" ? "desc" : "asc",
+                          );
+                        }}
+                      >
+                        Giá
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setSortBy("duration");
+                          setSortDir((prev) =>
+                            sortBy === "duration" && prev === "asc" ? "desc" : "asc",
+                          );
+                        }}
+                      >
+                        Thời hạn
+                      </TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setSortBy("subs");
+                          setSortDir((prev) =>
+                            sortBy === "subs" && prev === "asc" ? "desc" : "asc",
+                          );
+                        }}
+                      >
+                        Active subs
+                      </TableHead>
+                      <TableHead className="text-right">Thao tác</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paged.map((p, index) => (
+                      <motion.tr
+                        key={p.id}
+                        className="border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.03 }}
+                      >
+                        <TableCell className="max-w-[260px] truncate">
+                          <div className="font-medium">{p.planName}</div>
+                          <div className="text-xs text-muted-foreground truncate">{p.id}</div>
+                        </TableCell>
+                        <TableCell>{formatVnd(p.price ?? 0)}</TableCell>
+                        <TableCell>{(p.durationDays ?? 0).toLocaleString()} ngày</TableCell>
+                        <TableCell>
+                          <Badge variant={p.isActive ? "outline" : "destructive"} className={p.isActive ? "border-emerald-500/50 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30" : ""}>
+                            {p.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{(p.activeSubscriptions ?? 0).toLocaleString()}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="inline-flex items-center gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
+                              onClick={() => openEdit(p)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200"
+                              onClick={() => setDeleteConfirm(p)}
+                              disabled={!p.isActive}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </motion.tr>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+        </Card>
+      </motion.div>
 
       {!loading && filtered.length > 0 && (
-        <div className="flex items-center justify-between gap-3 text-xs sm:text-sm text-muted-foreground">
+        <motion.div
+          className="flex items-center justify-between gap-3 text-xs sm:text-sm text-muted-foreground"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
           <div>
             Hiển thị{" "}
             <span className="font-semibold">
@@ -432,7 +465,7 @@ export default function AdminPlansPage() {
               Trang sau
             </Button>
           </div>
-        </div>
+        </motion.div>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -573,7 +606,7 @@ export default function AdminPlansPage() {
             <Button
               onClick={() => void save()}
               disabled={saving || !form.planName.trim() || Number(form.durationDays) <= 0}
-              className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+              className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
             >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editing ? "Lưu" : "Tạo"}
@@ -585,7 +618,10 @@ export default function AdminPlansPage() {
       <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Vô hiệu hoá plan</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-red-500" />
+              Vô hiệu hoá plan
+            </DialogTitle>
             <DialogDescription>
               Bạn có chắc muốn vô hiệu hoá{" "}
               <strong>{deleteConfirm?.planName}</strong>?
@@ -602,7 +638,7 @@ export default function AdminPlansPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
 

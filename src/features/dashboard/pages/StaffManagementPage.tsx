@@ -25,9 +25,10 @@ import type { Task } from "@/shared/types/task";
 import { useStoreStore } from "@/shared/store/storeStore";
 import { timekeepingApi } from "@/shared/lib/timekeepingApi";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 
 const BUTTON_GRADIENT =
-  "from-teal-500 to-teal-600 bg-gradient-to-r hover:from-teal-600 hover:to-teal-700 text-white shadow-sm transition-all";
+  "from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#FF7B21]/30 hover:-translate-y-0.5";
 
 const StaffManagementPage = () => {
   const { t } = useTranslation("staff");
@@ -215,12 +216,28 @@ const StaffManagementPage = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <StoreSelector pageDescription={t("page.storeSelectorHint")} />
-      <div className="flex flex-wrap items-center justify-end gap-3">
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <StoreSelector pageDescription={t("page.storeSelectorHint")} />
+      </motion.div>
+      <motion.div
+        className="flex flex-wrap items-center justify-end gap-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
         <Button
           variant="outline"
-          className="border-teal-600 text-teal-600 hover:bg-teal-50"
+          className="border-[#FF7B21]/30 text-[#FF7B21] hover:bg-[#FF7B21]/10 hover:border-[#FF7B21] transition-all duration-300"
           onClick={() => setCreateTaskModalOpen(true)}
         >
           {t("actions.createTask")}
@@ -232,19 +249,30 @@ const StaffManagementPage = () => {
           <UserPlus className="mr-2 h-4 w-4" />
           {t("actions.addStaff")}
         </Button>
-      </div>
+      </motion.div>
 
-      <DashboardStats stats={stats} />
-      <div className="border pb-10 px-5 rounded-2xl">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <DashboardStats stats={stats} />
+      </motion.div>
+      <motion.div
+        className="border bg-card/50 backdrop-blur-sm pb-10 px-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-5">
-          <span className="text-md font-bold">
+          <span className="text-md font-bold text-foreground">
             {t("list.title")}
           </span>
           <div className="relative w-full sm:w-64">
             <SearchInput
               placeholder={t("list.searchPlaceholder")}
               wrapperClassName="w-full sm:w-64"
-              className="bg-background"
+              className="bg-background transition-all duration-300 focus:ring-2 focus:ring-[#FF7B21]/20"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -255,16 +283,21 @@ const StaffManagementPage = () => {
             {t("list.loading")}
           </div>
         ) : (
-          <div className="flex justify-center pt-10 min-w-full">
+          <motion.div
+            className="flex justify-center pt-10 min-w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
             <DataTable
               data={filteredStaff}
               onViewStaff={handleViewStaff}
               tasksByStaffId={taskByAssignee}
               onViewTasks={handleViewTasks}
             />
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       <InviteStaffModal
         open={inviteModalOpen}
@@ -282,7 +315,7 @@ const StaffManagementPage = () => {
         staffName={tasksModalStaffName}
         tasks={tasksModalTasks}
       />
-    </div>
+    </motion.div>
   );
 };
 

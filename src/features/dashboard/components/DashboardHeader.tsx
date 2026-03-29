@@ -4,6 +4,8 @@ import { useLocation } from "react-router-dom";
 import ThemeMode from "@/shared/components/ui/themeMode";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
+import { Menu, X } from "lucide-react";
 
 const PAGE_NAME = {
   "/dashboard": {
@@ -52,56 +54,100 @@ const ROLE_DISPLAY_LABELS: Record<string, string> = {
 
 interface DashboardHeaderProps {
   isSidebarCollapsed: boolean;
+  onMobileMenuToggle?: () => void;
+  isMobileMenuOpen?: boolean;
 }
 
 export const DashboardHeader = ({
   isSidebarCollapsed,
+  onMobileMenuToggle,
+  isMobileMenuOpen,
 }: DashboardHeaderProps) => {
   const { t } = useTranslation("dashboard");
   const { user } = useAuthStore();
   const location = useLocation();
   const pageName = PAGE_NAME[location.pathname as keyof typeof PAGE_NAME];
-  
+
   // Get display role (handle comma-separated roles)
   const displayRole = (() => {
     const role = user?.role;
     if (!role) return "User";
-    // role is already normalized by decodeTokenToUser
     return ROLE_DISPLAY_LABELS[role] ?? role;
   })();
-  
+
   return (
-    <header className="border-b border-gray-200 dark:border-gray-700 bg-background sticky top-0 z-50 h-[73px] flex items-center">
+    <header className="border-b border-border/50 bg-gradient-to-r from-background via-background to-muted/20 backdrop-blur-md sticky top-0 z-50 h-[73px]">
       <div
-        className={`flex items-center justify-between w-full transition-all duration-300 ${
-          isSidebarCollapsed ? "px-4" : "container mx-auto px-4"
+        className={`flex items-center justify-between h-full w-full transition-all duration-300 ${
+          isSidebarCollapsed ? "px-4 lg:px-6" : "container mx-auto px-4 lg:px-6"
         }`}
       >
+        {/* Left: Mobile menu button + Page title */}
         <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold">
+          {/* Mobile menu toggle */}
+          <button
+            onClick={onMobileMenuToggle}
+            className="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-accent/50 hover:bg-accent transition-all duration-200 active:scale-95"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            <motion.div
+              animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </motion.div>
+          </button>
+
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col justify-center"
+          >
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
               {pageName ? t(pageName.nameKey) : ""}
             </h1>
-            <h2 className="text-sm text-muted-foreground">
+            <h2 className="text-xs sm:text-sm text-muted-foreground leading-tight">
               {pageName ? t(pageName.titleKey) : ""}
             </h2>
-          </div>
+          </motion.div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="scale-75 origin-right">
+
+        {/* Right: Controls */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="flex items-center gap-2 sm:gap-3"
+        >
+          <div className="scale-90 sm:scale-100 origin-right">
             <ThemeMode />
           </div>
           <LanguageSwitcher />
-          <AvatarDropĐown />
-          <div className="flex flex-col">
-            <span className="text-sm">
-              {t("header.greeting", { name: user?.name || "User" })}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {displayRole}
-            </span>
+
+          {/* User info */}
+          <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-border/50">
+            <div className="flex flex-col justify-center">
+              <span className="text-sm font-medium leading-tight">
+                {t("header.greeting", { name: user?.name || "User" })}
+              </span>
+              <span className="text-xs text-muted-foreground leading-tight">
+                {displayRole}
+              </span>
+            </div>
+            <AvatarDropĐown />
           </div>
-        </div>
+
+          {/* Mobile user avatar */}
+          <div className="sm:hidden">
+            <AvatarDropĐown />
+          </div>
+        </motion.div>
       </div>
     </header>
   );

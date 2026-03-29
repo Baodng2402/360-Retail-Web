@@ -276,30 +276,35 @@ const CustomerPage = () => {
       <StoreSelector pageDescription={tCustomer("page.storeSelectorHint")} />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-5 bg-gradient-to-br from-teal-50 to-white dark:from-teal-950/20 dark:to-background border-teal-200">
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card className="p-5 bg-gradient-to-br from-[#FF7B21]/10 to-white dark:from-[#FF7B21]/10 dark:to-background border-[#FF7B21]/20 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Tổng khách hàng</p>
               <h3 className="text-2xl font-bold text-foreground">{totalCustomers}</h3>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
-              <Users className="h-6 w-6 text-teal-600" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF7B21]/20 to-[#FF7B21]/10 flex items-center justify-center shadow-inner">
+              <Users className="h-6 w-6 text-[#FF7B21]" />
             </div>
           </div>
         </Card>
-        <Card className="p-5 bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200">
+        <Card className="p-5 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-background border-emerald-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Tổng doanh thu</p>
-              <h3 className="text-2xl font-bold text-foreground">{totalRevenue.toLocaleString("vi-VN")}đ</h3>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">{totalRevenue.toLocaleString("vi-VN")}đ</h3>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <ShoppingBag className="h-6 w-6 text-green-600" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-900/10 flex items-center justify-center shadow-inner">
+              <ShoppingBag className="h-6 w-6 text-emerald-600" />
             </div>
           </div>
         </Card>
-        <Card className="p-5 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background border-amber-200">
+        <Card className="p-5 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background border-amber-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Khách VIP</p>
@@ -307,12 +312,12 @@ const CustomerPage = () => {
                 {customers.filter((c) => (c.totalSpend || 0) > 5000000).length}
               </h3>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-900/10 flex items-center justify-center shadow-inner">
               <Crown className="h-6 w-6 text-amber-600" />
             </div>
           </div>
         </Card>
-      </div>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -321,12 +326,12 @@ const CustomerPage = () => {
         className="grid grid-cols-1 lg:grid-cols-3 gap-6"
       >
         {/* Customer List */}
-        <Card className="lg:col-span-1 p-0 overflow-hidden">
+        <Card className="lg:col-span-1 p-0 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
           {/* Header */}
-          <div className="p-5 border-b bg-gradient-to-r from-teal-500/10 to-blue-500/10">
+          <div className="p-5 border-b bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
@@ -343,13 +348,13 @@ const CustomerPage = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Tìm kiếm..."
-                className="pl-10"
+                className="pl-10 bg-background/80 backdrop-blur-sm transition-all duration-200 focus:ring-2 focus:ring-[#FF7B21]/20"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <Button
-              className="w-full mt-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
+              className="w-full mt-4 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
               onClick={openCreateForm}
             >
               <UserPlus className="mr-2 h-4 w-4" />
@@ -374,18 +379,18 @@ const CustomerPage = () => {
                   return (
                     <div
                       key={c.id || `${c.fullName}-${index}`}
-                      className={`p-4 cursor-pointer transition-colors ${
+                      className={`p-4 cursor-pointer transition-all duration-200 ${
                         isSelected
-                          ? "bg-teal-50 dark:bg-teal-950/30 border-l-4 border-l-teal-500"
-                          : "hover:bg-muted/50 border-l-4 border-l-transparent"
+                          ? "bg-gradient-to-r from-[#FF7B21]/10 to-transparent border-l-4 border-l-[#FF7B21]"
+                          : "hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent border-l-4 border-l-transparent"
                       }`}
                       onClick={() => void handleSelectCustomer(c)}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold shadow-md ${
                           (c.totalSpend || 0) > 5000000
                             ? "bg-gradient-to-br from-amber-400 to-amber-600"
-                            : "bg-gradient-to-br from-teal-500 to-blue-500"
+                            : "bg-gradient-to-br from-[#FF7B21] to-[#19D6C8]"
                         }`}>
                           {c.fullName[0].toUpperCase()}
                         </div>
@@ -405,7 +410,7 @@ const CustomerPage = () => {
                             <ShoppingBag className="h-3 w-3" />
                             {c.totalOrders ?? 0} đơn
                           </Badge>
-                          <Badge variant="outline" className="gap-1 text-teal-600 border-teal-200">
+                          <Badge variant="outline" className="gap-1 text-[#FF7B21] border-[#FF7B21]/30 bg-[#FF7B21]/5">
                             {(c.totalSpend || 0).toLocaleString("vi-VN")}đ
                           </Badge>
                         </div>
@@ -429,13 +434,13 @@ const CustomerPage = () => {
           ) : (
             <>
               {/* Customer Header */}
-              <div className="p-6 border-b bg-gradient-to-r from-teal-500/10 to-blue-500/10">
+              <div className="p-6 border-b bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold ${
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg ${
                       (selectedCustomer.totalSpend || 0) > 5000000
                         ? "bg-gradient-to-br from-amber-400 to-amber-600"
-                        : "bg-gradient-to-br from-teal-500 to-blue-500"
+                        : "bg-gradient-to-br from-[#FF7B21] to-[#19D6C8]"
                     }`}>
                       {selectedCustomer.fullName[0].toUpperCase()}
                     </div>
@@ -454,12 +459,12 @@ const CustomerPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openEditForm(selectedCustomer)}>
+                    <Button variant="outline" size="sm" className="hover:bg-[#FF7B21]/10 hover:border-[#FF7B21]/30 hover:text-[#FF7B21] transition-all duration-200" onClick={() => openEditForm(selectedCustomer)}>
                       <Edit2 className="h-4 w-4 mr-2" />
                       Sửa
                     </Button>
                     {canDelete && (
-                      <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => confirmDelete(selectedCustomer)}>
+                      <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors" onClick={() => confirmDelete(selectedCustomer)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -469,16 +474,16 @@ const CustomerPage = () => {
 
               {/* Tabs */}
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex-1">
-                <TabsList className="w-full justify-start rounded-none border-b px-4">
-                  <TabsTrigger value="info" className="gap-2">
+                <TabsList className="w-full justify-start rounded-none border-b px-4 bg-muted/30">
+                  <TabsTrigger value="info" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF7B21] data-[state=active]:to-[#19D6C8] data-[state=active]:text-white transition-all duration-300">
                     <Users className="h-4 w-4" />
                     Thông tin
                   </TabsTrigger>
-                  <TabsTrigger value="loyalty" className="gap-2">
+                  <TabsTrigger value="loyalty" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF7B21] data-[state=active]:to-[#19D6C8] data-[state=active]:text-white transition-all duration-300">
                     <Award className="h-4 w-4" />
                     Tích điểm
                   </TabsTrigger>
-                  <TabsTrigger value="feedback" className="gap-2">
+                  <TabsTrigger value="feedback" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF7B21] data-[state=active]:to-[#19D6C8] data-[state=active]:text-white transition-all duration-300">
                     <MessageSquare className="h-4 w-4" />
                     Phản hồi
                   </TabsTrigger>
@@ -488,9 +493,9 @@ const CustomerPage = () => {
                   {/* Info Tab */}
                   <TabsContent value="info" className="m-0 space-y-6">
                     <div className="grid grid-cols-2 gap-4">
-                      <Card className="p-4 bg-gradient-to-br from-blue-50 to-white border-blue-200">
+                      <Card className="p-4 bg-gradient-to-br from-blue-50 to-white border-blue-200 rounded-xl hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center shadow-inner">
                             <ShoppingBag className="h-5 w-5 text-blue-600" />
                           </div>
                           <div>
@@ -499,14 +504,14 @@ const CustomerPage = () => {
                           </div>
                         </div>
                       </Card>
-                      <Card className="p-4 bg-gradient-to-br from-green-50 to-white border-green-200">
+                      <Card className="p-4 bg-gradient-to-br from-emerald-50 to-white border-emerald-200 rounded-xl hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                            <Crown className="h-5 w-5 text-green-600" />
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center shadow-inner">
+                            <Crown className="h-5 w-5 text-emerald-600" />
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Tổng chi tiêu</p>
-                            <p className="text-xl font-bold text-green-600">
+                            <p className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
                               {(selectedCustomer.totalSpend || 0).toLocaleString("vi-VN")}đ
                             </p>
                           </div>
@@ -539,7 +544,7 @@ const CustomerPage = () => {
                         </div>
                         <div className="flex justify-between py-2">
                           <span className="text-muted-foreground">Trạng thái</span>
-                          <Badge className={selectedCustomer.isActive !== false ? "bg-green-500" : "bg-gray-500"}>
+                          <Badge className={selectedCustomer.isActive !== false ? "bg-gradient-to-r from-emerald-500 to-emerald-600" : "bg-gray-500"}>
                             {selectedCustomer.isActive !== false ? "Hoạt động" : "Ngừng"}
                           </Badge>
                         </div>
@@ -625,8 +630,8 @@ const CustomerPage = () => {
                       </Card>
                     ) : (
                       <div className="space-y-4">
-                        {feedbacks.map((f) => (
-                          <Card key={f.id} className="p-4">
+                        {feedbacks.map((f, _i) => (
+                          <Card key={f.id} className="p-4 hover:shadow-md transition-all duration-200 hover:border-[#FF7B21]/30">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-1">
                                 {Array.from({ length: 5 }).map((_, i) => (
@@ -712,7 +717,7 @@ const CustomerPage = () => {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
+              className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
             >
               {saving
                 ? tCommon("states.saving")

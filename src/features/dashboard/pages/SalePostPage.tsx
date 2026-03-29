@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -72,6 +73,7 @@ type ProductVariantDisplay = {
   color?: string;
   stockQuantity?: number;
   priceOverride?: number;
+  sku?: string;
 };
 
 type ProductDisplay = {
@@ -124,7 +126,14 @@ const SalePostPage = () => {
   const [removeLastConfirmOpen, setRemoveLastConfirmOpen] = useState(false);
   const [pendingRemoveProductId, setPendingRemoveProductId] = useState<string | null>(null);
   const [variantPickerProduct, setVariantPickerProduct] = useState<ProductDisplay | null>(null);
-  const [variantQuantity, setVariantQuantity] = useState(1);
+  /** Số lượng nhập tay cho từng product (không biến thể) */
+  const [productQty, setProductQty] = useState<Record<string, number>>({});
+  /** Số lượng cho từng variant trong variant picker: variantId → qty */
+  const [variantQty, setVariantQty] = useState<Record<string, number>>({});
+
+  const cartItemKey = (item: CartItem) =>
+    `${item.product.id}-${item.productVariantId ?? "base"}`;
+
   const pendingRemoveProductName =
     pendingRemoveProductId
       ? cart.find((c) => cartItemKey(c) === pendingRemoveProductId)?.product
@@ -315,70 +324,55 @@ const SalePostPage = () => {
       product.category.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const addToCart = (product: ProductDisplay, productVariantId?: string) => {
-    const existingItem = cart.find(
-      (item) =>
-        item.product.id === product.id &&
-        (item.productVariantId ?? "") === (productVariantId ?? ""),
-    );
-    if (existingItem) {
-      setCart(
-        cart.map((item) =>
+  const addToCart = (product: ProductDisplay, productVariantId?: string, qty = 1) => {
+    setCart((prev) => {
+      const existingIdx = prev.findIndex(
+        (item) =>
           item.product.id === product.id &&
-          (item.productVariantId ?? "") === (productVariantId ?? "")
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        ),
+          (item.productVariantId ?? "") === (productVariantId ?? ""),
       );
-    } else {
-      setCart([
-        ...cart,
-        { product, quantity: 1, productVariantId: productVariantId ?? undefined },
-      ]);
-    }
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = {
+          ...updated[existingIdx],
+          quantity: updated[existingIdx].quantity + qty,
+        };
+        return updated;
+      }
+      return [...prev, { product, quantity: qty, productVariantId: productVariantId ?? undefined }];
+    });
   };
-
-  const handleProductClick = (product: ProductDisplay) => {
-    if (product.stock === 0) return;
-    if (product.hasVariants && product.variants && product.variants.length > 0) {
-      setVariantPickerProduct(product);
-      setVariantQuantity(1);
-      return;
-    }
-    addToCart(product);
-  };
-
-  const cartItemKey = (item: CartItem) =>
-    `${item.product.id}-${item.productVariantId ?? "base"}`;
 
   const updateQuantity = (
     productId: string,
     delta: number,
     productVariantId?: string,
   ) => {
-    const target = cart.find(
-      (i) =>
-        i.product.id === productId &&
-        (i.productVariantId ?? "") === (productVariantId ?? ""),
-    );
-    if (!target) return;
+    setCart((prev) => {
+      const target = prev.find(
+        (i) =>
+          i.product.id === productId &&
+          (i.productVariantId ?? "") === (productVariantId ?? ""),
+      );
+      if (!target) return prev;
 
-    if (delta < 0 && target.quantity <= 1 && cart.length === 1) {
-      setPendingRemoveProductId(cartItemKey(target));
-      setRemoveLastConfirmOpen(true);
-      return;
-    }
+      const newQty = target.quantity + delta;
 
-    setCart(
-      cart
-        .map((item) =>
-          item.product.id === productId &&
-          (item.productVariantId ?? "") === (productVariantId ?? "")
-            ? { ...item, quantity: Math.max(0, item.quantity + delta) }
-            : item,
-        )
-        .filter((item) => item.quantity > 0),
-    );
+      if (newQty <= 0) {
+        setPendingRemoveProductId(
+          `${productId}-${productVariantId ?? "base"}`,
+        );
+        setRemoveLastConfirmOpen(true);
+        return prev;
+      }
+
+      return prev.map((item) =>
+        item.product.id === productId &&
+        (item.productVariantId ?? "") === (productVariantId ?? "")
+          ? { ...item, quantity: newQty }
+          : item,
+      );
+    });
   };
 
   const removeFromCart = (productId: string, productVariantId?: string) => {
@@ -503,7 +497,7 @@ const SalePostPage = () => {
     <div className="space-y-6">
       <StoreSelector pageDescription={t("sale:page.storeSelectorHint")} />
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-md grid-cols-3">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="pos">{t("sale:tabs.pos")}</TabsTrigger>
           <TabsTrigger value="inventory">
             {t("sale:tabs.inventory")}
@@ -562,9 +556,8 @@ const SalePostPage = () => {
                         className={`p-4 transition-all group ${
                           product.stock === 0
                             ? "opacity-60 cursor-not-allowed"
-                            : "hover:shadow-lg cursor-pointer"
+                            : "hover:shadow-lg"
                         }`}
-                        onClick={() => handleProductClick(product)}
                       >
                         <div className="mb-3 text-center min-h-[128px] flex items-center justify-center">
                           {renderProductImage(product.id, product.image, "md")}
@@ -595,13 +588,72 @@ const SalePostPage = () => {
                           <span className="font-bold text-primary">
                             {product.price.toLocaleString("vi-VN")} ₫
                           </span>
+                          {product.stock > 0 ? (
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                className="h-7 w-7"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const cur = productQty[product.id] ?? 1;
+                                  if (cur > 1) {
+                                    setProductQty((q) => ({ ...q, [product.id]: cur - 1 }));
+                                  }
+                                }}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <Input
+                                type="number"
+                                min={1}
+                                max={product.stock}
+                                value={productQty[product.id] ?? 1}
+                                onChange={(e) => {
+                                  const n = Number(e.target.value);
+                                  if (Number.isFinite(n) && n >= 1) {
+                                    setProductQty((q) => ({
+                                      ...q,
+                                      [product.id]: Math.min(product.stock, n),
+                                    }));
+                                  }
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="h-7 w-12 text-center text-xs px-1 py-1"
+                              />
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                className="h-7 w-7"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const cur = productQty[product.id] ?? 1;
+                                  if (cur < product.stock) {
+                                    setProductQty((q) => ({ ...q, [product.id]: cur + 1 }));
+                                  }
+                                }}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : null}
+                        </div>
+                        {product.stock > 0 && (
                           <Button
                             size="sm"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const qty = productQty[product.id] ?? 1;
+                              addToCart(product, undefined, qty);
+                              toast.success(`Đã thêm ${qty} × ${product.name} vào giỏ`);
+                              setProductQty((q) => ({ ...q, [product.id]: 1 }));
+                            }}
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-4 w-4 mr-1" />
+                            Thêm
                           </Button>
-                        </div>
+                        )}
                       </Card>
                     ))}
                   </div>
@@ -644,28 +696,36 @@ const SalePostPage = () => {
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">
+                              <p className="font-semibold text-sm truncate">
                                 {item.product.name}
-                                {item.productVariantId &&
-                                  (() => {
+                              </p>
+                              {item.productVariantId
+                                ? (() => {
                                     const v = item.product.variants?.find(
                                       (x) => x.id === item.productVariantId,
                                     );
-                                    return v
-                                      ? ` (${[v.size, v.color]
-                                          .filter(Boolean)
-                                          .join(" / ") || v.variantName || "Biến thể"})`
-                                      : "";
-                                  })()}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {(item.product.variants?.find(
-                                  (x) => x.id === item.productVariantId,
-                                )?.priceOverride ?? item.product.price).toLocaleString(
-                                  "vi-VN",
-                                )}{" "}
-                                ₫
-                              </p>
+                                    const variantLabel = [v?.size, v?.color]
+                                      .filter(Boolean)
+                                      .join(" / ");
+                                    return (
+                                      <>
+                                        <Badge variant="outline" className="text-xs mt-0.5 mb-1">
+                                          {variantLabel || v?.variantName || "Biến thể"}
+                                        </Badge>
+                                        <p className="text-xs text-muted-foreground">
+                                          SKU: {v?.sku ?? "—"}
+                                        </p>
+                                        <p className="text-xs font-medium">
+                                          {(v?.priceOverride ?? item.product.price).toLocaleString("vi-VN")} ₫
+                                        </p>
+                                      </>
+                                    );
+                                  })()
+                                : (
+                                  <p className="text-xs text-muted-foreground">
+                                    {item.product.price.toLocaleString("vi-VN")} ₫
+                                  </p>
+                                )}
                             </div>
                             <div className="flex items-center gap-2">
                               <Button
@@ -1004,76 +1064,141 @@ const SalePostPage = () => {
         open={!!variantPickerProduct}
         onOpenChange={(open) => !open && setVariantPickerProduct(null)}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>
-              {variantPickerProduct?.name} – {t("sale:misc.chooseVariant", { defaultValue: "Chọn biến thể" })}
+            <DialogTitle className="text-base">
+              {variantPickerProduct?.name}
             </DialogTitle>
             <DialogDescription>
-              {t("sale:misc.chooseVariantHint", {
-                defaultValue: "Chọn một biến thể để thêm vào giỏ.",
-              })}
+              Nhập số lượng cho từng biến thể muốn thêm vào giỏ
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <Label className="text-xs">
-                  {t("sale:misc.quantity", { defaultValue: "Số lượng" })}
-                </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={variantQuantity}
-                  onChange={(e) => {
-                    const n = Number(e.target.value);
-                    setVariantQuantity(Number.isFinite(n) ? Math.max(1, n) : 1);
-                  }}
-                />
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setVariantQuantity(1)}
-              >
-                Reset
-              </Button>
-            </div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto">
+          <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
             {variantPickerProduct?.variants?.map((v) => {
+              const vid = v.id ?? `${v.size}-${v.color}`;
               const inStock = (v.stockQuantity ?? 0) > 0;
+              const qty = variantQty[vid] ?? 1;
               return (
-                <Button
-                  key={v.id ?? `${v.size}-${v.color}`}
-                  variant="outline"
-                  className="w-full justify-between h-auto py-3"
-                  disabled={!inStock}
-                  onClick={() => {
-                    if (!variantPickerProduct || !v.id) return;
-                    for (let i = 0; i < Math.max(1, variantQuantity); i += 1) {
-                      addToCart(variantPickerProduct, v.id);
-                    }
-                    setVariantPickerProduct(null);
-                  }}
+                <div
+                  key={vid}
+                  className={cn(
+                    "flex items-center gap-3 p-3 rounded-xl border transition-all",
+                    !inStock
+                      ? "border-destructive/30 bg-destructive/5 opacity-60"
+                      : "border-border bg-muted/30 hover:bg-muted/50",
+                  )}
                 >
-                  <span>
-                    {[v.variantName, v.size, v.color].filter(Boolean).join(" / ") || "Biến thể"}
-                    {v.priceOverride != null && (
-                      <span className="ml-2 text-muted-foreground">
-                        {v.priceOverride.toLocaleString("vi-VN")} ₫
-                      </span>
-                    )}
-                  </span>
-                  <Badge variant={inStock ? "secondary" : "destructive"}>
-                    {inStock
-                      ? t("sale:misc.left", { count: v.stockQuantity ?? 0 })
-                      : t("sale:misc.outOfStock", { defaultValue: "Hết" })}
+                  {/* info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate">
+                      {[v.variantName, v.size, v.color].filter(Boolean).join(" / ") || "Biến thể"}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      SKU: {v.sku ?? "—"}
+                    </p>
+                    <p className="text-sm font-medium mt-0.5">
+                      {(v.priceOverride ?? variantPickerProduct.price).toLocaleString("vi-VN")} ₫
+                    </p>
+                  </div>
+
+                  {/* stock badge */}
+                  <Badge variant={inStock ? "secondary" : "destructive"} className="shrink-0 text-xs">
+                    {inStock ? `${v.stockQuantity} tồn` : "Hết hàng"}
                   </Badge>
-                </Button>
+
+                  {/* qty controls */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-8 w-8"
+                      disabled={qty <= 1 || !inStock}
+                      onClick={() => setVariantQty((p) => ({ ...p, [vid]: Math.max(1, (p[vid] ?? 1) - 1) }))}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={v.stockQuantity ?? 1}
+                      value={qty}
+                      disabled={!inStock}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        const val = Number.isFinite(n) ? Math.max(1, n) : 1;
+                        setVariantQty((p) => ({ ...p, [vid]: val }));
+                      }}
+                      className="h-8 w-14 text-center"
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-8 w-8"
+                      disabled={!inStock}
+                      onClick={() =>
+                        setVariantQty((p) => ({
+                          ...p,
+                          [vid]: Math.min((v.stockQuantity ?? 0) > 0 ? v.stockQuantity! : 1, (p[vid] ?? 1) + 1),
+                        }))
+                      }
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
               );
             })}
-            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-2 border-t">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                if (!variantPickerProduct) return;
+                const init: Record<string, number> = {};
+                for (const v of variantPickerProduct.variants ?? []) {
+                  const vid = v.id ?? `${v.size}-${v.color}`;
+                  init[vid] = 1;
+                }
+                setVariantQty(init);
+              }}
+            >
+              Reset
+            </Button>
+            <Button
+              className="flex-[2] bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:opacity-90 text-white shadow-md"
+              onClick={() => {
+                if (!variantPickerProduct) return;
+                let added = 0;
+                for (const v of variantPickerProduct.variants ?? []) {
+                  const vid = v.id ?? `${v.size}-${v.color}`;
+                  const qty = variantQty[vid] ?? 1;
+                  if (qty <= 0) continue;
+                  const stock = v.stockQuantity ?? 0;
+                  if (stock <= 0) continue;
+                  if (qty > stock) {
+                    toast.error(
+                      `${[v.variantName, v.size, v.color].filter(Boolean).join(" / ")}: chỉ còn ${stock} sản phẩm`,
+                    );
+                    continue;
+                  }
+                  addToCart(variantPickerProduct, v.id, qty);
+                  added++;
+                }
+                if (added > 0) {
+                  toast.success(
+                    `Đã thêm ${added} biến thể vào giỏ`,
+                  );
+                  setVariantPickerProduct(null);
+                } else {
+                  toast.error("Không có biến thể nào để thêm");
+                }
+              }}
+            >
+              Thêm vào giỏ hàng
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

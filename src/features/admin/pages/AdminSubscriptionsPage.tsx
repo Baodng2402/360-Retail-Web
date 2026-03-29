@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
 import toast from "react-hot-toast";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table";
 import { superAdminSaasApi, type SuperAdminPlan } from "@/shared/lib/superAdminSaasApi";
-import { Ban, CalendarPlus, Loader2 } from "lucide-react";
+import { Ban, CalendarPlus, Loader2, CreditCard } from "lucide-react";
 import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
 
 const getStr = (o: Record<string, unknown>, keys: string[]) => {
@@ -155,163 +156,202 @@ export default function AdminSubscriptionsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="p-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-gradient-to-r from-teal-500 to-blue-500 text-white">
-                SuperAdmin
-              </Badge>
-              <span className="text-sm text-muted-foreground">
-                Subscriptions (list / cancel / extend)
-              </span>
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="p-4 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
+                  SuperAdmin
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Subscriptions (list / cancel / extend)
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-4">
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">Status</div>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                    <SelectValue placeholder="Chọn..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Trial">Trial</SelectItem>
+                    <SelectItem value="Expired">Expired</SelectItem>
+                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">Plan</div>
+                <Select value={planId} onValueChange={setPlanId}>
+                  <SelectTrigger className="bg-background/80 backdrop-blur-sm">
+                    <SelectValue placeholder="Chọn..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {plans.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.planName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">Tìm kiếm</div>
+                <Input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Tìm theo store, plan, id..."
+                  className="bg-background/80 backdrop-blur-sm"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button
+                  onClick={() => void load()}
+                  className="w-full bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
+                  disabled={loading}
+                >
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Làm mới"}
+                </Button>
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">Status</div>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Trial">Trial</SelectItem>
-                  <SelectItem value="Expired">Expired</SelectItem>
-                  <SelectItem value="Cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">Plan</div>
-              <Select value={planId} onValueChange={setPlanId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  {plans.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.planName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">Tìm kiếm</div>
-              <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Tìm theo store, plan, id..."
-              />
-            </div>
-            <div className="flex items-end">
-              <Button
-                onClick={() => void load()}
-                className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
-                disabled={loading}
-              >
-                {loading ? "Đang tải..." : "Làm mới"}
-              </Button>
-            </div>
+        </Card>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-[#FF7B21]" />
+              Danh sách subscriptions
+            </h3>
+            <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
+              {tableRows.length.toLocaleString()}
+            </Badge>
           </div>
-        </div>
-      </Card>
 
-      <Card className="p-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold">Danh sách subscriptions</h3>
-          <Badge variant="outline">{tableRows.length.toLocaleString()}</Badge>
-        </div>
-
-        <div className="mt-4">
-          {loading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : tableRows.length === 0 ? (
-            <div className="py-10 text-center text-sm text-muted-foreground">
-              Không có dữ liệu.
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Store</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Start</TableHead>
-                  <TableHead>End</TableHead>
-                  <TableHead>Days left</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pagedRows.map((r) => (
-                  <TableRow key={r.id || JSON.stringify(r.raw)}>
-                    <TableCell className="max-w-[240px] truncate">
-                      <div className="font-medium">{r.storeName || "—"}</div>
-                      <div className="text-xs text-muted-foreground truncate">{r.id || "—"}</div>
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate">{r.planName || "—"}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{r.status || "—"}</Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">
-                      {r.startDate || "—"}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">
-                      {r.endDate || "—"}
-                    </TableCell>
-                    <TableCell>{r.daysRemaining ? r.daysRemaining.toLocaleString() : "—"}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="inline-flex items-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1"
-                          onClick={() => openExtend(r.raw)}
-                        >
-                          <CalendarPlus className="h-4 w-4" />
-                          Extend
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          className="gap-1"
-                          onClick={() => openCancel(r.raw)}
-                        >
-                          <Ban className="h-4 w-4" />
-                          Cancel
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setRawTitle(`Subscription raw: ${r.id || "—"}`);
-                            setRawValue(r.raw);
-                            setRawOpen(true);
-                          }}
-                        >
-                          Raw
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
-      </Card>
+          <div className="mt-4">
+            {loading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : tableRows.length === 0 ? (
+              <div className="py-10 text-center text-sm text-muted-foreground">
+                Không có dữ liệu.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5">
+                      <TableHead>Store</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Start</TableHead>
+                      <TableHead>End</TableHead>
+                      <TableHead>Days left</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pagedRows.map((r, index) => (
+                      <motion.tr
+                        key={r.id || JSON.stringify(r.raw)}
+                        className="border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.03 }}
+                      >
+                        <TableCell className="max-w-[240px] truncate">
+                          <div className="font-medium">{r.storeName || "—"}</div>
+                          <div className="text-xs text-muted-foreground truncate">{r.id || "—"}</div>
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate">{r.planName || "—"}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={r.status === "Active" ? "border-emerald-500/50 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30" : ""}>
+                            {r.status || "—"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">
+                          {r.startDate || "—"}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">
+                          {r.endDate || "—"}
+                        </TableCell>
+                        <TableCell>{r.daysRemaining ? r.daysRemaining.toLocaleString() : "—"}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="inline-flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200"
+                              onClick={() => openExtend(r.raw)}
+                            >
+                              <CalendarPlus className="h-4 w-4" />
+                              Extend
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="gap-1"
+                              onClick={() => openCancel(r.raw)}
+                            >
+                              <Ban className="h-4 w-4" />
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
+                              onClick={() => {
+                                setRawTitle(`Subscription raw: ${r.id || "—"}`);
+                                setRawValue(r.raw);
+                                setRawOpen(true);
+                              }}
+                            >
+                              Raw
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </motion.tr>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+        </Card>
+      </motion.div>
 
       {!loading && tableRows.length > 0 && (
-        <div className="flex items-center justify-between gap-3 text-xs sm:text-sm text-muted-foreground">
+        <motion.div
+          className="flex items-center justify-between gap-3 text-xs sm:text-sm text-muted-foreground"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
           <div>
             Hiển thị{" "}
             <span className="font-semibold">
@@ -345,14 +385,24 @@ export default function AdminSubscriptionsPage() {
               Trang sau
             </Button>
           </div>
-        </div>
+        </motion.div>
       )}
 
       <Dialog open={!!actionType} onOpenChange={() => { setActionType(null); setActionTarget(null); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              {actionType === "cancel" ? "Huỷ subscription" : "Gia hạn subscription"}
+            <DialogTitle className="flex items-center gap-2">
+              {actionType === "cancel" ? (
+                <>
+                  <Ban className="h-5 w-5 text-red-500" />
+                  Huỷ subscription
+                </>
+              ) : (
+                <>
+                  <CalendarPlus className="h-5 w-5 text-[#FF7B21]" />
+                  Gia hạn subscription
+                </>
+              )}
             </DialogTitle>
             <DialogDescription>
               Endpoint: <span className="font-mono text-xs">/saas/super-admin/saas/dashboard/subscriptions/{"{id}"}/{actionType}</span>
@@ -367,6 +417,7 @@ export default function AdminSubscriptionsPage() {
                 value={String(days)}
                 onChange={(e) => setDays(Number(e.target.value || 0))}
                 placeholder="30"
+                className="bg-background/80"
               />
             </div>
           )}
@@ -379,7 +430,7 @@ export default function AdminSubscriptionsPage() {
               variant={actionType === "cancel" ? "destructive" : "default"}
               onClick={() => void doAction()}
               disabled={acting || (actionType === "extend" && Number(days) <= 0)}
-              className={actionType === "extend" ? "bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600" : undefined}
+              className={actionType === "extend" ? "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300" : undefined}
             >
               {acting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Xác nhận
@@ -394,7 +445,7 @@ export default function AdminSubscriptionsPage() {
         title={rawTitle}
         value={rawValue}
       />
-    </div>
+    </motion.div>
   );
 }
 

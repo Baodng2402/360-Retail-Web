@@ -61,6 +61,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("auth-storage"); // clear persisted auth state to prevent rehydration issues
         sessionStorage.removeItem("pendingGoogleNewUser");
         set({
           user: null,

@@ -459,13 +459,12 @@ export default function SubscriptionPlansPage() {
       >
         {plans.map((plan) => (
           <motion.div key={plan.id} variants={itemVariants}>
-            <PlanCard 
-              plan={plan} 
-              isPopular={plan.isPopular} 
-              isCurrentPlan={isCurrentPlan(plan)} 
-              isLoading={purchasingPlanId === plan.id} 
+            <PlanCard
+              plan={plan}
+              isPopular={plan.isPopular}
+              isCurrentPlan={isCurrentPlan(plan)}
+              isLoading={purchasingPlanId === plan.id}
               onPaySepay={() => startPayment(plan, "sepay")}
-              onPayVnpay={() => startPayment(plan, "vnpay")}
               reviewSummary={getSummaryForPlan(plan)}
               onOpenReview={() => openReviewDialog(plan)}
             />
@@ -483,7 +482,7 @@ export default function SubscriptionPlansPage() {
           <h3 className="font-semibold mb-6 text-center text-xl text-foreground">Tại sao chọn chúng tôi?</h3>
           <div className="grid gap-4 md:grid-cols-2">
             {[
-              { icon: Check, text: "Thanh toán an toàn qua VNPay", color: "text-green-500" },
+              { icon: Check, text: "Thanh toán an toàn qua QR SePay", color: "text-green-500" },
               { icon: Check, text: "Kích hoạt tài khoản ngay lập tức", color: "text-blue-500" },
               { icon: Check, text: "Hỗ trợ khách hàng 24/7", color: "text-purple-500" },
               { icon: Check, text: "Cập nhật tính năng miễn phí", color: "text-teal-500" },
@@ -687,7 +686,6 @@ function PlanCard({
   isCurrentPlan,
   isLoading,
   onPaySepay,
-  onPayVnpay,
   reviewSummary,
   onOpenReview,
 }: {
@@ -696,7 +694,6 @@ function PlanCard({
   isCurrentPlan: boolean;
   isLoading: boolean;
   onPaySepay: () => void;
-  onPayVnpay: () => void;
   reviewSummary?: PlanReviewSummary;
   onOpenReview: () => void;
 }) {
@@ -847,14 +844,6 @@ function PlanCard({
                   </>
                 )}
               </Button>
-              <button
-                type="button"
-                className="mt-2 w-full text-xs text-muted-foreground hover:text-teal-600 underline-offset-2 hover:underline text-center"
-                onClick={onPayVnpay}
-                disabled={isLoading}
-              >
-                Hoặc thanh toán VNPay demo
-              </button>
             </motion.div>
           )}
         </CardFooter>

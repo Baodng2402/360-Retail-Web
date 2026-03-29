@@ -5,6 +5,7 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 
 import logo from "@/assets/logo.png";
 import googleIcon from "@/assets/icon/google-icon.svg";
@@ -137,53 +138,98 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center bg-white overflow-x-hidden">
-      <div className="relative z-0 mt-4 w-[calc(100%-24px)] mx-3 min-h-[35vh] sm:min-h-[38vh] md:min-h-[48vh] rounded-[24px] bg-[linear-gradient(160deg,rgba(25,214,200,1)_0%,rgba(255,123,33,1)_100%)] pt-2 pb-16 sm:pb-14 md:pb-20 text-white shadow-md">
-        <div className="flex w-full items-start justify-between px-4 sm:px-5">
-          <img
+    <div className="relative flex min-h-screen w-full flex-col items-center bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
+      {/* Hero section with gradient */}
+      <motion.div
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-0 mt-4 w-[calc(100%-24px)] mx-3 min-h-[35vh] sm:min-h-[38vh] md:min-h-[48vh] rounded-[24px] bg-gradient-to-br from-[#FF7B21] via-[#FF9F45] to-[#19D6C8] pt-2 pb-16 sm:pb-14 md:pb-20 text-white shadow-xl"
+      >
+        {/* Glow effects */}
+        <div className="absolute top-1/4 -right-10 w-[200px] h-[200px] rounded-full bg-white/20 blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 -left-10 w-[150px] h-[150px] rounded-full bg-white/10 blur-2xl animate-pulse" style={{ animationDelay: "1s" }} />
+
+        <div className="flex w-full items-start justify-between px-4 sm:px-5 relative z-10">
+          <motion.img
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
             src={logo}
             alt="360 Retail"
-            className="h-14 sm:h-16 md:h-20 w-auto object-contain"
+            className="h-14 sm:h-16 md:h-20 w-auto object-contain transition-transform duration-300 hover:scale-105"
           />
 
           <LanguageSwitcher />
         </div>
 
-        <div className="mt-3 sm:mt-1 sm:-mt-4 md:-mt-8 flex flex-col items-center text-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-3 sm:mt-1 sm:-mt-4 md:-mt-8 flex flex-col items-center text-center px-4 relative z-10"
+        >
           <h1 className="text-2xl sm:text-3xl md:text-[40px] font-extrabold leading-tight sm:leading-[40px] md:leading-[48px] tracking-[-0.9px]">
             {t("auth:signup.heroTitle")}
           </h1>
           <p className="mt-2 text-sm sm:text-base text-white/90">
             {t("auth:signup.heroSubtitle")}
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div className="relative z-50 signup-card-wrapper mb-16 flex w-full max-w-[1120px] justify-center px-4 sm:px-6 md:px-0">
-        <div className="w-full max-w-[520px] rounded-[15px] bg-white shadow-xl">
+      {/* Card wrapper */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="relative z-50 signup-card-wrapper mb-16 flex w-full max-w-[1120px] justify-center px-4 sm:px-6 md:px-0"
+      >
+        <div className="w-full max-w-[520px] rounded-[15px] bg-white shadow-xl border border-border/50 overflow-hidden">
           <div className="px-4 sm:px-6 md:px-7 pb-8 pt-6 sm:pt-7 md:pt-8">
-            <div className="flex flex-col gap-5">
-              <div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              className="flex flex-col gap-5"
+            >
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 }}
+              >
                 <Link
                   to="/"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-teal-600 transition-colors hover:text-teal-700"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-[#FF7B21] hover:gap-3"
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4 transition-transform duration-300" />
                   <span>{t("common:actions.backToHome")}</span>
                 </Link>
-              </div>
+              </motion.div>
 
-              <div className="flex flex-col gap-6 sm:gap-[30px]">
-                <h2 className="text-center text-lg font-extrabold leading-[25.2px] text-gray-700">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
+                className="flex flex-col gap-6 sm:gap-[30px]"
+              >
+                <h2 className="text-center text-lg font-extrabold leading-[25.2px] bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
                   {t("auth:signup.socialTitle")}
                 </h2>
 
-                <div className="flex items-center justify-center gap-3 sm:gap-[15px]">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.7 }}
+                  className="flex items-center justify-center gap-3 sm:gap-[15px]"
+                >
                   {socialButtons.map((social, index) =>
                     social.alt === "Google" ? (
-                      <div
+                      <motion.div
                         key={social.alt + index}
-                        className="relative flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] min-h-[80px] min-w-[80px] items-center justify-center rounded-[24px] border border-gray-200 bg-white shadow-sm overflow-visible hover:bg-gray-50"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="relative flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] min-h-[80px] min-w-[80px] items-center justify-center rounded-[24px] border border-border/50 bg-white shadow-lg shadow-gray-200/50 overflow-visible hover:bg-gray-50 hover:shadow-xl transition-all duration-300"
                         style={{ isolation: "isolate" }}
                       >
                         <img
@@ -206,12 +252,12 @@ const SignupPage = () => {
                             />
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     ) : (
                       <Button
                         key={social.alt + index}
                         variant="outline"
-                        className="flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] items-center justify-center rounded-[24px] border border-gray-200 bg-white hover:bg-gray-50 transition-all shadow-sm p-1.5"
+                        className="flex h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] items-center justify-center rounded-[24px] border border-border/50 bg-white hover:bg-gray-50 shadow-lg shadow-gray-200/50 hover:shadow-xl transition-all duration-300 p-1.5"
                       >
                         <img
                           src={social.src}
@@ -221,47 +267,82 @@ const SignupPage = () => {
                       </Button>
                     )
                   )}
-                </div>
+                </motion.div>
 
-                <div className="text-center text-lg font-bold leading-[25.2px] text-gray-400">
-                  {t("auth:signup.or")}
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                  <span className="text-sm text-muted-foreground font-medium uppercase tracking-wider">
+                    {t("auth:signup.or")}
+                  </span>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
                 </div>
-              </div>
+              </motion.div>
 
-              <form className="flex flex-col gap-4 sm:gap-6" onSubmit={handleSubmit}>
+              <motion.form
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.8 }}
+                className="flex flex-col gap-4 sm:gap-6"
+                onSubmit={handleSubmit}
+              >
                 <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-                  <div className="flex flex-col gap-2.5">
-                    <Label
-                      htmlFor="name"
-                      className="text-sm font-normal leading-[19.6px] text-gray-700"
-                    >
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.9 }}
+                    className="flex flex-col gap-2.5"
+                  >
+                    <Label htmlFor="name" className="text-sm font-semibold text-foreground">
                       {t("auth:signup.name")}
                     </Label>
                     <Input
                       id="name"
                       type="text"
                       placeholder={t("auth:signup.namePlaceholder")}
-                      className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                      className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-white px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       autoComplete="off"
                       data-form-type="other"
                     />
-                  </div>
+                  </motion.div>
 
-                  <div className="flex flex-col gap-2.5">
-                    <Label
-                      htmlFor="password"
-                      className="text-sm font-normal leading-[19.6px] text-gray-700"
-                    >
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 1.0 }}
+                    className="flex flex-col gap-2.5"
+                  >
+                    <Label htmlFor="email" className="text-sm font-semibold text-foreground">
+                      {t("auth:signup.email")}
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={t("auth:signup.emailPlaceholder")}
+                      className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-white px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="off"
+                      data-form-type="other"
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 1.1 }}
+                    className="flex flex-col gap-2.5"
+                  >
+                    <Label htmlFor="password" className="text-sm font-semibold text-foreground">
                       {t("auth:signup.password")}
                     </Label>
-                    <div className="relative">
+                    <div className="relative group">
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder={t("auth:signup.passwordPlaceholder")}
-                        className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                        className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-white pr-10 px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete="off"
@@ -270,7 +351,7 @@ const SignupPage = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-600 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#FF7B21] p-2 rounded-lg hover:bg-[#FF7B21]/10 transition-all duration-300"
                         aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? (
@@ -280,40 +361,23 @@ const SignupPage = () => {
                         )}
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex flex-col gap-2.5">
-                    <Label
-                      htmlFor="email"
-                      className="text-sm font-normal leading-[19.6px] text-gray-700"
-                    >
-                      {t("auth:signup.email")}
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder={t("auth:signup.emailPlaceholder")}
-                      className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="off"
-                      data-form-type="other"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2.5">
-                    <Label
-                      htmlFor="confirm-password"
-                      className="text-sm font-normal leading-[19.6px] text-gray-700"
-                    >
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 1.2 }}
+                    className="flex flex-col gap-2.5"
+                  >
+                    <Label htmlFor="confirm-password" className="text-sm font-semibold text-foreground">
                       {t("auth:signup.confirmPassword")}
                     </Label>
-                    <div className="relative">
+                    <div className="relative group">
                       <Input
                         id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder={t("auth:signup.confirmPasswordPlaceholder")}
-                        className="h-12 sm:h-[50px] rounded-[15px] border border-gray-200 bg-white pr-10 px-4 sm:px-5 text-sm font-normal leading-[19.6px] text-gray-700 [&::-webkit-autofill]:!bg-white [&::-webkit-autofill]:![-webkit-text-fill-color:#333] [&::-webkit-autofill]:!transition-all [&::-webkit-autofill]:!duration-500000"
+                        className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-white pr-10 px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         autoComplete="off"
@@ -322,10 +386,8 @@ const SignupPage = () => {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword((prev) => !prev)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-600 transition-colors"
-                        aria-label={
-                          showConfirmPassword ? "Hide confirm password" : "Show confirm password"
-                        }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#FF7B21] p-2 rounded-lg hover:bg-[#FF7B21]/10 transition-all duration-300"
+                        aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -334,37 +396,41 @@ const SignupPage = () => {
                         )}
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {error && (
-                  <p className="text-sm text-red-500">
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-500 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20"
+                  >
                     {error}
-                  </p>
+                  </motion.p>
                 )}
 
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-12 sm:h-[52px] rounded-xl bg-[linear-gradient(145deg,rgba(0,187,167,1)_0%,rgba(0,150,137,1)_100%)] px-4 py-3 text-xs sm:text-sm font-bold leading-[18px] tracking-[0.02em] text-white hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="h-12 sm:h-[52px] rounded-xl bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] px-4 py-3 text-xs sm:text-sm font-bold leading-[18px] tracking-[0.02em] text-white hover:shadow-xl hover:shadow-[#FF7B21]/30 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300"
                 >
                   {loading ? t("auth:signup.submitting") : t("auth:signup.submit")}
                 </Button>
 
-                <p className="text-center text-xs font-normal leading-[18px] text-gray-400">
+                <p className="text-center text-xs text-muted-foreground">
                   {t("auth:signup.alreadyHaveAccount")}{" "}
                   <Link
                     to="/login"
-                    className="font-medium text-[#00bba7] hover:underline"
+                    className="font-bold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent hover:opacity-80 transition-opacity"
                   >
                     {t("auth:signup.goToLogin")}
                   </Link>
                 </p>
-              </form>
-            </div>
+              </motion.form>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

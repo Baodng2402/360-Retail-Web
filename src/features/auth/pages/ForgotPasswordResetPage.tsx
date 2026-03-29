@@ -4,6 +4,7 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, KeyRound, Lock, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -109,30 +110,50 @@ const ForgotPasswordResetPage = () => {
           "Enter the 6-digit code sent to your email and set a new password for your account.",
       })}
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+      <motion.form
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.5 }}
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.6 }}
+          className="space-y-2"
+        >
+          <Label htmlFor="email" className="text-sm font-semibold text-foreground">
             {t("auth:login.email")}
           </Label>
-          <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
+              <Mail className="h-5 w-5 text-[#FF7B21]" />
+            </div>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-12 bg-white text-gray-900 border-gray-200 pl-11"
+              className="h-12 pl-14 pr-4 bg-white text-gray-900 border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
               autoComplete="off"
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="space-y-2">
-          <Label htmlFor="code" className="text-sm font-medium text-gray-700">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.7 }}
+          className="space-y-2"
+        >
+          <Label htmlFor="code" className="text-sm font-semibold text-foreground">
             {t("auth:verify.codeLabel", { defaultValue: "Verification code (6 digits)" })}
           </Label>
-          <div className="relative">
-            <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
+              <KeyRound className="h-5 w-5 text-[#FF7B21]" />
+            </div>
             <Input
               id="code"
               type="text"
@@ -140,25 +161,32 @@ const ForgotPasswordResetPage = () => {
               maxLength={6}
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              className="h-12 pl-11 tracking-[0.3em] bg-white text-gray-900 border-gray-200"
+              className="h-12 pl-14 pr-4 tracking-[0.3em] bg-white text-gray-900 border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
               placeholder="••••••"
               autoComplete="one-time-code"
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="space-y-2">
-          <Label htmlFor="newPassword" className="text-sm font-medium text-gray-700">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.8 }}
+          className="space-y-2"
+        >
+          <Label htmlFor="newPassword" className="text-sm font-semibold text-foreground">
             {t("auth:forgotPassword.reset.newPassword", { defaultValue: "New password" })}
           </Label>
-          <div className="relative">
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
+              <Lock className="h-5 w-5 text-[#FF7B21]" />
+            </div>
             <Input
               id="newPassword"
               type={showNewPassword ? "text" : "password"}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="h-12 pl-11 pr-11 bg-white text-gray-900 border-gray-200 placeholder:text-gray-500"
+              className="h-12 pl-14 pr-14 bg-white text-gray-900 border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
               placeholder={t("auth:forgotPassword.reset.newPasswordPlaceholder", {
                 defaultValue: "At least 8 characters",
               })}
@@ -167,7 +195,7 @@ const ForgotPasswordResetPage = () => {
             <button
               type="button"
               onClick={() => setShowNewPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-600 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#FF7B21] p-2 rounded-lg hover:bg-[#FF7B21]/10 transition-all duration-300"
               aria-label={showNewPassword ? "Hide password" : "Show password"}
             >
               {showNewPassword ? (
@@ -177,19 +205,27 @@ const ForgotPasswordResetPage = () => {
               )}
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.9 }}
+          className="space-y-2"
+        >
+          <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground">
             {t("auth:forgotPassword.reset.confirmPassword", { defaultValue: "Confirm new password" })}
           </Label>
-          <div className="relative">
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
+              <Lock className="h-5 w-5 text-[#FF7B21]" />
+            </div>
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="h-12 pr-11 bg-white text-gray-900 border-gray-200 placeholder:text-gray-500"
+              className="h-12 pl-14 pr-14 bg-white text-gray-900 border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
               placeholder={t("auth:forgotPassword.reset.confirmPasswordPlaceholder", {
                 defaultValue: "Re-enter new password",
               })}
@@ -198,7 +234,7 @@ const ForgotPasswordResetPage = () => {
             <button
               type="button"
               onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-600 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#FF7B21] p-2 rounded-lg hover:bg-[#FF7B21]/10 transition-all duration-300"
               aria-label={showConfirmPassword ? "Hide password" : "Show password"}
             >
               {showConfirmPassword ? (
@@ -208,20 +244,34 @@ const ForgotPasswordResetPage = () => {
               )}
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-sm text-red-500 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20"
+          >
+            {error}
+          </motion.p>
+        )}
 
-        <Button
-          type="submit"
-          disabled={submitting}
-          className="h-12 w-full bg-[#0D9488] text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0D9488]/90 disabled:opacity-70 disabled:cursor-not-allowed"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 1.0 }}
         >
-          {submitting
-            ? t("auth:forgotPassword.reset.submitting", { defaultValue: "PROCESSING..." })
-            : t("auth:forgotPassword.reset.submit", { defaultValue: "RESET PASSWORD" })}
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="h-12 w-full bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-sm font-bold uppercase tracking-wide text-white hover:shadow-xl hover:shadow-[#FF7B21]/30 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 rounded-xl"
+          >
+            {submitting
+              ? t("auth:forgotPassword.reset.submitting", { defaultValue: "PROCESSING..." })
+              : t("auth:forgotPassword.reset.submit", { defaultValue: "RESET PASSWORD" })}
+          </Button>
+        </motion.div>
+      </motion.form>
     </AuthFormLayout>
   );
 };
