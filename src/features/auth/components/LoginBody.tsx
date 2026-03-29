@@ -160,14 +160,14 @@ const LoginBody = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-gray-100 dark:bg-gray-900 text-gray-900 overflow-hidden">
+    <div className="flex min-h-screen w-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
       <div className="flex w-full max-w-[1920px] mx-auto">
         {/* Left Panel - Form */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-          className="relative flex w-full lg:w-[50%] flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-50 px-6 sm:px-12 md:px-16 lg:px-20 py-12 text-gray-900 backdrop-blur-xl"
+          className="relative flex w-full lg:w-[50%] flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-50 px-6 sm:px-12 md:px-16 lg:px-20 py-12 text-gray-900 dark:text-gray-900 backdrop-blur-xl"
         >
           {/* Background decoration */}
           <div className="pointer-events-none absolute left-0 top-0 h-[400px] w-[400px] -ml-[100px] -mt-[100px] rounded-full bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 blur-3xl" />
@@ -228,7 +228,7 @@ const LoginBody = () => {
                     id="email"
                     type="email"
                     placeholder={t("auth:signup.emailPlaceholder")}
-                    className="h-12 pl-14 pr-4 bg-white dark:bg-gray-100 text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
+                    className="h-12 pl-14 pr-4 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="off"
@@ -257,7 +257,7 @@ const LoginBody = () => {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder={t("auth:signup.passwordPlaceholder")}
-                    className="login-password-input h-12 pl-14 pr-14 bg-white dark:bg-gray-100 text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
+                    className="login-password-input h-12 pl-14 pr-14 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="off"

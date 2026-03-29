@@ -39,11 +39,11 @@ export const LanguageSwitcher = () => {
         <Button
           type="button"
           variant="outline"
-          className="h-10 gap-2 rounded-full px-3 border-border bg-white/80 hover:bg-accent text-foreground shadow-sm"
+          className="h-10 gap-2 rounded-full px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
           aria-label="Language"
         >
-          <Globe className="h-4 w-4 text-foreground" />
-          <span className="text-sm font-medium text-foreground">{currentLabel}</span>
+          <Globe className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{currentLabel}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">

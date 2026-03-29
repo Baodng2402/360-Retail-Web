@@ -138,7 +138,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
+    <div className="relative flex min-h-screen w-full flex-col items-center bg-gray-100 overflow-x-hidden">
       {/* Hero section with gradient */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
@@ -185,7 +185,7 @@ const SignupPage = () => {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="relative z-50 signup-card-wrapper mb-16 flex w-full max-w-[1120px] justify-center px-4 sm:px-6 md:px-0"
       >
-        <div className="w-full max-w-[520px] rounded-[15px] bg-white shadow-xl border border-border/50 overflow-hidden">
+        <div className="w-full max-w-[520px] rounded-[15px] bg-white dark:bg-white shadow-xl border border-border/50 overflow-hidden">
           <div className="px-4 sm:px-6 md:px-7 pb-8 pt-6 sm:pt-7 md:pt-8">
             <motion.div
               initial={{ opacity: 0 }}
@@ -299,7 +299,7 @@ const SignupPage = () => {
                       id="name"
                       type="text"
                       placeholder={t("auth:signup.namePlaceholder")}
-                      className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-white px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
+                      className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-gray-50 px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       autoComplete="off"
@@ -320,7 +320,7 @@ const SignupPage = () => {
                       id="email"
                       type="email"
                       placeholder={t("auth:signup.emailPlaceholder")}
-                      className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-white px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
+                      className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-gray-50 px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       autoComplete="off"
@@ -342,7 +342,7 @@ const SignupPage = () => {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder={t("auth:signup.passwordPlaceholder")}
-                        className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-white pr-10 px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
+                        className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-gray-50 pr-10 px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete="off"
@@ -377,7 +377,7 @@ const SignupPage = () => {
                         id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder={t("auth:signup.confirmPasswordPlaceholder")}
-                        className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-white pr-10 px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
+                        className="h-12 sm:h-[50px] rounded-xl border border-border/50 bg-gray-50 pr-10 px-4 sm:px-5 text-sm text-gray-700 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         autoComplete="off"

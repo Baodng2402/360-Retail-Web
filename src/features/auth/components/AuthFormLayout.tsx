@@ -29,14 +29,14 @@ export const AuthFormLayout = ({
     });
 
   return (
-    <div className="flex min-h-screen w-full bg-gray-100 dark:bg-gray-900 text-foreground overflow-hidden">
+    <div className="flex min-h-screen w-full bg-gray-100 overflow-hidden">
       <div className="mx-auto flex w-full max-w-[1920px]">
         {/* Left: Form — full width on mobile, 45% when right panel visible */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-          className="relative flex w-full sm:w-[45%] min-w-0 flex-col items-center justify-center bg-white dark:bg-gray-50 px-6 py-12 backdrop-blur-xl sm:px-8 md:px-16"
+          className="relative flex w-full sm:w-[45%] min-w-0 flex-col items-center justify-center bg-white px-6 py-12 backdrop-blur-xl sm:px-8 md:px-16"
         >
           {/* Background glow effects */}
           <div className="pointer-events-none absolute left-0 top-0 h-[400px] w-[400px] -ml-[100px] -mt-[100px] rounded-full bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 blur-3xl" />

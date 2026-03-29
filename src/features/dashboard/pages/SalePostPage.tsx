@@ -553,18 +553,37 @@ const SalePostPage = () => {
                     {filteredProducts.map((product) => (
                       <Card
                         key={product.id}
-                        className={`p-4 transition-all group ${
-                          product.stock === 0
-                            ? "opacity-60 cursor-not-allowed"
-                            : "hover:shadow-lg"
-                        }`}
+                        className={cn(
+                          "transition-all group",
+                          product.hasVariants
+                            ? "cursor-pointer hover:ring-2 hover:ring-[#FF7B21]/50"
+                            : product.stock === 0
+                              ? "opacity-60 cursor-not-allowed"
+                              : "hover:shadow-lg",
+                        )}
+                        onClick={() => {
+                          if (product.hasVariants) {
+                            setVariantPickerProduct(product);
+                            setVariantQty({});
+                          }
+                        }}
                       >
                         <div className="mb-3 text-center min-h-[128px] flex items-center justify-center">
                           {renderProductImage(product.id, product.image, "md")}
                         </div>
-                        <h4 className="font-semibold text-sm mb-2 line-clamp-2">
-                          {product.name}
-                        </h4>
+                        <div className="flex items-start justify-between gap-1 mb-1">
+                          <h4 className="font-semibold text-sm line-clamp-2 flex-1">
+                            {product.name}
+                          </h4>
+                          {product.hasVariants && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] px-1.5 py-0 shrink-0 border-[#FF7B21]/50 text-[#FF7B21] bg-[#FF7B21]/5 whitespace-nowrap"
+                            >
+                              Biến thể
+                            </Badge>
+                          )}
+                        </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-muted-foreground">
                             {product.category}
@@ -588,7 +607,7 @@ const SalePostPage = () => {
                           <span className="font-bold text-primary">
                             {product.price.toLocaleString("vi-VN")} ₫
                           </span>
-                          {product.stock > 0 ? (
+                          {product.stock > 0 && !product.hasVariants ? (
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Button
                                 size="icon"
@@ -636,9 +655,13 @@ const SalePostPage = () => {
                                 <Plus className="h-3 w-3" />
                               </Button>
                             </div>
+                          ) : product.hasVariants ? (
+                            <span className="text-[10px] text-[#FF7B21] opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+                              Chọn biến thể
+                            </span>
                           ) : null}
                         </div>
-                        {product.stock > 0 && (
+                        {product.stock > 0 && !product.hasVariants && (
                           <Button
                             size="sm"
                             className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
