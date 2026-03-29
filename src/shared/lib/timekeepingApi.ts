@@ -1,5 +1,6 @@
 import { hrApi } from "./axios-instances";
 import type { ApiResponse } from "@/shared/types/api-response";
+import type { Staff } from "@/shared/types/staff";
 
 export interface TodayTimekeepingRecord {
   id: string;
@@ -161,6 +162,26 @@ export const timekeepingApi = {
       totalWorkHours: normaliseNumber(o.totalWorkHours ?? o.total_work_hours),
       totalLateCount: normaliseNumber(o.totalLateCount ?? o.total_late_count),
     };
+  },
+
+  /**
+   * Get list of staff in a store for check-in selection
+   * GET /hr/staff?storeId=
+   */
+  async getStaffInStore(storeId: string): Promise<Staff[]> {
+    const res = await hrApi.get<ApiResponse<Staff[]> | Staff[]>(
+      `hr/staff?storeId=${storeId}`,
+    );
+
+    if ("success" in res.data && res.data.success && Array.isArray(res.data.data)) {
+      return res.data.data;
+    }
+
+    if (Array.isArray(res.data)) {
+      return res.data as Staff[];
+    }
+
+    return [];
   },
 };
 

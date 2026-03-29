@@ -11,11 +11,16 @@ import {
   Star,
   Trash2,
   Edit2,
+  ChevronRight,
+  ShoppingBag,
+  MessageSquare,
+  Award,
 } from "lucide-react";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -57,15 +62,9 @@ const CustomerPage = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    null,
-  );
-  const [loyaltySummary, setLoyaltySummary] = useState<LoyaltySummary | null>(
-    null,
-  );
-  const [loyaltyTransactions, setLoyaltyTransactions] = useState<
-    LoyaltyTransaction[]
-  >([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [loyaltySummary, setLoyaltySummary] = useState<LoyaltySummary | null>(null);
+  const [loyaltyTransactions, setLoyaltyTransactions] = useState<LoyaltyTransaction[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [formOpen, setFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -74,6 +73,7 @@ const CustomerPage = () => {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [hasLoyaltyFeature, setHasLoyaltyFeature] = useState<boolean | null>(null);
+  const [activeTab, setActiveTab] = useState<"info" | "loyalty" | "feedback">("info");
 
   const canDelete =
     !!user && ["StoreOwner", "Manager"].includes(user.role ?? "");
@@ -93,20 +93,14 @@ const CustomerPage = () => {
   const loadCustomers = async () => {
     try {
       setLoading(true);
-      // Backend GET crm/customers lấy storeId từ JWT (claim store_id). Token thiếu/sai store_id → 500.
       const me = await authApi.meWithSubscription().catch(() => null);
       if (!me?.storeId?.trim()) {
         setCustomers([]);
-        toast.error(
-          tCustomer("toasts.missingStoreInSession"),
-        );
+        toast.error(tCustomer("toasts.missingStoreInSession"));
         return;
       }
       const res = await customersApi.getCustomers({ pageSize: 200 });
       setCustomers(res.items);
-      if (!selectedCustomer && res.items.length > 0) {
-        void handleSelectCustomer(res.items[0]);
-      }
     } catch (error: unknown) {
       const res = (error as { response?: { status?: number; data?: { code?: string; message?: string } } })?.response;
       const status = res?.status;
@@ -146,14 +140,11 @@ const CustomerPage = () => {
 
   useEffect(() => {
     void loadCustomers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSelectCustomer = async (customer: Customer) => {
     setSelectedCustomer(customer);
-    setLoyaltySummary(null);
-    setLoyaltyTransactions([]);
-    setFeedbacks([]);
+    setActiveTab("info");
     if (hasLoyaltyFeature) {
       await loadCustomerInsights(customer);
     }
@@ -199,7 +190,6 @@ const CustomerPage = () => {
         if (selectedCustomer?.id === updated.id) {
           setSelectedCustomer(updated);
         }
-        // Đồng bộ lại từ backend để khớp với bộ lọc store / phân trang
         void loadCustomers();
         toast.success(tCustomer("toasts.updateSuccess"));
       } else {
@@ -209,9 +199,7 @@ const CustomerPage = () => {
           email: formState.email.trim() || undefined,
         });
         if (created?.id) {
-          // Hiển thị ngay khách mới trên UI
           setCustomers((prev) => [created, ...prev]);
-          // Chọn luôn khách mới để hiển thị insights, không refetch ngay để tránh BE sort lại danh sách
           void handleSelectCustomer(created);
         }
         toast.success(tCustomer("toasts.createSuccess"));
@@ -280,9 +268,51 @@ const CustomerPage = () => {
     });
   }, [customers, search]);
 
+  const totalCustomers = customers.length;
+  const totalRevenue = customers.reduce((sum, c) => sum + (c.totalSpend || 0), 0);
+
   return (
     <div className="space-y-6">
       <StoreSelector pageDescription={tCustomer("page.storeSelectorHint")} />
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-5 bg-gradient-to-br from-teal-50 to-white dark:from-teal-950/20 dark:to-background border-teal-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Tổng khách hàng</p>
+              <h3 className="text-2xl font-bold text-foreground">{totalCustomers}</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
+              <Users className="h-6 w-6 text-teal-600" />
+            </div>
+          </div>
+        </Card>
+        <Card className="p-5 bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Tổng doanh thu</p>
+              <h3 className="text-2xl font-bold text-foreground">{totalRevenue.toLocaleString("vi-VN")}đ</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <ShoppingBag className="h-6 w-6 text-green-600" />
+            </div>
+          </div>
+        </Card>
+        <Card className="p-5 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background border-amber-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Khách VIP</p>
+              <h3 className="text-2xl font-bold text-foreground">
+                {customers.filter((c) => (c.totalSpend || 0) > 5000000).length}
+              </h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <Crown className="h-6 w-6 text-amber-600" />
+            </div>
+          </div>
+        </Card>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -290,330 +320,347 @@ const CustomerPage = () => {
         transition={{ duration: 0.3 }}
         className="grid grid-cols-1 lg:grid-cols-3 gap-6"
       >
-        <Card className="lg:col-span-2 p-5 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white">
-                <Users className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">
-                  {tCustomer("header.title")}
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  {tCustomer("header.subtitle")}
-                </p>
+        {/* Customer List */}
+        <Card className="lg:col-span-1 p-0 overflow-hidden">
+          {/* Header */}
+          <div className="p-5 border-b bg-gradient-to-r from-teal-500/10 to-blue-500/10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    {tCustomer("header.title")}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {filteredCustomers.length} khách hàng
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex gap-2">
-              <div className="relative w-full md:w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder={tCustomer("search.placeholder")}
-                  className="pl-8"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              <Button
-                className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white whitespace-nowrap"
-                onClick={openCreateForm}
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                {tCustomer("actions.addCustomer")}
-              </Button>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Tìm kiếm..."
+                className="pl-10"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
+            <Button
+              className="w-full mt-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
+              onClick={openCreateForm}
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Thêm khách hàng
+            </Button>
           </div>
 
-          {loading ? (
-            <div className="py-10 text-center text-muted-foreground">
-              {tCustomer("states.loadingList")}
-            </div>
-          ) : filteredCustomers.length === 0 ? (
-            <div className="py-10 text-center text-muted-foreground">
-              {tCustomer("states.emptyList")}
-            </div>
-          ) : (
-            <div className="border rounded-xl overflow-hidden">
-              <div className="max-h-[420px] overflow-y-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-muted/60 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-4 py-2 text-left font-medium text-xs text-muted-foreground">
-                        {tCustomer("table.customer")}
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-xs text-muted-foreground">
-                        {tCustomer("table.contact")}
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-xs text-muted-foreground">
-                        {tCustomer("table.ordersSpend")}
-                      </th>
-                      <th className="px-4 py-2 text-right font-medium text-xs text-muted-foreground">
-                        {tCustomer("table.actions")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCustomers.map((c, index) => {
-                      const isSelected = selectedCustomer?.id === c.id;
-                      const shortId = (c.id || "").slice(0, 8);
-                      const rowKey = c.id || `${c.fullName}-${index}`;
-                      return (
-                        <tr
-                          key={rowKey}
-                          className={`cursor-pointer border-t text-sm transition-colors ${
-                            isSelected
-                              ? "bg-teal-50/70 dark:bg-teal-950/30"
-                              : "hover:bg-muted/60"
-                          }`}
-                          onClick={() => void handleSelectCustomer(c)}
-                        >
-                          <td className="px-4 py-3">
-                            <div className="flex flex-col">
-                              <span className="font-medium text-foreground">
-                                {c.fullName}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {tCustomer("table.idPrefix")}{" "}
-                                {shortId ? `${shortId}...` : "—"}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-col gap-1">
-                              <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                                <Phone className="h-3 w-3" />
-                                <span>{c.phoneNumber}</span>
-                              </div>
-                              {c.email && (
-                                <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Mail className="h-3 w-3" />
-                                  <span>{c.email}</span>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-xs">
-                            <div className="flex flex-col gap-1">
-                              <span>
-                                {tCustomer("table.ordersLabel")}{" "}
-                                <strong>
-                                  {c.totalOrders ?? 0}
-                                </strong>
-                              </span>
-                              <span className="text-muted-foreground">
-                                {tCustomer("table.spendLabel")}{" "}
-                                <strong>
-                                  {c.totalSpend
-                                    ? `${c.totalSpend.toLocaleString("vi-VN")}₫`
-                                    : "-"}
-                                </strong>
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-end gap-1">
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openEditForm(c);
-                                }}
-                                aria-label={tCustomer("aria.edit")}
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                              {canDelete && (
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    confirmDelete(c);
-                                  }}
-                                  aria-label={tCustomer("aria.deleteCustomer")}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+          {/* Customer List */}
+          <div className="max-h-[500px] overflow-y-auto">
+            {loading ? (
+              <div className="p-8 text-center text-muted-foreground">
+                Đang tải...
               </div>
-            </div>
-          )}
+            ) : filteredCustomers.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">
+                {tCustomer("states.emptyList")}
+              </div>
+            ) : (
+              <div className="divide-y">
+                {filteredCustomers.map((c, index) => {
+                  const isSelected = selectedCustomer?.id === c.id;
+                  return (
+                    <div
+                      key={c.id || `${c.fullName}-${index}`}
+                      className={`p-4 cursor-pointer transition-colors ${
+                        isSelected
+                          ? "bg-teal-50 dark:bg-teal-950/30 border-l-4 border-l-teal-500"
+                          : "hover:bg-muted/50 border-l-4 border-l-transparent"
+                      }`}
+                      onClick={() => void handleSelectCustomer(c)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                          (c.totalSpend || 0) > 5000000
+                            ? "bg-gradient-to-br from-amber-400 to-amber-600"
+                            : "bg-gradient-to-br from-teal-500 to-blue-500"
+                        }`}>
+                          {c.fullName[0].toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground truncate">
+                            {c.fullName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {c.phoneNumber}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      {isSelected && (
+                        <div className="mt-2 flex items-center gap-2 text-xs">
+                          <Badge variant="secondary" className="gap-1">
+                            <ShoppingBag className="h-3 w-3" />
+                            {c.totalOrders ?? 0} đơn
+                          </Badge>
+                          <Badge variant="outline" className="gap-1 text-teal-600 border-teal-200">
+                            {(c.totalSpend || 0).toLocaleString("vi-VN")}đ
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </Card>
 
-        <Card className="p-5 space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-base font-semibold text-foreground">
-                {tCustomer("insights.title")}
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {tCustomer("insights.subtitle")}
-              </p>
-            </div>
-          </div>
-
+        {/* Customer Detail */}
+        <Card className="lg:col-span-2 p-0 overflow-hidden">
           {!selectedCustomer ? (
-            <div className="py-8 text-center text-muted-foreground text-sm">
-              {tCustomer("insights.selectCustomerHint")}
-            </div>
-          ) : !hasLoyaltyFeature ? (
-            <div className="space-y-4 text-sm text-muted-foreground">
-              <p>
-                Tính năng "Tích điểm Loyalty" không khả dụng trong gói hiện tại của bạn.
-              </p>
-              <p>
-                Vui lòng nâng cấp lên gói Pro hoặc cao hơn để xem điểm thưởng, lịch sử giao dịch và phản hồi khách hàng trực tiếp tại đây.
-              </p>
+            <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground">
+              <Users className="h-16 w-16 mb-4 opacity-30" />
+              <p className="text-lg font-medium">Chọn khách hàng để xem chi tiết</p>
+              <p className="text-sm">Click vào khách hàng bên trái để xem thông tin</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">
-                    {selectedCustomer.fullName}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedCustomer.phoneNumber}
-                  </p>
-                </div>
-                {loyaltySummary && (
-                  <Badge className="gap-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white">
-                    <Crown className="h-3 w-3" />
-                    {loyaltySummary.rank}
-                  </Badge>
-                )}
-              </div>
-
-              {loyaltySummary ? (
-                <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      {tCustomer("loyalty.totalPointsLabel")}
-                    </span>
-                    <span className="text-sm font-semibold">
-                      {tCustomer("loyalty.totalPointsValue", {
-                        points: loyaltySummary.totalPoints,
-                      })}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    {tCustomer("loyalty.rankHint")}
-                  </p>
-                </div>
-              ) : (
-                <div className="rounded-lg border border-dashed bg-muted/40 p-3 text-xs text-muted-foreground">
-                  {tCustomer("loyalty.empty")}
-                </div>
-              )}
-
-              <div className="space-y-2">
+            <>
+              {/* Customer Header */}
+              <div className="p-6 border-b bg-gradient-to-r from-teal-500/10 to-blue-500/10">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-foreground">
-                    {tCustomer("loyalty.recentTransactions.title")}
-                  </span>
-                  <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span>{tCustomer("loyalty.recentTransactions.latest")}</span>
-                  </div>
-                </div>
-                {loyaltyTransactions.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">
-                    {tCustomer("loyalty.recentTransactions.empty")}
-                  </p>
-                ) : (
-                  <div className="max-h-40 overflow-y-auto space-y-2 text-xs">
-                    {loyaltyTransactions.slice(0, 5).map((txn) => (
-                      <div
-                        key={txn.id}
-                        className="flex items-center justify-between rounded-md bg-background border px-2 py-1.5"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {txn.points > 0 ? "+" : ""}
-                            {tCustomer("loyalty.pointsValue", { points: txn.points })}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            {txn.description || tCustomer("loyalty.transactionFallback")}
-                          </span>
-                        </div>
-                        <span className="text-[11px] text-muted-foreground">
-                          {tCommon("formats.date", {
-                            value: new Date(txn.createdAt),
-                          })}
-                        </span>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold ${
+                      (selectedCustomer.totalSpend || 0) > 5000000
+                        ? "bg-gradient-to-br from-amber-400 to-amber-600"
+                        : "bg-gradient-to-br from-teal-500 to-blue-500"
+                    }`}>
+                      {selectedCustomer.fullName[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold">{selectedCustomer.fullName}</h2>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        {selectedCustomer.phoneNumber}
+                        {selectedCustomer.email && (
+                          <>
+                            <Mail className="h-4 w-4 ml-2" />
+                            {selectedCustomer.email}
+                          </>
+                        )}
                       </div>
-                    ))}
+                    </div>
                   </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-foreground">
-                    {tCustomer("feedback.title")}
-                  </span>
-                  <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <Star className="h-3 w-3 text-amber-400" />
-                    <span>{tCustomer("feedback.count", { count: feedbacks.length })}</span>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openEditForm(selectedCustomer)}>
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Sửa
+                    </Button>
+                    {canDelete && (
+                      <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => confirmDelete(selectedCustomer)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
-                {feedbacks.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">
-                    {tCustomer("feedback.empty")}
-                  </p>
-                ) : (
-                  <div className="max-h-40 overflow-y-auto space-y-2 text-xs">
-                    {feedbacks.slice(0, 3).map((f) => (
-                      <div
-                        key={f.id}
-                        className="rounded-md bg-background border px-2 py-1.5 space-y-1"
-                      >
-                        <div className="flex items-center justify-between text-[11px]">
-                          <div className="inline-flex items-center gap-1">
-                            <Star className="h-3 w-3 text-amber-400" />
-                            <span>{f.rating}/5</span>
+              </div>
+
+              {/* Tabs */}
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex-1">
+                <TabsList className="w-full justify-start rounded-none border-b px-4">
+                  <TabsTrigger value="info" className="gap-2">
+                    <Users className="h-4 w-4" />
+                    Thông tin
+                  </TabsTrigger>
+                  <TabsTrigger value="loyalty" className="gap-2">
+                    <Award className="h-4 w-4" />
+                    Tích điểm
+                  </TabsTrigger>
+                  <TabsTrigger value="feedback" className="gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Phản hồi
+                  </TabsTrigger>
+                </TabsList>
+
+                <div className="p-6 max-h-[400px] overflow-y-auto">
+                  {/* Info Tab */}
+                  <TabsContent value="info" className="m-0 space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Card className="p-4 bg-gradient-to-br from-blue-50 to-white border-blue-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <ShoppingBag className="h-5 w-5 text-blue-600" />
                           </div>
-                          <span className="text-muted-foreground">
-                            {tCommon("formats.date", { value: new Date(f.createdAt) })}
+                          <div>
+                            <p className="text-sm text-muted-foreground">Tổng đơn hàng</p>
+                            <p className="text-xl font-bold">{selectedCustomer.totalOrders ?? 0}</p>
+                          </div>
+                        </div>
+                      </Card>
+                      <Card className="p-4 bg-gradient-to-br from-green-50 to-white border-green-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                            <Crown className="h-5 w-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Tổng chi tiêu</p>
+                            <p className="text-xl font-bold text-green-600">
+                              {(selectedCustomer.totalSpend || 0).toLocaleString("vi-VN")}đ
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+
+                    <Card className="p-4">
+                      <h3 className="font-semibold mb-4">Thông tin chi tiết</h3>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between py-2 border-b">
+                          <span className="text-muted-foreground">Họ và tên</span>
+                          <span className="font-medium">{selectedCustomer.fullName}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b">
+                          <span className="text-muted-foreground">Số điện thoại</span>
+                          <span className="font-medium">{selectedCustomer.phoneNumber}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b">
+                          <span className="text-muted-foreground">Email</span>
+                          <span className="font-medium">{selectedCustomer.email || "-"}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b">
+                          <span className="text-muted-foreground">Ngày tham gia</span>
+                          <span className="font-medium">
+                            {selectedCustomer.createdAt
+                              ? new Date(selectedCustomer.createdAt).toLocaleDateString("vi-VN")
+                              : "-"}
                           </span>
                         </div>
-                        <p className="text-[11px] text-muted-foreground line-clamp-2">
-                          {f.content || tCustomer("feedback.contentFallback")}
-                        </p>
+                        <div className="flex justify-between py-2">
+                          <span className="text-muted-foreground">Trạng thái</span>
+                          <Badge className={selectedCustomer.isActive !== false ? "bg-green-500" : "bg-gray-500"}>
+                            {selectedCustomer.isActive !== false ? "Hoạt động" : "Ngừng"}
+                          </Badge>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Loyalty Tab */}
+                  <TabsContent value="loyalty" className="m-0 space-y-6">
+                    {!hasLoyaltyFeature ? (
+                      <Card className="p-6 text-center">
+                        <Award className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground">
+                          Tính năng "Tích điểm Loyalty" không khả dụng trong gói hiện tại của bạn.
+                        </p>
+                      </Card>
+                    ) : loyaltySummary ? (
+                      <>
+                        <Card className="p-6 bg-gradient-to-br from-amber-50 to-white border-amber-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Điểm tích lũy</p>
+                              <p className="text-3xl font-bold text-amber-600">
+                                {(loyaltySummary.totalPoints ?? 0).toLocaleString()}
+                              </p>
+                            </div>
+                            <Badge className="gap-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white">
+                              <Crown className="h-4 w-4" />
+                              {loyaltySummary.rank}
+                            </Badge>
+                          </div>
+                        </Card>
+
+                        <Card className="p-4">
+                          <h3 className="font-semibold mb-4 flex items-center gap-2">
+                            <Clock className="h-5 w-5 text-muted-foreground" />
+                            Lịch sử tích điểm
+                          </h3>
+                          {loyaltyTransactions.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-4">
+                              Chưa có giao dịch tích điểm
+                            </p>
+                          ) : (
+                            <div className="space-y-2">
+                              {loyaltyTransactions.map((txn) => (
+                                <div
+                                  key={txn.id}
+                                  className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
+                                >
+                                  <div>
+                                    <p className="font-medium text-sm">
+                                      {txn.points > 0 ? "+" : ""}
+                                      {txn.points} điểm
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {txn.description || "Tích điểm"}
+                                    </p>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(txn.createdAt).toLocaleDateString("vi-VN")}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </Card>
+                      </>
+                    ) : (
+                      <Card className="p-6 text-center">
+                        <p className="text-sm text-muted-foreground">Đang tải dữ liệu loyalty...</p>
+                      </Card>
+                    )}
+                  </TabsContent>
+
+                  {/* Feedback Tab */}
+                  <TabsContent value="feedback" className="m-0 space-y-4">
+                    {feedbacks.length === 0 ? (
+                      <Card className="p-6 text-center">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground">
+                          Chưa có phản hồi nào từ khách hàng này
+                        </p>
+                      </Card>
+                    ) : (
+                      <div className="space-y-4">
+                        {feedbacks.map((f) => (
+                          <Card key={f.id} className="p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < f.rating ? "text-amber-400 fill-amber-400" : "text-muted"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(f.createdAt).toLocaleDateString("vi-VN")}
+                              </span>
+                            </div>
+                            <p className="text-sm">{f.content || "Khách hàng không có nội dung phản hồi"}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </>
           )}
         </Card>
       </motion.div>
 
-      <Dialog
-        open={formOpen}
-        onOpenChange={(open) => {
-          setFormOpen(open);
-          if (!open) setEditingCustomer(null);
-        }}
-      >
+      {/* Create/Edit Dialog */}
+      <Dialog open={formOpen} onOpenChange={(open) => setFormOpen(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCustomer
-                ? tCustomer("form.editTitle")
-                : tCustomer("form.createTitle")}
+              {editingCustomer ? tCustomer("form.editTitle") : tCustomer("form.createTitle")}
             </DialogTitle>
             <DialogDescription>
               {tCustomer("form.description")}
@@ -677,6 +724,7 @@ const CustomerPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -686,10 +734,7 @@ const CustomerPage = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               {tCommon("actions.cancel")}
             </Button>
             <Button

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -46,6 +47,7 @@ import {
   FolderTree,
   Loader2,
   Eye,
+  ExternalLink,
 } from "lucide-react";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Switch } from "@/shared/components/ui/switch";
@@ -168,6 +170,7 @@ export default function ProductManagementPage() {
   const { t } = useTranslation("product");
   const { currentStore } = useStoreStore();
   const storeId = currentStore?.id;
+  const navigate = useNavigate();
 
   const [products, setProducts] = useState<ExtendedProduct[]>([]);
   const [categories, setCategories] = useState<ExtendedCategory[]>([]);
@@ -1114,8 +1117,21 @@ export default function ProductManagementPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              <div className="font-medium">
-                                {product.productName}
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="font-medium cursor-pointer hover:text-teal-600 transition-colors"
+                                  onClick={() => navigate(`/dashboard/products/${product.id}`)}
+                                >
+                                  {product.productName}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => navigate(`/dashboard/products/${product.id}`)}
+                                >
+                                  <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                                </Button>
                               </div>
                             </TableCell>
                             <TableCell>
