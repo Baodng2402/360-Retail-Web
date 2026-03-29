@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { inventoryApi } from "@/shared/lib/inventoryApi";
 import { productsApi } from "@/shared/lib/productsApi";
+import { storesApi } from "@/shared/lib/storesApi";
 import type {
     InventoryTicket,
     InventoryTicketType,
@@ -46,6 +47,8 @@ import toast from "react-hot-toast";
 interface TicketItemForm {
     productId: string;
     productName: string;
+    productVariantId: string | null;
+    productVariantName: string;
     quantity: number;
     note: string;
 }
@@ -108,7 +111,17 @@ const InventoryManagementPage = () => {
     const loadProducts = async () => {
         setProductsLoading(true);
         try {
-            const prods = await productsApi.getProducts({ pageSize: 200 });
+            let storeId: string | undefined;
+            try {
+                const myStore = await storesApi.getMyStore();
+                storeId = myStore.id;
+            } catch {
+                // If no store, continue without storeId
+            }
+            const prods = await productsApi.getProducts({
+                storeId,
+                pageSize: 200,
+            });
             setProducts(prods);
         } catch {
             toast.error("Không thể tải danh sách sản phẩm");
@@ -129,7 +142,14 @@ const InventoryManagementPage = () => {
     const handleAddItem = () => {
         setCreateItems((prev) => [
             ...prev,
-            { productId: "", productName: "", quantity: 1, note: "" },
+            {
+                productId: "",
+                productName: "",
+                productVariantId: null,
+                productVariantName: "",
+                quantity: 1,
+                note: "",
+            },
         ]);
     };
 
@@ -140,7 +160,7 @@ const InventoryManagementPage = () => {
     const handleItemChange = (
         index: number,
         field: keyof TicketItemForm,
-        value: string | number,
+        value: string | number | null,
     ) => {
         setCreateItems((prev) =>
             prev.map((item, i) => {
@@ -151,6 +171,22 @@ const InventoryManagementPage = () => {
                         ...item,
                         productId: value as string,
                         productName: product?.productName ?? "",
+                        productVariantId: null,
+                        productVariantName: "",
+                    };
+                }
+                if (field === "productVariantId") {
+                    const product = products.find((p) => p.id === item.productId);
+                    const variant = product?.variants?.find(
+                        (v) => v.id === value,
+                    );
+                    return {
+                        ...item,
+                        productVariantId: value as string | null,
+                        productVariantName:
+                            variant
+                                ? `${variant.size ?? ""} ${variant.color ?? ""} ${variant.sku ?? ""}`.trim()
+                                : "",
                     };
                 }
                 return { ...item, [field]: value };
@@ -163,9 +199,12 @@ const InventoryManagementPage = () => {
             toast.error("Vui lòng thêm ít nhất 1 sản phẩm");
             return;
         }
-        const invalidItems = createItems.filter(
-            (item) => !item.productId || item.quantity <= 0,
-        );
+        const invalidItems = createItems.filter((item) => {
+            if (!item.productId || item.quantity <= 0) return true;
+            const product = products.find((p) => p.id === item.productId);
+            if (product?.hasVariants && !item.productVariantId) return true;
+            return false;
+        });
         if (invalidItems.length > 0) {
             toast.error("Vui lòng chọn sản phẩm và nhập số lượng hợp lệ");
             return;
@@ -178,6 +217,7 @@ const InventoryManagementPage = () => {
                 note: createNote || undefined,
                 items: createItems.map((item) => ({
                     productId: item.productId,
+                    productVariantId: item.productVariantId || null,
                     quantity: item.quantity,
                     note: item.note || undefined,
                 })),
@@ -550,63 +590,164 @@ const InventoryManagementPage = () => {
                                     Chưa có sản phẩm nào. Nhấn "Thêm" để bắt đầu.
                                 </div>
                             ) : (
-                                <div className="space-y-2">
-                                    {createItems.map((item, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center gap-2 p-2 border rounded-md bg-muted/10"
-                                        >
-                                            <Select
-                                                value={item.productId || ""}
-                                                onValueChange={(v) =>
-                                                    handleItemChange(index, "productId", v)
-                                                }
+                                <div className="space-y-3">
+                                    {createItems.map((item, index) => {
+                                        const selectedProduct = products.find(
+                                            (p) => p.id === item.productId,
+                                        );
+                                        const hasVariants =
+                                            selectedProduct?.hasVariants &&
+                                            (selectedProduct.variants?.length ?? 0) > 0;
+
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="flex flex-col gap-2 p-3 border rounded-md bg-muted/10"
                                             >
-                                                <SelectTrigger className="flex-1 h-9">
-                                                    <SelectValue placeholder="Chọn sản phẩm" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {products.map((p) => (
-                                                        <SelectItem key={p.id} value={p.id}>
-                                                            {p.productName}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                className="w-20 h-9 rounded-md border border-input bg-background px-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring"
-                                                placeholder="SL"
-                                                value={item.quantity}
-                                                onChange={(e) =>
-                                                    handleItemChange(
-                                                        index,
-                                                        "quantity",
-                                                        parseInt(e.target.value) || 0,
-                                                    )
-                                                }
-                                            />
-                                            <input
-                                                type="text"
-                                                className="w-32 h-9 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                                placeholder="Ghi chú"
-                                                value={item.note}
-                                                onChange={(e) =>
-                                                    handleItemChange(index, "note", e.target.value)
-                                                }
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-red-500 shrink-0"
-                                                onClick={() => handleRemoveItem(index)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    ))}
+                                                {/* Product Select */}
+                                                <div className="flex items-center gap-2">
+                                                    <Select
+                                                        value={item.productId || ""}
+                                                        onValueChange={(v) =>
+                                                            handleItemChange(
+                                                                index,
+                                                                "productId",
+                                                                v,
+                                                            )
+                                                        }
+                                                    >
+                                                        <SelectTrigger className="flex-1 h-9">
+                                                            <SelectValue placeholder="Chọn sản phẩm" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {products.map((p) => (
+                                                                <SelectItem
+                                                                    key={p.id}
+                                                                    value={p.id}
+                                                                >
+                                                                    {p.productName}
+                                                                    {p.hasVariants && " ★"}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <input
+                                                        type="number"
+                                                        min={1}
+                                                        className="w-20 h-9 rounded-md border border-input bg-background px-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring"
+                                                        placeholder="SL"
+                                                        value={item.quantity}
+                                                        onChange={(e) =>
+                                                            handleItemChange(
+                                                                index,
+                                                                "quantity",
+                                                                parseInt(
+                                                                    e.target.value,
+                                                                ) || 0,
+                                                            )
+                                                        }
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-red-500 shrink-0"
+                                                        onClick={() =>
+                                                            handleRemoveItem(index)
+                                                        }
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+
+                                                {/* Variant Select - Chỉ hiện khi sản phẩm có biến thể */}
+                                                {hasVariants && (
+                                                    <div className="flex items-center gap-2 pl-2">
+                                                        <Label className="text-xs text-muted-foreground w-20">
+                                                            Biến thể:
+                                                        </Label>
+                                                        <Select
+                                                            value={
+                                                                item.productVariantId ||
+                                                                ""
+                                                            }
+                                                            onValueChange={(v) =>
+                                                                handleItemChange(
+                                                                    index,
+                                                                    "productVariantId",
+                                                                    v ||
+                                                                        null,
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger className="flex-1 h-8 text-sm">
+                                                                <SelectValue placeholder="Chọn biến thể (size/màu)" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {selectedProduct?.variants?.map(
+                                                                    (variant) => (
+                                                                        <SelectItem
+                                                                            key={
+                                                                                variant.id
+                                                                            }
+                                                                            value={
+                                                                                variant.id!
+                                                                            }
+                                                                        >
+                                                                            {[
+                                                                                variant.size,
+                                                                                variant.color,
+                                                                                variant.sku,
+                                                                            ]
+                                                                                .filter(
+                                                                                    Boolean,
+                                                                                )
+                                                                                .join(
+                                                                                    " • ",
+                                                                                )}{" "}
+                                                                            (Tồn:{" "}
+                                                                            {variant.stockQuantity ??
+                                                                                0}
+                                                                            )
+                                                                        </SelectItem>
+                                                                    ),
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                )}
+
+                                                {/* Note */}
+                                                <div className="flex items-center gap-2 pl-2">
+                                                    <Label className="text-xs text-muted-foreground w-20">
+                                                        Ghi chú:
+                                                    </Label>
+                                                    <input
+                                                        type="text"
+                                                        className="flex-1 h-8 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                                        placeholder="Ghi chú"
+                                                        value={item.note}
+                                                        onChange={(e) =>
+                                                            handleItemChange(
+                                                                index,
+                                                                "note",
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Warning nếu sản phẩm có biến thể nhưng chưa chọn */}
+                                                {hasVariants &&
+                                                    !item.productVariantId && (
+                                                        <p className="text-xs text-amber-600 pl-2">
+                                                            Vui lòng chọn biến
+                                                            thể cụ thể
+                                                        </p>
+                                                    )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -679,9 +820,16 @@ const InventoryManagementPage = () => {
                                             key={i}
                                             className="flex items-center justify-between p-2 rounded-md border bg-muted/10 text-sm"
                                         >
-                                            <div className="flex items-center gap-2">
-                                                <Package className="h-4 w-4 text-muted-foreground" />
-                                                <span>{item.productName || item.productId}</span>
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    <Package className="h-4 w-4 text-muted-foreground" />
+                                                    <span>{item.productName || item.productId}</span>
+                                                </div>
+                                                {item.productVariantId && (
+                                                    <span className="text-xs text-muted-foreground pl-6">
+                                                        Biến thể: {item.productVariantId}
+                                                    </span>
+                                                )}
                                             </div>
                                             <Badge variant="outline">x{item.quantity}</Badge>
                                         </div>
