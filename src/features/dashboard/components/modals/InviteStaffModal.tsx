@@ -21,6 +21,8 @@ import {
 import { staffApi } from "@/shared/lib/staffApi";
 import { useStoreStore } from "@/shared/store/storeStore";
 import { useAuthStore } from "@/shared/store/authStore";
+import { Loader2, UserPlus } from "lucide-react";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 
 interface InviteStaffModalProps {
   open: boolean;
@@ -67,9 +69,15 @@ const InviteStaffModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] overflow-hidden p-0 gap-0">
+        <WowDialogInner>
         <DialogHeader>
-          <DialogTitle>Invite Staff / Mời nhân viên</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/30">
+              <UserPlus className="h-4 w-4" />
+            </div>
+            Invite Staff / Mời nhân viên
+          </DialogTitle>
           <DialogDescription>
             Gửi email mời nhân viên tham gia cửa hàng
           </DialogDescription>
@@ -83,12 +91,13 @@ const InviteStaffModal = ({
               placeholder="staff@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="bg-background/80 backdrop-blur-sm"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="role">Role / Vai trò</Label>
             <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-background/80 backdrop-blur-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -105,13 +114,15 @@ const InviteStaffModal = ({
             Hủy
           </Button>
           <Button
-            className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700"
+            className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
+            {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {isSubmitting ? "Đang gửi..." : "Gửi lời mời"}
           </Button>
         </DialogFooter>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

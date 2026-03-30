@@ -131,6 +131,258 @@
 }
 
 @layer components {
+  /* ============================================
+     GRADIENT UTILITIES — Brand Colors
+     ============================================ */
+  .bg-gradient-brand {
+    @apply bg-gradient-to-r from-[#FF7B21] to-[#19D6C8];
+  }
+  .bg-gradient-brand-hover:hover {
+    @apply bg-gradient-to-r from-[#FF7B21] to-[#19D6C8];
+  }
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent;
+  }
+  .border-gradient-brand {
+    border-image: linear-gradient(135deg, #FF7B21, #19D6C8) 1;
+  }
+
+  /* ============================================
+     GLOW EFFECTS — Shadows & Borders
+     ============================================ */
+  .glow-orange {
+    box-shadow: 0 0 20px rgba(255, 123, 33, 0.3), 0 0 40px rgba(255, 123, 33, 0.1);
+  }
+  .glow-orange-sm {
+    box-shadow: 0 0 10px rgba(255, 123, 33, 0.2);
+  }
+  .glow-teal {
+    box-shadow: 0 0 20px rgba(25, 214, 200, 0.3), 0 0 40px rgba(25, 214, 200, 0.1);
+  }
+  .glow-teal-sm {
+    box-shadow: 0 0 10px rgba(25, 214, 200, 0.2);
+  }
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(255, 123, 33, 0.3), 0 0 40px rgba(255, 123, 33, 0.1);
+  }
+  .glow-border {
+    @apply relative;
+  }
+  .glow-border::before {
+    content: "";
+    @apply absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, rgba(255, 123, 33, 0.3), rgba(25, 214, 200, 0.3));
+    filter: blur(8px);
+    z-index: -1;
+  }
+  .glow-border:hover::before {
+    @apply opacity-100;
+  }
+
+  /* ============================================
+     GLASS MORPHISM
+     ============================================ */
+  .glass {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20;
+  }
+  .glass-dark {
+    @apply bg-black/20 backdrop-blur-xl border border-white/10;
+  }
+  .glass-card {
+    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-border/50 shadow-sm;
+  }
+
+  /* ============================================
+     CARD HOVER EFFECTS — Elevation on hover
+     ============================================ */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+  .card-hover:hover {
+    @apply -translate-y-1 shadow-lg;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 123, 33, 0.05);
+  }
+  .dark .card-hover:hover {
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 123, 33, 0.1);
+  }
+
+  /* ============================================
+     BUTTON ANIMATIONS
+     ============================================ */
+  .btn-press {
+    @apply active:scale-[0.97] transition-transform duration-150;
+  }
+  .btn-bounce {
+    @apply transition-all duration-200;
+  }
+  .btn-bounce:hover {
+    @apply scale-105;
+  }
+  .btn-bounce:active {
+    @apply scale-95;
+  }
+
+  /* ============================================
+     INPUT FOCUS ANIMATIONS
+     ============================================ */
+  .input-glow:focus {
+    box-shadow: 0 0 0 3px rgba(255, 123, 33, 0.15), 0 0 20px rgba(255, 123, 33, 0.1);
+  }
+  .input-glow-teal:focus {
+    box-shadow: 0 0 0 3px rgba(25, 214, 200, 0.15), 0 0 20px rgba(25, 214, 200, 0.1);
+  }
+
+  /* ============================================
+     ENTRANCE ANIMATIONS
+     ============================================ */
+  .animate-fade-up {
+    animation: fadeUp 0.5s ease-out forwards;
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+  .animate-slide-in-right {
+    animation: slideInRight 0.4s ease-out forwards;
+  }
+  .animate-slide-in-left {
+    animation: slideInLeft 0.4s ease-out forwards;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* ============================================
+     STAGGER DELAYS — For list animations
+     ============================================ */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+  .stagger-6 { animation-delay: 0.3s; }
+
+  /* ============================================
+     SHIMMER LOADING EFFECT
+     ============================================ */
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+  .shimmer::after {
+    content: "";
+    @apply absolute inset-0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 100%
+    );
+    animation: shimmer 1.5s infinite;
+    transform: translateX(-100%);
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* ============================================
+     PULSE GLOW ANIMATION
+     ============================================ */
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(255, 123, 33, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(255, 123, 33, 0.4), 0 0 50px rgba(255, 123, 33, 0.2);
+    }
+  }
+
+  /* ============================================
+     SPINNING BORDER ANIMATION
+     ============================================ */
+  .animate-spin-border {
+    @apply relative;
+  }
+  .animate-spin-border::before {
+    content: "";
+    @apply absolute inset-0 rounded-xl;
+    background: conic-gradient(from 0deg, #FF7B21, #19D6C8, #FF7B21);
+    animation: spinBorder 3s linear infinite;
+    z-index: -1;
+    padding: 2px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+  }
+
+  @keyframes spinBorder {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ============================================
+     SIGNUP CARD WRAPPER
+     ============================================ */
   .signup-card-wrapper {
     margin-top: -3rem;
   }
@@ -159,6 +411,9 @@
     }
   }
 
+  /* ============================================
+     REVIEW MARQUEE ANIMATION
+     ============================================ */
   @keyframes review-marquee {
     0% {
       transform: translateX(0);
@@ -176,6 +431,9 @@
     animation-play-state: paused;
   }
 
+  /* ============================================
+     SCROLLBAR STYLES
+     ============================================ */
   .scrollbar-hide {
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
@@ -210,11 +468,19 @@
     display: none;
   }
 
+  /* ============================================
+     AUTOFILL INPUT STYLES
+     ============================================ */
   .login-form .login-password-input,
   .login-form .login-password-input:-webkit-autofill,
   .login-form .login-password-input:-webkit-autofill:hover,
   .login-form .login-password-input:-webkit-autofill:focus,
-  .login-form .login-password-input:-webkit-autofill:active {
+  .login-form .login-password-input:-webkit-autofill:active,
+  .login-form .login-email-input,
+  .login-form .login-email-input:-webkit-autofill,
+  .login-form .login-email-input:-webkit-autofill:hover,
+  .login-form .login-email-input:-webkit-autofill:focus,
+  .login-form .login-email-input:-webkit-autofill:active {
     background-color: white !important;
     -webkit-box-shadow: 0 0 0 1000px white inset !important;
     -webkit-text-fill-color: #111827 !important;
@@ -224,7 +490,12 @@
   .dark .login-form .login-password-input:-webkit-autofill,
   .dark .login-form .login-password-input:-webkit-autofill:hover,
   .dark .login-form .login-password-input:-webkit-autofill:focus,
-  .dark .login-form .login-password-input:-webkit-autofill:active {
+  .dark .login-form .login-password-input:-webkit-autofill:active,
+  .dark .login-form .login-email-input,
+  .dark .login-form .login-email-input:-webkit-autofill,
+  .dark .login-form .login-email-input:-webkit-autofill:hover,
+  .dark .login-form .login-email-input:-webkit-autofill:focus,
+  .dark .login-form .login-email-input:-webkit-autofill:active {
     background-color: white !important;
     -webkit-box-shadow: 0 0 0 1000px white inset !important;
     -webkit-text-fill-color: #111827 !important;
@@ -245,5 +516,32 @@
   .dark input:-webkit-autofill:active {
     -webkit-text-fill-color: #f3f4f6 !important;
     -webkit-box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  }
+
+  /* ============================================
+     MOBILE NAVIGATION
+     ============================================ */
+  .mobile-nav-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300;
+  }
+  .mobile-nav-panel {
+    @apply fixed inset-y-0 left-0 w-72 bg-sidebar dark:bg-slate-900 z-50 shadow-2xl;
+    @apply transform transition-transform duration-300 ease-in-out;
+  }
+  .mobile-nav-panel.translate-x-full {
+    @apply translate-x-full;
+  }
+
+  /* ============================================
+     SAFE AREA FOR MOBILE BOTTOM NAV
+     ============================================ */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
+
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .safe-area-bottom {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -21,6 +22,8 @@ import {
 import { categoriesApi } from "@/shared/lib/categoriesApi";
 import { productsApi } from "@/shared/lib/productsApi";
 import type { Category } from "@/shared/types/categories";
+import { Loader2, Package } from "lucide-react";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 
 interface AddProductModalProps {
   open: boolean;
@@ -164,9 +167,15 @@ const AddProductModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] overflow-hidden p-0 gap-0">
+        <WowDialogInner>
         <DialogHeader>
-          <DialogTitle>Add Product / Thêm sản phẩm mới</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/30">
+              <Package className="h-4 w-4" />
+            </div>
+            Add Product / Thêm sản phẩm mới
+          </DialogTitle>
           <DialogDescription>
             Nhập thông tin sản phẩm để thêm vào kho
           </DialogDescription>
@@ -183,6 +192,7 @@ const AddProductModal = ({
               placeholder="Ví dụ: Áo thun nam cổ tròn..."
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
+              className="bg-background/80 backdrop-blur-sm"
             />
           </div>
 
@@ -196,7 +206,7 @@ const AddProductModal = ({
                 onValueChange={setCategoryId}
                 disabled={categoriesLoading}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background/80 backdrop-blur-sm">
                   <SelectValue
                     placeholder={
                       categoriesLoading
@@ -250,6 +260,7 @@ const AddProductModal = ({
                 placeholder="250000"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
+                className="bg-background/80 backdrop-blur-sm"
               />
             </div>
 
@@ -263,6 +274,7 @@ const AddProductModal = ({
                 placeholder="50"
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
+                className="bg-background/80 backdrop-blur-sm"
               />
             </div>
           </div>
@@ -280,12 +292,13 @@ const AddProductModal = ({
                 placeholder="8934567890123"
                 value={barcode}
                 onChange={(e) => setBarcode(e.target.value)}
-                className="flex-1"
+                className="flex-1 bg-background/80 backdrop-blur-sm"
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setBarcode(generateBarcode())}
+                className="hover:bg-[#FF7B21]/10 hover:text-[#FF7B21] transition-colors"
               >
                 Generate
               </Button>
@@ -293,8 +306,13 @@ const AddProductModal = ({
           </div>
 
           {productName && (
-            <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
-              <p className="text-sm font-medium text-teal-900 mb-2">Preview:</p>
+            <motion.div
+              className="p-4 bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5 rounded-xl border"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p className="text-sm font-medium text-foreground mb-2">Preview:</p>
               <div className="flex items-center gap-3">
                 <span className="text-3xl">{image}</span>
                 <div>
@@ -302,7 +320,7 @@ const AddProductModal = ({
                   <p className="text-sm text-muted-foreground">
                     {categoryName}
                   </p>
-                  <p className="text-sm font-bold text-teal-600">
+                  <p className="text-sm font-bold text-[#FF7B21]">
                     {price
                       ? parseInt(price, 10).toLocaleString("vi-VN")
                       : "0"}{" "}
@@ -310,7 +328,7 @@ const AddProductModal = ({
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
 
@@ -323,7 +341,7 @@ const AddProductModal = ({
             Cancel / Hủy
           </Button>
           <Button
-            className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
+            className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
             onClick={() => void handleSubmit()}
             disabled={
               isSubmitting ||
@@ -332,9 +350,11 @@ const AddProductModal = ({
               !categoryId
             }
           >
+            {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {isSubmitting ? "Đang thêm..." : "Add Product / Thêm sản phẩm"}
           </Button>
         </DialogFooter>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

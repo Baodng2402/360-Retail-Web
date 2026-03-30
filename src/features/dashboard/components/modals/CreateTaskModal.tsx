@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -22,6 +23,8 @@ import {
 import { employeesApi } from "@/shared/lib/employeesApi";
 import { tasksApi } from "@/shared/lib/tasksApi";
 import type { Employee } from "@/shared/types/employee";
+import { Loader2, ClipboardList } from "lucide-react";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -93,9 +96,15 @@ const CreateTaskModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] overflow-hidden p-0 gap-0">
+        <WowDialogInner>
         <DialogHeader>
-          <DialogTitle>Create Task / Tạo nhiệm vụ</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/30">
+              <ClipboardList className="h-4 w-4" />
+            </div>
+            Create Task / Tạo nhiệm vụ
+          </DialogTitle>
           <DialogDescription>
             Tạo nhiệm vụ mới và giao cho nhân viên
           </DialogDescription>
@@ -103,11 +112,16 @@ const CreateTaskModal = ({
 
         <div className="space-y-4 py-4">
           {feedbackData && (
-            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+            <motion.div
+              className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
               <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
                 Related to feedback from: {feedbackData.customer}
               </p>
-            </div>
+            </motion.div>
           )}
 
           <div className="space-y-2">
@@ -119,6 +133,7 @@ const CreateTaskModal = ({
               placeholder="Ví dụ: Kiểm kê hàng tồn kho..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className="bg-background/80 backdrop-blur-sm"
             />
           </div>
 
@@ -130,6 +145,7 @@ const CreateTaskModal = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
+              className="bg-background/80 backdrop-blur-sm resize-none"
             />
           </div>
 
@@ -140,7 +156,7 @@ const CreateTaskModal = ({
                 <span className="text-red-500">*</span>
               </Label>
               <Select value={assigneeId} onValueChange={setAssigneeId}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background/80 backdrop-blur-sm">
                   <SelectValue placeholder="Chọn nhân viên" />
                 </SelectTrigger>
                 <SelectContent>
@@ -159,7 +175,7 @@ const CreateTaskModal = ({
                 value={priority}
                 onValueChange={(v) => setPriority(v as "Low" | "Medium" | "High")}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background/80 backdrop-blur-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,6 +196,7 @@ const CreateTaskModal = ({
               type="datetime-local"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+              className="bg-background/80 backdrop-blur-sm"
             />
           </div>
         </div>
@@ -193,13 +210,15 @@ const CreateTaskModal = ({
             Cancel / Hủy
           </Button>
           <Button
-            className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
+            className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
+            {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {isSubmitting ? "Đang tạo..." : "Create Task / Tạo nhiệm vụ"}
           </Button>
         </DialogFooter>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

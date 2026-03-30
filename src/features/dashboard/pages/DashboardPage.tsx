@@ -8,7 +8,6 @@ import type { ChartConfig } from "@/shared/components/ui/chart";
 import ChartLineDefault, {
   type ChartLineDataItem,
 } from "@/shared/components/ui/chart-line-default";
-import QuickActions from "@/features/dashboard/components/QuickActions";
 import RecentTransactions from "@/features/dashboard/components/RecentTransactions";
 import DashboardAlerts from "@/features/dashboard/components/DashboardAlerts";
 import RestockModal from "@/features/dashboard/components/modals/RestockModal";
@@ -26,12 +25,40 @@ import { formatVnd } from "@/shared/utils/formatMoney";
 import { motion } from "motion/react";
 import { ordersApi } from "@/shared/lib/ordersApi";
 import type { Order } from "@/shared/types/orders";
+import type {
+  OrderStatusOverview,
+  InventorySummary,
+  RecentActivityItem,
+} from "@/shared/lib/salesDashboardApi";
 import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
 import { Card } from "@/shared/components/ui/card";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { Badge } from "@/shared/components/ui/badge";
 import { AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94] as const,
+    },
+  },
+};
 
 const DashboardPage = () => {
   const { t: tDashboard } = useTranslation("dashboard");
@@ -65,11 +92,24 @@ const DashboardPage = () => {
   const [todayOverview, setTodayOverview] = useState<
     Awaited<ReturnType<typeof salesDashboardApi.getOverview>> | null
   >(null);
-  const [, setRecentOrders] = useState<Order[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "today">("30d");
   const lastOrderCreatedAt = useDashboardEventsStore(
     (state) => state.lastOrderCreatedAt,
   );
+
+  const [orderStatusOverview, setOrderStatusOverview] =
+    useState<OrderStatusOverview | null>(null);
+  const [inventorySummary, setInventorySummary] =
+    useState<InventorySummary | null>(null);
+
+  const orderCodeToId = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const o of recentOrders) {
+      if (o.code) m[o.code] = o.id;
+    }
+    return m;
+  }, [recentOrders]);
 
   // Subscription expiry warning
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,6 +188,8 @@ const DashboardPage = () => {
           employeesRes,
           productsRes,
           recentOrdersRes,
+          orderStatusRes,
+          inventorySummaryRes,
         ] = await Promise.all([
           salesDashboardApi.getOverview({
             from: rangeFrom.toISOString(),
@@ -165,23 +207,40 @@ const DashboardPage = () => {
           salesDashboardApi.getTopProducts({
             from: rangeFrom.toISOString(),
             to: now.toISOString(),
-            top: 5,
+            top: 8,
           }),
           salesDashboardApi.getRecentActivity(20),
           employeesApi.getEmployees(true).catch(() => []),
           productsApi.getProducts({ pageSize: 100, includeInactive: false }),
           ordersApi
-            .getOrdersPaged({ page: 1, pageSize: 5 })
+            .getOrdersPaged({ page: 1, pageSize: 80 })
             .then((res) => res.items)
             .catch(() => []),
+          salesDashboardApi
+            .getOrderStatus({
+              from: rangeFrom.toISOString(),
+              to: now.toISOString(),
+            })
+            .catch(() => null),
+          salesDashboardApi.getInventorySummary().catch(() => null),
         ]);
 
         setOverview(overviewRes);
         setTodayOverview(todayOverviewRes);
-        setOrders(activityRes.activities || []);
+        setOrders(
+          (activityRes.activities || []).map((a) => {
+            const ext = a as RecentActivityItem & { reference_id?: string };
+            return {
+              ...a,
+              referenceId: ext.referenceId ?? ext.reference_id,
+            };
+          }),
+        );
         setEmployees(employeesRes);
         setProducts(productsRes);
         setRecentOrders(recentOrdersRes);
+        setOrderStatusOverview(orderStatusRes);
+        setInventorySummary(inventorySummaryRes);
 
         const barData: ChartDataItem[] = topProducts.map((p, index) => ({
           items: p.productName,
@@ -311,18 +370,32 @@ const DashboardPage = () => {
   if (userStatus === "noStore") {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center min-h-[70vh] text-center"
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4"
       >
-        <div className="w-full max-w-lg">
-          <div className="mb-8 flex justify-center">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center shadow-lg">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2, type: "spring", stiffness: 200 }}
+          className="mb-8 flex justify-center"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] rounded-full blur-xl opacity-50 animate-pulse" />
+            <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-xl shadow-orange-500/30">
               <Store className="h-10 w-10 text-white" />
             </div>
           </div>
+        </motion.div>
 
-          <h1 className="text-3xl font-bold text-foreground mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="w-full max-w-lg"
+        >
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 tracking-tight">
             {tDashboard("dashboardPage.onboarding.welcomeTitle")}
           </h1>
 
@@ -336,125 +409,155 @@ const DashboardPage = () => {
             />
           </p>
 
-          <div className="bg-muted/50 rounded-xl p-6 mb-8 text-left">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="bg-gradient-to-br from-card to-muted/30 rounded-2xl p-6 mb-8 text-left border border-border/50 shadow-lg"
+          >
             <h3 className="font-semibold mb-4">
               {tDashboard("dashboardPage.onboarding.benefitsTitle")}
             </h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-3">
-                <Gift className="h-5 w-5 text-teal-500" />
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-md">
+                  <Gift className="h-4 w-4 text-white" />
+                </div>
                 <span>
                   {tDashboard("dashboardPage.onboarding.benefits.noCard")}
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <Store className="h-5 w-5 text-blue-500" />
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#FF9F45] flex items-center justify-center shadow-md">
+                  <Store className="h-4 w-4 text-white" />
+                </div>
                 <span>
                   {tDashboard("dashboardPage.onboarding.benefits.setupStore")}
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <ArrowRight className="h-5 w-5 text-purple-500" />
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#19D6C8] to-cyan-500 flex items-center justify-center shadow-md">
+                  <ArrowRight className="h-4 w-4 text-white" />
+                </div>
                 <span>
                   {tDashboard("dashboardPage.onboarding.benefits.fullAccess")}
                 </span>
               </li>
             </ul>
-          </div>
+          </motion.div>
 
-          <Button
-            onClick={handleCreateStore}
-            className="h-12 w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-lg font-semibold"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <Gift className="mr-2 h-5 w-5" />
-            {tDashboard("dashboardPage.onboarding.createStore")}
-          </Button>
+            <Button
+              onClick={handleCreateStore}
+              className="h-12 w-full text-lg font-semibold shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 active:scale-[0.98]"
+            >
+              <Gift className="mr-2 h-5 w-5" />
+              {tDashboard("dashboardPage.onboarding.createStore")}
+            </Button>
 
-          <p className="text-xs text-muted-foreground mt-4">
-            {tDashboard("dashboardPage.onboarding.afterTrialNote")}
-          </p>
+            <p className="text-xs text-muted-foreground mt-4">
+              {tDashboard("dashboardPage.onboarding.afterTrialNote")}
+            </p>
+          </motion.div>
 
           <StartTrialDialog
             open={showStartTrialDialog}
             onOpenChange={setShowStartTrialDialog}
             userEmail={user?.email}
           />
-        </div>
+        </motion.div>
       </motion.div>
     );
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-10"
+      className="space-y-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
     >
       {/* Subscription Expiry Warning */}
       {expiryInfo && expiryInfo.daysRemaining !== undefined && expiryInfo.daysRemaining <= 14 && (
-        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
-          <div className="flex-1 text-sm">
-            <span className="font-medium text-amber-900 dark:text-amber-200">
-              {tDashboard("dashboardPage.expiry.title")}
-            </span>{" "}
-            <span className="text-amber-800 dark:text-amber-300">
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: tDashboard(
-                    expiryInfo.endDate
-                      ? "dashboardPage.expiry.remainingWithEndDate"
-                      : "dashboardPage.expiry.remainingNoEndDate",
-                    {
-                      days: expiryInfo.daysRemaining,
-                      endDate: expiryInfo.endDate,
-                    },
-                  ),
-                }}
-              />
-            </span>
-          </div>
-          <Badge className="bg-amber-500 text-white shrink-0">
-            {tDashboard("dashboardPage.expiry.badgeDays", {
-              days: expiryInfo.daysRemaining,
-            })}
-          </Badge>
-        </Card>
+        <motion.div variants={itemVariants}>
+          <Card className="border-amber-200/50 bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:from-amber-950/30 dark:to-orange-950/30 px-4 py-3 flex items-center gap-3 shadow-lg shadow-amber-500/10">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <AlertCircle className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1 text-sm">
+              <span className="font-medium text-amber-900 dark:text-amber-200">
+                {tDashboard("dashboardPage.expiry.title")}
+              </span>{" "}
+              <span className="text-amber-800 dark:text-amber-300">
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: tDashboard(
+                      expiryInfo.endDate
+                        ? "dashboardPage.expiry.remainingWithEndDate"
+                        : "dashboardPage.expiry.remainingNoEndDate",
+                      {
+                        days: expiryInfo.daysRemaining,
+                        endDate: expiryInfo.endDate,
+                      },
+                    ),
+                  }}
+                />
+              </span>
+            </div>
+            <Badge variant="warning" className="shrink-0">
+              {tDashboard("dashboardPage.expiry.badgeDays", {
+                days: expiryInfo.daysRemaining,
+              })}
+            </Badge>
+          </Card>
+        </motion.div>
       )}
 
-      <section className="space-y-4">
+      <motion.section
+        variants={itemVariants}
+        className="space-y-4"
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">
             {tDashboard("dashboardPage.sections.salesOverview")}
           </h2>
-          <div className="inline-flex rounded-md border bg-background p-1 text-xs sm:text-sm">
+          <div className="inline-flex rounded-xl border bg-background p-1 text-xs sm:text-sm shadow-sm">
             <button
               type="button"
-              className={`px-3 py-1 rounded-md ${dateRange === "today"
-                  ? "bg-teal-500 text-white"
-                  : "text-muted-foreground"
-                }`}
+              className={cn(
+                "px-3 py-1.5 rounded-lg transition-all duration-200",
+                dateRange === "today"
+                  ? "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-md"
+                  : "text-muted-foreground hover:bg-accent"
+              )}
               onClick={() => setDateRange("today")}
             >
               {tDashboard("dashboardPage.actions.today")}
             </button>
             <button
               type="button"
-              className={`px-3 py-1 rounded-md ${dateRange === "7d"
-                  ? "bg-teal-500 text-white"
-                  : "text-muted-foreground"
-                }`}
+              className={cn(
+                "px-3 py-1.5 rounded-lg transition-all duration-200",
+                dateRange === "7d"
+                  ? "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-md"
+                  : "text-muted-foreground hover:bg-accent"
+              )}
               onClick={() => setDateRange("7d")}
             >
               {tDashboard("dashboardPage.actions.days7")}
             </button>
             <button
               type="button"
-              className={`px-3 py-1 rounded-md ${dateRange === "30d"
-                  ? "bg-teal-500 text-white"
-                  : "text-muted-foreground"
-                }`}
+              className={cn(
+                "px-3 py-1.5 rounded-lg transition-all duration-200",
+                dateRange === "30d"
+                  ? "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-md"
+                  : "text-muted-foreground hover:bg-accent"
+              )}
               onClick={() => setDateRange("30d")}
             >
               {tDashboard("dashboardPage.actions.days30")}
@@ -462,32 +565,145 @@ const DashboardPage = () => {
           </div>
         </div>
         <DashboardStats stats={stats} />
-      </section>
+      </motion.section>
 
-      <section>
-        <QuickActions />
-      </section>
-
-      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6 w-full items-start">
-        <div className="xl:col-span-2 flex flex-col gap-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.section
+        variants={itemVariants}
+        className="grid grid-cols-1 xl:grid-cols-3 gap-4 w-full items-start min-w-0"
+      >
+        <div className="xl:col-span-2 flex flex-col gap-4 min-w-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
             <ChartBar
               chartData={chartBarData}
               chartConfig={chartConfig}
               title={tDashboard("dashboardPage.charts.topProductsTitle")}
             />
-            <ChartLineDefault data={chartLineData} isLoading={dashboardLoading} />
+            <ChartLineDefault
+              data={chartLineData}
+              isLoading={dashboardLoading}
+            />
           </div>
-          <RecentTransactions activities={orders} isLoading={dashboardLoading} />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0">
+            <Card className="p-4 min-w-0">
+              <h3 className="text-sm font-semibold mb-3">
+                {tDashboard("dashboardPage.charts.orderStatusTitle", {
+                  defaultValue: "Đơn hàng theo trạng thái",
+                })}
+              </h3>
+              {orderStatusOverview &&
+              orderStatusOverview.statuses?.length > 0 ? (
+                <ul className="space-y-2.5">
+                  {orderStatusOverview.statuses.map((s) => (
+                    <li key={s.status} className="space-y-1">
+                      <div className="flex justify-between text-xs gap-2">
+                        <span className="text-muted-foreground truncate">
+                          {s.status}
+                        </span>
+                        <span className="font-medium tabular-nums shrink-0">
+                          {s.count}{" "}
+                          <span className="text-muted-foreground font-normal">
+                            ({s.percentage.toFixed(0)}%)
+                          </span>
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-[#FF7B21] to-[#19D6C8]"
+                          style={{
+                            width: `${Math.min(100, Math.max(0, s.percentage))}%`,
+                          }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-muted-foreground py-4 text-center">
+                  {dashboardLoading
+                    ? "…"
+                    : tDashboard("dashboardPage.charts.noOrderStatus", {
+                        defaultValue: "Chưa có dữ liệu",
+                      })}
+                </p>
+              )}
+            </Card>
+
+            <Card className="p-4 min-w-0">
+              <h3 className="text-sm font-semibold mb-3">
+                {tDashboard("dashboardPage.charts.inventoryTitle", {
+                  defaultValue: "Tổng quan tồn kho",
+                })}
+              </h3>
+              {inventorySummary ? (
+                <div className="grid grid-cols-2 gap-3 text-center">
+                  <div className="rounded-lg bg-muted/40 p-3">
+                    <div className="text-lg font-bold tabular-nums">
+                      {inventorySummary.totalProducts}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {tDashboard("dashboardPage.charts.skuTotal", {
+                        defaultValue: "SKU",
+                      })}
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-emerald-500/10 p-3">
+                    <div className="text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
+                      {inventorySummary.inStockCount}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {tDashboard("dashboardPage.charts.inStock", {
+                        defaultValue: "Còn hàng",
+                      })}
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-amber-500/10 p-3">
+                    <div className="text-lg font-bold tabular-nums text-amber-800 dark:text-amber-400">
+                      {inventorySummary.lowStockCount}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {tDashboard("dashboardPage.charts.lowStock", {
+                        defaultValue: "Sắp hết",
+                      })}
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-red-500/10 p-3">
+                    <div className="text-lg font-bold tabular-nums text-red-700 dark:text-red-400">
+                      {inventorySummary.outOfStockCount}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {tDashboard("dashboardPage.charts.outOfStock", {
+                        defaultValue: "Hết hàng",
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground py-4 text-center">
+                  {dashboardLoading
+                    ? "…"
+                    : tDashboard("dashboardPage.charts.noInventory", {
+                        defaultValue: "Chưa có dữ liệu",
+                      })}
+                </p>
+              )}
+            </Card>
+          </div>
+
+          <RecentTransactions
+            activities={orders}
+            isLoading={dashboardLoading}
+            orderCodeToId={orderCodeToId}
+          />
         </div>
 
-        <div className="xl:col-span-1">
+        <div className="xl:col-span-1 min-w-0">
           <DashboardAlerts
             lowStockProducts={lowStockProducts}
             onRestockClick={handleRestockClick}
           />
         </div>
-      </section>
+      </motion.section>
 
       <RestockModal
         open={restockModalOpen}

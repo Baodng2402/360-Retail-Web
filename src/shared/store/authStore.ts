@@ -61,7 +61,11 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("auth-storage"); // clear persisted auth state to prevent rehydration issues
         sessionStorage.removeItem("pendingGoogleNewUser");
+        // Reset dark mode to light mode on logout so auth pages render correctly
+        localStorage.removeItem("darkMode");
+        document.documentElement.classList.remove("dark");
         set({
           user: null,
           token: null,

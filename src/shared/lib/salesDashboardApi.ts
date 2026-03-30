@@ -61,6 +61,8 @@ export interface RecentActivityItem {
   amount: number | null;
   status: string;
   createdAt: string;
+  /** Phiếu kho / tham chiếu — backend có thể gửi để mở chi tiết */
+  referenceId?: string;
 }
 
 export interface RecentActivityResponse {

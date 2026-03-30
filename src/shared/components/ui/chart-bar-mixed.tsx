@@ -22,6 +22,8 @@ export interface ChartBarMixedProps {
   chartConfig: ChartConfig;
   className?: string;
   title?: string;
+  /** Override default aspect-video chart area (fixed height fits dashboard grids) */
+  chartClassName?: string;
 }
 
 const ChartBarMixed = ({
@@ -29,14 +31,21 @@ const ChartBarMixed = ({
   chartConfig,
   className,
   title,
+  chartClassName,
 }: ChartBarMixedProps) => (
   <div
-    className={`w-full rounded-md border border-border bg-card p-4 ${
+    className={`w-full rounded-md border border-border bg-card p-3 sm:p-4 min-w-0 ${
       className || ""
     }`}
   >
-    <h3 className="text-base md:text-lg font-semibold pb-4 md:pb-5">{title}</h3>
-    <ChartContainer config={chartConfig}>
+    <h3 className="text-sm sm:text-base font-semibold pb-2">{title}</h3>
+    <ChartContainer
+      config={chartConfig}
+      className={
+        chartClassName ??
+        "aspect-auto h-[200px] w-full min-h-[180px] max-h-[240px]"
+      }
+    >
       <BarChart
         accessibilityLayer
         data={chartData}
@@ -57,12 +66,17 @@ const ChartBarMixed = ({
               : value
           }
         />
-        <YAxis axisLine={false} tickLine={false} tickMargin={10} />
+        <YAxis
+          axisLine={false}
+          tickLine={false}
+          tickMargin={10}
+          domain={["auto", "auto"]}
+        />
         <ChartTooltip
           content={<ChartTooltipContent hideLabel />}
           cursor={false}
         />
-        <Bar dataKey="values" radius={5}>
+        <Bar dataKey="values" radius={5} isAnimationActive>
           {chartData.map((entry, index) => (
             <Cell
               key={`cell-${index}`}

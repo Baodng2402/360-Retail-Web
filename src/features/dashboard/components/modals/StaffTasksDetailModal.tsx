@@ -1,9 +1,11 @@
+import { motion } from "motion/react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 import { Badge } from "@/shared/components/ui/badge";
 import type { Task } from "@/shared/types/task";
 import { useTranslation } from "react-i18next";
@@ -45,10 +47,13 @@ export default function StaffTasksDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[520px] max-h-[85vh] overflow-hidden p-0 gap-0 flex flex-col">
+        <WowDialogInner className="max-h-[calc(85vh-0.5rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ListTodo className="h-5 w-5 text-teal-600" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/30">
+              <ListTodo className="h-4 w-4" />
+            </div>
             {tasks.length > 0
               ? `${staffName} – ${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}`
               : "Tasks"}
@@ -60,10 +65,13 @@ export default function StaffTasksDetailModal({
               {tTasks("states.empty")}
             </p>
           ) : (
-            tasks.map((task) => (
-              <div
+            tasks.map((task, index) => (
+              <motion.div
                 key={task.id}
-                className="rounded-lg border border-border/70 bg-muted/30 p-3 space-y-2"
+                className="rounded-xl border border-border/70 bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5 p-3 space-y-2 hover:shadow-md transition-shadow duration-200"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-foreground text-sm">
@@ -107,10 +115,11 @@ export default function StaffTasksDetailModal({
                     </span>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))
           )}
         </div>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

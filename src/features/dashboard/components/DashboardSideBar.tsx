@@ -7,7 +7,6 @@ import {
   UserCircle,
   FileText,
   Settings,
-  Plus,
   ClipboardCheck,
   MessageSquare,
   ListChecks,
@@ -22,11 +21,6 @@ import {
   MapPin,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
-import {
-  NewSaleModal,
-  StaffCheckInModal,
-} from "@/features/dashboard/components/modals/QuickActionModals";
-import CreateTaskModal from "@/features/dashboard/components/modals/CreateTaskModal";
 import { authApi } from "@/shared/lib/authApi";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { UserStatus } from "@/shared/types/jwt-claims";
@@ -80,9 +74,6 @@ export const DashboardSideBar = ({
   onToggle,
 }: DashboardSideBarProps) => {
   const { t } = useTranslation("dashboard");
-  const [newSaleOpen, setNewSaleOpen] = useState(false);
-  const [checkInOpen, setCheckInOpen] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<{
     label: string;
     subLabel: string;
@@ -295,31 +286,6 @@ export const DashboardSideBar = ({
     },
   ];
 
-  const quickActions = [
-    {
-      icon: Plus,
-      label: t("sidebar.quickActions.createOrder.label"),
-      subLabel: t("sidebar.quickActions.createOrder.subLabel"),
-      action: () => setNewSaleOpen(true),
-    },
-    {
-      icon: ClipboardCheck,
-      label: t("sidebar.quickActions.staffCheckIn.label"),
-      subLabel: t("sidebar.quickActions.staffCheckIn.subLabel"),
-      action: () => setCheckInOpen(true),
-    },
-    {
-      icon: MessageSquare,
-      label: t("sidebar.quickActions.recordFeedback.label"),
-      subLabel: t("sidebar.quickActions.recordFeedback.subLabel"),
-      action: () => setFeedbackOpen(true),
-    },
-  ];
-  const canUseQuickActions =
-    userRole === "StoreOwner" || userRole === "Manager" || userRole === "Staff";
-  // Quick actions (tạo đơn, check-in, ghi feedback) vẫn cho Trial dùng nếu subscription còn hạn.
-  const quickActionsLockedByPlan = subscriptionExpired;
-
   return (
     <>
       {isCollapsed && hoveredItem && (
@@ -341,13 +307,13 @@ export const DashboardSideBar = ({
         </div>
       )}
       <aside
-        className={`relative flex h-screen flex-col border-r bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-[width] duration-300 ease-in-out ${isCollapsed ? "w-20" : "w-64"
+        className={`relative flex h-full flex-col bg-gradient-to-b from-sidebar to-sidebar/95 dark:from-slate-900 dark:to-slate-950 border-r border-border/50 transition-[width] duration-300 ease-out ${isCollapsed ? "w-20" : "w-64"
           }`}
         style={{
           willChange: "width",
         }}
       >
-        <div className="h-[73px] flex items-center px-4 flex-shrink-0 border-b border-gray-200 dark:border-gray-800">
+        <div className="h-[73px] flex items-center px-4 flex-shrink-0 border-b border-border/50">
           <div
             className={`flex items-center gap-3 w-full ${isCollapsed ? "justify-center" : ""
               }`}
@@ -356,7 +322,7 @@ export const DashboardSideBar = ({
               <img src={logo} alt="logo" className="w-full h-full object-contain" />
             </div>
             <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+              className={`overflow-hidden transition-all duration-300 ease-out ${
                 isCollapsed
                   ? "w-0 opacity-0 scale-95"
                   : "w-auto opacity-100 scale-100 min-w-0"
@@ -366,7 +332,7 @@ export const DashboardSideBar = ({
               }}
             >
               <div className="whitespace-nowrap">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-teal-500 to-blue-500 bg-clip-text text-transparent">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
                   {t("sidebar.brandLine1", { defaultValue: "Retail 360" })}
                 </h1>
                 <p className="text-xs text-muted-foreground">
@@ -377,7 +343,7 @@ export const DashboardSideBar = ({
           </div>
         </div>
 
-        <nav className={`flex-1 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent ${isCollapsed ? "scrollbar-hide" : ""}`}>
+        <nav className={`flex-1 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-border/50 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent ${isCollapsed ? "scrollbar-hide" : ""}`}>
           <ul className="space-y-1">
             {mainNavItems.map((item) => {
               let normalizedRoles: string[] = [];
@@ -437,35 +403,40 @@ export const DashboardSideBar = ({
                       }
                     }}
                     className={cn(
-                      "flex items-center rounded-lg transition-all duration-200 cursor-pointer",
-                      isCollapsed ? "justify-center px-3 py-2.5" : "gap-3 px-3 py-2.5",
+                      "flex items-center rounded-xl transition-all duration-200 cursor-pointer group",
+                      isCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-2.5 lg:py-3",
                       isActive
-                        ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-md"
+                        ? "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-orange-500/20"
                         : isLocked
-                          ? "opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                          ? "opacity-50 cursor-not-allowed text-muted-foreground"
+                          : "hover:bg-gradient-to-r hover:from-[#FF7B21]/10 hover:to-[#19D6C8]/10 hover:text-foreground dark:hover:bg-white/10"
                     )}
                   >
                     <div className="relative">
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <item.icon className={cn(
+                        "h-5 w-5 flex-shrink-0 transition-transform duration-200",
+                        !isActive && !isLocked && "group-hover:scale-110"
+                      )} />
                       {isLocked && (
-                        <Lock className="h-3 w-3 absolute -top-1 -right-1 text-red-500" />
+                        <Lock className="h-3 w-3 absolute -top-1 -right-1 text-destructive" />
                       )}
                     </div>
                     <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed
+                      className={cn(
+                        "overflow-hidden transition-all duration-300 ease-out",
+                        isCollapsed
                           ? "w-0 opacity-0 scale-95"
                           : "w-auto opacity-100 scale-100 ml-0"
-                        }`}
+                      )}
                       style={{
                         transitionDelay: isCollapsed ? "0ms" : "100ms",
                       }}
                     >
                       <div className="flex flex-col whitespace-nowrap relative">
-                        <span className={cn("text-sm font-medium", isLocked && "text-gray-400")}>
+                        <span className={cn("text-sm font-medium", isLocked && "text-muted-foreground")}>
                           {item.label}
                         </span>
-                        <span className={cn("text-xs opacity-70", isLocked && "text-gray-300")}>
+                        <span className={cn("text-xs opacity-70", isLocked && "text-muted-foreground")}>
                           {item.subLabel}
                         </span>
                       </div>
@@ -474,112 +445,14 @@ export const DashboardSideBar = ({
                 </li>
               );
             })}
-            {isCollapsed && canUseQuickActions && (
-              <>
-                <li className="py-2">
-                  <div className="border-t border-gray-200 dark:border-gray-700 mx-3"></div>
-                </li>
-                {quickActions.map((action) => (
-                  <li key={action.label} className="relative">
-                    <button
-                      onClick={() => {
-                        if (userStatus === "noStore") {
-                          setShowSetupDialog(true);
-                        } else if (quickActionsLockedByPlan) {
-                          openUpgradeModal({
-                            errorType: "FeatureNotAvailable",
-                            message:
-                              "Vui lòng nâng cấp gói để sử dụng tính năng này.",
-                          });
-                        } else {
-                          if (action.label === "Staff Check-in" && userRole === "Staff") {
-                            navigate("/dashboard/timekeeping");
-                          } else {
-                            action.action();
-                          }
-                        }
-                      }}
-                      onMouseEnter={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setHoveredItem({
-                          label: action.label,
-                          subLabel: action.subLabel,
-                          x: rect.right + 8,
-                          y: rect.top + rect.height / 2,
-                        });
-                      }}
-                      onMouseLeave={() => {
-                        setHoveredItem(null);
-                      }}
-                      className={cn(
-                        "flex w-full items-center justify-center rounded-lg px-3 py-2.5 transition-all duration-200",
-                        userStatus === "noStore" || quickActionsLockedByPlan
-                          ? "opacity-50 cursor-not-allowed text-gray-400"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-                      )}
-                    >
-                      <action.icon className="h-5 w-5 flex-shrink-0" />
-                    </button>
-                  </li>
-                ))}
-              </>
-            )}
           </ul>
 
-        {!isCollapsed && canUseQuickActions && (
-            <div className="mt-4">
-              <h3 className="mb-2 px-3 text-xs font-semibold uppercase text-muted-foreground whitespace-nowrap">
-              {t("sidebar.quickActionsSection")}
-              </h3>
-              <ul className="space-y-1">
-                {quickActions.map((action) => (
-                  <li key={action.label}>
-                    <button
-                      onClick={() => {
-                        if (userStatus === "noStore") {
-                          setShowSetupDialog(true);
-                        } else if (quickActionsLockedByPlan) {
-                          openUpgradeModal({
-                            errorType: "FeatureNotAvailable",
-                            message:
-                              "Vui lòng nâng cấp gói để sử dụng tính năng này.",
-                          });
-                        } else {
-                          if (action.label === "Staff Check-in" && userRole === "Staff") {
-                            navigate("/dashboard/timekeeping");
-                          } else {
-                            action.action();
-                          }
-                        }
-                      }}
-                      className={cn(
-                        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200",
-                        userStatus === "noStore" || quickActionsLockedByPlan
-                          ? "opacity-50 cursor-not-allowed text-gray-400"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-                      )}
-                    >
-                      <action.icon className="h-5 w-5 flex-shrink-0" />
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          {action.label}
-                        </span>
-                        <span className="text-xs opacity-70">
-                          {action.subLabel}
-                        </span>
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </nav>
 
-        <div className="p-3 flex items-center justify-end flex-shrink-0 border-t border-gray-200 dark:border-gray-800">
+        <div className="p-3 flex items-center justify-end flex-shrink-0 border-t border-border/50">
           <button
             onClick={onToggle}
-            className="flex items-center justify-center rounded-full transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 w-10 h-10"
+            className="flex items-center justify-center rounded-xl transition-all duration-200 hover:bg-accent active:scale-95 w-10 h-10"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? (
@@ -590,14 +463,6 @@ export const DashboardSideBar = ({
           </button>
         </div>
       </aside>
-
-      <NewSaleModal open={newSaleOpen} onOpenChange={setNewSaleOpen} />
-      <StaffCheckInModal open={checkInOpen} onOpenChange={setCheckInOpen} />
-      <CreateTaskModal
-        open={feedbackOpen}
-        onOpenChange={setFeedbackOpen}
-        feedbackData={undefined}
-      />
 
       <Dialog open={showSetupDialog} onOpenChange={setShowSetupDialog}>
         <DialogContent className="sm:max-w-md">

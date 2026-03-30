@@ -89,12 +89,12 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
   return (
     <aside
       className={cn(
-        "relative flex h-screen flex-col border-r bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-[width] duration-300 ease-in-out",
+        "relative flex h-screen flex-col border-r border-border/50 bg-gradient-to-b from-sidebar to-sidebar/95 dark:from-slate-900 dark:to-slate-950 transition-[width] duration-300 ease-in-out",
         isCollapsed ? "w-20" : "w-64",
       )}
       style={{ willChange: "width" }}
     >
-      <div className="h-[73px] flex items-center px-4 flex-shrink-0 border-b border-gray-200 dark:border-gray-800">
+      <div className="h-[73px] flex items-center px-4 flex-shrink-0 border-b border-border/50">
         <div
           className={cn(
             "flex items-center gap-3 w-full",
@@ -112,7 +112,7 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
             style={{ transitionDelay: isCollapsed ? "0ms" : "100ms" }}
           >
             <div className="whitespace-nowrap">
-              <h1 className="text-lg font-bold bg-gradient-to-r from-teal-500 to-blue-500 bg-clip-text text-transparent">
+              <h1 className="text-lg font-bold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
                 {t("sidebar.brand.title")}
               </h1>
               <p className="text-xs text-muted-foreground">
@@ -122,7 +122,7 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
           </div>
           {!isCollapsed && (
             <div className="ml-auto flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] text-white shadow-md shadow-[#FF7B21]/20">
                 <Shield className="h-5 w-5" />
               </div>
             </div>
@@ -138,11 +138,11 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center rounded-lg transition-all duration-200",
+                    "flex items-center rounded-xl transition-all duration-200",
                     isCollapsed ? "justify-center px-3 py-2.5" : "gap-3 px-3 py-2.5",
                     isActive
-                      ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-md"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
+                      ? "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20"
+                      : "hover:bg-[#FF7B21]/10 dark:hover:bg-[#19D6C8]/10 text-gray-700 dark:text-gray-300 hover:text-[#FF7B21]",
                   )
                 }
               >
@@ -159,7 +159,7 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
         </ul>
       </nav>
 
-      <div className="p-3 flex items-center justify-end flex-shrink-0 border-t border-gray-200 dark:border-gray-800">
+      <div className="p-3 flex items-center justify-end flex-shrink-0 border-t border-border/50">
         <Button
           variant="ghost"
           size="icon"

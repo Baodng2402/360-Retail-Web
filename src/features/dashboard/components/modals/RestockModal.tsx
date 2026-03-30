@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "motion/react";
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -12,6 +13,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
+import { ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 
 interface RestockModalProps {
   open: boolean;
@@ -60,12 +63,25 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] overflow-hidden p-0 gap-0">
+        <WowDialogInner>
         <DialogHeader>
-          <DialogTitle>
-            {operation === "in"
-              ? "Stock In / Nhập kho"
-              : "Stock Out / Xuất kho"}
+          <DialogTitle className="flex items-center gap-2">
+            {operation === "in" ? (
+              <>
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                  <ArrowDownToLine className="h-4 w-4" />
+                </div>
+                Stock In / Nhập kho
+              </>
+            ) : (
+              <>
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+                  <ArrowUpFromLine className="h-4 w-4" />
+                </div>
+                Stock Out / Xuất kho
+              </>
+            )}
           </DialogTitle>
           <DialogDescription>
             Cập nhật số lượng tồn kho cho sản phẩm
@@ -73,16 +89,21 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="flex items-center gap-4 p-4 bg-teal-50 rounded-lg border border-teal-200">
+          <motion.div
+            className="flex items-center gap-4 p-4 rounded-xl border bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5 backdrop-blur-sm"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
             <span className="text-4xl">{product.image}</span>
             <div className="flex-1">
-              <p className="font-semibold text-stone-900">{product.name}</p>
-              <p className="text-sm text-stone-600">
+              <p className="font-semibold text-foreground">{product.name}</p>
+              <p className="text-sm text-muted-foreground">
                 Tồn kho hiện tại:{" "}
-                <span className="font-bold">{product.stock}</span>
+                <span className="font-bold text-[#FF7B21]">{product.stock}</span>
               </p>
             </div>
-          </div>
+          </motion.div>
 
           <div className="space-y-2">
             <Label>Operation Type / Loại thao tác</Label>
@@ -90,15 +111,17 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
               value={operation}
               onValueChange={(val) => setOperation(val as "in" | "out")}
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                 <RadioGroupItem value="in" id="in" />
-                <Label htmlFor="in" className="font-normal cursor-pointer">
+                <Label htmlFor="in" className="font-normal cursor-pointer flex items-center gap-2">
+                  <ArrowDownToLine className="h-4 w-4 text-emerald-500" />
                   Stock In / Nhập kho
                 </Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                 <RadioGroupItem value="out" id="out" />
-                <Label htmlFor="out" className="font-normal cursor-pointer">
+                <Label htmlFor="out" className="font-normal cursor-pointer flex items-center gap-2">
+                  <ArrowUpFromLine className="h-4 w-4 text-orange-500" />
                   Stock Out / Xuất kho
                 </Label>
               </div>
@@ -116,7 +139,7 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
               placeholder="Nhập số lượng..."
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-full"
+              className="w-full bg-background/80 backdrop-blur-sm"
             />
           </div>
 
@@ -127,7 +150,7 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
               placeholder="Nhà cung cấp hoặc lý do..."
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full"
+              className="w-full bg-background/80 backdrop-blur-sm"
             />
           </div>
         </div>
@@ -141,13 +164,14 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             Cancel / Hủy
           </Button>
           <Button
-            className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-sm"
+            className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Đang xử lý..." : "Confirm / Xác nhận"}
           </Button>
         </DialogFooter>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

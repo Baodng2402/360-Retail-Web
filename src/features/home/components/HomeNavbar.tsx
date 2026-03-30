@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import ThemeMode from "@/shared/components/ui/themeMode";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 
 import {
   Accordion,
@@ -106,19 +107,20 @@ const HomeNavbar = ({
         <div className="py-4">
           <nav className="hidden items-center justify-between lg:flex">
             <div className="flex items-center gap-6">
-              <a
+              <motion.a
                 href={translatedLogo.url}
-                className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-80"
+                className="flex items-center gap-2 transition-all duration-300 hover:scale-105 group"
+                whileHover={{ scale: 1.05 }}
               >
                 <img
                   src={translatedLogo.src}
-                  className="h-9 w-auto rounded-xl bg-transparent transition-all duration-300"
+                  className="h-9 w-auto rounded-xl bg-transparent"
                   alt={translatedLogo.alt}
                 />
-                <span className="text-lg font-semibold tracking-tight">
+                <span className="text-lg font-bold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
                   {translatedLogo.title}
                 </span>
-              </a>
+              </motion.a>
 
               {menu.length > 0 && (
                 <div className="flex items-center">
@@ -138,11 +140,20 @@ const HomeNavbar = ({
 
               <LanguageSwitcher />
 
-              <Button asChild variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-[#FF7B21]/30 hover:border-[#FF7B21] hover:bg-[#FF7B21]/5 transition-all duration-300"
+                asChild
+              >
                 <a href={translatedAuth.login.url}>{translatedAuth.login.title}</a>
               </Button>
 
-              <Button asChild size="sm">
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:shadow-lg hover:shadow-[#FF7B21]/20 transition-all duration-300"
+                asChild
+              >
                 <a href={translatedAuth.signup.url}>{translatedAuth.signup.title}</a>
               </Button>
             </div>
@@ -198,10 +209,17 @@ const HomeNavbar = ({
                       )}
 
                       <div className="flex flex-col gap-3">
-                        <Button asChild variant="outline">
+                        <Button
+                          variant="outline"
+                          className="border-[#FF7B21]/30 hover:border-[#FF7B21] hover:bg-[#FF7B21]/5 transition-all duration-300"
+                          asChild
+                        >
                           <a href={translatedAuth.login.url}>{translatedAuth.login.title}</a>
                         </Button>
-                        <Button asChild>
+                        <Button
+                          className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:shadow-lg hover:shadow-[#FF7B21]/20 transition-all duration-300"
+                          asChild
+                        >
                           <a href={translatedAuth.signup.url}>{translatedAuth.signup.title}</a>
                         </Button>
                       </div>
