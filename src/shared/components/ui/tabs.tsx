@@ -42,7 +42,11 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF7B21] data-[state=active]:to-[#19D6C8] data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-orange-500/15 dark:data-[state=active]:text-white focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-muted-foreground dark:text-muted-foreground inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-transparent px-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:text-foreground",
+        "text-muted-foreground dark:text-muted-foreground inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-transparent px-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:text-foreground",
+        "overflow-hidden",
+        "data-[state=active]:border-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF7B21] data-[state=active]:to-[#19D6C8] data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-[#FF7B21]/20",
+        "dark:data-[state=active]:border-transparent dark:data-[state=active]:bg-gradient-to-r dark:data-[state=active]:from-[#FF7B21] dark:data-[state=active]:to-[#19D6C8] dark:data-[state=active]:text-white",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B21]/45 focus-visible:ring-offset-0",
         className
       )}
       {...props}

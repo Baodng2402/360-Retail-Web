@@ -192,22 +192,22 @@ export default function PaymentSuccessPage() {
             transition={{ delay: 0.7 }}
             className="flex flex-col sm:flex-row gap-3 justify-center"
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button 
-                onClick={handleGoToDashboard}
-                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-teal-500 to-blue-500"
-              >
-                <Home className="h-4 w-4" />
-                Về trang chủ
-              </Button>
-            </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={handleGoToDashboard}
+                  className="w-full sm:w-auto gap-2 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF7B21]/90 hover:to-[#19D6C8]/90 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 border-0 transition-all duration-300"
+                >
+                  <Home className="h-4 w-4" />
+                  Về trang chủ
+                </Button>
+              </motion.div>
 
             {status === "success" && (
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button 
+                <Button
                   onClick={handleGoToSubscription}
                   variant="outline"
-                  className="w-full sm:w-auto gap-2"
+                  className="w-full sm:w-auto gap-2 border-[#FF7B21]/30 hover:border-[#FF7B21] hover:bg-[#FF7B21]/5 transition-all"
                 >
                   <ArrowRight className="h-4 w-4" />
                   Xem gói dịch vụ
@@ -217,10 +217,10 @@ export default function PaymentSuccessPage() {
 
             {status === "error" && (
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button 
+                <Button
                   onClick={() => navigate("/dashboard/subscription")}
                   variant="outline"
-                  className="w-full sm:w-auto gap-2"
+                  className="w-full sm:w-auto gap-2 border-[#FF7B21]/30 hover:border-[#FF7B21] hover:bg-[#FF7B21]/5 transition-all"
                 >
                   Thử lại
                 </Button>

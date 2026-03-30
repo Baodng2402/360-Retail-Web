@@ -55,11 +55,14 @@ export default function AdminDashboardPage() {
     expiredStores: number;
     conversionRate: number;
   } | null>(null);
-  const [revenuePoints, setRevenuePoints] = useState<{ label: string; revenue: number }[]>([]);
+  const [revenuePoints, setRevenuePoints] = useState<{ label: string; revenue: number; mrr?: number }[]>([]);
   const [planDistribution, setPlanDistribution] = useState<
     { name: string; value: number }[]
   >([]);
   const [funnel, setFunnel] = useState<{ landing: number; signup: number } | null>(null);
+  const [storeStatus, setStoreStatus] = useState<
+    { name: string; value: number; fill: string }[]
+  >([]);
   const [registrations, setRegistrations] = useState<{ label: string; count: number }[]>([]);
 
   useEffect(() => {
@@ -98,6 +101,7 @@ export default function AdminDashboardPage() {
         (rev.dataPoints ?? []).map((p) => ({
           label: p.label,
           revenue: p.revenue,
+          mrr: p.mrr,
         })),
       );
       setPlanDistribution(
@@ -107,6 +111,11 @@ export default function AdminDashboardPage() {
       );
       setFunnel({ landing: fun.landing, signup: fun.signup });
       setRegistrations(regs);
+      setStoreStatus([
+        { name: "Đang hoạt động", value: ov.activeStores, fill: "#22c55e" },
+        { name: "Dùng thử", value: ov.trialStores, fill: "#f59e0b" },
+        { name: "Hết hạn", value: ov.expiredStores, fill: "#ef4444" },
+      ]);
     } catch (err) {
       console.error("Failed to load superadmin dashboard:", err);
       toast.error("Không tải được dữ liệu dashboard SuperAdmin.");
@@ -115,6 +124,7 @@ export default function AdminDashboardPage() {
       setPlanDistribution([]);
       setFunnel(null);
       setRegistrations([]);
+      setStoreStatus([]);
     } finally {
       setLoading(false);
     }
@@ -176,11 +186,17 @@ export default function AdminDashboardPage() {
   const revenueConfig = {
     revenue: { label: t("dashboard.revenueChart.tooltipLabel"), color: "var(--chart-1)" },
   } as const;
+  const mrrConfig = {
+    mrr: { label: "MRR (VNĐ)", color: "#a855f7" },
+  } as const;
   const registrationsConfig = {
     count: { label: t("dashboard.registrations.label"), color: "var(--chart-2)" },
   } as const;
   const planConfig = {
     value: { label: t("dashboard.planDistribution.label"), color: "var(--chart-3)" },
+  } as const;
+  const storeStatusConfig = {
+    value: { label: "Cửa hàng", color: "var(--chart-4)" },
   } as const;
 
   return (
@@ -317,6 +333,7 @@ export default function AdminDashboardPage() {
                       stroke="var(--color-revenue)"
                       strokeWidth={2}
                       dot={false}
+                      isAnimationActive
                     />
                   </LineChart>
                 </ChartContainer>
@@ -330,7 +347,7 @@ export default function AdminDashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
+          <Card className="p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">
                 {t("dashboard.planDistribution.title")}
@@ -359,6 +376,7 @@ export default function AdminDashboardPage() {
                       innerRadius={55}
                       outerRadius={90}
                       paddingAngle={2}
+                      isAnimationActive
                     />
                   </PieChart>
                 </ChartContainer>
@@ -451,11 +469,112 @@ export default function AdminDashboardPage() {
                     <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
                     <YAxis tickLine={false} axisLine={false} tickMargin={8} />
                     <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-                    <Bar dataKey="count" fill="var(--color-count)" radius={6} />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={6} isAnimationActive />
                   </BarChart>
                 </ChartContainer>
               )}
             </div>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* MRR Trend + Store Status */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+        >
+          <Card className="p-4 lg:col-span-2 hover:shadow-lg transition-shadow duration-300 overflow-visible">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold">Xu hướng MRR</h3>
+              <Badge variant="outline" className="border-purple-400/40 text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-300">
+                Doanh thu định kỳ
+              </Badge>
+            </div>
+            <div className="mt-3">
+              {loading && revenuePoints.length === 0 ? (
+                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+                  {t("dashboard.states.loading")}
+                </div>
+              ) : revenuePoints.length === 0 ? (
+                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
+                  Không có dữ liệu MRR trong khoảng thời gian đã chọn.
+                </div>
+              ) : (
+                <ChartContainer config={mrrConfig} className="h-[260px] w-full">
+                  <LineChart
+                    data={revenuePoints}
+                    margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                    <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+                    <Line
+                      type="monotone"
+                      dataKey="mrr"
+                      stroke="#a855f7"
+                      strokeWidth={2}
+                      dot={false}
+                      isAnimationActive
+                    />
+                  </LineChart>
+                </ChartContainer>
+              )}
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        >
+          <Card className="p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold">Trạng thái cửa hàng</h3>
+              <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
+                Tổng quan
+              </Badge>
+            </div>
+            {loading && storeStatus.length === 0 ? (
+              <div className="h-[260px] flex items-center justify-center text-muted-foreground">
+                {t("dashboard.states.loading")}
+              </div>
+            ) : storeStatus.length === 0 ? (
+              <div className="h-[260px] flex items-center justify-center text-muted-foreground">
+                Không có dữ liệu cửa hàng.
+              </div>
+            ) : (
+              <>
+                <ChartContainer config={storeStatusConfig} className="h-[200px] w-full">
+                  <PieChart>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Pie
+                      data={storeStatus}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      isAnimationActive
+                    />
+                  </PieChart>
+                </ChartContainer>
+                <div className="mt-3 grid gap-2">
+                  {storeStatus.map((s) => (
+                    <div key={s.name} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.fill }} />
+                        <span className="text-muted-foreground">{s.name}</span>
+                      </div>
+                      <span className="font-medium">{s.value.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </Card>
         </motion.div>
       </div>

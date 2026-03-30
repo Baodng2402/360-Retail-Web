@@ -22,6 +22,7 @@ import { staffApi } from "@/shared/lib/staffApi";
 import { useStoreStore } from "@/shared/store/storeStore";
 import { useAuthStore } from "@/shared/store/authStore";
 import { Loader2, UserPlus } from "lucide-react";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 
 interface InviteStaffModalProps {
   open: boolean;
@@ -68,7 +69,8 @@ const InviteStaffModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] overflow-hidden p-0 gap-0">
+        <WowDialogInner>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/30">
@@ -120,6 +122,7 @@ const InviteStaffModal = ({
             {isSubmitting ? "Đang gửi..." : "Gửi lời mời"}
           </Button>
         </DialogFooter>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

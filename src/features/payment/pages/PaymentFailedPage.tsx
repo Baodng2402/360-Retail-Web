@@ -101,7 +101,7 @@ export default function PaymentFailedPage() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={handleGoToDashboard}
-                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-teal-500 to-blue-500"
+                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF7B21]/90 hover:to-[#19D6C8]/90 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 border-0 transition-all duration-300"
               >
                 <Home className="h-4 w-4" />
                 Về trang chủ
@@ -112,7 +112,7 @@ export default function PaymentFailedPage() {
               <Button
                 onClick={handleRetryPayment}
                 variant="outline"
-                className="w-full sm:w-auto gap-2"
+                className="w-full sm:w-auto gap-2 border-[#FF7B21]/30 hover:border-[#FF7B21] hover:bg-[#FF7B21]/5 transition-all"
               >
                 <CreditCard className="h-4 w-4" />
                 Thử thanh toán lại

@@ -1031,68 +1031,71 @@ export default function ProductManagementPage() {
           </TabsList>
 
         <TabsContent value="products" className="space-y-4">
-          <div className="p-6 backdrop-blur-sm rounded-xl border bg-card">
-            <div className="flex flex-col lg:flex-row gap-4 mb-6">
-              <div className="flex-1 relative">
+          <div className="p-4 sm:p-6 backdrop-blur-sm rounded-xl border bg-card">
+            <div className="flex flex-col gap-4 mb-6">
+              <div className="w-full relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t("search.productsPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background/80 backdrop-blur-sm transition-all duration-200 focus:ring-2 focus:ring-[#FF7B21]/20 focus:border-[#FF7B21]/50"
+                  className="pl-10 pr-4 bg-background/80 backdrop-blur-sm transition-all duration-200 focus:ring-2 focus:ring-[#FF7B21]/20 focus:border-[#FF7B21]/50"
                 />
               </div>
 
-              <Select
-                value={selectedCategory}
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger className="w-full lg:w-[200px] bg-background/80 backdrop-blur-sm">
-                  <SelectValue placeholder="Tất cả danh mục" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả danh mục</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.categoryName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
+                  <SelectTrigger className="w-full bg-background/80 backdrop-blur-sm">
+                    <SelectValue placeholder="Tất cả danh mục" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả danh mục</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.categoryName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-full lg:w-[200px] bg-background/80 backdrop-blur-sm">
-                  <SelectValue placeholder="Tất cả trạng thái" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                  <SelectItem value="in-stock">Còn hàng</SelectItem>
-                  <SelectItem value="low-stock">Sắp hết</SelectItem>
-                  <SelectItem value="out-of-stock">Hết hàng</SelectItem>
-                </SelectContent>
-              </Select>
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger className="w-full bg-background/80 backdrop-blur-sm">
+                    <SelectValue placeholder="Tất cả trạng thái" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                    <SelectItem value="in-stock">Còn hàng</SelectItem>
+                    <SelectItem value="low-stock">Sắp hết</SelectItem>
+                    <SelectItem value="out-of-stock">Hết hàng</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <Select
-                value={selectedActiveStatus}
-                onValueChange={setSelectedActiveStatus}
-              >
-                <SelectTrigger className="w-full lg:w-[200px] bg-background/80 backdrop-blur-sm">
-                  <SelectValue placeholder="Tất cả hoạt động" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="active">Hoạt động</SelectItem>
-                  <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
-                </SelectContent>
-              </Select>
+                <Select
+                  value={selectedActiveStatus}
+                  onValueChange={setSelectedActiveStatus}
+                >
+                  <SelectTrigger className="w-full bg-background/80 backdrop-blur-sm">
+                    <SelectValue placeholder="Tất cả hoạt động" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="active">Hoạt động</SelectItem>
+                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <Button
-                onClick={handleAddProduct}
-                className="gap-2 whitespace-nowrap bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
-              >
-                <Plus className="h-4 w-4" />
-                Thêm sản phẩm
-              </Button>
+                <Button
+                  onClick={handleAddProduct}
+                  className="gap-2 whitespace-nowrap bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Thêm sản phẩm</span>
+                  <span className="sm:hidden">Thêm</span>
+                </Button>
+              </div>
             </div>
 
             {loading ? (
@@ -1100,8 +1103,8 @@ export default function ProductManagementPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-[#FF7B21]" />
               </div>
             ) : (
-              <div className="h-[min(600px,70vh)] w-full overflow-auto rounded-lg border bg-card">
-                <Table className="table-fixed min-w-[1100px] w-full">
+              <div className="w-full overflow-x-auto rounded-lg border bg-card">
+                <Table className="table-fixed min-w-[900px] w-full md:min-w-[1100px]">
                   <TableHeader>
                     <TableRow className="bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5 hover:from-[#FF7B21]/10 hover:to-[#19D6C8]/10">
                       <TableHead className="w-[52px] text-center font-semibold px-2">
@@ -1391,7 +1394,7 @@ export default function ProductManagementPage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {categories.map((category, index) => (
                   <motion.div
                     key={category.id}

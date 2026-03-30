@@ -23,6 +23,7 @@ import { categoriesApi } from "@/shared/lib/categoriesApi";
 import { productsApi } from "@/shared/lib/productsApi";
 import type { Category } from "@/shared/types/categories";
 import { Loader2, Package } from "lucide-react";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 
 interface AddProductModalProps {
   open: boolean;
@@ -166,7 +167,8 @@ const AddProductModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] overflow-hidden p-0 gap-0">
+        <WowDialogInner>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/30">
@@ -352,6 +354,7 @@ const AddProductModal = ({
             {isSubmitting ? "Đang thêm..." : "Add Product / Thêm sản phẩm"}
           </Button>
         </DialogFooter>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

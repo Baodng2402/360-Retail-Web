@@ -32,7 +32,7 @@ export const DashboardLayout = () => {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -280, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 left-0 z-50 lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] lg:hidden"
           >
             <DashboardSideBar
               isCollapsed={false}
@@ -57,7 +57,7 @@ export const DashboardLayout = () => {
           onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           isMobileMenuOpen={isMobileMenuOpen}
         />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6">
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 10 }}

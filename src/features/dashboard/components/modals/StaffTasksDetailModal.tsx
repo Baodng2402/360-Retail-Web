@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 import { Badge } from "@/shared/components/ui/badge";
 import type { Task } from "@/shared/types/task";
 import { useTranslation } from "react-i18next";
@@ -46,7 +47,8 @@ export default function StaffTasksDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[520px] max-h-[85vh] overflow-hidden p-0 gap-0 flex flex-col">
+        <WowDialogInner className="max-h-[calc(85vh-0.5rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/30">
@@ -117,6 +119,7 @@ export default function StaffTasksDetailModal({
             ))
           )}
         </div>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

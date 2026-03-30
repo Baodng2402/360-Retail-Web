@@ -79,8 +79,8 @@ const StatCard = ({
 
       <div className="flex items-center justify-between relative z-10">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-muted-foreground dark:text-gray-400 mb-1 truncate">{label}</p>
-          <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground dark:text-white">{value}</h3>
+          <p className="text-[11px] sm:text-xs text-muted-foreground dark:text-gray-400 mb-1 truncate">{label}</p>
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-foreground dark:text-white">{value}</h3>
           {change ? (
             <p
               className={cn(

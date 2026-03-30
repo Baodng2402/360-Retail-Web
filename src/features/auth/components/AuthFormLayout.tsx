@@ -82,11 +82,11 @@ export const AuthFormLayout = ({
               transition={{ duration: 0.4, delay: 0.4 }}
               className="mb-8 space-y-3"
             >
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent md:text-4xl">
+              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent sm:text-3xl leading-snug pb-1">
                 {title}
               </h1>
               {description && (
-                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed pt-1">{description}</p>
               )}
             </motion.div>
 
@@ -114,34 +114,29 @@ export const AuthFormLayout = ({
             <div className="absolute top-40 left-1/3 w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm" />
           </div>
 
-          {/* Content overlay */}
+          {/* Content overlay — logo trong khung tròn xoay (đồng bộ trang login) */}
           <div className="absolute inset-0 flex items-center justify-center p-12">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-center text-white"
-            >
-              <h2 className="text-4xl xl:text-5xl font-bold mb-4 tracking-tight">
-                {t("auth:layout.welcomeTitle", { defaultValue: "360 Retail" })}
-              </h2>
-              <p className="text-xl text-white/80 mb-8 max-w-md mx-auto">
-                {t("auth:layout.welcomeSubtitle", { defaultValue: "Nền tảng quản lý bán hàng đa kênh hàng đầu Việt Nam" })}
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                {["🛒", "📊", "👥", "🚀"].map((emoji, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0.5 + i * 0.1 }}
-                    className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl hover:bg-white/30 transition-all duration-300 hover:scale-110"
-                  >
-                    {emoji}
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+            <div className="text-center text-white">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <motion.div
+                  className="relative mx-auto"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                >
+                  <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border-4 border-white/30 shadow-2xl">
+                    <img
+                      src={logo}
+                      alt="360 Retail Logo"
+                      className="w-32 h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 object-contain"
+                    />
+                  </div>
+                </motion.div>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
       </div>

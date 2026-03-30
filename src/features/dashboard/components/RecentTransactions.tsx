@@ -110,7 +110,7 @@ const RecentTransactions = ({
   const navigate = useNavigate();
 
   return (
-    <Card className="p-5 md:p-6 overflow-hidden">
+    <Card className="p-4 sm:p-5 md:p-6 overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div className="flex flex-col">

@@ -228,7 +228,7 @@ const LoginBody = () => {
                     id="email"
                     type="email"
                     placeholder={t("auth:signup.emailPlaceholder")}
-                    className="h-12 pl-14 pr-4 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
+                    className="login-email-input h-12 pl-14 pr-4 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 focus:ring-offset-0 transition-all duration-300 rounded-xl"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="off"
@@ -257,7 +257,7 @@ const LoginBody = () => {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder={t("auth:signup.passwordPlaceholder")}
-                    className="login-password-input h-12 pl-14 pr-14 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 transition-all duration-300 rounded-xl"
+                    className="login-password-input h-12 pl-14 pr-14 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 focus:ring-offset-0 transition-all duration-300 rounded-xl"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="off"
@@ -288,7 +288,6 @@ const LoginBody = () => {
                   id="remember"
                   checked={rememberMe}
                   onCheckedChange={handleRememberChange}
-                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-[#FF7B21] data-[state=checked]:to-[#19D6C8]"
                 />
                 <Label
                   htmlFor="remember"

@@ -66,12 +66,17 @@ const ChartBarMixed = ({
               : value
           }
         />
-        <YAxis axisLine={false} tickLine={false} tickMargin={10} />
+        <YAxis
+          axisLine={false}
+          tickLine={false}
+          tickMargin={10}
+          domain={["auto", "auto"]}
+        />
         <ChartTooltip
           content={<ChartTooltipContent hideLabel />}
           cursor={false}
         />
-        <Bar dataKey="values" radius={5}>
+        <Bar dataKey="values" radius={5} isAnimationActive>
           {chartData.map((entry, index) => (
             <Cell
               key={`cell-${index}`}

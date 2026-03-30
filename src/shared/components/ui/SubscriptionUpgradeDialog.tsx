@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 import { Button } from "@/shared/components/ui/button";
 import { useFeatureGateStore } from "@/shared/store/featureGateStore";
 import { useTranslation } from "react-i18next";
@@ -48,50 +49,52 @@ export function SubscriptionUpgradeDialog() {
 
   return (
     <Dialog open onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-              <AlertCircle className="h-5 w-5" />
+      <DialogContent className="sm:max-w-lg overflow-hidden p-0 gap-0">
+        <WowDialogInner>
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#FF7B21]/20 to-[#19D6C8]/20 text-[#FF7B21]">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <DialogTitle>{title}</DialogTitle>
             </div>
-            <DialogTitle>{title}</DialogTitle>
-          </div>
-          <DialogDescription asChild className="mt-2">
-            <div className="space-y-2">
-              <p>{message}</p>
-              {errorType === "FeatureNotAvailable" && requiredPlan && (
-                <p className="text-sm text-muted-foreground">
-                  {currentPlan && (
-                    <>
-                      {t("upgradeDialog.currentPlan", { plan: currentPlan })}{" "}
-                    </>
-                  )}
-                  {feature
-                    ? t("upgradeDialog.toUseFeature", {
-                        feature,
-                        requiredPlan,
-                      })
-                    : t("upgradeDialog.toUseFeatureFallback", {
-                        requiredPlan,
-                      })}
-                </p>
-              )}
-            </div>
-          </DialogDescription>
-        </DialogHeader>
+            <DialogDescription asChild className="mt-2">
+              <div className="space-y-2">
+                <p>{message}</p>
+                {errorType === "FeatureNotAvailable" && requiredPlan && (
+                  <p className="text-sm text-muted-foreground">
+                    {currentPlan && (
+                      <>
+                        {t("upgradeDialog.currentPlan", { plan: currentPlan })}{" "}
+                      </>
+                    )}
+                    {feature
+                      ? t("upgradeDialog.toUseFeature", {
+                          feature,
+                          requiredPlan,
+                        })
+                      : t("upgradeDialog.toUseFeatureFallback", {
+                          requiredPlan,
+                        })}
+                  </p>
+                )}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="mt-4 flex justify-end gap-3">
-          <Button variant="outline" onClick={handleClose}>
-            {t("upgradeDialog.later")}
-          </Button>
-          <Button
-            onClick={handleUpgrade}
-            className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
-          >
-            {t("upgradeDialog.upgradeNow")}
-            <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Button>
-        </div>
+          <div className="mt-4 flex justify-end gap-3">
+            <Button variant="outline" onClick={handleClose}>
+              {t("upgradeDialog.later")}
+            </Button>
+            <Button
+              onClick={handleUpgrade}
+              className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF7B21]/90 hover:to-[#19D6C8]/90 text-white border-0 shadow-md shadow-[#FF7B21]/20"
+            >
+              {t("upgradeDialog.upgradeNow")}
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+          </div>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

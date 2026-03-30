@@ -307,7 +307,7 @@ export const DashboardSideBar = ({
         </div>
       )}
       <aside
-        className={`relative flex h-screen flex-col bg-gradient-to-b from-sidebar to-sidebar/95 dark:from-slate-900 dark:to-slate-950 border-r border-border/50 transition-[width] duration-300 ease-out ${isCollapsed ? "w-20" : "w-64"
+        className={`relative flex h-full flex-col bg-gradient-to-b from-sidebar to-sidebar/95 dark:from-slate-900 dark:to-slate-950 border-r border-border/50 transition-[width] duration-300 ease-out ${isCollapsed ? "w-20" : "w-64"
           }`}
         style={{
           willChange: "width",

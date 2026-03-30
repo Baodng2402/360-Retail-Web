@@ -475,7 +475,12 @@
   .login-form .login-password-input:-webkit-autofill,
   .login-form .login-password-input:-webkit-autofill:hover,
   .login-form .login-password-input:-webkit-autofill:focus,
-  .login-form .login-password-input:-webkit-autofill:active {
+  .login-form .login-password-input:-webkit-autofill:active,
+  .login-form .login-email-input,
+  .login-form .login-email-input:-webkit-autofill,
+  .login-form .login-email-input:-webkit-autofill:hover,
+  .login-form .login-email-input:-webkit-autofill:focus,
+  .login-form .login-email-input:-webkit-autofill:active {
     background-color: white !important;
     -webkit-box-shadow: 0 0 0 1000px white inset !important;
     -webkit-text-fill-color: #111827 !important;
@@ -485,7 +490,12 @@
   .dark .login-form .login-password-input:-webkit-autofill,
   .dark .login-form .login-password-input:-webkit-autofill:hover,
   .dark .login-form .login-password-input:-webkit-autofill:focus,
-  .dark .login-form .login-password-input:-webkit-autofill:active {
+  .dark .login-form .login-password-input:-webkit-autofill:active,
+  .dark .login-form .login-email-input,
+  .dark .login-form .login-email-input:-webkit-autofill,
+  .dark .login-form .login-email-input:-webkit-autofill:hover,
+  .dark .login-form .login-email-input:-webkit-autofill:focus,
+  .dark .login-form .login-email-input:-webkit-autofill:active {
     background-color: white !important;
     -webkit-box-shadow: 0 0 0 1000px white inset !important;
     -webkit-text-fill-color: #111827 !important;

@@ -277,7 +277,7 @@ const CustomerPage = () => {
 
       {/* Stats Cards */}
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
@@ -285,30 +285,30 @@ const CustomerPage = () => {
         <Card className="p-5 bg-gradient-to-br from-[#FF7B21]/10 to-white dark:from-[#FF7B21]/10 dark:to-background border-[#FF7B21]/20 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Tổng khách hàng</p>
-              <h3 className="text-2xl font-bold text-foreground">{totalCustomers}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Tổng khách hàng</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground">{totalCustomers}</h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF7B21]/20 to-[#FF7B21]/10 flex items-center justify-center shadow-inner">
               <Users className="h-6 w-6 text-[#FF7B21]" />
             </div>
           </div>
         </Card>
-        <Card className="p-5 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-background border-emerald-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+        <Card className="p-4 sm:p-5 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-background border-emerald-200 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Tổng doanh thu</p>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">{totalRevenue.toLocaleString("vi-VN")}đ</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Tổng doanh thu</p>
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">{totalRevenue.toLocaleString("vi-VN")}đ</h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-900/10 flex items-center justify-center shadow-inner">
               <ShoppingBag className="h-6 w-6 text-emerald-600" />
             </div>
           </div>
         </Card>
-        <Card className="p-5 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background border-amber-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+        <Card className="p-4 sm:p-5 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background border-amber-200 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Khách VIP</p>
-              <h3 className="text-2xl font-bold text-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">Khách VIP</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground">
                 {customers.filter((c) => (c.totalSpend || 0) > 5000000).length}
               </h3>
             </div>
@@ -363,7 +363,7 @@ const CustomerPage = () => {
           </div>
 
           {/* Customer List */}
-          <div className="max-h-[500px] overflow-y-auto">
+          <div className="max-h-[400px] sm:max-h-[500px] overflow-y-auto">
             {loading ? (
               <div className="p-8 text-center text-muted-foreground">
                 Đang tải...
@@ -426,10 +426,10 @@ const CustomerPage = () => {
         {/* Customer Detail */}
         <Card className="lg:col-span-2 p-0 overflow-hidden">
           {!selectedCustomer ? (
-            <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground">
-              <Users className="h-16 w-16 mb-4 opacity-30" />
-              <p className="text-lg font-medium">Chọn khách hàng để xem chi tiết</p>
-              <p className="text-sm">Click vào khách hàng bên trái để xem thông tin</p>
+            <div className="flex flex-col items-center justify-center h-full min-h-[300px] sm:min-h-[400px] text-muted-foreground p-4">
+              <Users className="h-12 w-12 sm:h-16 sm:w-16 mb-4 opacity-30" />
+              <p className="text-base sm:text-lg font-medium">Chọn khách hàng để xem chi tiết</p>
+              <p className="text-xs sm:text-sm hidden sm:block">Click vào khách hàng bên trái để xem thông tin</p>
             </div>
           ) : (
             <>

@@ -14,6 +14,7 @@ import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 import { ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 
 interface RestockModalProps {
   open: boolean;
@@ -62,7 +63,8 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] overflow-hidden p-0 gap-0">
+        <WowDialogInner>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {operation === "in" ? (
@@ -169,6 +171,7 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             {isSubmitting ? "Đang xử lý..." : "Confirm / Xác nhận"}
           </Button>
         </DialogFooter>
+        </WowDialogInner>
       </DialogContent>
     </Dialog>
   );

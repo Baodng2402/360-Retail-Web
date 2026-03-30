@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
+import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 import { Textarea } from "@/shared/components/ui/textarea";
 import toast from "react-hot-toast";
 
@@ -393,19 +394,25 @@ export default function SubscriptionPlansPage() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
-          <Card className="bg-gradient-to-r from-blue-50 via-indigo-50 to-teal-50 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-teal-950/20 border-blue-200 dark:border-blue-800/30">
+          <Card className="bg-gradient-to-br from-[#FF7B21]/5 via-[#19D6C8]/5 to-[#FF7B21]/5 dark:from-[#FF7B21]/10 dark:via-[#19D6C8]/10 dark:to-[#FF7B21]/10 border-[#FF7B21]/20 dark:border-[#FF7B21]/30 shadow-lg shadow-[#FF7B21]/5 overflow-hidden relative">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8]" />
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-sm">
+                  <motion.div
+                    initial={{ scale: 0, rotate: -10 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                    className="h-12 w-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/20"
+                  >
                     <Check className="h-6 w-6 text-white" />
-                  </div>
+                  </motion.div>
                   <div>
                     <p className="text-sm text-muted-foreground">
                       Gói dịch vụ hiện tại của{" "}
                       {currentStore ? currentStore.storeName : "cửa hàng bạn"}
                     </p>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-2xl font-bold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
                       {storeStatus?.planName || mySubscription?.planName}
                     </p>
                     {storeStatus?.status && (
@@ -414,10 +421,10 @@ export default function SubscriptionPlansPage() {
                           variant="outline"
                           className={
                             storeStatus.status === "Trial"
-                              ? "border-amber-400 text-amber-700 bg-amber-50"
+                              ? "border-amber-400 text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-300"
                               : storeStatus.status === "Active"
-                              ? "border-emerald-400 text-emerald-700 bg-emerald-50"
-                              : "border-slate-300 text-slate-700 bg-slate-50"
+                              ? "border-[#FF7B21]/40 text-[#FF7B21] bg-[#FF7B21]/5 dark:bg-[#FF7B21]/10"
+                              : "border-slate-300 text-slate-700 bg-slate-50 dark:bg-slate-900/20 dark:text-slate-300"
                           }
                         >
                           {storeStatus.status === "Trial"
@@ -432,15 +439,23 @@ export default function SubscriptionPlansPage() {
                 </div>
                 <div className="flex flex-col md:items-end gap-1">
                   {typeof storeStatus?.daysRemaining === "number" && (
-                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm">
-                      Còn {storeStatus.daysRemaining} ngày
-                    </Badge>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                    >
+                      <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
+                        Còn {storeStatus.daysRemaining} ngày
+                      </Badge>
+                    </motion.div>
                   )}
                   <p className="text-xs text-muted-foreground">
                     Hết hạn:{" "}
-                    {formatDate(
-                      storeStatus?.subscriptionEndDate ?? mySubscription?.endDate,
-                    )}
+                    <span className="font-medium">
+                      {formatDate(
+                        storeStatus?.subscriptionEndDate ?? mySubscription?.endDate,
+                      )}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -455,7 +470,7 @@ export default function SubscriptionPlansPage() {
         variants={containerVariants} 
         initial="hidden" 
         animate="visible"
-        className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto"
+        className="grid gap-6 sm:gap-8 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 max-w-6xl mx-auto items-stretch"
       >
         {plans.map((plan) => (
           <motion.div key={plan.id} variants={itemVariants}>
@@ -478,8 +493,16 @@ export default function SubscriptionPlansPage() {
         transition={{ delay: 0.5 }}
         className="max-w-4xl mx-auto"
       >
-        <Card className="p-8 bg-gradient-to-br from-white via-blue-50/30 to-teal-50/30 dark:from-gray-900 dark:via-gray-800/50 dark:to-teal-950/20 border-blue-100 dark:border-blue-900/30">
-          <h3 className="font-semibold mb-6 text-center text-xl text-foreground">Tại sao chọn chúng tôi?</h3>
+        <Card className="p-8 bg-gradient-to-br from-white via-[#FF7B21]/5 to-[#19D6C8]/5 dark:from-gray-900 dark:via-[#FF7B21]/10 dark:to-[#19D6C8]/10 border border-border/60 dark:border-border/50 shadow-xl shadow-[#FF7B21]/5 transition-all duration-300 hover:shadow-2xl hover:shadow-[#FF7B21]/10 overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8]" />
+          <motion.h3
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-semibold mb-6 text-center text-xl bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent"
+          >
+            Tại sao chọn chúng tôi?
+          </motion.h3>
           <div className="grid gap-4 md:grid-cols-2">
             {[
               { icon: Check, text: "Thanh toán an toàn qua QR SePay", color: "text-green-500" },
@@ -505,14 +528,20 @@ export default function SubscriptionPlansPage() {
       </motion.div>
 
       <Dialog open={sepayDialogOpen} onOpenChange={setSepayDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Thanh toán QR (SePay)</DialogTitle>
-            <DialogDescription>
-              Quét mã QR hoặc chuyển khoản theo thông tin bên dưới. Sau khi thanh toán,
-              bạn có thể bấm vào nút kiểm tra trạng thái để hệ thống tự động cập nhật gói.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-md overflow-hidden p-0 gap-0">
+          <WowDialogInner>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-md shadow-[#FF7B21]/20">
+                  <CreditCard className="h-4 w-4 text-white" />
+                </div>
+                Thanh toán QR (SePay)
+              </DialogTitle>
+              <DialogDescription>
+                Quét mã QR hoặc chuyển khoản theo thông tin bên dưới. Sau khi thanh toán,
+                bạn có thể bấm vào nút kiểm tra trạng thái để hệ thống tự động cập nhật gói.
+              </DialogDescription>
+            </DialogHeader>
           {sepayData ? (
             <div className="space-y-4">
               <div className="w-full flex justify-center">
@@ -578,7 +607,7 @@ export default function SubscriptionPlansPage() {
                     type="button"
                     onClick={handleCheckPaymentStatus}
                     disabled={refreshingAccess}
-                    className="bg-teal-600 hover:bg-teal-700 text-white"
+                    className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF7B21]/90 hover:to-[#19D6C8]/90 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 border-0 transition-all duration-300"
                   >
                     {refreshingAccess ? (
                       <>
@@ -594,86 +623,97 @@ export default function SubscriptionPlansPage() {
             </div>
           ) : (
             <div className="flex items-center justify-center py-6">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#FF7B21]" />
             </div>
           )}
+          </WowDialogInner>
         </DialogContent>
       </Dialog>
 
       <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Đánh giá gói {selectedPlanForReview?.planName}</DialogTitle>
-            <DialogDescription>
-              Chia sẻ trải nghiệm sử dụng gói SaaS để giúp những chủ shop khác tham khảo.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">
-                Mức độ hài lòng
-              </p>
-              <div className="flex items-center gap-2">
-                {[1, 2, 3, 4, 5].map((value) => {
-                  const active = reviewRating === value;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setReviewRating(value)}
-                      className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
-                        active
-                          ? "border-amber-400 bg-amber-50 text-amber-500"
-                          : "border-border bg-background text-muted-foreground hover:border-amber-300 hover:text-amber-400"
-                      }`}
-                      aria-label={`${value} sao`}
-                    >
-                      <Star
-                        className={`h-4 w-4 ${
-                          active ? "fill-amber-400" : "fill-none"
-                        }`}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+        <DialogContent className="sm:max-w-lg overflow-hidden p-0 gap-0">
+          <WowDialogInner>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-md shadow-[#FF7B21]/20">
+                    <Star className="h-4 w-4 text-white" />
+                  </div>
+                  Đánh giá gói {selectedPlanForReview?.planName}
+                </DialogTitle>
+                <DialogDescription>
+                  Chia sẻ trải nghiệm sử dụng gói SaaS để giúp những chủ shop khác tham khảo.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">
+                    Mức độ hài lòng
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((value) => {
+                      const active = reviewRating === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setReviewRating(value)}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
+                            active
+                              ? "border-amber-400 bg-amber-50 text-amber-500"
+                              : "border-border bg-background text-muted-foreground hover:border-amber-300 hover:text-amber-400"
+                          }`}
+                          aria-label={`${value} sao`}
+                        >
+                          <Star
+                            className={`h-4 w-4 ${
+                              active ? "fill-amber-400" : "fill-none"
+                            }`}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">
-                Nhận xét (không bắt buộc)
-              </p>
-              <Textarea
-                rows={4}
-                value={reviewContent}
-                onChange={(e) => setReviewContent(e.target.value)}
-                placeholder="Bạn thấy gói này phù hợp với cửa hàng nào? Ưu điểm và hạn chế là gì?"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setReviewDialogOpen(false)}
-              disabled={submittingReview}
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={handleSubmitReview}
-              disabled={submittingReview}
-              className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
-            >
-              {submittingReview ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang gửi...
-                </>
-              ) : (
-                "Gửi đánh giá"
-              )}
-            </Button>
-          </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">
+                    Nhận xét (không bắt buộc)
+                  </p>
+                  <Textarea
+                    rows={4}
+                    value={reviewContent}
+                    onChange={(e) => setReviewContent(e.target.value)}
+                    placeholder="Bạn thấy gói này phù hợp với cửa hàng nào? Ưu điểm và hạn chế là gì?"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setReviewDialogOpen(false)}
+                  disabled={submittingReview}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  onClick={handleSubmitReview}
+                  disabled={submittingReview}
+                  className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF7B21]/90 hover:to-[#19D6C8]/90 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 border-0 transition-all duration-300"
+                >
+                  {submittingReview ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Đang gửi...
+                    </>
+                  ) : (
+                    <>
+                      <Star className="mr-2 h-4 w-4" />
+                      Gửi đánh giá
+                    </>
+                  )}
+                </Button>
+              </div>
+          </WowDialogInner>
         </DialogContent>
       </Dialog>
     </div>
@@ -704,6 +744,7 @@ function PlanCard({
     <motion.div
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="h-full flex flex-col"
     >
       <Card className={`relative flex flex-col h-full transition-all duration-300 ${isPopular ? "border-primary shadow-lg" : "shadow-md hover:shadow-lg"} ${isCurrentPlan ? "bg-muted/50" : ""}`}>
         {isPopular && !isCurrentPlan && (
@@ -732,7 +773,7 @@ function PlanCard({
           </motion.div>
         )}
 
-        <CardHeader className="text-center pb-4 pt-6">
+        <CardHeader className="text-center pb-4 pt-6 shrink-0">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -743,7 +784,7 @@ function PlanCard({
           <CardDescription className="text-base">{plan.durationDays} ngày sử dụng</CardDescription>
         </CardHeader>
 
-        <CardContent className="flex-1 pt-0 px-6">
+        <CardContent className="flex-1 pt-0 px-6 min-h-0 overflow-hidden">
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -787,7 +828,7 @@ function PlanCard({
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="h-5 w-5 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5"
+                    className="h-5 w-5 rounded-full bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm shadow-[#FF7B21]/20"
                   >
                     <Check className="h-3 w-3 text-white" />
                   </motion.div>
@@ -798,7 +839,7 @@ function PlanCard({
           )}
         </CardContent>
 
-        <CardFooter className="pt-4 px-6 pb-6">
+        <CardFooter className="pt-4 px-6 pb-6 shrink-0 mt-auto">
           {isCurrentPlan ? (
             <motion.div whileTap={{ scale: 0.95 }} className="w-full">
               <div className="space-y-2">

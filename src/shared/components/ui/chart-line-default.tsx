@@ -85,6 +85,7 @@ const ChartLineDefault = ({
           stroke="var(--color-desktop)"
           strokeWidth={2}
           type="natural"
+          isAnimationActive
         />
       </LineChart>
     </ChartContainer>
