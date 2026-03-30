@@ -404,7 +404,7 @@ export const DashboardSideBar = ({
                     }}
                     className={cn(
                       "flex items-center rounded-xl transition-all duration-200 cursor-pointer group",
-                      isCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-3",
+                      isCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-2.5 lg:py-3",
                       isActive
                         ? "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-orange-500/20"
                         : isLocked

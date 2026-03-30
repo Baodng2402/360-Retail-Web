@@ -18,11 +18,9 @@ import { useTranslation } from "react-i18next";
 
 interface AdminHeaderProps {
   isSidebarCollapsed: boolean;
-  onMobileMenuToggle?: () => void;
-  isMobileMenuOpen?: boolean;
 }
 
-export function AdminHeader({ isSidebarCollapsed, onMobileMenuToggle, isMobileMenuOpen }: AdminHeaderProps) {
+export function AdminHeader({ isSidebarCollapsed }: AdminHeaderProps) {
   const { t } = useTranslation("admin");
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();

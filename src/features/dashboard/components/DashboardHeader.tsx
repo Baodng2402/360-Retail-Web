@@ -76,18 +76,18 @@ export const DashboardHeader = ({
   })();
 
   return (
-    <header className="border-b border-border/50 bg-gradient-to-r from-background via-background to-muted/20 backdrop-blur-md sticky top-0 z-50 h-[73px]">
+    <header className="border-b border-border/50 bg-gradient-to-r from-background via-background to-muted/20 backdrop-blur-md sticky top-0 z-50 h-[60px] sm:h-[73px]">
       <div
         className={`flex items-center justify-between h-full w-full transition-all duration-300 ${
-          isSidebarCollapsed ? "px-4 lg:px-6" : "container mx-auto px-4 lg:px-6"
+          isSidebarCollapsed ? "px-3 sm:px-4 lg:px-6" : "container mx-auto px-3 sm:px-4 lg:px-6"
         }`}
       >
         {/* Left: Mobile menu button + Page title */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Mobile menu toggle */}
           <button
             onClick={onMobileMenuToggle}
-            className="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-accent/50 hover:bg-accent transition-all duration-200 active:scale-95"
+            className="lg:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-accent/50 hover:bg-accent transition-all duration-200 active:scale-95"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
             <motion.div
@@ -95,9 +95,9 @@ export const DashboardHeader = ({
               transition={{ duration: 0.2 }}
             >
               {isMobileMenuOpen ? (
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
               ) : (
-                <Menu className="h-5 w-5" />
+                <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
               )}
             </motion.div>
           </button>
@@ -109,10 +109,10 @@ export const DashboardHeader = ({
             transition={{ duration: 0.3 }}
             className="flex flex-col justify-center"
           >
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+            <h1 className="text-base sm:text-xl md:text-2xl font-bold tracking-tight leading-tight">
               {pageName ? t(pageName.nameKey) : ""}
             </h1>
-            <h2 className="text-xs sm:text-sm text-muted-foreground leading-tight">
+            <h2 className="text-[10px] sm:text-xs md:text-sm text-muted-foreground leading-tight hidden sm:block">
               {pageName ? t(pageName.titleKey) : ""}
             </h2>
           </motion.div>
@@ -123,9 +123,9 @@ export const DashboardHeader = ({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="flex items-center gap-2 sm:gap-3"
+          className="flex items-center gap-1 sm:gap-2 md:gap-3"
         >
-          <div className="scale-90 sm:scale-100 origin-right">
+          <div className="scale-75 sm:scale-90 md:scale-100 origin-right">
             <ThemeMode />
           </div>
           <LanguageSwitcher />

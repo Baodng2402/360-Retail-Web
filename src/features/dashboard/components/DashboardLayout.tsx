@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardSideBar } from "./DashboardSideBar";
+import { MobileBottomNav } from "./MobileBottomNav";
 
 export const DashboardLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -57,7 +58,7 @@ export const DashboardLayout = () => {
           onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           isMobileMenuOpen={isMobileMenuOpen}
         />
-        <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6">
+        <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 pb-20 lg:pb-6">
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 10 }}
@@ -69,6 +70,9 @@ export const DashboardLayout = () => {
           </motion.div>
         </main>
       </div>
+
+      {/* Mobile Bottom Tab Bar */}
+      <MobileBottomNav />
     </div>
   );
 };

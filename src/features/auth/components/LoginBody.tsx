@@ -186,16 +186,16 @@ const LoginBody = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative z-10 w-full max-w-md mt-16"
-          >
-            <div className="mb-6">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent leading-tight">
-                {t("auth:login.title")}
-              </h1>
-              <p className="text-sm text-muted-foreground mt-2">
-                {t("auth:login.subtitle")}
-              </p>
-            </div>
+          className="relative z-10 w-full max-w-md mt-16 px-2 sm:px-0"
+        >
+          <div className="mb-5 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent leading-tight">
+              {t("auth:login.title")}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+              {t("auth:login.subtitle")}
+            </p>
+          </div>
 
             <div className="mb-6">
               <Link
@@ -207,7 +207,7 @@ const LoginBody = () => {
               </Link>
             </div>
 
-            <form className="login-form space-y-5" onSubmit={handleSubmit}>
+            <form className="login-form space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -221,14 +221,14 @@ const LoginBody = () => {
                   {t("auth:login.email")}
                 </Label>
                 <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
-                    <Mail className="h-5 w-5 text-[#FF7B21]" />
+                  <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
+                    <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF7B21]" />
                   </div>
                   <Input
                     id="email"
                     type="email"
                     placeholder={t("auth:signup.emailPlaceholder")}
-                    className="login-email-input h-12 pl-14 pr-4 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 focus:ring-offset-0 transition-all duration-300 rounded-xl"
+                    className="login-email-input h-11 sm:h-12 pl-12 sm:pl-14 pr-4 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 focus:ring-offset-0 transition-all duration-300 rounded-xl"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="off"
@@ -250,14 +250,14 @@ const LoginBody = () => {
                   {t("auth:login.password")}
                 </Label>
                 <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
-                    <Lock className="h-5 w-5 text-[#FF7B21]" />
+                  <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-gradient-to-br from-[#FF7B21]/10 to-[#19D6C8]/10 flex items-center justify-center transition-all duration-300 group-focus-within:bg-gradient-to-br group-focus-within:from-[#FF7B21]/20 group-focus-within:to-[#19D6C8]/20">
+                    <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF7B21]" />
                   </div>
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder={t("auth:signup.passwordPlaceholder")}
-                    className="login-password-input h-12 pl-14 pr-14 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 focus:ring-offset-0 transition-all duration-300 rounded-xl"
+                    className="login-password-input h-11 sm:h-12 pl-12 sm:pl-14 pr-12 sm:pr-14 bg-gray-50 dark:bg-white text-gray-900 dark:text-gray-900 placeholder:text-muted-foreground border-border/50 focus:border-[#FF7B21] focus:ring-2 focus:ring-[#FF7B21]/20 focus:ring-offset-0 transition-all duration-300 rounded-xl"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="off"
@@ -315,7 +315,7 @@ const LoginBody = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-12 w-full bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-sm font-bold uppercase tracking-wide text-white hover:shadow-xl hover:shadow-[#FF7B21]/30 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 rounded-xl"
+                  className="h-11 sm:h-12 w-full text-sm sm:text-base bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white hover:shadow-xl hover:shadow-[#FF7B21]/30 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 rounded-xl"
                 >
                   {loading ? t("auth:login.submitting") : t("auth:login.submit")}
                 </Button>
@@ -325,7 +325,7 @@ const LoginBody = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, delay: 0.7 }}
-                className="space-y-5"
+                className="space-y-4 sm:space-y-5"
               >
                 <div className="flex items-center justify-between text-xs sm:text-sm">
                   <Link
@@ -362,13 +362,13 @@ const LoginBody = () => {
                         key={social.alt}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="relative flex h-[72px] w-[72px] sm:h-[80px] sm:w-[80px] min-w-[72px] min-h-[72px] items-center justify-center rounded-2xl border border-border/50 bg-white shadow-lg shadow-gray-200/50 overflow-visible hover:bg-gray-50 hover:shadow-xl transition-all duration-300"
+                        className="relative flex h-14 w-14 sm:h-[72px] sm:w-[72px] min-w-[56px] min-h-[56px] items-center justify-center rounded-2xl border border-border/50 bg-white shadow-lg shadow-gray-200/50 overflow-visible hover:bg-gray-50 hover:shadow-xl transition-all duration-300"
                         style={{ isolation: "isolate" }}
                       >
                         <img
                           src={googleIcon}
                           alt="Google"
-                          className="pointer-events-none absolute inset-0 z-10 m-auto h-9 w-9 object-contain sm:h-10 sm:w-10"
+                          className="pointer-events-none absolute inset-0 z-10 m-auto h-8 w-8 sm:h-9 sm:w-9 object-contain"
                         />
                         <div
                           className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center opacity-0"
@@ -391,12 +391,12 @@ const LoginBody = () => {
                         key={social.alt}
                         type="button"
                         variant="outline"
-                        className="flex h-[72px] w-[72px] sm:h-[80px] sm:w-[80px] items-center justify-center rounded-2xl border border-border/50 bg-white hover:bg-gray-50 shadow-lg shadow-gray-200/50 p-1.5 hover:shadow-xl transition-all duration-300"
+                        className="flex h-14 w-14 sm:h-[72px] sm:w-[72px] items-center justify-center rounded-2xl border border-border/50 bg-white hover:bg-gray-50 shadow-lg shadow-gray-200/50 p-1.5 hover:shadow-xl transition-all duration-300"
                       >
                         <img
                           src={social.src}
                           alt={social.alt}
-                          className="h-9 w-9 sm:h-10 sm:w-10 object-contain"
+                          className="h-8 w-8 sm:h-9 sm:w-9 object-contain"
                         />
                       </Button>
                     )

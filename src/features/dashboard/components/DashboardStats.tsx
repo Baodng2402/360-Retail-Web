@@ -13,14 +13,14 @@ export interface StatItem {
 }
 
 export const DashboardStats = ({ stats }: { stats: StatItem[] }) => (
-  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
     {stats.map((stat, i) => (
       <motion.div
         key={stat.label}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: i * 0.08, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-        whileHover={{ y: -4 }}
+        whileHover={{ y: -2 }}
       >
         <StatCard {...stat} index={i} />
       </motion.div>
@@ -70,21 +70,21 @@ const StatCard = ({
 
   return (
     <div className={cn(
-      "p-5 sm:p-6 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-xl",
+      "p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl sm:rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-lg",
       "relative overflow-hidden group",
       bgGradient
     )}>
       {/* Background glow effect */}
-      <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-500 bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] blur-2xl" />
+      <div className="absolute -top-10 -right-10 w-24 sm:w-28 md:w-32 h-24 sm:h-28 md:h-32 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-500 bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] blur-2xl" />
 
       <div className="flex items-center justify-between relative z-10">
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] sm:text-xs text-muted-foreground dark:text-gray-400 mb-1 truncate">{label}</p>
-          <h3 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-foreground dark:text-white">{value}</h3>
+          <p className="text-[10px] sm:text-xs text-muted-foreground dark:text-gray-400 mb-1 truncate">{label}</p>
+          <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight text-foreground dark:text-white">{value}</h3>
           {change ? (
             <p
               className={cn(
-                "text-xs font-semibold mt-1.5 flex items-center gap-1",
+                "text-[10px] sm:text-xs font-semibold mt-1 flex items-center gap-1",
                 isTrendUp && "text-emerald-600 dark:text-emerald-400",
                 isTrendDown && "text-red-600 dark:text-red-400",
                 !isTrendUp && !isTrendDown && "text-muted-foreground",
@@ -95,16 +95,16 @@ const StatCard = ({
               {change}
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground mt-1.5 truncate">{subLabel}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 truncate">{subLabel}</p>
           )}
         </div>
         <div
           className={cn(
-            "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 ml-3",
+            "w-10 h-10 sm:w-11 sm:h-11 md:w-12 lg:w-14 md:h-12 lg:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 ml-2 sm:ml-3",
             iconBg
           )}
         >
-          <Icon className={cn("h-5 w-5 sm:h-6 sm:w-6", iconColor)} />
+          <Icon className={cn("h-4 w-4 sm:h-5 sm:w-5 lg:h-5 lg:w-5", iconColor)} />
         </div>
       </div>
     </div>

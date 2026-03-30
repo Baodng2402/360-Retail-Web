@@ -15,7 +15,7 @@ import {
 import { useAuthStore } from "@/shared/store/authStore";
 
 interface QuickAction {
-  icon: React.ElementType;
+  icon: React.FC<{ className?: string }>;
   title: string;
   description: string;
   action: "modal" | "navigate";
@@ -23,7 +23,7 @@ interface QuickAction {
   path?: string;
   gradient: string;
   hoverGradient: string;
-  visibleFor?: ("StoreOwner" | "Manager" | "Staff")[];
+  visibleFor?: Array<"StoreOwner" | "Manager" | "Staff">;
 }
 
 const quickActions: QuickAction[] = [
@@ -140,7 +140,10 @@ const QuickActions = () => {
                 className={`relative w-11 h-11 md:w-12 md:h-12 mx-auto mb-2 md:mb-3 bg-gradient-to-br ${action.gradient} ${action.hoverGradient} rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 group-hover:shadow-xl`}
                 whileHover={{ rotate: 5 }}
               >
-                <action.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                {(() => {
+                  const IconComponent = action.icon;
+                  return <IconComponent className="w-5 h-5 md:w-6 md:h-6 text-white" />;
+                })()}
               </motion.div>
 
               <h3 className="text-xs md:text-sm font-semibold text-foreground mb-1 relative z-10">
