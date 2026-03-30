@@ -75,7 +75,7 @@ export function AdminLayout() {
         <AdminHeader
           isSidebarCollapsed={isSidebarCollapsed}
         />
-        <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 pt-2">
+        <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 pt-[60px] sm:pt-[73px] md:pt-[77px]">
           <Outlet />
         </main>
       </div>
