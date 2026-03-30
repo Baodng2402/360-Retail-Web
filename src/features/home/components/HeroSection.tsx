@@ -446,6 +446,11 @@ export function HeroSection() {
             loop
             muted
             playsInline
+            preload="metadata"
+            poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23010408'/%3E%3Cstop offset='50%25' style='stop-color:%23020c1b'/%3E%3Cstop offset='100%25' style='stop-color:%23051525'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23bg)' width='1920' height='1080'/%3E%3C/svg%3E"
+            onLoadedData={() => {
+              console.log("Video loaded successfully");
+            }}
             onError={() => {
               setVideoError(true);
               console.log("Video failed to load from:", VIDEO_PATH);
