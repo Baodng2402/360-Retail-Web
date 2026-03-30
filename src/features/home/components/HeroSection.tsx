@@ -441,7 +441,16 @@ export function HeroSection() {
           {/* Video element */}
           <video
             ref={videoRef}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute top-0 left-0 w-full h-full"
+            style={{ 
+              objectFit: 'cover',
+              width: '100%',
+              height: '100%',
+              minWidth: '100%',
+              minHeight: '100%',
+              maxWidth: 'none',
+              maxHeight: 'none'
+            }}
             autoPlay
             loop
             muted
