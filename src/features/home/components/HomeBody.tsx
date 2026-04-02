@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   Settings,
   Zap,
@@ -33,6 +34,16 @@ const itemVariants = {
 };
 
 const HomeBody = () => {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkDark = () => setIsDark(document.documentElement.classList.contains("dark"));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <motion.div
       className="min-h-screen bg-background transition-colors duration-300"
@@ -49,10 +60,19 @@ const HomeBody = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.6 }}
-        className="border-y border-border bg-gradient-to-r from-[#FF7B21]/5 via-[#19D6C8]/5 to-[#FF7B21]/5 dark:border-slate-800 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-900 dark:to-slate-800"
+        className="border-y"
+        style={{
+          background: isDark
+            ? "linear-gradient(to right, #0f172a, #1e293b, #0f172a)"
+            : "linear-gradient(to right, rgba(255,123,33,0.05), rgba(25,214,200,0.05), rgba(255,123,33,0.05))",
+          borderColor: isDark ? "#1e293b" : "#e2e8f0",
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 sm:py-10">
-          <p className="text-center text-[9px] sm:text-[10px] font-semibold tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] uppercase text-muted-foreground mb-4 sm:mb-6">
+          <p
+            className="text-center text-[9px] sm:text-[10px] font-semibold tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] uppercase mb-4 sm:mb-6"
+            style={{ color: isDark ? "#64748b" : "#94a3b8" }}
+          >
             Được tin dùng bởi các thương hiệu bán lẻ tại Việt Nam
           </p>
           <motion.div
@@ -66,15 +86,16 @@ const HomeBody = () => {
               { color: "from-orange-500 to-amber-500", name: "Coffee Corner" },
               { color: "from-sky-500 to-indigo-500", name: "Mobile Hub" },
               { color: "from-emerald-500 to-[#19D6C8]", name: "Green Mart" },
-            ].map((brand, i) => (
-              <motion.div
-                key={brand.name}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 0.7, y: 0 }}
-                transition={{ delay: 0.6 + i * 0.1 }}
-                whileHover={{ opacity: 1, scale: 1.05 }}
-                className="flex items-center gap-1 sm:gap-1.5 font-semibold text-[10px] sm:text-xs md:text-base text-foreground"
-              >
+            ]              .map((brand, i) => (
+                <motion.div
+                  key={brand.name}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: isDark ? 0.7 : 0.6, y: 0 }}
+                  transition={{ delay: 0.6 + i * 0.1 }}
+                  whileHover={{ opacity: 1, scale: 1.05 }}
+                  className="flex items-center gap-1 sm:gap-1.5 font-semibold text-[10px] sm:text-xs md:text-base"
+                  style={{ color: isDark ? "#e2e8f0" : "#334155" }}
+                >
                 <span className={`inline-block h-3 w-3 sm:h-4 sm:w-4 lg:h-6 lg:w-6 rounded-lg bg-gradient-to-br ${brand.color}`} />
                 <span className="whitespace-nowrap">{brand.name}</span>
               </motion.div>
@@ -202,7 +223,12 @@ const HomeBody = () => {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-        className="py-12 sm:py-16 md:py-24 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white"
+        className="py-12 sm:py-16 md:py-24"
+        style={{
+          background: isDark
+            ? "linear-gradient(to bottom, #0f172a, #1e293b, #0f172a)"
+            : "linear-gradient(to bottom, #f1f5f9, #e2e8f0, #f8fafc)",
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
           <motion.div
@@ -211,10 +237,16 @@ const HomeBody = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-[clamp(22px,4vw,44px)] font-extrabold mb-3 sm:mb-4 md:mb-6 tracking-tight">
+            <h2
+              className="text-[clamp(22px,4vw,44px)] font-extrabold mb-3 sm:mb-4 md:mb-6 tracking-tight"
+              style={{ color: isDark ? "#f1f5f9" : "#0f172a" }}
+            >
               Đồng hành cùng sự phát triển bán lẻ Việt Nam
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base md:text-lg leading-relaxed mb-6 sm:mb-8 md:mb-10">
+            <p
+              className="text-sm sm:text-base md:text-lg leading-relaxed mb-6 sm:mb-8 md:mb-10"
+              style={{ color: isDark ? "#94a3b8" : "#475569" }}
+            >
               Từ trung tâm thành phố đến tỉnh lẻ, 360 Retail giúp chủ shop theo dõi doanh thu và khách hàng theo khu vực, từ đó tối ưu chiến dịch và nguồn lực.
             </p>
 
@@ -226,14 +258,24 @@ const HomeBody = () => {
               className="grid grid-cols-2 gap-6 sm:gap-8"
             >
               {[
-                { value: "5,000+", label: "Cửa hàng sử dụng", color: "text-[#FF7B21]" },
-                { value: "63", label: "Tỉnh thành có khách hàng", color: "text-[#19D6C8]" },
-                { value: "12+", label: "Ngành hàng khác nhau", color: "text-[#FF7B21]" },
-                { value: "24/7", label: "Hỗ trợ đội ngũ CSKH", color: "text-[#19D6C8]" },
+                { value: "5,000+", label: "Cửa hàng sử dụng", color: "#FF7B21" },
+                { value: "63", label: "Tỉnh thành có khách hàng", color: "#19D6C8" },
+                { value: "12+", label: "Ngành hàng khác nhau", color: "#FF7B21" },
+                { value: "24/7", label: "Hỗ trợ đội ngũ CSKH", color: "#19D6C8" },
               ].map((stat) => (
                 <motion.div key={stat.label} variants={itemVariants}>
-                  <p className={`text-2xl sm:text-3xl md:text-4xl font-extrabold ${stat.color} mb-1`}>{stat.value}</p>
-                  <p className="text-xs sm:text-sm font-medium text-slate-300">{stat.label}</p>
+                  <p
+                    className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1"
+                    style={{ color: stat.color }}
+                  >
+                    {stat.value}
+                  </p>
+                  <p
+                    className="text-xs sm:text-sm font-medium"
+                    style={{ color: isDark ? "#94a3b8" : "#64748b" }}
+                  >
+                    {stat.label}
+                  </p>
                 </motion.div>
               ))}
             </motion.div>
@@ -247,8 +289,27 @@ const HomeBody = () => {
             className="relative w-full"
           >
             <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] w-full max-w-3xl mx-auto">
-              <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl border border-border/40 overflow-hidden">
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,#22d3ee_0,transparent_55%),radial-gradient(circle_at_bottom,#fb923c_0,transparent_55%)] z-0" />
+              <div
+                className="absolute inset-0 rounded-2xl sm:rounded-3xl shadow-2xl border overflow-hidden"
+                style={{
+                  background: isDark
+                    ? "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"
+                    : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                  borderColor: isDark ? "rgba(51,65,85,0.5)" : "rgba(226,232,240,0.8)",
+                  boxShadow: isDark
+                    ? "0 25px 50px -12px rgba(0,0,0,0.5)"
+                    : "0 25px 50px -12px rgba(0,0,0,0.1)",
+                }}
+              >
+                <div
+                  className="absolute inset-0 z-0"
+                  style={{
+                    opacity: isDark ? 0.2 : 0.15,
+                    background: isDark
+                      ? "radial-gradient(circle_at_top,#22d3ee_0,transparent_55%),radial-gradient(circle_at_bottom,#fb923c_0,transparent_55%)"
+                      : "radial-gradient(circle_at_top,#0ea5e9_0,transparent_50%),radial-gradient(circle_at_bottom,#FF7B21_0,transparent_50%)",
+                  }}
+                />
                 <div className="absolute inset-0 z-10 flex items-center justify-center p-2 sm:p-4">
                   <GithubGlobe />
                 </div>

@@ -63,16 +63,16 @@ function PlatformModule({
   size?: number;
 }) {
   const ref = useRef<THREE.Mesh>(null);
-  const floatOffset = useRef(Math.random() * Math.PI * 2);
+  const offsetValue = useRef(Math.random() * Math.PI * 2);
 
   useFrame((state) => {
     if (!ref.current) return;
     const t = state.clock.getElapsedTime();
     const baseY = position[1];
-    const floatY = Math.sin(t * 0.7 + floatOffset.current) * 0.14;
+    const floatY = Math.sin(t * 0.7 + offsetValue.current) * 0.14;
     ref.current.position.y = baseY + floatY;
     ref.current.rotation.y += 0.006;
-    ref.current.rotation.x = Math.sin(t * 0.25 + floatOffset.current) * 0.08;
+    ref.current.rotation.x = Math.sin(t * 0.25 + offsetValue.current) * 0.08;
   });
 
   return (
@@ -115,7 +115,7 @@ function OrbitingDot({
   size?: number;
 }) {
   const ref = useRef<THREE.Mesh>(null);
-  const angle = useRef(Math.random() * Math.PI * 2);
+  const angle = useRef((Math.random() * 0.4) * Math.PI * 2);
 
   useFrame(() => {
     if (!ref.current) return;
@@ -133,7 +133,7 @@ function OrbitingDot({
   );
 }
 
-function StarField() {
+function StarField({ isDark = true }: { isDark?: boolean }) {
   const count = 1000;
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
@@ -145,15 +145,18 @@ function StarField() {
     return arr;
   }, []);
 
+  const color = isDark ? "#60a5fa" : "#94a3b8";
+  const opacity = isDark ? 0.5 : 0.35;
+
   return (
     <Points positions={positions} stride={3} frustumCulled={false}>
       <PointMaterial
         transparent
-        color="#60a5fa"
+        color={color}
         size={0.03}
         sizeAttenuation
         depthWrite={false}
-        opacity={0.5}
+        opacity={opacity}
       />
     </Points>
   );
@@ -189,7 +192,7 @@ function ConnectionLine({
   );
 }
 
-function PlatformScene() {
+function PlatformScene({ isDark = true }: { isDark?: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
@@ -215,7 +218,7 @@ function PlatformScene() {
       <pointLight position={[0, -6, 4]} intensity={1} color="#19D6C8" />
       <pointLight position={[3, -3, 5]} intensity={0.6} color="#a78bfa" />
 
-      <StarField />
+      <StarField isDark={isDark} />
 
       <FloatingRing radius={2.0} color="#0ea5e9" rotationSpeed={0.4} tiltX={Math.PI / 3} opacity={0.22} />
       <FloatingRing radius={2.5} color="#FF7B21" rotationSpeed={-0.25} tiltX={Math.PI / 4.5} tiltZ={0.4} opacity={0.18} />
@@ -256,7 +259,7 @@ function PlatformScene() {
 // CANVAS PARTICLE SYSTEM
 // ===============================
 
-function useCanvasParticles(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
+function useCanvasParticles(canvasRef: React.RefObject<HTMLCanvasElement | null>, isDark = true) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -265,7 +268,9 @@ function useCanvasParticles(canvasRef: React.RefObject<HTMLCanvasElement | null>
 
     let animationId: number;
     const particles: { x: number; y: number; vx: number; vy: number; size: number; color: string; alpha: number; life: number; maxLife: number }[] = [];
-    const colors = ["#0ea5e9", "#FF7B21", "#19D6C8", "#a78bfa", "#f0abfc", "#38bdf8"];
+    const darkColors = ["#0ea5e9", "#FF7B21", "#19D6C8", "#a78bfa", "#f0abfc", "#38bdf8"];
+    const lightColors = ["#0ea5e9", "#FF7B21", "#19D6C8", "#6366f1", "#ec4899", "#8b5cf6"];
+    const colors = isDark ? darkColors : lightColors;
 
     const resize = () => {
       if (canvas) {
@@ -324,7 +329,7 @@ function useCanvasParticles(canvasRef: React.RefObject<HTMLCanvasElement | null>
 
     draw();
     return () => { window.removeEventListener("resize", resize); cancelAnimationFrame(animationId); };
-  }, [canvasRef]);
+  }, [canvasRef, isDark]);
 }
 
 // ===============================
@@ -379,6 +384,17 @@ export function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [sceneReady, setSceneReady] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  // Detect dark mode
+  useEffect(() => {
+    const checkDark = () => setIsDark(document.documentElement.classList.contains("dark"));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   // Scroll progress
   const { scrollYProgress } = useScroll({
@@ -403,7 +419,7 @@ export function HeroSection() {
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.08, 0.25], [1, 1, 0]);
 
   // Canvas particles
-  useCanvasParticles(canvasRef);
+  useCanvasParticles(canvasRef, isDark);
 
   // Mark scene ready
   useEffect(() => {
@@ -442,22 +458,22 @@ export function HeroSection() {
           <video
             ref={videoRef}
             className="absolute top-0 left-0 w-full h-full"
-            style={{ 
+            style={{
               objectFit: 'cover',
               width: '100%',
               height: '100%',
               minWidth: '100%',
               minHeight: '100%',
               maxWidth: 'none',
-              maxHeight: 'none'
+              maxHeight: 'none',
             }}
             autoPlay
             loop
             muted
             playsInline
-            preload="metadata"
-            poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23010408'/%3E%3Cstop offset='50%25' style='stop-color:%23020c1b'/%3E%3Cstop offset='100%25' style='stop-color:%23051525'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23bg)' width='1920' height='1080'/%3E%3C/svg%3E"
+            preload="auto"
             onLoadedData={() => {
+              setIsVideoLoaded(true);
               console.log("Video loaded successfully");
             }}
             onError={() => {
@@ -467,6 +483,10 @@ export function HeroSection() {
           >
             <source src={VIDEO_PATH} type="video/mp4" />
           </video>
+          {/* Dark overlay when video loaded to blend with 3D scene */}
+          {isVideoLoaded && (
+            <div className="absolute inset-0 bg-black/60 dark:bg-black/0 transition-opacity duration-1000" />
+          )}
         </motion.div>
 
         {/* ===== LAYER 1: FALLBACK GRADIENT ===== */}
@@ -500,26 +520,32 @@ export function HeroSection() {
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* ===== LAYER 3: CSS GRID OVERLAY (dark mode only) ===== */}
+        {/* ===== LAYER 3: CSS GRID OVERLAY ===== */}
         <div
-          className="absolute inset-0 z-2 opacity-[0.04] hidden dark:block"
+          className="absolute inset-0 z-2 opacity-[0.04]"
           style={{
             backgroundImage: "linear-gradient(rgba(14, 165, 233, 0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(14, 165, 233, 0.8) 1px, transparent 1px)",
             backgroundSize: "70px 70px",
           }}
         />
 
-        {/* ===== LAYER 4: CANVAS PARTICLES (dark mode only) ===== */}
+        {/* ===== LAYER 4: CANVAS PARTICLES ===== */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 z-3 pointer-events-none hidden dark:block"
-          style={{ opacity: 0.9 }}
+          className="absolute inset-0 z-3 pointer-events-none"
+          style={{ opacity: isDark ? 0.9 : 0.5 }}
         />
 
-        {/* ===== LAYER 5: THREE.JS 3D SCENE (dark mode only) ===== */}
+        {/* ===== LAYER 5: THREE.JS 3D SCENE ===== */}
         <motion.div
-          className="absolute inset-0 z-4 hidden dark:block"
-          style={{ y: sceneY, x: sceneX, scale: sceneScale }}
+          className="absolute inset-0 z-4"
+          style={{
+            y: sceneY,
+            x: sceneX,
+            scale: sceneScale,
+            opacity: isDark ? 1 : isVideoLoaded ? 0.15 : 0.85,
+            transition: "opacity 1s ease",
+          }}
         >
           {sceneReady && (
             <Canvas
@@ -531,31 +557,25 @@ export function HeroSection() {
                 scene.background = null;
               }}
             >
-              <PlatformScene />
+              <PlatformScene isDark={isDark} />
             </Canvas>
           )}
         </motion.div>
 
         {/* ===== LAYER 6: OVERLAY (text readability) ===== */}
         <motion.div
-          className="absolute inset-0 z-10 hidden dark:block"
+          className="absolute inset-0 z-10"
           style={{
             opacity: overlayOpacity,
-            background: "linear-gradient(to bottom, rgba(1,4,8,0.5) 0%, rgba(1,4,8,0.35) 40%, rgba(1,4,8,0.55) 70%, rgba(1,4,8,0.85) 100%)",
-            pointerEvents: "none",
-          }}
-        />
-        <motion.div
-          className="absolute inset-0 z-10 block dark:hidden"
-          style={{
-            opacity: overlayOpacity,
-            background: "linear-gradient(to bottom, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.4) 40%, rgba(255,255,255,0.5) 70%, rgba(255,255,255,0.7) 100%)",
+            background: isDark
+              ? "linear-gradient(to bottom, rgba(1,4,8,0.5) 0%, rgba(1,4,8,0.35) 40%, rgba(1,4,8,0.55) 70%, rgba(1,4,8,0.85) 100%)"
+              : "linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 40%, rgba(255,255,255,0.45) 70%, rgba(255,255,255,0.65) 100%)",
             pointerEvents: "none",
           }}
         />
 
-        {/* ===== LAYER 7: DECORATIVE CSS FLOATING CUBES (dark mode only) ===== */}
-        <div className="hidden dark:block">
+        {/* ===== LAYER 7: DECORATIVE CSS FLOATING CUBES ===== */}
+        <div>
           <MiniFloatingCube className="top-[7%] right-[5%]" size={50} color="#0ea5e9" delay={0.3} />
           <MiniFloatingCube className="top-[16%] right-[17%]" size={30} color="#FF7B21" delay={0.7} />
           <MiniFloatingCube className="bottom-[14%] right-[7%]" size={38} color="#19D6C8" delay={1.1} />
