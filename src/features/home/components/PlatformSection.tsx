@@ -324,9 +324,12 @@ function ConnectingLines({ isDark = true }: { isDark?: boolean }) {
 }
 
 function CenterHub({ isDark = true }: { isDark?: boolean }) {
-  const ringBorderColor = isDark ? "#0ea5e9" : "#0ea5e9";
-  const ring2BorderColor = isDark ? "#FF7B21" : "#f97316";
-  const ring3BorderColor = isDark ? "#19D6C8" : "#14b8a6";
+  // Only show in dark mode - hub design is for dark backgrounds
+  if (!isDark) return null;
+
+  const ringBorderColor = "#0ea5e9";
+  const ring2BorderColor = "#FF7B21";
+  const ring3BorderColor = "#19D6C8";
 
   return (
     <motion.div
@@ -611,7 +614,7 @@ export function PlatformSection() {
               <div
                 key={module.id}
                 className={cn(
-                  "relative",
+                  "relative z-10",
                   index === 0 && "md:pt-8",
                   index === 1 && "md:pt-0",
                   index === 2 && "md:pt-8"
