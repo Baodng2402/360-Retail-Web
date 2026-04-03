@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useRef, useEffect, useState, Suspense, lazy } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "motion/react";
 import {
@@ -9,333 +9,16 @@ import {
   Headphones,
   ChevronDown,
 } from "lucide-react";
-import * as THREE from "three";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Points, PointMaterial } from "@react-three/drei";
 import TrueFocus from "@/shared/components/TrueFocus";
 
-// ===============================
-// VIDEO CONFIG — Edit your video path here
-// ===============================
-const VIDEO_PATH = "/videos/hero.mp4";
-
-// ===============================
-// THREE.JS SCENE COMPONENTS
-// ===============================
-
-function FloatingRing({
-  radius = 2,
-  tubeWidth = 0.012,
-  color = "#0ea5e9",
-  rotationSpeed = 0.3,
-  tiltX = Math.PI / 4,
-  tiltZ = 0,
-  opacity = 0.3,
-}: {
-  radius?: number;
-  tubeWidth?: number;
-  color?: string;
-  rotationSpeed?: number;
-  tiltX?: number;
-  tiltZ?: number;
-  opacity?: number;
-}) {
-  const ref = useRef<THREE.Mesh>(null);
-  useFrame(() => {
-    if (!ref.current) return;
-    ref.current.rotation.z += rotationSpeed * 0.01;
-  });
-  return (
-    <mesh ref={ref} rotation={[tiltX, 0, tiltZ]}>
-      <torusGeometry args={[radius, tubeWidth, 8, 120]} />
-      <meshBasicMaterial color={color} transparent opacity={opacity} />
-    </mesh>
-  );
-}
-
-function PlatformModule({
-  position = [0, 0, 0] as [number, number, number],
-  color = "#0ea5e9",
-  size = 0.3,
-}: {
-  position?: [number, number, number];
-  color?: string;
-  size?: number;
-}) {
-  const ref = useRef<THREE.Mesh>(null);
-  const offsetValue = useRef(Math.random() * Math.PI * 2);
-
-  useFrame((state) => {
-    if (!ref.current) return;
-    const t = state.clock.getElapsedTime();
-    const baseY = position[1];
-    const floatY = Math.sin(t * 0.7 + offsetValue.current) * 0.14;
-    ref.current.position.y = baseY + floatY;
-    ref.current.rotation.y += 0.006;
-    ref.current.rotation.x = Math.sin(t * 0.25 + offsetValue.current) * 0.08;
-  });
-
-  return (
-    <group position={position}>
-      <mesh>
-        <sphereGeometry args={[size * 2.8, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.03} />
-      </mesh>
-      <mesh ref={ref}>
-        <boxGeometry args={[size, size * 0.65, size]} />
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={0.6}
-          metalness={0.9}
-          roughness={0.08}
-          transparent
-          opacity={0.88}
-        />
-      </mesh>
-      <mesh ref={ref} scale={1.05}>
-        <boxGeometry args={[size, size * 0.65, size]} />
-        <meshBasicMaterial color={color} wireframe transparent opacity={0.3} />
-      </mesh>
-    </group>
-  );
-}
-
-function OrbitingDot({
-  parentPos = [0, 0, 0] as [number, number, number],
-  radius = 0.65,
-  color = "#0ea5e9",
-  speed = 1,
-  size = 0.035,
-}: {
-  parentPos?: [number, number, number];
-  radius?: number;
-  color?: string;
-  speed?: number;
-  size?: number;
-}) {
-  const ref = useRef<THREE.Mesh>(null);
-  const angle = useRef((Math.random() * 0.4) * Math.PI * 2);
-
-  useFrame(() => {
-    if (!ref.current) return;
-    angle.current += speed * 0.012;
-    ref.current.position.x = parentPos[0] + Math.cos(angle.current) * radius;
-    ref.current.position.z = parentPos[2] + Math.sin(angle.current) * radius;
-    ref.current.position.y = parentPos[1] + Math.sin(angle.current * 0.4) * 0.18;
-  });
-
-  return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[size, 8, 8]} />
-      <meshBasicMaterial color={color} />
-    </mesh>
-  );
-}
-
-function StarField({ isDark = true }: { isDark?: boolean }) {
-  const count = 1000;
-  const positions = useMemo(() => {
-    const arr = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      arr[i * 3 + 0] = (Math.random() - 0.5) * 25;
-      arr[i * 3 + 1] = (Math.random() - 0.5) * 25;
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 25;
-    }
-    return arr;
-  }, []);
-
-  const color = isDark ? "#60a5fa" : "#94a3b8";
-  const opacity = isDark ? 0.5 : 0.35;
-
-  return (
-    <Points positions={positions} stride={3} frustumCulled={false}>
-      <PointMaterial
-        transparent
-        color={color}
-        size={0.03}
-        sizeAttenuation
-        depthWrite={false}
-        opacity={opacity}
-      />
-    </Points>
-  );
-}
-
-function ConnectionLine({
-  from = [0, 0, 0] as [number, number, number],
-  to = [1, 1, 1] as [number, number, number],
-  color = "#0ea5e9",
-}: {
-  from?: [number, number, number];
-  to?: [number, number, number];
-  color?: string;
-}) {
-  const dx = to[0] - from[0];
-  const dy = to[1] - from[1];
-  const dz = to[2] - from[2];
-  const length = Math.sqrt(dx * dx + dy * dy + dz * dz);
-  const midX = (from[0] + to[0]) / 2;
-  const midY = (from[1] + to[1]) / 2;
-  const midZ = (from[2] + to[2]) / 2;
-
-  const axis = new THREE.Vector3(dx, dy, dz).normalize();
-  const up = new THREE.Vector3(0, 1, 0);
-  const quaternion = new THREE.Quaternion().setFromUnitVectors(up, axis);
-  const euler = new THREE.Euler().setFromQuaternion(quaternion);
-
-  return (
-    <mesh position={[midX, midY, midZ]} rotation={euler}>
-      <cylinderGeometry args={[0.003, 0.003, length, 4]} />
-      <meshBasicMaterial color={color} transparent opacity={0.2} />
-    </mesh>
-  );
-}
-
-function PlatformScene({ isDark = true }: { isDark?: boolean }) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (!groupRef.current) return;
-    const t = state.clock.getElapsedTime();
-    groupRef.current.rotation.y = Math.sin(t * 0.08) * 0.12;
-    groupRef.current.rotation.x = Math.sin(t * 0.05) * 0.04;
-  });
-
-  const moduleConfigs = [
-    { position: [-1.9, 0.5, -1.2] as [number, number, number], color: "#0ea5e9", size: 0.36, name: "People" },
-    { position: [0, 1.1, -0.9] as [number, number, number], color: "#FF7B21", size: 0.42, name: "Product" },
-    { position: [1.9, 0.5, -1.2] as [number, number, number], color: "#19D6C8", size: 0.36, name: "Customer" },
-  ];
-
-  const centerHub = [0, 0.3, 0] as [number, number, number];
-
-  return (
-    <group ref={groupRef}>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[6, 6, 6]} intensity={2} color="#0ea5e9" />
-      <pointLight position={[-6, -4, -6]} intensity={1.2} color="#FF7B21" />
-      <pointLight position={[0, -6, 4]} intensity={1} color="#19D6C8" />
-      <pointLight position={[3, -3, 5]} intensity={0.6} color="#a78bfa" />
-
-      <StarField isDark={isDark} />
-
-      <FloatingRing radius={2.0} color="#0ea5e9" rotationSpeed={0.4} tiltX={Math.PI / 3} opacity={0.22} />
-      <FloatingRing radius={2.5} color="#FF7B21" rotationSpeed={-0.25} tiltX={Math.PI / 4.5} tiltZ={0.4} opacity={0.18} />
-      <FloatingRing radius={3.0} color="#19D6C8" rotationSpeed={0.18} tiltX={Math.PI / 2.5} opacity={0.1} />
-
-      <group position={centerHub}>
-        <mesh>
-          <sphereGeometry args={[0.32, 32, 32]} />
-          <meshStandardMaterial color="#0ea5e9" emissive="#0ea5e9" emissiveIntensity={1.2} metalness={0.95} roughness={0.05} transparent opacity={0.92} />
-        </mesh>
-        <mesh>
-          <sphereGeometry args={[0.48, 16, 16]} />
-          <meshBasicMaterial color="#0ea5e9" transparent opacity={0.06} />
-        </mesh>
-        <mesh>
-          <torusGeometry args={[0.55, 0.008, 8, 80]} />
-          <meshBasicMaterial color="#0ea5e9" transparent opacity={0.4} />
-        </mesh>
-      </group>
-
-      {moduleConfigs.map((cfg) => (
-        <group key={cfg.name}>
-          <PlatformModule position={cfg.position} color={cfg.color} size={cfg.size} />
-          {[0, 1, 2].map((j) => (
-            <OrbitingDot key={j} parentPos={cfg.position} radius={cfg.size + 0.25 + j * 0.18} color={cfg.color} speed={0.8 + j * 0.5} size={0.03 + j * 0.008} />
-          ))}
-        </group>
-      ))}
-
-      {moduleConfigs.map((cfg) => (
-        <ConnectionLine key={`line-${cfg.name}`} from={centerHub} to={cfg.position} color={cfg.color} />
-      ))}
-    </group>
-  );
-}
-
-// ===============================
-// CANVAS PARTICLE SYSTEM
-// ===============================
-
-function useCanvasParticles(canvasRef: React.RefObject<HTMLCanvasElement | null>, isDark = true) {
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationId: number;
-    const particles: { x: number; y: number; vx: number; vy: number; size: number; color: string; alpha: number; life: number; maxLife: number }[] = [];
-    const darkColors = ["#0ea5e9", "#FF7B21", "#19D6C8", "#a78bfa", "#f0abfc", "#38bdf8"];
-    const lightColors = ["#0ea5e9", "#FF7B21", "#19D6C8", "#6366f1", "#ec4899", "#8b5cf6"];
-    const colors = isDark ? darkColors : lightColors;
-
-    const resize = () => {
-      if (canvas) {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-      }
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const spawn = () => {
-      if (particles.length > 50) return;
-      const maxLife = 120 + Math.random() * 60;
-      particles.push({
-        x: Math.random() * (canvas?.width ?? 800),
-        y: Math.random() * (canvas?.height ?? 600),
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 1.5 + 0.3,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: Math.random() * 0.4 + 0.1,
-        life: 0,
-        maxLife,
-      });
-    };
-
-    const draw = () => {
-      if (!canvas || !ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (Math.random() < 0.06) spawn();
-
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life++;
-
-        const progress = p.life / p.maxLife;
-        const alpha = progress < 0.2 ? (progress / 0.2) * p.alpha : progress > 0.8 ? ((1 - progress) / 0.2) * p.alpha : p.alpha;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0, alpha);
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = p.color;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
-
-        if (p.life >= p.maxLife) particles.splice(i, 1);
-      }
-
-      animationId = requestAnimationFrame(draw);
-    };
-
-    draw();
-    return () => { window.removeEventListener("resize", resize); cancelAnimationFrame(animationId); };
-  }, [canvasRef, isDark]);
-}
+// Lazy load Three.js canvas — code-splits the heavy 3D bundle
+const BreathingDotsBackground = lazy(() =>
+  import("./BreathingDotsBackground").then((m) => ({ default: m.BreathingDotsBackground }))
+);
 
 // ===============================
 // CSS FLOATING CUBES
 // ===============================
-
 function MiniFloatingCube({ size = 40, color = "#0ea5e9", delay = 0, className = "" }: { size?: number; color?: string; delay?: number; className?: string }) {
   return (
     <motion.div
@@ -377,14 +60,8 @@ function MiniFloatingCube({ size = 40, color = "#0ea5e9", delay = 0, className =
 // ===============================
 // MAIN HERO SECTION
 // ===============================
-
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [sceneReady, setSceneReady] = useState(false);
-  const [videoError, setVideoError] = useState(false);
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
   // Detect dark mode
@@ -402,30 +79,13 @@ export function HeroSection() {
     offset: ["start start", "end start"],
   });
 
-  // Parallax transforms — fade later so users don’t scroll through a long “empty black” strip
+  // Parallax transforms for content
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "28%"]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.55, 0.92], [1, 0.35, 0]);
-
-  // Video parallax
-  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-
-  // Three.js scene parallax
-  const sceneY = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
-  const sceneScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.65]);
-  const sceneX = useTransform(scrollYProgress, [0, 0.5], ["0%", "-10%"]);
 
   // Overlay fades out as you scroll
   const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.08, 0.25], [1, 1, 0]);
-
-  // Canvas particles
-  useCanvasParticles(canvasRef, isDark);
-
-  // Mark scene ready
-  useEffect(() => {
-    const timer = setTimeout(() => setSceneReady(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <section
@@ -436,78 +96,17 @@ export function HeroSection() {
       {/* ====================== STICKY WRAPPER ====================== */}
       <div className="sticky top-0 w-full h-screen overflow-hidden">
 
-        {/* ===== LAYER 0: VIDEO BACKGROUND ===== */}
-        <motion.div
+        {/* ===== LAYER 0: FALLBACK GRADIENT BACKGROUND ===== */}
+        <div
           className="absolute inset-0 z-0"
           style={{
-            y: videoY,
-            opacity: videoError ? 0 : 1,
+            background: isDark
+              ? "linear-gradient(135deg, #010408 0%, #020c1b 50%, #051525 100%)"
+              : "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)",
           }}
-        >
-          {/* Fallback dark background (shows while video loads) */}
-          <div
-            className="absolute inset-0 dark:hidden"
-            style={{ background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)" }}
-          />
-          <div
-            className="absolute inset-0 hidden dark:block"
-            style={{ background: "linear-gradient(135deg, #010408 0%, #020c1b 50%, #051525 100%)" }}
-          />
-          
-          {/* Video element */}
-          <video
-            ref={videoRef}
-            className="absolute top-0 left-0 w-full h-full"
-            style={{
-              objectFit: 'cover',
-              width: '100%',
-              height: '100%',
-              minWidth: '100%',
-              minHeight: '100%',
-              maxWidth: 'none',
-              maxHeight: 'none',
-            }}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            onLoadedData={() => {
-              setIsVideoLoaded(true);
-              console.log("Video loaded successfully");
-            }}
-            onError={() => {
-              setVideoError(true);
-              console.log("Video failed to load from:", VIDEO_PATH);
-            }}
-          >
-            <source src={VIDEO_PATH} type="video/mp4" />
-          </video>
-          {/* Dark overlay when video loaded to blend with 3D scene */}
-          {isVideoLoaded && (
-            <div className="absolute inset-0 bg-black/60 dark:bg-black/0 transition-opacity duration-1000" />
-          )}
-        </motion.div>
+        />
 
-        {/* ===== LAYER 1: FALLBACK GRADIENT ===== */}
-        {videoError && (
-          <>
-            <div
-              className="absolute inset-0 z-0 dark:hidden"
-              style={{
-                background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 25%, #e2e8f0 50%, #cbd5e1 72%, #f8fafc 100%)",
-              }}
-            />
-            <div
-              className="absolute inset-0 z-0 hidden dark:block"
-              style={{
-                background: "linear-gradient(135deg, #010408 0%, #020c1b 25%, #051525 50%, #071828 72%, #020a16 100%)",
-              }}
-            />
-          </>
-        )}
-
-        {/* ===== LAYER 2: AMBIENT LIGHT ZONES (dark mode only) ===== */}
+        {/* ===== LAYER 1: AMBIENT LIGHT ZONES (dark mode only) ===== */}
         <motion.div
           className="absolute inset-0 z-1 hidden dark:block"
           animate={{
@@ -520,7 +119,7 @@ export function HeroSection() {
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* ===== LAYER 3: CSS GRID OVERLAY ===== */}
+        {/* ===== LAYER 2: CSS GRID OVERLAY ===== */}
         <div
           className="absolute inset-0 z-2 opacity-[0.04]"
           style={{
@@ -529,40 +128,20 @@ export function HeroSection() {
           }}
         />
 
-        {/* ===== LAYER 4: CANVAS PARTICLES ===== */}
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 z-3 pointer-events-none"
-          style={{ opacity: isDark ? 0.9 : 0.5 }}
-        />
+        {/* ===== LAYER 3: BREATHING DOTS BACKGROUND (Matt Rossman technique) ===== */}
+        {/* 
+          - Full-screen Canvas with InstancedMesh + Chromatic Aberration
+          - Idle mode: automatic continuous breathing wave
+          - Interactive mode: mouse warps/pushes dots
+          - 60fps+, reduces dots on mobile
+        */}
+        <div className="absolute inset-0 z-5">
+          <Suspense fallback={null}>
+            <BreathingDotsBackground isDark={isDark} />
+          </Suspense>
+        </div>
 
-        {/* ===== LAYER 5: THREE.JS 3D SCENE ===== */}
-        <motion.div
-          className="absolute inset-0 z-4"
-          style={{
-            y: sceneY,
-            x: sceneX,
-            scale: sceneScale,
-            opacity: isDark ? 1 : isVideoLoaded ? 0.15 : 0.85,
-            transition: "opacity 1s ease",
-          }}
-        >
-          {sceneReady && (
-            <Canvas
-              camera={{ position: [0, 0, 6.5], fov: 48 }}
-              gl={{ antialias: true, alpha: true, premultipliedAlpha: false }}
-              style={{ background: "transparent" }}
-              onCreated={({ gl, scene }) => {
-                gl.setClearColor(0x000000, 0);
-                scene.background = null;
-              }}
-            >
-              <PlatformScene isDark={isDark} />
-            </Canvas>
-          )}
-        </motion.div>
-
-        {/* ===== LAYER 6: OVERLAY (text readability) ===== */}
+        {/* ===== LAYER 4: OVERLAY (text readability) ===== */}
         <motion.div
           className="absolute inset-0 z-10"
           style={{
@@ -574,8 +153,8 @@ export function HeroSection() {
           }}
         />
 
-        {/* ===== LAYER 7: DECORATIVE CSS FLOATING CUBES ===== */}
-        <div>
+        {/* ===== LAYER 5: DECORATIVE CSS FLOATING CUBES ===== */}
+        <div className="pointer-events-none">
           <MiniFloatingCube className="top-[7%] right-[5%]" size={50} color="#0ea5e9" delay={0.3} />
           <MiniFloatingCube className="top-[16%] right-[17%]" size={30} color="#FF7B21" delay={0.7} />
           <MiniFloatingCube className="bottom-[14%] right-[7%]" size={38} color="#19D6C8" delay={1.1} />
@@ -584,8 +163,8 @@ export function HeroSection() {
           <MiniFloatingCube className="top-[4%] left-[14%]" size={20} color="#0ea5e9" delay={1.8} />
         </div>
 
-        {/* ===== LAYER 8: CONTENT ===== */}
-        <div className="relative z-20 flex items-center w-full h-full px-4 sm:px-8 lg:px-16 xl:px-20">
+        {/* ===== LAYER 6: CONTENT (pointer-events-none so mouse reaches canvas) ===== */}
+        <div className="relative z-20 flex items-center w-full h-full px-4 sm:px-8 lg:px-16 xl:px-20 pointer-events-none">
           <motion.div
             className="flex flex-col items-center lg:items-start text-center lg:text-left max-w-2xl lg:max-w-[50%] pt-20 lg:pt-0"
             style={{ y: contentY, opacity: contentOpacity }}
@@ -610,12 +189,12 @@ export function HeroSection() {
               </h1>
             </motion.div>
 
-            {/* TrueFocus — move up to right below headline */}
+            {/* TrueFocus — pointer-events-auto so it stays interactive */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.5 }}
-              className="mb-6 sm:mb-8 flex justify-center lg:justify-start w-full"
+              className="mb-6 sm:mb-8 flex justify-center lg:justify-start w-full pointer-events-auto"
             >
               <TrueFocus
                 sentence="Cùng 360 Retail"
@@ -638,7 +217,7 @@ export function HeroSection() {
             >
               <Link
                 to="/dashboard"
-                className="group relative flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 md:px-9 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base overflow-hidden transition-all duration-300 hover:scale-[1.04] active:scale-[0.98] w-full sm:w-auto"
+                className="pointer-events-auto group relative flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 md:px-9 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base overflow-hidden transition-all duration-300 hover:scale-[1.04] active:scale-[0.98] w-full sm:w-auto"
                 style={{ background: "linear-gradient(135deg, #FF7B21 0%, #FF9F45 45%, #19D6C8 100%)", boxShadow: "0 8px 40px rgba(255, 123, 33, 0.45), 0 2px 10px rgba(0,0,0,0.3)", color: "white" }}
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100" style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%)" }} />
@@ -648,7 +227,7 @@ export function HeroSection() {
 
               <Link
                 to="/login"
-                className="group flex items-center justify-center gap-2 px-5 sm:px-6 md:px-7 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold text-xs sm:text-sm transition-all duration-300 border backdrop-blur-md hover:scale-[1.03] active:scale-[0.98] w-full sm:w-auto dark:bg-white/10 dark:border-white/20 dark:text-slate-100 bg-slate-900/10 border-slate-700/30 text-slate-800"
+                className="pointer-events-auto group flex items-center justify-center gap-2 px-5 sm:px-6 md:px-7 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold text-xs sm:text-sm transition-all duration-300 border backdrop-blur-md hover:scale-[1.03] active:scale-[0.98] w-full sm:w-auto dark:bg-white/10 dark:border-white/20 dark:text-slate-100 bg-slate-900/10 border-slate-700/30 text-slate-800"
                 style={{ backdropFilter: "blur(12px)" }}
               >
                 Đăng nhập
