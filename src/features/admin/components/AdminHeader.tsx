@@ -16,11 +16,7 @@ import ThemeMode from "@/shared/components/ui/themeMode";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 
-interface AdminHeaderProps {
-  isSidebarCollapsed: boolean;
-}
-
-export function AdminHeader({ isSidebarCollapsed }: AdminHeaderProps) {
+export function AdminHeader() {
   const { t } = useTranslation("admin");
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
@@ -35,9 +31,7 @@ export function AdminHeader({ isSidebarCollapsed }: AdminHeaderProps) {
   return (
     <header className="border-b border-gray-200 dark:border-gray-700 bg-background sticky top-0 z-50 h-[73px] flex items-center">
       <div
-        className={`flex items-center justify-between w-full transition-all duration-300 ${
-          isSidebarCollapsed ? "px-4" : "container mx-auto px-4"
-        }`}
+        className="flex items-center justify-between w-full px-4 transition-all duration-300"
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="hidden sm:flex items-center gap-2">

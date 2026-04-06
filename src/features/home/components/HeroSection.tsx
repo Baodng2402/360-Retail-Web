@@ -10,6 +10,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import TrueFocus from "@/shared/components/TrueFocus";
+import { useTranslation } from "react-i18next";
 
 // Lazy load Three.js canvas — code-splits the heavy 3D bundle
 const BreathingDotsBackground = lazy(() =>
@@ -61,6 +62,7 @@ function MiniFloatingCube({ size = 40, color = "#0ea5e9", delay = 0, className =
 // MAIN HERO SECTION
 // ===============================
 export function HeroSection() {
+  const { t } = useTranslation("home");
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
 
@@ -237,9 +239,9 @@ export function HeroSection() {
             {/* Trust Indicators */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }} className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2">
               {([
-                { icon: <ShieldCheck className="w-4 h-4" />, text: "No credit card" },
-                { icon: <Zap className="w-4 h-4" />, text: "5-min setup" },
-                { icon: <Headphones className="w-4 h-4" />, text: "24/7 Support" },
+                { icon: <ShieldCheck className="w-4 h-4" />, text: t("hero.trust.noCreditCard") },
+                { icon: <Zap className="w-4 h-4" />, text: t("hero.trust.fiveMinSetup") },
+                { icon: <Headphones className="w-4 h-4" />, text: t("hero.trust.support247") },
               ] as const).map((item, i) => (
                 <motion.div
                   key={item.text}

@@ -36,7 +36,6 @@ const StatCard = ({
   change,
   trend,
   color,
-  index: _i,
 }: StatItem & { index?: number }) => {
   const isTrendUp = trend === "up";
   const isTrendDown = trend === "down";

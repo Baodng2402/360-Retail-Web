@@ -150,6 +150,10 @@ export default function AdminStoresPage() {
                       <TableHead>{t("stores.columns.name")}</TableHead>
                       <TableHead>{t("stores.columns.address")}</TableHead>
                       <TableHead>{t("stores.columns.phone")}</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Sub status</TableHead>
+                      <TableHead>End date</TableHead>
                       <TableHead>{t("stores.columns.status")}</TableHead>
                       <TableHead>{t("stores.columns.createdAt")}</TableHead>
                       <TableHead className="text-right">Raw</TableHead>
@@ -178,6 +182,18 @@ export default function AdminStoresPage() {
                           </TableCell>
                           <TableCell className="max-w-[160px] truncate">
                             {String(s.phone ?? "—")}
+                          </TableCell>
+                          <TableCell className="max-w-[220px] truncate text-muted-foreground">
+                            {String(s.ownerEmail ?? s.owner_email ?? "—")}
+                          </TableCell>
+                          <TableCell className="max-w-[160px] truncate">
+                            {String(s.currentPlan ?? s.planName ?? s.plan_name ?? "—")}
+                          </TableCell>
+                          <TableCell className="max-w-[160px] truncate text-muted-foreground">
+                            {String(s.subscriptionStatus ?? s.subscription_status ?? "—")}
+                          </TableCell>
+                          <TableCell className="max-w-[160px] truncate text-muted-foreground">
+                            {formatDate(String(s.subscriptionEndDate ?? s.subscription_end_date ?? s.endDate ?? s.end_date ?? ""))}
                           </TableCell>
                           <TableCell>
                             <Badge

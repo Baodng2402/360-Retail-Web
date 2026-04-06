@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -69,6 +70,7 @@ const savePendingPayments = (next: PendingStorePayments) => {
 };
 
 const StoreManagementPage = () => {
+  const navigate = useNavigate();
   const [stores, setStores] = useState<StoreData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -561,6 +563,15 @@ const StoreManagementPage = () => {
                 <Card
                   key={store.id}
                   className="p-6 hover:shadow-lg transition-all relative overflow-hidden"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/dashboard/stores/${store.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/dashboard/stores/${store.id}`);
+                    }
+                  }}
                 >
                   <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-primary/50 to-transparent" />
 
@@ -625,7 +636,10 @@ const StoreManagementPage = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEditStore(store)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditStore(store);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -637,6 +651,7 @@ const StoreManagementPage = () => {
                           checked={store.isActive}
                           onCheckedChange={() => handleToggleStoreActive(store)}
                           disabled={togglingStoreIds.has(store.id)}
+                          onClick={(e) => e.stopPropagation()}
                         />
                       </div>
                     </div>
@@ -657,6 +672,15 @@ const StoreManagementPage = () => {
                   <Card
                     key={store.id}
                     className="p-6 hover:shadow-md transition-shadow"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(`/dashboard/stores/${store.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        navigate(`/dashboard/stores/${store.id}`);
+                      }
+                    }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex gap-4 flex-1">
@@ -722,7 +746,10 @@ const StoreManagementPage = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleEditStore(store)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditStore(store);
+                          }}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -735,6 +762,7 @@ const StoreManagementPage = () => {
                             onCheckedChange={() =>
                               handleToggleStoreActive(store)
                             }
+                            onClick={(e) => e.stopPropagation()}
                           />
                         </div>
                       </div>

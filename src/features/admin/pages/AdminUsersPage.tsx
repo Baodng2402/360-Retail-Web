@@ -137,22 +137,12 @@ export default function AdminUsersPage() {
     try {
       setSaving(true);
       if (!editing) {
-        const id = await superAdminUsersApi.create({
+        const created = await superAdminUsersApi.create({
           email: form.email.trim(),
           password: form.password,
           roleName: form.roleName,
         });
-        setItems((prev) => [
-          {
-            id,
-            email: form.email.trim(),
-            isActivated: true,
-            status: "Active",
-            storeId: null,
-            roles: [form.roleName],
-          },
-          ...prev,
-        ]);
+        setItems((prev) => [created, ...prev]);
         toast.success("Đã tạo user.");
       } else {
         await superAdminUsersApi.update(editing.id, {

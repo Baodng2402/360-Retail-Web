@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import { GithubGlobe } from "@/shared/components/configs/GithubGlobe";
 import { HeroSection } from "./HeroSection";
 import { PlatformSection } from "./PlatformSection";
+import { useTranslation } from "react-i18next";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,6 +35,7 @@ const itemVariants = {
 };
 
 const HomeBody = () => {
+  const { t } = useTranslation("home");
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -430,18 +432,22 @@ const HomeBody = () => {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <h5 className="text-[9px] sm:text-[10px] md:text-xs font-bold mb-3 sm:mb-4 tracking-widest opacity-50">PRODUCT</h5>
+              <h5 className="text-[9px] sm:text-[10px] md:text-xs font-bold mb-3 sm:mb-4 tracking-widest opacity-50">
+                {t("footer.product")}
+              </h5>
               <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm opacity-80">
-                {["Features", "Pricing", "Security"].map((item) => (
+                {(t("footer.productItems", { returnObjects: true }) as string[]).map((item) => (
                   <li key={item}><a href="#" className="hover:text-[#19D6C8] transition-colors">{item}</a></li>
                 ))}
               </ul>
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <h5 className="text-[9px] sm:text-[10px] md:text-xs font-bold mb-3 sm:mb-4 tracking-widest opacity-50">COMPANY</h5>
+              <h5 className="text-[9px] sm:text-[10px] md:text-xs font-bold mb-3 sm:mb-4 tracking-widest opacity-50">
+                {t("footer.company")}
+              </h5>
               <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm opacity-80">
-                {["About", "Blog", "Contact"].map((item) => (
+                {(t("footer.companyItems", { returnObjects: true }) as string[]).map((item) => (
                   <li key={item}><a href="#" className="hover:text-[#19D6C8] transition-colors">{item}</a></li>
                 ))}
               </ul>
@@ -449,7 +455,9 @@ const HomeBody = () => {
           </motion.div>
 
           <div className="pt-6 sm:pt-8 border-t border-white/10 text-center">
-            <p className="text-xs sm:text-sm opacity-60 tracking-wide">© 2025 360 Retail. Built for shop owners, by shop owners.</p>
+            <p className="text-xs sm:text-sm opacity-60 tracking-wide">
+              {t("footer.copyright")}
+            </p>
           </div>
         </div>
       </footer>
