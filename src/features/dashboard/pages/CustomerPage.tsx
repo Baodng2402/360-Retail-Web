@@ -630,7 +630,7 @@ const CustomerPage = () => {
                       </Card>
                     ) : (
                       <div className="space-y-4">
-                        {feedbacks.map((f, _i) => (
+                        {feedbacks.map((f) => (
                           <Card key={f.id} className="p-4 hover:shadow-md transition-all duration-200 hover:border-[#FF7B21]/30">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-1">

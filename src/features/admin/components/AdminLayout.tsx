@@ -72,10 +72,8 @@ export function AdminLayout() {
           </button>
         </div>
 
-        <AdminHeader
-          isSidebarCollapsed={isSidebarCollapsed}
-        />
-        <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 pt-[60px] sm:pt-[73px] md:pt-[77px]">
+        <AdminHeader />
+        <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 pt-[60px] sm:pt-[73px] md:pt-[77px] pb-6 safe-area-bottom">
           <Outlet />
         </main>
       </div>

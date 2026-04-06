@@ -12,6 +12,7 @@ import { superAdminSaasApi } from "@/shared/lib/superAdminSaasApi";
 import { formatVnd } from "@/shared/utils/formatMoney";
 import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
 import { Loader2, Receipt } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const getStr = (o: Record<string, unknown>, keys: string[]) => {
   for (const k of keys) {
@@ -37,15 +38,16 @@ const toIsoFromDateInput = (date: string, endOfDay = false) => {
 };
 
 export default function AdminPaymentsPage() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
 
   const [status, setStatus] = useState<string>("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-   const [q, setQ] = useState("");
-   const [page, setPage] = useState(1);
-   const pageSize = 10;
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const [rawOpen, setRawOpen] = useState(false);
   const [rawTitle, setRawTitle] = useState("Raw JSON");
   const [rawValue, setRawValue] = useState<unknown>(null);
@@ -235,10 +237,13 @@ export default function AdminPaymentsPage() {
                     {pagedRows.map((r, index) => (
                       <motion.tr
                         key={r.id || JSON.stringify(r.raw)}
-                        className="border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
+                        className="cursor-pointer border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.03 }}
+                        onClick={() => {
+                          if (r.id) navigate(`/admin/payments/${r.id}`);
+                        }}
                       >
                         <TableCell className="max-w-[240px] truncate">
                           <div className="font-medium">{r.storeName || "—"}</div>
@@ -259,7 +264,8 @@ export default function AdminPaymentsPage() {
                             size="sm"
                             variant="ghost"
                             className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setRawTitle(`Payment raw: ${r.id || "—"}`);
                               setRawValue(r.raw);
                               setRawOpen(true);

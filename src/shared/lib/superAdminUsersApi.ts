@@ -68,10 +68,29 @@ export const superAdminUsersApi = {
     };
   },
 
-  async create(payload: SuperAdminCreateUserDto): Promise<string> {
+  async create(payload: SuperAdminCreateUserDto): Promise<SuperAdminUserDto> {
     const res = await identityApi.post<unknown>("identity/super-admin/users", payload);
     const raw = unwrap(res.data as ApiResponse<unknown> | unknown);
-    return String(raw);
+    if (!raw || typeof raw !== "object") {
+      // Fallback: backend returned just id
+      return {
+        id: String(raw ?? ""),
+        email: payload.email,
+        isActivated: true,
+        status: "Active",
+        storeId: null,
+        roles: [payload.roleName],
+      };
+    }
+    const u = raw as Record<string, unknown>;
+    return {
+      id: String(u.id ?? ""),
+      email: String(u.email ?? payload.email),
+      isActivated: toBool(u.isActivated, true),
+      status: u.status != null ? String(u.status) : "Active",
+      storeId: u.storeId != null ? String(u.storeId) : null,
+      roles: Array.isArray(u.roles) ? u.roles.map((r) => String(r)) : [payload.roleName],
+    };
   },
 
   async update(id: string, payload: SuperAdminUpdateUserDto): Promise<void> {

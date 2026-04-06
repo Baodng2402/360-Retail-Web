@@ -9,6 +9,7 @@ import { ArrowLeft, MapPin, Phone, Store, Users, Layers } from "lucide-react";
 import toast from "react-hot-toast";
 import { storesApi } from "@/shared/lib/storesApi";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
+import { superAdminSaasApi } from "@/shared/lib/superAdminSaasApi";
 import type { Store as StoreType } from "@/shared/types/stores";
 import type { SubscriptionStatus } from "@/shared/types/subscription";
 
@@ -18,18 +19,25 @@ export default function AdminStoreDetailPage() {
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StoreType | null>(null);
   const [sub, setSub] = useState<SubscriptionStatus | null>(null);
+  const [dashStore, setDashStore] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
       try {
         setLoading(true);
-        const [s, subStatus] = await Promise.all([
+        const [s, subStatus, dashboardStores] = await Promise.all([
           storesApi.getStoreById(id),
           subscriptionApi.getStoreSubscriptionStatus(id).catch(() => null),
+          superAdminSaasApi.listDashboardStores().catch(() => []),
         ]);
         setStore(s);
         setSub(subStatus);
+        const found =
+          (dashboardStores as Record<string, unknown>[]).find(
+            (x) => String(x.id ?? "") === id,
+          ) ?? null;
+        setDashStore(found);
       } catch (err) {
         console.error("Failed to load store detail:", err);
         toast.error("Không tải được thông tin store.");
@@ -61,6 +69,16 @@ export default function AdminStoreDetailPage() {
   const createdDate = store.createdAt
     ? new Date(store.createdAt).toLocaleString("vi-VN")
     : "—";
+  const endDate =
+    ((dashStore?.subscriptionEndDate ??
+      dashStore?.subscription_end_date) as string | null | undefined) ??
+    sub?.subscriptionEndDate ??
+    (sub as unknown as { endDate?: string | null })?.endDate ??
+    sub?.trialEndDate ??
+    null;
+  const dashOwnerEmail = String(dashStore?.ownerEmail ?? dashStore?.owner_email ?? "").trim();
+  const dashPlanName = String(dashStore?.currentPlan ?? dashStore?.planName ?? dashStore?.plan_name ?? "").trim();
+  const dashSubStatus = String(dashStore?.subscriptionStatus ?? dashStore?.subscription_status ?? "").trim();
 
   return (
     <motion.div
@@ -124,6 +142,12 @@ export default function AdminStoreDetailPage() {
                   Địa chỉ & Liên hệ
                 </div>
                 <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-1">
+                  {dashOwnerEmail && (
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                      <span>Owner</span>
+                      <span className="font-mono break-all">{dashOwnerEmail}</span>
+                    </div>
+                  )}
                   <div className="flex items-start gap-2">
                     <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
                     <span>{store.address || "Chưa có địa chỉ"}</span>
@@ -155,17 +179,19 @@ export default function AdminStoreDetailPage() {
                     <>
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs text-muted-foreground">Gói hiện tại</span>
-                        <Badge variant="outline" className="text-xs">{sub.planName || "Không rõ"}</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {dashPlanName || sub.planName || "Không rõ"}
+                        </Badge>
                       </div>
                       <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                         <span>Trạng thái</span>
-                        <span className="font-medium">{sub.status}</span>
+                        <span className="font-medium">{dashSubStatus || sub.status}</span>
                       </div>
                       <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                         <span>Ngày hết hạn</span>
                         <span className="font-mono">
-                          {sub.subscriptionEndDate
-                            ? new Date(sub.subscriptionEndDate).toLocaleDateString("vi-VN")
+                          {endDate
+                            ? new Date(endDate).toLocaleDateString("vi-VN")
                             : "—"}
                         </span>
                       </div>

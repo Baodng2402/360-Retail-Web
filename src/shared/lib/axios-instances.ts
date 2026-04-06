@@ -93,23 +93,32 @@ const globalBaseURL =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") ||
   "http://localhost:5001";
 
-const getApiUrl = (envVar?: string) => {
-  const url = envVar?.replace(/\/+$/, "") || globalBaseURL;
-  return url + "/";
+/**
+ * Normalize base URL to the **Gateway root**.
+ *
+ * This project calls endpoints with explicit service prefixes in the path
+ * (e.g. `identity/...`, `saas/...`). If an env var mistakenly includes a
+ * service prefix in its baseURL (e.g. `http://localhost:5001/identity`),
+ * requests would become `.../identity/identity/...` and silently fail.
+ */
+const toGatewayRootUrl = (envVar?: string) => {
+  const raw = (envVar || globalBaseURL).trim().replace(/\/+$/, "");
+  const stripped = raw.replace(/\/(identity|saas|sales|hr|crm)$/i, "");
+  return stripped.replace(/\/+$/, "") + "/";
 };
 
 export const identityApi = createAxiosInstance(
-  getApiUrl(import.meta.env.VITE_IDENTITY_API_URL),
+  toGatewayRootUrl(import.meta.env.VITE_IDENTITY_API_URL),
 );
 export const saasApi = createAxiosInstance(
-  getApiUrl(import.meta.env.VITE_SAAS_API_URL),
+  toGatewayRootUrl(import.meta.env.VITE_SAAS_API_URL),
 );
 export const salesApi = createAxiosInstance(
-  getApiUrl(import.meta.env.VITE_SALES_API_URL),
+  toGatewayRootUrl(import.meta.env.VITE_SALES_API_URL),
 );
 export const hrApi = createAxiosInstance(
-  getApiUrl(import.meta.env.VITE_HR_API_URL),
+  toGatewayRootUrl(import.meta.env.VITE_HR_API_URL),
 );
 export const crmApi = createAxiosInstance(
-  getApiUrl(import.meta.env.VITE_CRM_API_URL),
+  toGatewayRootUrl(import.meta.env.VITE_CRM_API_URL),
 );

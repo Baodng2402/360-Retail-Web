@@ -16,7 +16,7 @@ import {
   superAdminDashboardApi,
   type SuperAdminGroupBy,
 } from "@/shared/lib/superAdminDashboardApi";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
           groupBy,
         }),
         superAdminDashboardApi.getPlanDistribution(query),
-        superAdminDashboardApi.getFunnelLandingToSignup(),
+        superAdminDashboardApi.getFunnelLandingToSignup(query),
         superAdminDashboardApi.getRegistrations(query),
       ]);
 
@@ -186,9 +186,6 @@ export default function AdminDashboardPage() {
   const revenueConfig = {
     revenue: { label: t("dashboard.revenueChart.tooltipLabel"), color: "var(--chart-1)" },
   } as const;
-  const mrrConfig = {
-    mrr: { label: "MRR (VNĐ)", color: "#a855f7" },
-  } as const;
   const registrationsConfig = {
     count: { label: t("dashboard.registrations.label"), color: "var(--chart-2)" },
   } as const;
@@ -199,9 +196,19 @@ export default function AdminDashboardPage() {
     value: { label: "Cửa hàng", color: "var(--chart-4)" },
   } as const;
 
+  const planColors = ["#FF7B21", "#19D6C8", "#0ea5e9", "#a855f7", "#22c55e", "#f59e0b"] as const;
+  const planData = useMemo(
+    () =>
+      planDistribution.map((p, i) => ({
+        ...p,
+        fill: planColors[i % planColors.length],
+      })),
+    [planDistribution],
+  );
+
   return (
     <motion.div
-      className="space-y-6"
+      className="space-y-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
@@ -295,13 +302,14 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         <motion.div
+          className="lg:col-span-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Card className="p-4 lg:col-span-2 hover:shadow-lg transition-shadow duration-300">
+          <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">
                 {t("dashboard.revenueChart.title")}
@@ -347,7 +355,7 @@ export default function AdminDashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <Card className="p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible">
+          <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible flex flex-col">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">
                 {t("dashboard.planDistribution.title")}
@@ -356,12 +364,12 @@ export default function AdminDashboardPage() {
                 {t("dashboard.planDistribution.badge")}
               </Badge>
             </div>
-            <div className="mt-3">
+            <div className="mt-3 flex-1">
               {loading && planDistribution.length === 0 ? (
                 <div className="h-[240px] flex items-center justify-center text-muted-foreground">
                   {t("dashboard.states.loading")}
                 </div>
-              ) : planDistribution.length === 0 ? (
+              ) : planData.length === 0 ? (
                 <div className="h-[240px] flex items-center justify-center text-muted-foreground">
                   {t("dashboard.planDistribution.empty")}
                 </div>
@@ -370,23 +378,30 @@ export default function AdminDashboardPage() {
                   <PieChart>
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Pie
-                      data={planDistribution}
+                      data={planData}
                       dataKey="value"
                       nameKey="name"
                       innerRadius={55}
                       outerRadius={90}
                       paddingAngle={2}
                       isAnimationActive
-                    />
+                    >
+                      {planData.map((entry) => (
+                        <Cell key={entry.name} fill={entry.fill} />
+                      ))}
+                    </Pie>
                   </PieChart>
                 </ChartContainer>
               )}
             </div>
-            {planDistribution.length > 0 && (
+            {planData.length > 0 && (
               <div className="mt-3 grid gap-2">
-                {planDistribution.slice(0, 6).map((p) => (
+                {planData.slice(0, 6).map((p) => (
                   <div key={p.name} className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{p.name}</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: p.fill }} />
+                      <span className="text-muted-foreground truncate">{p.name}</span>
+                    </div>
                     <span className="font-medium">{p.value.toLocaleString()}</span>
                   </div>
                 ))}
@@ -396,13 +411,13 @@ export default function AdminDashboardPage() {
         </motion.div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3 items-stretch">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
+          <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">
                 {t("dashboard.funnel.title")}
@@ -411,7 +426,7 @@ export default function AdminDashboardPage() {
                 {t("dashboard.funnel.badge")}
               </Badge>
             </div>
-            <div className="mt-4 grid gap-3">
+            <div className="mt-4 grid gap-3 flex-1">
               <div className="flex items-center justify-between rounded-md border p-3">
                 <span className="text-sm text-muted-foreground">
                   {t("dashboard.funnel.landing")}
@@ -443,11 +458,12 @@ export default function AdminDashboardPage() {
         </motion.div>
 
         <motion.div
+          className="lg:col-span-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <Card className="p-4 lg:col-span-2 hover:shadow-lg transition-shadow duration-300">
+          <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">
                 {t("dashboard.registrations.title")}
@@ -457,7 +473,7 @@ export default function AdminDashboardPage() {
                 {t("dashboard.registrations.badge")}
               </Badge>
             </div>
-            <div className="mt-3">
+            <div className="mt-3 flex-1">
               {loading && registrations.length === 0 ? (
                 <div className="h-[240px] flex items-center justify-center text-muted-foreground">
                   {t("dashboard.states.loading")}
@@ -479,48 +495,36 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* MRR Trend + Store Status */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3 items-stretch">
         <motion.div
+          className="lg:col-span-2 h-full"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.7 }}
         >
-          <Card className="p-4 lg:col-span-2 hover:shadow-lg transition-shadow duration-300 overflow-visible">
+          <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible flex flex-col">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold">Xu hướng MRR</h3>
+              <h3 className="text-base font-semibold">MRR (tháng hiện tại)</h3>
               <Badge variant="outline" className="border-purple-400/40 text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-300">
                 Doanh thu định kỳ
               </Badge>
             </div>
-            <div className="mt-3">
-              {loading && revenuePoints.length === 0 ? (
+            <div className="mt-3 flex-1 grid items-center">
+              {loading && !overview ? (
                 <div className="h-[240px] flex items-center justify-center text-muted-foreground">
                   {t("dashboard.states.loading")}
                 </div>
-              ) : revenuePoints.length === 0 ? (
-                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
-                  Không có dữ liệu MRR trong khoảng thời gian đã chọn.
-                </div>
               ) : (
-                <ChartContainer config={mrrConfig} className="h-[260px] w-full">
-                  <LineChart
-                    data={revenuePoints}
-                    margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
-                  >
-                    <CartesianGrid vertical={false} />
-                    <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
-                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                    <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-                    <Line
-                      type="monotone"
-                      dataKey="mrr"
-                      stroke="#a855f7"
-                      strokeWidth={2}
-                      dot={false}
-                      isAnimationActive
-                    />
-                  </LineChart>
-                </ChartContainer>
+                <div className="h-[240px] flex flex-col justify-center gap-3">
+                  <div className="text-3xl font-semibold tracking-tight">
+                    {overview ? formatVnd(overview.mrr) : "—"}
+                  </div>
+                  <div className="text-sm text-muted-foreground leading-relaxed">
+                    Backend hiện chỉ trả về <span className="font-medium text-foreground">1 giá trị MRR</span> ở endpoint{" "}
+                    <span className="font-mono text-foreground">overview</span> (tổng payment <span className="font-medium text-foreground">Completed</span> từ đầu tháng hiện tại đến nay, theo UTC).
+                    Vì chưa có MRR theo từng mốc thời gian nên frontend không thể vẽ “xu hướng” mà không bị sai lệch.
+                  </div>
+                </div>
               )}
             </div>
           </Card>
@@ -531,7 +535,7 @@ export default function AdminDashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
         >
-          <Card className="p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible">
+          <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-semibold">Trạng thái cửa hàng</h3>
               <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">

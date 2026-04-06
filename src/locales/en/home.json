@@ -4,6 +4,20 @@
     "signup": "Sign up",
     "brandAlt": "360 Retail logo",
     "brandTitle": "360 Retail"
+  },
+  "hero": {
+    "trust": {
+      "noCreditCard": "No credit card required",
+      "fiveMinSetup": "~5 min setup",
+      "support247": "24/7 support"
+    }
+  },
+  "footer": {
+    "product": "PRODUCT",
+    "company": "COMPANY",
+    "productItems": ["Features", "Pricing", "Security"],
+    "companyItems": ["About", "Blog", "Contact"],
+    "copyright": "© 2025 360 Retail. Built for shop owners, by shop owners."
   }
 }
 

@@ -30,10 +30,18 @@ export type SuperAdminPlanDistributionItem = {
   percentage?: number;
 };
 
+export type SuperAdminFunnelPoint = {
+  date: string;
+  landingPageViews: number;
+  signups: number;
+  conversionRate?: number;
+};
+
 export type SuperAdminFunnel = {
   landing: number;
   signup: number;
   conversionRate?: number;
+  points?: SuperAdminFunnelPoint[];
 };
 
 export type SuperAdminRegistrationsPoint = {
@@ -46,6 +54,18 @@ const unwrap = <T>(raw: ApiResponse<T> | T): T => {
     return (raw as ApiResponse<T>).data as T;
   }
   return raw as T;
+};
+
+const unwrapMaybeData = <T>(raw: unknown): T => {
+  const unwrapped = unwrap(raw as ApiResponse<T> | T);
+  if (
+    unwrapped &&
+    typeof unwrapped === "object" &&
+    "data" in (unwrapped as Record<string, unknown>)
+  ) {
+    return ((unwrapped as unknown) as { data: T }).data;
+  }
+  return unwrapped as T;
 };
 
 const toNum = (v: unknown, fallback = 0) => {
@@ -65,17 +85,26 @@ export const superAdminDashboardApi = {
     const res = await saasApi.get<unknown>(
       `saas/super-admin/saas/dashboard/overview${qs ? `?${qs}` : ""}`,
     );
-    const data = unwrap(
-      res.data as ApiResponse<Record<string, unknown>> | Record<string, unknown>,
-    );
+    const data = unwrapMaybeData<Record<string, unknown>>(res.data);
 
     return {
       totalRevenue: toNum(data.totalRevenue ?? data.total_revenue),
-      mrr: toNum(data.mrr ?? data.MRR),
+      // Backend: monthlyRecurringRevenue
+      mrr: toNum(
+        data.monthlyRecurringRevenue ??
+          data.monthly_recurring_revenue ??
+          data.mrr ??
+          data.MRR,
+      ),
       activeStores: toNum(data.activeStores ?? data.active_stores),
       trialStores: toNum(data.trialStores ?? data.trial_stores),
       expiredStores: toNum(data.expiredStores ?? data.expired_stores),
-      conversionRate: toNum(data.conversionRate ?? data.conversion_rate),
+      conversionRate: toNum(
+        data.trialToPaidConversionRate ??
+          data.trial_to_paid_conversion_rate ??
+          data.conversionRate ??
+          data.conversion_rate,
+      ),
     };
   },
 
@@ -92,16 +121,20 @@ export const superAdminDashboardApi = {
     const res = await saasApi.get<unknown>(
       `saas/super-admin/saas/dashboard/revenue-chart?${query.toString()}`,
     );
-    const raw = unwrap(
-      res.data as ApiResponse<Record<string, unknown>> | Record<string, unknown>,
-    );
-
-    const points = (raw.dataPoints ?? raw.points ?? raw.items) as unknown;
-    const dataPoints: SuperAdminRevenuePoint[] = Array.isArray(points)
-      ? points.map((p) => {
+    const payload = unwrapMaybeData<unknown>(res.data);
+    // Backend (documented): [{ date: "2026-01", revenue: 2500000 }]
+    // Backward-compat: { dataPoints: [...] } or { points: [...] }
+    const list =
+      Array.isArray(payload)
+        ? payload
+        : ((payload as Record<string, unknown>)?.dataPoints ??
+            (payload as Record<string, unknown>)?.points ??
+            (payload as Record<string, unknown>)?.items);
+    const dataPoints: SuperAdminRevenuePoint[] = Array.isArray(list)
+      ? (list as unknown[]).map((p) => {
           const item = p as Record<string, unknown>;
           return {
-            label: String(item.label ?? item.date ?? item.period ?? ""),
+            label: String(item.date ?? item.label ?? item.period ?? ""),
             revenue: toNum(item.revenue ?? item.totalRevenue ?? item.value),
             mrr: item.mrr != null ? toNum(item.mrr) : undefined,
           };
@@ -110,8 +143,13 @@ export const superAdminDashboardApi = {
 
     return {
       dataPoints,
-      totalRevenue: raw.totalRevenue != null ? toNum(raw.totalRevenue) : undefined,
-      groupBy: (raw.groupBy as SuperAdminGroupBy | undefined) ?? params.groupBy,
+      totalRevenue:
+        !Array.isArray(payload) && (payload as Record<string, unknown>)?.totalRevenue != null
+          ? toNum((payload as Record<string, unknown>)?.totalRevenue)
+          : undefined,
+      groupBy:
+        (!Array.isArray(payload) ? ((payload as Record<string, unknown>)?.groupBy as SuperAdminGroupBy | undefined) : undefined) ??
+        params.groupBy,
     };
   },
 
@@ -120,17 +158,18 @@ export const superAdminDashboardApi = {
     if (params?.from) query.set("from", params.from);
     if (params?.to) query.set("to", params.to);
     const qs = query.toString();
-    const res = await saasApi.get<ApiResponse<{ plans: unknown[]; totalStores?: unknown }> | { plans: unknown[]; totalStores?: unknown }>(
+    const res = await saasApi.get<unknown>(
       `saas/super-admin/saas/dashboard/plan-distribution${qs ? `?${qs}` : ""}`,
     );
-    const raw = unwrap(res.data);
+    const payload = unwrapMaybeData<unknown>(res.data);
+    // Backend (documented): [{ planName, count }]
+    // Backward-compat: { plans: [...] }
+    const items = Array.isArray(payload)
+      ? payload
+      : (payload as Record<string, unknown>)?.plans;
+    if (!Array.isArray(items)) return [];
 
-    const items = raw?.plans;
-    if (!Array.isArray(items)) {
-      return [];
-    }
-
-    return items.map((x) => {
+    return (items as unknown[]).map((x) => {
       const item = x as Record<string, unknown>;
       return {
         planName: String(item.planName ?? item.name ?? item.plan ?? ""),
@@ -140,27 +179,39 @@ export const superAdminDashboardApi = {
     });
   },
 
-  async getFunnelLandingToSignup(): Promise<SuperAdminFunnel> {
-    const res = await identityApi.get<
-      ApiResponse<{
-        landingViews: unknown;
-        signupCount: unknown;
-        conversionRate?: unknown;
-      }> | {
-        landingViews: unknown;
-        signupCount: unknown;
-        conversionRate?: unknown;
-      }
-    >(
-      "identity/super-admin/users/stats/funnel/landing-to-signup",
-    );
-    const raw = unwrap(res.data);
+  async getFunnelLandingToSignup(params?: { from?: string; to?: string }): Promise<SuperAdminFunnel> {
+    const query = new URLSearchParams();
+    if (params?.from) query.set("from", params.from);
+    if (params?.to) query.set("to", params.to);
+    const qs = query.toString();
 
-    return {
-      landing: toNum(raw.landingViews),
-      signup: toNum(raw.signupCount),
-      conversionRate: raw.conversionRate != null ? toNum(raw.conversionRate) : undefined,
-    };
+    const res = await identityApi.get<unknown>(
+      `identity/super-admin/users/stats/funnel/landing-to-signup${qs ? `?${qs}` : ""}`,
+    );
+    const payload = unwrapMaybeData<unknown>(res.data);
+    // Backend (documented): [{ date, landingPageViews, signups, conversionRate }]
+    const list = Array.isArray(payload)
+      ? (payload as unknown[])
+      : (payload as Record<string, unknown>)?.data;
+
+    const points: SuperAdminFunnelPoint[] = Array.isArray(list)
+      ? (list as unknown[]).map((x) => {
+          const item = x as Record<string, unknown>;
+          return {
+            date: String(item.date ?? ""),
+            landingPageViews: toNum(item.landingPageViews ?? item.landingViews ?? item.landing),
+            signups: toNum(item.signups ?? item.signupCount ?? item.signup),
+            conversionRate: item.conversionRate != null ? toNum(item.conversionRate) : undefined,
+          };
+        })
+      : [];
+
+    const landing = points.reduce((sum, p) => sum + (p.landingPageViews ?? 0), 0);
+    const signup = points.reduce((sum, p) => sum + (p.signups ?? 0), 0);
+    const conversionRate =
+      landing > 0 ? (signup / landing) * 100 : undefined;
+
+    return { landing, signup, conversionRate, points };
   },
 
   async getRegistrations(params?: { from?: string; to?: string }): Promise<SuperAdminRegistrationsPoint[]> {

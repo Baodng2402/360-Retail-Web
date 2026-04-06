@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { superAdminSaasApi, type SuperAdminPlan } from "@/shared/lib/superAdminSaasApi";
 import { Ban, CalendarPlus, Loader2, CreditCard } from "lucide-react";
 import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
+import { useNavigate } from "react-router-dom";
 
 const getStr = (o: Record<string, unknown>, keys: string[]) => {
   for (const k of keys) {
@@ -32,6 +33,7 @@ const getNum = (o: Record<string, unknown>, keys: string[]) => {
 };
 
 export default function AdminSubscriptionsPage() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
 
@@ -279,10 +281,13 @@ export default function AdminSubscriptionsPage() {
                     {pagedRows.map((r, index) => (
                       <motion.tr
                         key={r.id || JSON.stringify(r.raw)}
-                        className="border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
+                        className="cursor-pointer border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.03 }}
+                        onClick={() => {
+                          if (r.id) navigate(`/admin/subscriptions/${r.id}`);
+                        }}
                       >
                         <TableCell className="max-w-[240px] truncate">
                           <div className="font-medium">{r.storeName || "—"}</div>
@@ -302,7 +307,7 @@ export default function AdminSubscriptionsPage() {
                         </TableCell>
                         <TableCell>{r.daysRemaining ? r.daysRemaining.toLocaleString() : "—"}</TableCell>
                         <TableCell className="text-right">
-                          <div className="inline-flex items-center gap-1">
+                          <div className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                             <Button
                               size="sm"
                               variant="outline"

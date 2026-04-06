@@ -27,6 +27,7 @@ import SettingPage from "@/features/dashboard/pages/SettingPage";
 import CustomerPage from "@/features/dashboard/pages/CustomerPage";
 import ProductDetailPage from "@/features/dashboard/pages/ProductDetailPage";
 import StoreManagementPage from "@/features/dashboard/pages/StoreManagementPage";
+import StoreDetailPage from "@/features/dashboard/pages/StoreDetailPage";
 import ProductManagementPage from "@/features/dashboard/pages/ProductManagementPage";
 import { ProfilePage } from "@/features/dashboard/pages/ProfilePage";
 import SubscriptionPlansPage from "@/features/subscription/pages/SubscriptionPlansPage";
@@ -43,8 +44,12 @@ import AdminStoreDetailPage from "@/features/admin/pages/AdminStoreDetailPage";
 import AdminReviewsPage from "@/features/admin/pages/AdminReviewsPage";
 import AdminProfilePage from "@/features/admin/pages/AdminProfilePage";
 import AdminPlansPage from "@/features/admin/pages/AdminPlansPage";
+import AdminPlanDetailPage from "@/features/admin/pages/AdminPlanDetailPage";
 import AdminSubscriptionsPage from "@/features/admin/pages/AdminSubscriptionsPage";
+import AdminSubscriptionDetailPage from "@/features/admin/pages/AdminSubscriptionDetailPage";
 import AdminPaymentsPage from "@/features/admin/pages/AdminPaymentsPage";
+import AdminPaymentDetailPage from "@/features/admin/pages/AdminPaymentDetailPage";
+import AdminReviewDetailPage from "@/features/admin/pages/AdminReviewDetailPage";
 import EmployeeDetailPage from "@/features/dashboard/pages/EmployeeDetailPage";
 import MyTasksPage from "@/features/dashboard/pages/MyTasksPage";
 import CrmDashboardPage from "@/features/dashboard/pages/CrmDashboardPage";
@@ -68,7 +73,7 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
-      <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <div className="min-h-screen bg-background text-foreground transition-colors duration-300 safe-area-bottom">
         <Suspense fallback={<div className="p-4 text-sm">Loading...</div>}>
           <BrowserRouter>
             <SubscriptionUpgradeDialog />
@@ -129,6 +134,10 @@ function App() {
                     element={<StoreManagementPage />}
                   />
                   <Route
+                    path="/dashboard/stores/:id"
+                    element={<StoreDetailPage />}
+                  />
+                  <Route
                     path="/dashboard/products"
                     element={<ProductManagementPage />}
                   />
@@ -168,13 +177,17 @@ function App() {
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="plans" element={<AdminPlansPage />} />
+                  <Route path="plans/:id" element={<AdminPlanDetailPage />} />
                   <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
+                  <Route path="subscriptions/:id" element={<AdminSubscriptionDetailPage />} />
                   <Route path="payments" element={<AdminPaymentsPage />} />
+                  <Route path="payments/:id" element={<AdminPaymentDetailPage />} />
                   <Route path="users" element={<AdminUsersPage />} />
                   <Route path="users/:id" element={<AdminUserDetailPage />} />
                   <Route path="stores" element={<AdminStoresPage />} />
                   <Route path="stores/:id" element={<AdminStoreDetailPage />} />
                   <Route path="reviews" element={<AdminReviewsPage />} />
+                  <Route path="reviews/:id" element={<AdminReviewDetailPage />} />
                   <Route path="profile" element={<AdminProfilePage />} />
                 </Route>
               </Route>

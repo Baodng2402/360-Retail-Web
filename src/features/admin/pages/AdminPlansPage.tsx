@@ -14,9 +14,11 @@ import { superAdminSaasApi, type SuperAdminCreatePlanDto, type SuperAdminPlan, t
 import { Loader2, Plus, Trash2, Pencil, Package } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatVnd } from "@/shared/utils/formatMoney";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminPlansPage() {
   const { t } = useTranslation("admin");
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<SuperAdminPlan[]>([]);
   const [q, setQ] = useState("");
@@ -377,10 +379,11 @@ export default function AdminPlansPage() {
                     {paged.map((p, index) => (
                       <motion.tr
                         key={p.id}
-                        className="border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
+                        className="cursor-pointer border-b last:border-0 hover:bg-gradient-to-r hover:from-[#FF7B21]/5 hover:to-transparent transition-all duration-200"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.03 }}
+                        onClick={() => navigate(`/admin/plans/${p.id}`)}
                       >
                         <TableCell className="max-w-[260px] truncate">
                           <div className="font-medium">{p.planName}</div>
@@ -395,7 +398,7 @@ export default function AdminPlansPage() {
                         </TableCell>
                         <TableCell>{(p.activeSubscriptions ?? 0).toLocaleString()}</TableCell>
                         <TableCell className="text-right">
-                          <div className="inline-flex items-center gap-1">
+                          <div className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                             <Button
                               size="icon"
                               variant="ghost"

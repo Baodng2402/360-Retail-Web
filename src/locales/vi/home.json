@@ -4,6 +4,20 @@
     "signup": "Đăng ký",
     "brandAlt": "Logo 360 Retail",
     "brandTitle": "360 Retail"
+  },
+  "hero": {
+    "trust": {
+      "noCreditCard": "Không cần thẻ thanh toán",
+      "fiveMinSetup": "Thiết lập ~5 phút",
+      "support247": "Hỗ trợ 24/7"
+    }
+  },
+  "footer": {
+    "product": "SẢN PHẨM",
+    "company": "CÔNG TY",
+    "productItems": ["Tính năng", "Bảng giá", "Bảo mật"],
+    "companyItems": ["Giới thiệu", "Blog", "Liên hệ"],
+    "copyright": "© 2025 360 Retail. Xây dựng cho chủ shop, bởi đội ngũ thấu hiểu vận hành."
   }
 }
 
