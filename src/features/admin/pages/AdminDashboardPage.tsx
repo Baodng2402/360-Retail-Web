@@ -302,21 +302,21 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3 items-stretch">
         <motion.div
           className="lg:col-span-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
+          <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">
                 {t("dashboard.revenueChart.title")}
               </h3>
               <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">{groupBy}</Badge>
             </div>
-            <div className="mt-3">
+            <div className="mt-3 flex-1">
               {loading && revenuePoints.length === 0 ? (
                 <div className="h-[240px] flex items-center justify-center text-muted-foreground">
                   {t("dashboard.states.loading")}
