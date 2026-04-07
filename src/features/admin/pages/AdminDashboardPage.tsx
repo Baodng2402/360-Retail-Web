@@ -384,15 +384,19 @@ export default function AdminDashboardPage() {
             transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
             whileHover={{ scale: 1.02, y: -2 }}
           >
-            <Card className="p-4 hover:shadow-lg transition-all duration-300">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-xs text-muted-foreground">{k.title}</div>
+            <Card className="p-4 h-full hover:shadow-lg transition-all duration-300">
+              <div className="h-full flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs text-muted-foreground leading-snug line-clamp-2 min-h-[2.25rem]">
+                    {k.title}
+                  </div>
                   <div className="mt-1 text-lg font-semibold truncate">
                     {loading && !overview ? <Skeleton className="h-6 w-24" /> : k.value}
                   </div>
                 </div>
-                <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${k.tone} flex items-center justify-center text-white shadow-lg`}>
+                <div
+                  className={`h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br ${k.tone} flex items-center justify-center text-white shadow-lg`}
+                >
                   <k.icon className="h-5 w-5" />
                 </div>
               </div>
