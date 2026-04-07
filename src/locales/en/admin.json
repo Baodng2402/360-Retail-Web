@@ -86,15 +86,32 @@
     },
     "kpis": {
       "totalRevenue": "Total revenue",
-      "mrr": "MRR",
+      "mrr": "Revenue this month",
       "activeStores": "Active stores",
       "trialStores": "Trial stores",
       "expiredStores": "Expired stores",
       "conversionRate": "Conversion rate"
     },
+    "revenueTrend": {
+      "title": {
+        "day": "Revenue trend by day",
+        "week": "Revenue trend by week",
+        "month": "Revenue trend by month"
+      }
+    },
     "revenueChart": {
       "title": "Revenue chart",
       "tooltipLabel": "Revenue"
+    },
+    "monthlyRevenueCard": {
+      "title": "Revenue this month",
+      "badge": "This month",
+      "description": "This value reflects total revenue (Completed payments) within the selected time range.",
+      "rangeLabel": "Selected range:",
+      "latestMonthLabel": "Latest month",
+      "momUp": "up",
+      "momDown": "down",
+      "momSuffix": "vs previous month"
     },
     "planDistribution": {
       "title": "Plan distribution",

@@ -405,7 +405,9 @@ export default function AdminDashboardPage() {
           <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <h3 className="text-base font-semibold">Xu hướng doanh thu định kỳ (MRR)</h3>
+                <h3 className="text-base font-semibold">
+                  {t(`dashboard.revenueTrend.title.${groupBy}`)}
+                </h3>
                 {groupBy === "month" && twelveMonthGrowthPercent != null && (
                   <div className="text-xs text-muted-foreground">
                     {twelveMonthGrowthPercent >= 0 ? "Tăng trưởng 12 tháng" : "Suy giảm 12 tháng"}:{" "}
@@ -613,9 +615,14 @@ export default function AdminDashboardPage() {
         >
           <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible flex flex-col">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold">Doanh thu định kỳ (MRR)</h3>
-              <Badge variant="outline" className="border-purple-400/40 text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-300">
-                MRR
+              <h3 className="text-base font-semibold">
+                {t("dashboard.monthlyRevenueCard.title")}
+              </h3>
+              <Badge
+                variant="outline"
+                className="border-purple-400/40 text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-300"
+              >
+                {t("dashboard.monthlyRevenueCard.badge")}
               </Badge>
             </div>
             <div className="mt-3 flex-1 grid items-center">
@@ -629,18 +636,17 @@ export default function AdminDashboardPage() {
                     {overview ? formatVnd(overview.mrr) : "—"}
                   </div>
                   <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
-                    <p>Giá trị này phản ánh tổng doanh thu định kỳ đã ghi nhận trong khoảng thời gian đang xem.</p>
+                    <p>{t("dashboard.monthlyRevenueCard.description")}</p>
                     <p>
-                      Khoảng thời gian đang xem:{" "}
+                      {t("dashboard.monthlyRevenueCard.rangeLabel")}{" "}
                       <span className="font-medium text-foreground">
                         {formatDateFilter(fromDate)} → {formatDateFilter(toDate)}
                       </span>
                     </p>
                     {groupBy === "month" && latestRevenuePoint && (
                       <p>
-                        Tháng gần nhất (
-                        {formatRevenueLabel(latestRevenuePoint.label, "month")}
-                        ):{" "}
+                        {t("dashboard.monthlyRevenueCard.latestMonthLabel")} (
+                        {formatRevenueLabel(latestRevenuePoint.label, "month")}):{" "}
                         <span className="font-medium text-foreground">
                           {formatVnd(latestRevenuePoint.revenue)}
                         </span>
@@ -649,11 +655,12 @@ export default function AdminDashboardPage() {
                             {" "}
                             •{" "}
                             <span className="font-medium text-foreground">
-                              {trendPercent >= 0 ? "tăng" : "giảm"}{" "}
-                              {trendPercent >= 0 ? "+" : ""}
-                              {trendPercent.toFixed(1)}%
+                              {trendPercent >= 0
+                                ? t("dashboard.monthlyRevenueCard.momUp")
+                                : t("dashboard.monthlyRevenueCard.momDown")}{" "}
+                              {trendPercent >= 0 ? "+" : ""}{trendPercent.toFixed(1)}%
                             </span>{" "}
-                            so với tháng trước
+                            {t("dashboard.monthlyRevenueCard.momSuffix")}
                           </>
                         )}
                       </p>

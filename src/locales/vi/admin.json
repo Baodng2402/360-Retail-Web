@@ -86,15 +86,32 @@
     },
     "kpis": {
       "totalRevenue": "Tổng doanh thu",
-      "mrr": "MRR",
+      "mrr": "Doanh thu tháng này",
       "activeStores": "Active Stores",
       "trialStores": "Trial Stores",
       "expiredStores": "Expired Stores",
       "conversionRate": "Tỉ lệ chuyển đổi"
     },
+    "revenueTrend": {
+      "title": {
+        "day": "Xu hướng doanh thu theo ngày",
+        "week": "Xu hướng doanh thu theo tuần",
+        "month": "Xu hướng doanh thu theo tháng"
+      }
+    },
     "revenueChart": {
       "title": "Biểu đồ doanh thu",
       "tooltipLabel": "Doanh thu"
+    },
+    "monthlyRevenueCard": {
+      "title": "Doanh thu tháng này",
+      "badge": "Tháng này",
+      "description": "Giá trị này phản ánh tổng doanh thu (payments Completed) trong khoảng thời gian bạn đang xem.",
+      "rangeLabel": "Khoảng thời gian đang xem:",
+      "latestMonthLabel": "Tháng gần nhất",
+      "momUp": "tăng",
+      "momDown": "giảm",
+      "momSuffix": "so với tháng trước"
     },
     "planDistribution": {
       "title": "Phân bổ gói",
