@@ -476,7 +476,7 @@ export default function AdminPlansPage() {
           <DialogHeader>
             <DialogTitle>{editing ? "Cập nhật Plan" : "Tạo Plan mới"}</DialogTitle>
             <DialogDescription>
-              Endpoint: <span className="font-mono text-xs">/saas/super-admin/saas/plans</span>
+              Cập nhật thông tin gói và cấu hình tính năng.
             </DialogDescription>
           </DialogHeader>
 
@@ -596,8 +596,7 @@ export default function AdminPlansPage() {
                 </div>
               </div>
               <div className="text-[11px] text-muted-foreground">
-                Các trường khác không hiển thị ở đây (nếu có trong JSON cũ) vẫn được giữ nguyên
-                khi lưu để đảm bảo tương thích backend.
+                Các trường cấu hình nâng cao (nếu có trong dữ liệu hiện tại) vẫn được giữ nguyên khi lưu.
               </div>
             </div>
           </div>

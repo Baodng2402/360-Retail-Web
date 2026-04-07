@@ -229,9 +229,8 @@ export default function AdminStoreDetailPage() {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Danh sách nhân viên theo từng store hiện chưa được expose qua API cho SuperAdmin.
-              Khi backend bổ sung endpoint, màn hình này có thể mở rộng để hiển thị đầy đủ nhân viên
-              và role chi tiết.
+              Khu vực này tập trung tóm tắt thông tin nhân sự và quyền truy cập ở cấp cửa hàng để
+              hỗ trợ kiểm tra nhanh trong quá trình vận hành.
             </p>
           </Card>
         </motion.div>

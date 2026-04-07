@@ -222,13 +222,7 @@ export default function AdminSubscriptionDetailPage() {
             </div>
           </div>
 
-          <div className="relative mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span>
-              Endpoint:{" "}
-              <span className="font-mono">
-                /saas/super-admin/saas/dashboard/subscriptions
-              </span>
-            </span>
+          <div className="relative mt-4 flex flex-wrap items-center justify-end gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-2" onClick={() => void load()} disabled={acting}>
                 <RefreshCcw className="h-4 w-4" />
@@ -243,12 +237,19 @@ export default function AdminSubscriptionDetailPage() {
         </Card>
 
         <Card className="p-5 space-y-3 hover:shadow-lg transition-shadow duration-300">
-          <div className="text-sm font-semibold">Notes</div>
+          <div className="text-sm font-semibold">Tóm tắt subscription</div>
           <div className="text-xs text-muted-foreground space-y-2">
             <div>
-              Do backend hiện **chưa public** endpoint GET subscription by id trong tài liệu, trang
-              detail này lấy dữ liệu từ danh sách dashboard subscriptions và thao tác cancel/extend
-              đúng theo API đã công bố.
+              Trạng thái hiện tại: <span className="font-medium text-foreground">{view.status}</span>
+            </div>
+            <div>
+              Kỳ sử dụng:{" "}
+              <span className="font-medium text-foreground">
+                {view.startDate} → {view.endDate}
+              </span>
+            </div>
+            <div>
+              Còn lại: <span className="font-medium text-foreground">{view.daysRemaining || 0}</span> ngày
             </div>
           </div>
         </Card>

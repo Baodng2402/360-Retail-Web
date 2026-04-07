@@ -40,6 +40,38 @@ const normalizeConversionRate = (v: number) => {
   return v;
 };
 
+const formatDateFilter = (value: string) => {
+  if (!value) return "—";
+  // Input from <input type="date" /> is "YYYY-MM-DD"
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [yyyy, mm, dd] = value.split("-");
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = String(d.getFullYear());
+  return `${dd}/${mm}/${yyyy}`;
+};
+
+const formatRevenueLabel = (label: string, groupBy: SuperAdminGroupBy) => {
+  if (!label) return label;
+  if (groupBy === "month" && /^\d{4}-\d{2}$/.test(label)) {
+    const [year, month] = label.split("-");
+    return `T${Number(month)}/${year}`;
+  }
+  if (groupBy === "day" && /^\d{4}-\d{2}-\d{2}$/.test(label)) {
+    const [, month, day] = label.split("-");
+    return `${day}/${month}`;
+  }
+  if (groupBy === "week" && /^\d{4}-W\d{1,2}$/.test(label)) {
+    const [year, week] = label.split("-W");
+    return `Tuần ${Number(week)}/${year}`;
+  }
+  return label;
+};
+
 export default function AdminDashboardPage() {
   const { t } = useTranslation("admin");
   const [fromDate, setFromDate] = useState("");
@@ -65,11 +97,21 @@ export default function AdminDashboardPage() {
   >([]);
   const [registrations, setRegistrations] = useState<{ label: string; count: number }[]>([]);
 
+  const todayYmd = useMemo(() => {
+    const now = new Date();
+    return now.toISOString().slice(0, 10);
+  }, []);
+
+  const isFutureDate = (value: string) => {
+    if (!value) return false;
+    return value > todayYmd;
+  };
+
   useEffect(() => {
-    // Default last 30 days
+    // Default last 12 months (best for MRR trend)
     const now = new Date();
     const from = new Date(now);
-    from.setDate(now.getDate() - 30);
+    from.setFullYear(now.getFullYear() - 1);
     const toYmd = now.toISOString().slice(0, 10);
     const fromYmd = from.toISOString().slice(0, 10);
     setFromDate(fromYmd);
@@ -197,14 +239,33 @@ export default function AdminDashboardPage() {
   } as const;
 
   const planColors = ["#FF7B21", "#19D6C8", "#0ea5e9", "#a855f7", "#22c55e", "#f59e0b"] as const;
-  const planData = useMemo(
-    () =>
-      planDistribution.map((p, i) => ({
-        ...p,
-        fill: planColors[i % planColors.length],
-      })),
-    [planDistribution],
-  );
+  const planData = planDistribution.map((p, i) => ({
+    ...p,
+    fill: planColors[i % planColors.length],
+  }));
+
+  const latestRevenuePoint = revenuePoints[revenuePoints.length - 1];
+  const previousRevenuePoint =
+    revenuePoints.length > 1 ? revenuePoints[revenuePoints.length - 2] : undefined;
+  const trendPercent =
+    latestRevenuePoint && previousRevenuePoint && previousRevenuePoint.revenue > 0
+      ? ((latestRevenuePoint.revenue - previousRevenuePoint.revenue) / previousRevenuePoint.revenue) * 100
+      : null;
+
+  const last12MonthsPoints = useMemo(() => {
+    if (groupBy !== "month") return [];
+    return revenuePoints.slice(-12);
+  }, [groupBy, revenuePoints]);
+
+  const twelveMonthGrowthPercent = useMemo(() => {
+    if (groupBy !== "month") return null;
+    const pts = last12MonthsPoints;
+    if (pts.length < 2) return null;
+    const first = pts[0]?.revenue ?? 0;
+    const last = pts[pts.length - 1]?.revenue ?? 0;
+    if (first <= 0) return null;
+    return ((last - first) / first) * 100;
+  }, [groupBy, last12MonthsPoints]);
 
   return (
     <motion.div
@@ -239,7 +300,20 @@ export default function AdminDashboardPage() {
                 <Input
                   type="date"
                   value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    if (isFutureDate(next)) {
+                      toast.error("Ngày bắt đầu không được vượt quá hôm nay.");
+                      return;
+                    }
+                    if (toDate && next > toDate) {
+                      toast.error("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
+                      return;
+                    }
+                    setFromDate(next);
+                    setOverview(null);
+                    setRevenuePoints([]);
+                  }}
                   className="bg-background/80 backdrop-blur-sm"
                 />
               </div>
@@ -250,7 +324,20 @@ export default function AdminDashboardPage() {
                 <Input
                   type="date"
                   value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    if (isFutureDate(next)) {
+                      toast.error("Ngày kết thúc không được vượt quá hôm nay.");
+                      return;
+                    }
+                    if (fromDate && next < fromDate) {
+                      toast.error("Ngày kết thúc không được nhỏ hơn ngày bắt đầu.");
+                      return;
+                    }
+                    setToDate(next);
+                    setOverview(null);
+                    setRevenuePoints([]);
+                  }}
                   className="bg-background/80 backdrop-blur-sm"
                 />
               </div>
@@ -258,7 +345,13 @@ export default function AdminDashboardPage() {
                 <div className="text-xs text-muted-foreground">
                   {t("dashboard.filters.groupBy")}
                 </div>
-                <Select value={groupBy} onValueChange={(v) => setGroupBy(v as SuperAdminGroupBy)}>
+                <Select
+                  value={groupBy}
+                  onValueChange={(v) => {
+                    setGroupBy(v as SuperAdminGroupBy);
+                    setRevenuePoints([]);
+                  }}
+                >
                   <SelectTrigger className="bg-background/80 backdrop-blur-sm">
                     <SelectValue placeholder="Chọn..." />
                   </SelectTrigger>
@@ -311,10 +404,21 @@ export default function AdminDashboardPage() {
         >
           <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold">
-                {t("dashboard.revenueChart.title")}
-              </h3>
-              <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">{groupBy}</Badge>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold">Xu hướng MRR</h3>
+                {groupBy === "month" && twelveMonthGrowthPercent != null && (
+                  <div className="text-xs text-muted-foreground">
+                    Tăng trưởng 12 tháng:{" "}
+                    <span className="font-medium text-foreground">
+                      {twelveMonthGrowthPercent >= 0 ? "+" : ""}
+                      {twelveMonthGrowthPercent.toFixed(1)}%
+                    </span>
+                  </div>
+                )}
+              </div>
+              <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
+                {t(`dashboard.filters.groupByOptions.${groupBy}`)}
+              </Badge>
             </div>
             <div className="mt-3 flex-1">
               {loading && revenuePoints.length === 0 ? (
@@ -332,7 +436,13 @@ export default function AdminDashboardPage() {
                     margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
                   >
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+                    <XAxis
+                      dataKey="label"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      tickFormatter={(value: string) => formatRevenueLabel(value, groupBy)}
+                    />
                     <YAxis tickLine={false} axisLine={false} tickMargin={8} />
                     <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
                     <Line
@@ -494,7 +604,6 @@ export default function AdminDashboardPage() {
         </motion.div>
       </div>
 
-      {/* MRR Trend + Store Status */}
       <div className="grid gap-4 lg:grid-cols-3 items-stretch">
         <motion.div
           className="lg:col-span-2 h-full"
@@ -504,9 +613,9 @@ export default function AdminDashboardPage() {
         >
           <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible flex flex-col">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold">MRR (tháng hiện tại)</h3>
+              <h3 className="text-base font-semibold">Doanh thu định kỳ (MRR)</h3>
               <Badge variant="outline" className="border-purple-400/40 text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-300">
-                Doanh thu định kỳ
+                MRR
               </Badge>
             </div>
             <div className="mt-3 flex-1 grid items-center">
@@ -519,10 +628,35 @@ export default function AdminDashboardPage() {
                   <div className="text-3xl font-semibold tracking-tight">
                     {overview ? formatVnd(overview.mrr) : "—"}
                   </div>
-                  <div className="text-sm text-muted-foreground leading-relaxed">
-                    Backend hiện chỉ trả về <span className="font-medium text-foreground">1 giá trị MRR</span> ở endpoint{" "}
-                    <span className="font-mono text-foreground">overview</span> (tổng payment <span className="font-medium text-foreground">Completed</span> từ đầu tháng hiện tại đến nay, theo UTC).
-                    Vì chưa có MRR theo từng mốc thời gian nên frontend không thể vẽ “xu hướng” mà không bị sai lệch.
+                  <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+                    <p>Giá trị này phản ánh tổng doanh thu định kỳ đã ghi nhận trong khoảng thời gian đang xem.</p>
+                    <p>
+                      Khoảng thời gian đang xem:{" "}
+                      <span className="font-medium text-foreground">
+                        {formatDateFilter(fromDate)} → {formatDateFilter(toDate)}
+                      </span>
+                    </p>
+                    {groupBy === "month" && latestRevenuePoint && (
+                      <p>
+                        Tháng gần nhất (
+                        {formatRevenueLabel(latestRevenuePoint.label, "month")}
+                        ):{" "}
+                        <span className="font-medium text-foreground">
+                          {formatVnd(latestRevenuePoint.revenue)}
+                        </span>
+                        {trendPercent != null && (
+                          <>
+                            {" "}
+                            • biến động{" "}
+                            <span className="font-medium text-foreground">
+                              {trendPercent >= 0 ? "+" : ""}
+                              {trendPercent.toFixed(1)}%
+                            </span>{" "}
+                            so với tháng trước
+                          </>
+                        )}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

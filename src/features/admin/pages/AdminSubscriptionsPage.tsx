@@ -410,7 +410,7 @@ export default function AdminSubscriptionsPage() {
               )}
             </DialogTitle>
             <DialogDescription>
-              Endpoint: <span className="font-mono text-xs">/saas/super-admin/saas/dashboard/subscriptions/{"{id}"}/{actionType}</span>
+              Xác nhận thao tác cho subscription đã chọn.
             </DialogDescription>
           </DialogHeader>
 

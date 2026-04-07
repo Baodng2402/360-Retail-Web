@@ -178,10 +178,7 @@ export default function AdminPlanDetailPage() {
               </div>
             </div>
 
-            <div className="relative mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span>
-                Endpoint: <span className="font-mono">/saas/super-admin/saas/plans/{plan.id}</span>
-              </span>
+            <div className="relative mt-4 flex flex-wrap items-center justify-end gap-2 text-xs text-muted-foreground">
               <Button
                 variant="outline"
                 size="sm"

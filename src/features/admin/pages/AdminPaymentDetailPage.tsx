@@ -194,7 +194,7 @@ export default function AdminPaymentDetailPage() {
 
             <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-2">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Live status (GET /saas/payments/{`{id}`}/status)
+                Trạng thái thanh toán hiện tại
               </div>
               {status ? (
                 <div className="space-y-2 text-xs text-muted-foreground">
@@ -230,11 +230,7 @@ export default function AdminPaymentDetailPage() {
             </div>
           </div>
 
-          <div className="relative mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span>
-              Dashboard list endpoint:{" "}
-              <span className="font-mono">/saas/super-admin/saas/dashboard/payments</span>
-            </span>
+          <div className="relative mt-4 flex flex-wrap items-center justify-end gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-2" onClick={() => void load()}>
                 <RefreshCcw className="h-4 w-4" />
@@ -249,11 +245,16 @@ export default function AdminPaymentDetailPage() {
         </Card>
 
         <Card className="p-5 space-y-3 hover:shadow-lg transition-shadow duration-300">
-          <div className="text-sm font-semibold">Notes</div>
+          <div className="text-sm font-semibold">Tóm tắt giao dịch</div>
           <div className="text-xs text-muted-foreground space-y-2">
             <div>
-              Trang này ưu tiên **status realtime** từ endpoint payment-status, còn thông tin store/plan/amount
-              lấy từ dashboard list nếu có.
+              Trạng thái: <span className="font-medium text-foreground">{view.status}</span>
+            </div>
+            <div>
+              Giá trị: <span className="font-medium text-foreground">{formatVnd(view.amount ?? 0)}</span>
+            </div>
+            <div>
+              Nhà cung cấp: <span className="font-medium text-foreground">{view.provider}</span>
             </div>
           </div>
         </Card>

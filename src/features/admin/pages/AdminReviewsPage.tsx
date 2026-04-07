@@ -139,9 +139,6 @@ export default function AdminReviewsPage() {
                   {t("sidebar.nav.reviews.subLabel")}
                 </span>
               </div>
-              <div className="text-xs text-muted-foreground">
-                Endpoint: <span className="font-mono">/saas/plan-reviews/admin</span>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -192,7 +189,7 @@ export default function AdminReviewsPage() {
               Review dashboard
             </h3>
             <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-              /saas/plan-reviews/admin/dashboard
+              Tổng quan đánh giá
             </Badge>
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
