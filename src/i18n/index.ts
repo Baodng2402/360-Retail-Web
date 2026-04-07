@@ -17,6 +17,8 @@ if (!i18next.isInitialized) {
     .use(resourcesBackend)
     .init({
       lng: DEFAULT_LANGUAGE,
+      supportedLngs: ["vi", "en"],
+      load: "languageOnly",
       fallbackLng: FALLBACK_LANGUAGE,
       defaultNS: DEFAULT_NAMESPACE,
       ns: NAMESPACES,
