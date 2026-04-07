@@ -405,10 +405,10 @@ export default function AdminDashboardPage() {
           <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <h3 className="text-base font-semibold">Xu hướng MRR</h3>
+                <h3 className="text-base font-semibold">Xu hướng doanh thu định kỳ (MRR)</h3>
                 {groupBy === "month" && twelveMonthGrowthPercent != null && (
                   <div className="text-xs text-muted-foreground">
-                    Tăng trưởng 12 tháng:{" "}
+                    {twelveMonthGrowthPercent >= 0 ? "Tăng trưởng 12 tháng" : "Suy giảm 12 tháng"}:{" "}
                     <span className="font-medium text-foreground">
                       {twelveMonthGrowthPercent >= 0 ? "+" : ""}
                       {twelveMonthGrowthPercent.toFixed(1)}%
@@ -647,8 +647,9 @@ export default function AdminDashboardPage() {
                         {trendPercent != null && (
                           <>
                             {" "}
-                            • biến động{" "}
+                            •{" "}
                             <span className="font-medium text-foreground">
+                              {trendPercent >= 0 ? "tăng" : "giảm"}{" "}
                               {trendPercent >= 0 ? "+" : ""}
                               {trendPercent.toFixed(1)}%
                             </span>{" "}
