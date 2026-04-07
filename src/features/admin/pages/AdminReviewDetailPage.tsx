@@ -156,10 +156,7 @@ export default function AdminReviewDetailPage() {
             </div>
           </div>
 
-          <div className="relative mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span>
-              Endpoint: <span className="font-mono">/saas/plan-reviews/admin/{review.id}</span>
-            </span>
+          <div className="relative mt-4 flex flex-wrap items-center justify-end gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-2" onClick={() => void load()} disabled={deleting}>
                 <RefreshCcw className="h-4 w-4" />

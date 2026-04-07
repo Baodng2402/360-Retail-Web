@@ -210,10 +210,8 @@ export default function AdminUserDetailPage() {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Khi backend bổ sung nhiều metadata hơn (số lần đăng nhập, thời gian tạo, lịch sử
-              subscription theo user, v.v.) card này có thể mở rộng để hiển thị thêm insight về
-              tài khoản. Hiện tại trang này tập trung giúp bạn xem nhanh roles, trạng thái kích
-              hoạt và store/gói dịch vụ mà user đang gắn với.
+              Xem nhanh vai trò, trạng thái kích hoạt và thông tin store/gói dịch vụ đang gắn với
+              tài khoản để hỗ trợ quản trị người dùng hiệu quả.
             </p>
           </Card>
         </motion.div>

@@ -687,7 +687,7 @@ const SettingPage = () => {
                       </h4>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Lưu ý: Cài đặt thông báo sẽ được lưu trên thiết bị (chưa đồng bộ backend).
+                      Tùy chọn thông báo được áp dụng ngay để bạn cá nhân hóa trải nghiệm sử dụng.
                     </p>
                     <div className="flex items-center justify-between py-2">
                       <div className="space-y-0.5">
