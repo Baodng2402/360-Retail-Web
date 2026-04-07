@@ -167,7 +167,7 @@ const addOpacityToColor = (color: string | undefined, opacity: number): string =
 };
 
 export default function ProductManagementPage() {
-  const { t } = useTranslation("product");
+  const { t, i18n } = useTranslation(["product", "common"]);
   const { currentStore } = useStoreStore();
   const storeId = currentStore?.id;
   const navigate = useNavigate();
@@ -334,10 +334,10 @@ export default function ProductManagementPage() {
         /store|store_id|cửa hàng|StoreIdRequired/i.test(msg);
       if (isStoreError) {
         toast.error(
-          "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+          t("product:errors.storeRequired"),
         );
       } else {
-        toast.error("Không thể tải danh mục. Vui lòng thử lại.");
+        toast.error(t("product:errors.loadCategoriesFailed"));
       }
     } finally {
       setCategoriesLoading(false);
@@ -413,14 +413,12 @@ export default function ProductManagementPage() {
         /danh mục|category|không thuộc cửa hàng|chưa có danh mục/i.test(msg);
       if (isStoreError) {
         toast.error(
-          "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+          t("product:errors.storeRequired"),
         );
       } else if (isCategoryError) {
-        toast.error(
-          "Vui lòng tạo ít nhất một danh mục trước khi thêm sản phẩm.",
-        );
+        toast.error(t("product:addModal.toast.needCategoryFirst"));
       } else {
-        toast.error("Không thể tải sản phẩm. Vui lòng thử lại.");
+        toast.error(t("product:errors.loadProductsFailed"));
       }
     } finally {
       setLoading(false);
@@ -507,22 +505,22 @@ export default function ProductManagementPage() {
 
   const handleSaveProduct = async () => {
     if (!storeId) {
-      toast.error("Vui lòng chọn cửa hàng.");
+      toast.error(t("product:errors.selectStoreFirst"));
       return;
     }
 
     if (!productForm.productName.trim()) {
-      toast.error("Vui lòng nhập tên sản phẩm.");
+      toast.error(t("product:addModal.toast.productNameRequired"));
       return;
     }
 
     if (!productForm.categoryId) {
-      toast.error("Vui lòng chọn danh mục.");
+      toast.error(t("product:addModal.toast.categoryRequired"));
       return;
     }
 
     if (!productForm.price || parseFloat(productForm.price) <= 0) {
-      toast.error("Vui lòng nhập giá bán hợp lệ.");
+      toast.error(t("product:addModal.toast.priceInvalid"));
       return;
     }
 
@@ -531,12 +529,12 @@ export default function ProductManagementPage() {
         productForm.stockQuantity === "" ||
         parseInt(productForm.stockQuantity || "0", 10) < 0
       ) {
-        toast.error("Vui lòng nhập số lượng tồn kho hợp lệ.");
+        toast.error(t("product:addModal.toast.stockInvalid"));
         return;
       }
     } else {
       if (productForm.variants.length === 0) {
-        toast.error("Vui lòng thêm ít nhất 1 biến thể.");
+        toast.error(t("product:productForm.toast.variantRequired"));
         return;
       }
 
@@ -551,7 +549,7 @@ export default function ProductManagementPage() {
 
       if (hasInvalidVariant) {
         toast.error(
-          "Vui lòng nhập đầy đủ thông tin biến thể (Mã biến thể, tồn kho, giá > 0).",
+          t("product:productForm.toast.variantInvalid"),
         );
         return;
       }
@@ -601,7 +599,7 @@ export default function ProductManagementPage() {
               ? JSON.stringify(variantsPayload)
               : undefined,
         });
-        toast.success("Cập nhật sản phẩm thành công!");
+        toast.success(t("product:toast.updateProductSuccess"));
       } else {
         await productsApi.createProduct({
           productName: productForm.productName,
@@ -618,7 +616,7 @@ export default function ProductManagementPage() {
           hasVariants: productForm.hasVariants,
           variants: variantsPayload,
         });
-        toast.success("Thêm sản phẩm thành công!");
+        toast.success(t("product:toast.createProductSuccess"));
       }
 
       setProductDialogOpen(false);
@@ -630,7 +628,7 @@ export default function ProductManagementPage() {
         (error as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
         (error instanceof Error ? error.message : undefined) ||
-        "Có lỗi xảy ra. Vui lòng thử lại.";
+        t("common:states.error");
       toast.error(message);
     } finally {
       setProductFormLoading(false);
@@ -651,8 +649,8 @@ export default function ProductManagementPage() {
     setToggleProductDialogOpen(false);
 
     const confirmMessage = newActiveState
-      ? `Đang kích hoạt sản phẩm "${productToToggle.productName}"...`
-      : `Đang tạm ngừng sản phẩm "${productToToggle.productName}"...`;
+      ? t("product:toast.activatingProduct", { name: productToToggle.productName })
+      : t("product:toast.deactivatingProduct", { name: productToToggle.productName });
 
     const loadingToast = toast.loading(confirmMessage);
 
@@ -683,8 +681,8 @@ export default function ProductManagementPage() {
       toast.dismiss(loadingToast);
       toast.success(
         newActiveState
-          ? `Sản phẩm "${productToToggle.productName}" đã được kích hoạt`
-          : `Sản phẩm "${productToToggle.productName}" đã được tạm ngừng hoạt động`,
+          ? t("product:toast.productActivated", { name: productToToggle.productName })
+          : t("product:toast.productDeactivated", { name: productToToggle.productName }),
       );
 
       await loadProducts();
@@ -694,7 +692,7 @@ export default function ProductManagementPage() {
         (error as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
         (error instanceof Error ? error.message : undefined) ||
-        "Không thể cập nhật trạng thái sản phẩm";
+        t("product:errors.updateProductStatusFailed");
 
       toast.dismiss(loadingToast);
       toast.error(errorMessage);
@@ -734,12 +732,12 @@ export default function ProductManagementPage() {
 
   const handleSaveCategory = async () => {
     if (!storeId) {
-      toast.error("Vui lòng chọn cửa hàng.");
+      toast.error(t("product:errors.selectStoreFirst"));
       return;
     }
 
     if (!categoryForm.categoryName.trim()) {
-      toast.error("Vui lòng nhập tên danh mục.");
+      toast.error(t("product:categoryForm.toast.nameRequired"));
       return;
     }
 
@@ -754,14 +752,14 @@ export default function ProductManagementPage() {
           isActive: categoryForm.isActive,
         });
         setStoredCategoryColor(editingCategory.id, categoryForm.color);
-        toast.success("Cập nhật danh mục thành công!");
+        toast.success(t("product:toast.updateCategorySuccess"));
       } else {
         const created = await categoriesApi.createCategory({
           categoryName: categoryForm.categoryName,
           parentId: categoryForm.parentId || undefined,
         });
         setStoredCategoryColor(created.id, categoryForm.color);
-        toast.success("Thêm danh mục thành công!");
+        toast.success(t("product:toast.createCategorySuccess"));
       }
 
       setCategoryDialogOpen(false);
@@ -773,7 +771,7 @@ export default function ProductManagementPage() {
         (error as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
         (error instanceof Error ? error.message : undefined) ||
-        "Có lỗi xảy ra. Vui lòng thử lại.";
+        t("common:states.error");
       toast.error(message);
     } finally {
       setCategoryFormLoading(false);
@@ -794,8 +792,8 @@ export default function ProductManagementPage() {
     setToggleCategoryDialogOpen(false);
 
     const confirmMessage = newActiveState
-      ? `Đang kích hoạt danh mục "${categoryToToggle.categoryName}"...`
-      : `Đang tạm ngừng danh mục "${categoryToToggle.categoryName}"...`;
+      ? t("product:toast.activatingCategory", { name: categoryToToggle.categoryName })
+      : t("product:toast.deactivatingCategory", { name: categoryToToggle.categoryName });
 
     const loadingToast = toast.loading(confirmMessage);
 
@@ -821,8 +819,8 @@ export default function ProductManagementPage() {
       toast.dismiss(loadingToast);
       toast.success(
         newActiveState
-          ? `Danh mục "${categoryToToggle.categoryName}" đã được kích hoạt`
-          : `Danh mục "${categoryToToggle.categoryName}" đã được tạm ngừng hoạt động`,
+          ? t("product:toast.categoryActivated", { name: categoryToToggle.categoryName })
+          : t("product:toast.categoryDeactivated", { name: categoryToToggle.categoryName }),
       );
 
       await loadCategories();
@@ -832,7 +830,7 @@ export default function ProductManagementPage() {
         (error as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
         (error instanceof Error ? error.message : undefined) ||
-        "Không thể cập nhật trạng thái danh mục";
+        t("product:errors.updateCategoryStatusFailed");
 
       toast.dismiss(loadingToast);
       toast.error(errorMessage);
@@ -851,13 +849,13 @@ export default function ProductManagementPage() {
   const getStatusBadge = (status?: ExtendedProduct["status"]) => {
     switch (status) {
       case "in-stock":
-        return <Badge className="bg-green-500">Còn hàng</Badge>;
+        return <Badge className="bg-green-500">{t("product:status.inStock")}</Badge>;
       case "low-stock":
-        return <Badge className="bg-yellow-500">Sắp hết</Badge>;
+        return <Badge className="bg-yellow-500">{t("product:status.lowStock")}</Badge>;
       case "out-of-stock":
-        return <Badge className="bg-red-500">Hết hàng</Badge>;
+        return <Badge className="bg-red-500">{t("product:status.outOfStock")}</Badge>;
       default:
-        return <Badge>Còn hàng</Badge>;
+        return <Badge>{t("product:status.inStock")}</Badge>;
     }
   };
 
@@ -953,7 +951,7 @@ export default function ProductManagementPage() {
             <div>
               <p className="text-sm text-muted-foreground mb-1">{t("stats.inventoryValue")}</p>
               <h3 className="text-2xl font-bold text-foreground">
-                {totalValue.toLocaleString("vi-VN")}đ
+                {totalValue.toLocaleString(i18n.language)}đ
               </h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shadow-inner">
@@ -1049,10 +1047,10 @@ export default function ProductManagementPage() {
                   onValueChange={setSelectedCategory}
                 >
                   <SelectTrigger className="w-full bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Tất cả danh mục" />
+                    <SelectValue placeholder={t("product:filters.category.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tất cả danh mục</SelectItem>
+                    <SelectItem value="all">{t("product:filters.category.all")}</SelectItem>
                     {categories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
                         {cat.categoryName}
@@ -1063,13 +1061,13 @@ export default function ProductManagementPage() {
 
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                   <SelectTrigger className="w-full bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Tất cả trạng thái" />
+                    <SelectValue placeholder={t("product:filters.stockStatus.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                    <SelectItem value="in-stock">Còn hàng</SelectItem>
-                    <SelectItem value="low-stock">Sắp hết</SelectItem>
-                    <SelectItem value="out-of-stock">Hết hàng</SelectItem>
+                    <SelectItem value="all">{t("product:filters.stockStatus.all")}</SelectItem>
+                    <SelectItem value="in-stock">{t("product:status.inStock")}</SelectItem>
+                    <SelectItem value="low-stock">{t("product:status.lowStock")}</SelectItem>
+                    <SelectItem value="out-of-stock">{t("product:status.outOfStock")}</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -1078,12 +1076,12 @@ export default function ProductManagementPage() {
                   onValueChange={setSelectedActiveStatus}
                 >
                   <SelectTrigger className="w-full bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Tất cả hoạt động" />
+                    <SelectValue placeholder={t("product:filters.active.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="active">Hoạt động</SelectItem>
-                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                    <SelectItem value="all">{t("product:filters.active.all")}</SelectItem>
+                    <SelectItem value="active">{t("product:active.active")}</SelectItem>
+                    <SelectItem value="inactive">{t("product:active.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -1092,8 +1090,8 @@ export default function ProductManagementPage() {
                   className="gap-2 whitespace-nowrap bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Thêm sản phẩm</span>
-                  <span className="sm:hidden">Thêm</span>
+                  <span className="hidden sm:inline">{t("product:actions.addProduct")}</span>
+                  <span className="sm:hidden">{t("common:actions.create")}</span>
                 </Button>
               </div>
             </div>
@@ -1108,34 +1106,34 @@ export default function ProductManagementPage() {
                   <TableHeader>
                     <TableRow className="bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5 hover:from-[#FF7B21]/10 hover:to-[#19D6C8]/10">
                       <TableHead className="w-[52px] text-center font-semibold px-2">
-                        Mã
+                        {t("product:table.code")}
                       </TableHead>
                       <TableHead className="w-[76px] text-center font-semibold px-2">
-                        Ảnh
+                        {t("product:table.image")}
                       </TableHead>
                       <TableHead className="w-[18%] font-semibold px-2">
-                        Sản phẩm
+                        {t("product:table.product")}
                       </TableHead>
                       <TableHead className="w-[11%] font-semibold px-2">
-                        Danh mục
+                        {t("product:table.category")}
                       </TableHead>
                       <TableHead className="w-[9%] text-right font-semibold px-2">
-                        Giá bán
+                        {t("product:table.price")}
                       </TableHead>
                       <TableHead className="w-[8%] text-right font-semibold px-2">
-                        Giá vốn
+                        {t("product:table.costPrice")}
                       </TableHead>
                       <TableHead className="w-[9%] text-right font-semibold px-2">
-                        Lợi nhuận
+                        {t("product:table.profit")}
                       </TableHead>
                       <TableHead className="w-[7%] text-center font-semibold px-2">
-                        Tồn kho
+                        {t("product:table.stock")}
                       </TableHead>
                       <TableHead className="w-[12%] text-center font-semibold px-2">
-                        Trạng thái
+                        {t("product:table.status")}
                       </TableHead>
                       <TableHead className="w-[160px] text-right font-semibold px-2">
-                        Thao tác
+                        {t("product:table.actions")}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1148,7 +1146,7 @@ export default function ProductManagementPage() {
                         >
                           <div className="flex flex-col items-center gap-2">
                             <Package className="h-12 w-12 text-muted-foreground/50" />
-                            <p>Không tìm thấy sản phẩm</p>
+                            <p>{t("product:states.noProducts")}</p>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -1175,7 +1173,7 @@ export default function ProductManagementPage() {
                                     setBarCodeToView(product.barCode || "");
                                     setBarCodeViewDialogOpen(true);
                                   }}
-                                  title="Xem mã sản phẩm"
+                                  title={t("product:actions.viewBarcode")}
                                 >
                                   <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                                 </Button>
@@ -1231,18 +1229,18 @@ export default function ProductManagementPage() {
                               )}
                             </TableCell>
                             <TableCell className="text-right px-2 py-2 align-middle tabular-nums">
-                              {product.price.toLocaleString("vi-VN")}đ
+                              {product.price.toLocaleString(i18n.language)}đ
                             </TableCell>
                             <TableCell className="text-right px-2 py-2 align-middle tabular-nums text-muted-foreground">
                               {product.costPrice
-                                ? `${product.costPrice.toLocaleString("vi-VN")}đ`
+                                ? `${product.costPrice.toLocaleString(i18n.language)}đ`
                                 : "-"}
                             </TableCell>
                             <TableCell className="text-right px-2 py-2 align-middle tabular-nums">
                               {product.costPrice ? (
                                 <div className="flex flex-col items-end gap-0.5">
                                   <span className="font-medium text-green-600 dark:text-green-400">
-                                    +{profit.toLocaleString("vi-VN")}đ
+                                    +{profit.toLocaleString(i18n.language)}đ
                                   </span>
                                   <span className="text-xs text-muted-foreground">
                                     {margin}%
@@ -1264,7 +1262,7 @@ export default function ProductManagementPage() {
                                   product.variants &&
                                   product.variants.length > 0 && (
                                     <span className="text-xs text-muted-foreground">
-                                      ({product.variants.length} biến thể)
+                                      {t("product:productForm.variantCount", { count: product.variants.length })}
                                     </span>
                                   )}
                               </div>
@@ -1285,12 +1283,12 @@ export default function ProductManagementPage() {
                                   {product.isActive ? (
                                     <>
                                       <CheckCircle className="h-3 w-3 mr-1" />
-                                      Hoạt động
+                                      {t("product:active.active")}
                                     </>
                                   ) : (
                                     <>
                                       <XCircle className="h-3 w-3 mr-1" />
-                                      Ngừng
+                                      {t("product:active.inactiveShort")}
                                     </>
                                   )}
                                 </Badge>
@@ -1309,8 +1307,8 @@ export default function ProductManagementPage() {
                                 <div className="flex items-center gap-1.5 shrink-0">
                                   <span className="text-[11px] text-muted-foreground whitespace-nowrap hidden sm:inline">
                                     {product.isActive
-                                      ? "Hoạt động"
-                                      : "Tạm dừng"}
+                                      ? t("product:active.active")
+                                      : t("product:active.paused")}
                                   </span>
                                   <Switch
                                     checked={product.isActive}
@@ -1342,10 +1340,10 @@ export default function ProductManagementPage() {
               <div>
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <FolderTree className="h-5 w-5 text-[#FF7B21]" />
-                  Danh mục sản phẩm
+                  {t("product:categories.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Quản lý danh mục và nhóm sản phẩm
+                  {t("product:categories.subtitle")}
                 </p>
               </div>
               <div className="flex gap-3 items-center">
@@ -1354,12 +1352,12 @@ export default function ProductManagementPage() {
                   onValueChange={setSelectedCategoryActiveStatus}
                 >
                   <SelectTrigger className="w-full lg:w-[200px] bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Tất cả hoạt động" />
+                    <SelectValue placeholder={t("product:filters.active.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="active">Hoạt động</SelectItem>
-                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                    <SelectItem value="all">{t("product:filters.active.all")}</SelectItem>
+                    <SelectItem value="active">{t("product:active.active")}</SelectItem>
+                    <SelectItem value="inactive">{t("product:active.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
@@ -1367,7 +1365,7 @@ export default function ProductManagementPage() {
                   className="gap-2 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <Plus className="h-4 w-4" />
-                  Thêm danh mục
+                  {t("product:actions.addCategory")}
                 </Button>
               </div>
             </div>
@@ -1380,17 +1378,17 @@ export default function ProductManagementPage() {
               <div className="flex flex-col items-center justify-center py-12 text-center rounded-2xl border-2 border-dashed border-[#FF7B21]/20 bg-[#FF7B21]/5">
                 <Package className="h-16 w-16 text-[#FF7B21]/50 mb-4" />
                 <p className="text-lg font-medium text-foreground mb-2">
-                  Chưa có danh mục nào
+                  {t("product:categories.states.emptyTitle")}
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Tạo danh mục đầu tiên để bắt đầu quản lý sản phẩm
+                  {t("product:categories.states.emptySubtitle")}
                 </p>
                 <Button
                   onClick={handleAddCategory}
                   className="gap-2 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white shadow-lg shadow-[#FF7B21]/20 transition-all duration-300"
                 >
                   <Plus className="h-4 w-4" />
-                  Thêm danh mục đầu tiên
+                  {t("product:actions.addFirstCategory")}
                 </Button>
               </div>
             ) : (
@@ -1430,7 +1428,7 @@ export default function ProductManagementPage() {
                         </Button>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {category.isActive ? "Hoạt động" : "Tạm dừng"}
+                            {category.isActive ? t("product:active.active") : t("product:active.paused")}
                           </span>
                           <Switch
                             checked={category.isActive}
@@ -1449,14 +1447,14 @@ export default function ProductManagementPage() {
                     </h4>
                     {category.parentName && (
                       <p className="text-sm text-muted-foreground mb-3">
-                        Danh mục cha: {category.parentName}
+                        {t("product:categories.parentLabel")}: {category.parentName}
                       </p>
                     )}
 
                     <div className="flex items-center justify-between pt-3 border-t">
                       <div className="flex flex-col gap-1">
                         <span className="text-sm text-muted-foreground">
-                          Sản phẩm
+                          {t("product:categories.productLabel")}
                         </span>
                         <Badge
                           variant={category.isActive ? "default" : "secondary"}
@@ -1467,12 +1465,12 @@ export default function ProductManagementPage() {
                           {category.isActive ? (
                             <>
                               <CheckCircle className="h-3 w-3 mr-1" />
-                              Hoạt động
+                              {t("product:active.active")}
                             </>
                           ) : (
                             <>
                               <XCircle className="h-3 w-3 mr-1" />
-                              Ngừng
+                              {t("product:active.inactiveShort")}
                             </>
                           )}
                         </Badge>
@@ -1498,16 +1496,16 @@ export default function ProductManagementPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>
-              {editingProduct ? "Sửa sản phẩm" : "Thêm sản phẩm"}
+              {editingProduct ? t("product:productForm.titleEdit") : t("product:productForm.titleCreate")}
             </DialogTitle>
             <DialogDescription>
-              Điền thông tin sản phẩm bên dưới
+              {t("product:productForm.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4 min-w-0">
             <div className="space-y-2 min-w-0">
-              <Label htmlFor="product-name">Tên sản phẩm *</Label>
+              <Label htmlFor="product-name">{t("product:addModal.fields.productName")} *</Label>
               <Input
                 id="product-name"
                 value={productForm.productName}
@@ -1517,26 +1515,26 @@ export default function ProductManagementPage() {
                     productName: e.target.value,
                   })
                 }
-                placeholder="Ví dụ: Coca Cola 330ml"
+                placeholder={t("product:productForm.placeholders.productName")}
                 className="w-full"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4 min-w-0">
               <div className="space-y-2 min-w-0">
-                <Label htmlFor="product-sku">Mã sản phẩm</Label>
+                <Label htmlFor="product-sku">{t("product:addModal.fields.barcode")}</Label>
                 <Input
                   id="product-sku"
                   value={productForm.barCode}
                   onChange={(e) =>
                     setProductForm({ ...productForm, barCode: e.target.value })
                   }
-                  placeholder="Ví dụ: BEV-001"
+                  placeholder={t("product:productForm.placeholders.barcode")}
                   className="w-full"
                 />
               </div>
               <div className="space-y-2 min-w-0">
-                <Label htmlFor="product-category">Danh mục *</Label>
+                <Label htmlFor="product-category">{t("product:addModal.fields.category")} *</Label>
                 <Select
                   value={productForm.categoryId}
                   onValueChange={(value) =>
@@ -1544,7 +1542,7 @@ export default function ProductManagementPage() {
                   }
                 >
                   <SelectTrigger id="product-category" className="w-full">
-                    <SelectValue placeholder="Chọn danh mục" />
+                    <SelectValue placeholder={t("product:addModal.placeholders.category")} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -1559,7 +1557,7 @@ export default function ProductManagementPage() {
 
             <div className="grid grid-cols-2 gap-4 min-w-0">
               <div className="space-y-2 min-w-0">
-                <Label htmlFor="product-price">Giá bán (VND) *</Label>
+                <Label htmlFor="product-price">{t("product:productForm.fields.price")} *</Label>
                 <Input
                   id="product-price"
                   type="number"
@@ -1567,12 +1565,12 @@ export default function ProductManagementPage() {
                   onChange={(e) =>
                     setProductForm({ ...productForm, price: e.target.value })
                   }
-                  placeholder="15000"
+                  placeholder={t("product:productForm.placeholders.price")}
                   className="w-full"
                 />
               </div>
               <div className="space-y-2 min-w-0">
-                <Label htmlFor="product-cost">Giá vốn (VND)</Label>
+                <Label htmlFor="product-cost">{t("product:productForm.fields.costPrice")}</Label>
                 <Input
                   id="product-cost"
                   type="number"
@@ -1583,7 +1581,7 @@ export default function ProductManagementPage() {
                       costPrice: e.target.value,
                     })
                   }
-                  placeholder="12000"
+                  placeholder={t("product:productForm.placeholders.costPrice")}
                   className="w-full"
                 />
               </div>
@@ -1591,8 +1589,8 @@ export default function ProductManagementPage() {
 
             <div className="space-y-2 min-w-0">
               <Label htmlFor="product-stock">
-                Tồn kho{" "}
-                {productForm.hasVariants ? "(nếu không có biến thể)" : "*"}
+                {t("product:productForm.fields.stock")}{" "}
+                {productForm.hasVariants ? `(${t("product:productForm.stockWhenNoVariants")})` : "*"}
               </Label>
               <Input
                 id="product-stock"
@@ -1604,13 +1602,13 @@ export default function ProductManagementPage() {
                     stockQuantity: e.target.value,
                   })
                 }
-                placeholder="100"
+                placeholder={t("product:productForm.placeholders.stock")}
                 disabled={productForm.hasVariants}
                 className="w-full"
               />
               {productForm.hasVariants && (
                 <p className="text-xs text-muted-foreground">
-                  Sản phẩm có biến thể sẽ quản lý tồn kho ở từng biến thể riêng
+                  {t("product:productForm.variantStockHint")}
                 </p>
               )}
             </div>
@@ -1618,10 +1616,9 @@ export default function ProductManagementPage() {
             <div className="space-y-3 min-w-0 rounded-md border border-dashed p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <Label>Biến thể</Label>
+                  <Label>{t("product:productForm.fields.variants")}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Bật nếu sản phẩm có size/màu. Tồn kho sẽ trừ theo từng biến
-                    thể.
+                    {t("product:productForm.variantHint")}
                   </p>
                 </div>
                 <Switch
@@ -1636,19 +1633,19 @@ export default function ProductManagementPage() {
                     <div className="min-w-[860px] space-y-2">
                       <div className="grid grid-cols-12 gap-3 px-3">
                         <div className="col-span-4 text-xs font-medium text-muted-foreground">
-                          Mã biến thể *
+                          {t("product:productForm.variantColumns.sku")} *
                         </div>
                         <div className="col-span-2 text-xs font-medium text-muted-foreground">
-                          Kích thước
+                          {t("product:productForm.variantColumns.size")}
                         </div>
                         <div className="col-span-2 text-xs font-medium text-muted-foreground">
-                          Màu sắc
+                          {t("product:productForm.variantColumns.color")}
                         </div>
                         <div className="col-span-2 text-xs font-medium text-muted-foreground">
-                          Giá bán (tùy chỉnh)
+                          {t("product:productForm.variantColumns.priceOverride")}
                         </div>
                         <div className="col-span-2 text-xs font-medium text-muted-foreground">
-                          Tồn kho *
+                          {t("product:productForm.variantColumns.stock")} *
                         </div>
                       </div>
 
@@ -1664,7 +1661,8 @@ export default function ProductManagementPage() {
                               onChange={(e) =>
                                 updateVariantField(index, "sku", e.target.value)
                               }
-                              placeholder="VD: POLO-M-DEN"
+                              placeholder={t("product:productForm.placeholders.variantSku")}
+                              
                             />
                           </div>
                           <div className="col-span-2 min-w-0">
@@ -1678,7 +1676,7 @@ export default function ProductManagementPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="VD: M"
+                              placeholder={t("product:productForm.placeholders.variantSize")}
                             />
                           </div>
                           <div className="col-span-2 min-w-0">
@@ -1692,7 +1690,7 @@ export default function ProductManagementPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="VD: Đen"
+                              placeholder={t("product:productForm.placeholders.variantColor")}
                             />
                           </div>
                           <div className="col-span-2 min-w-0">
@@ -1707,7 +1705,7 @@ export default function ProductManagementPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="VD: 350000"
+                              placeholder={t("product:productForm.placeholders.variantPriceOverride")}
                             />
                           </div>
                           <div className="col-span-2 min-w-0 flex items-center gap-2">
@@ -1722,7 +1720,7 @@ export default function ProductManagementPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="VD: 20"
+                              placeholder={t("product:productForm.placeholders.variantStock")}
                             />
                             <Button
                               type="button"
@@ -1730,7 +1728,7 @@ export default function ProductManagementPage() {
                               size="icon"
                               className="shrink-0"
                               onClick={() => removeVariantRow(index)}
-                              title={`Xoá biến thể #${index + 1}`}
+                              title={t("product:productForm.actions.removeVariant", { index: index + 1 })}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -1747,14 +1745,14 @@ export default function ProductManagementPage() {
                     onClick={addVariantRow}
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    Thêm biến thể
+                    {t("product:productForm.actions.addVariant")}
                   </Button>
                 </div>
               )}
             </div>
 
             <div className="space-y-2 min-w-0">
-              <Label htmlFor="product-description">Mô tả</Label>
+              <Label htmlFor="product-description">{t("product:productForm.fields.description")}</Label>
               <Textarea
                 id="product-description"
                 value={productForm.description}
@@ -1764,14 +1762,14 @@ export default function ProductManagementPage() {
                     description: e.target.value,
                   })
                 }
-                placeholder="Mô tả sản phẩm..."
+                placeholder={t("product:productForm.placeholders.description")}
                 rows={3}
                 className="w-full resize-none"
               />
             </div>
 
             <div className="space-y-2 min-w-0">
-              <Label htmlFor="product-image">Hình ảnh</Label>
+              <Label htmlFor="product-image">{t("product:productForm.fields.image")}</Label>
               <Input
                 id="product-image"
                 type="file"
@@ -1809,7 +1807,7 @@ export default function ProductManagementPage() {
                 <Card className="p-4 bg-muted/50">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
-                      Lợi nhuận:
+                      {t("product:productForm.profitLabel")}:
                     </span>
                     <div className="text-right">
                       <div className="font-semibold text-green-600 dark:text-green-400">
@@ -1817,7 +1815,7 @@ export default function ProductManagementPage() {
                         {(
                           parseFloat(productForm.price) -
                           parseFloat(productForm.costPrice)
-                        ).toLocaleString("vi-VN")}
+                        ).toLocaleString(i18n.language)}
                         đ
                       </div>
                       <div className="text-xs text-muted-foreground">
@@ -1836,7 +1834,7 @@ export default function ProductManagementPage() {
 
             {editingProduct && (
               <div className="space-y-2 min-w-0">
-                <Label htmlFor="product-status">Trạng thái</Label>
+                <Label htmlFor="product-status">{t("product:productForm.fields.status")}</Label>
                 <Select
                   value={productForm.isActive ? "active" : "inactive"}
                   onValueChange={(value) =>
@@ -1850,8 +1848,8 @@ export default function ProductManagementPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Hoạt động</SelectItem>
-                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                    <SelectItem value="active">{t("product:active.active")}</SelectItem>
+                    <SelectItem value="inactive">{t("product:active.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1864,13 +1862,13 @@ export default function ProductManagementPage() {
               onClick={() => setProductDialogOpen(false)}
               disabled={productFormLoading}
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <Button onClick={handleSaveProduct} disabled={productFormLoading}>
               {productFormLoading && (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               )}
-              {editingProduct ? "Cập nhật" : "Thêm"}
+              {editingProduct ? t("common:actions.saveChanges") : t("common:actions.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1880,16 +1878,16 @@ export default function ProductManagementPage() {
         <DialogContent className="max-w-md overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? "Sửa danh mục" : "Thêm danh mục"}
+              {editingCategory ? t("product:categoryForm.titleEdit") : t("product:categoryForm.titleCreate")}
             </DialogTitle>
             <DialogDescription>
-              Điền thông tin danh mục bên dưới
+              {t("product:categoryForm.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4 min-w-0">
             <div className="space-y-2 min-w-0">
-              <Label htmlFor="category-name">Tên danh mục *</Label>
+              <Label htmlFor="category-name">{t("product:categoryForm.fields.name")} *</Label>
               <Input
                 id="category-name"
                 value={categoryForm.categoryName}
@@ -1899,13 +1897,13 @@ export default function ProductManagementPage() {
                     categoryName: e.target.value,
                   })
                 }
-                placeholder="Ví dụ: Đồ uống"
+                placeholder={t("product:categoryForm.placeholders.name")}
                 className="w-full"
               />
             </div>
 
             <div className="space-y-2 min-w-0">
-              <Label htmlFor="category-parent">Danh mục cha</Label>
+              <Label htmlFor="category-parent">{t("product:categoryForm.fields.parent")}</Label>
               <Select
                 value={categoryForm.parentId || "none"}
                 onValueChange={(value) =>
@@ -1916,10 +1914,10 @@ export default function ProductManagementPage() {
                 }
               >
                 <SelectTrigger id="category-parent" className="w-full">
-                  <SelectValue placeholder="Không có (danh mục gốc)" />
+                  <SelectValue placeholder={t("product:categoryForm.placeholders.parent")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Không có (danh mục gốc)</SelectItem>
+                  <SelectItem value="none">{t("product:categoryForm.noneParent")}</SelectItem>
                   {categories
                     .filter(
                       (cat) =>
@@ -1935,7 +1933,7 @@ export default function ProductManagementPage() {
             </div>
 
             <div className="space-y-2 min-w-0">
-              <Label htmlFor="category-color">Màu sắc</Label>
+              <Label htmlFor="category-color">{t("product:categoryForm.fields.color")}</Label>
               <div className="flex gap-2 min-w-0">
                 <Input
                   id="category-color"
@@ -1951,7 +1949,7 @@ export default function ProductManagementPage() {
                   onChange={(e) =>
                     setCategoryForm({ ...categoryForm, color: e.target.value })
                   }
-                  placeholder="HSL color"
+                  placeholder={t("product:categoryForm.placeholders.color")}
                   className="flex-1 min-w-0"
                 />
               </div>
@@ -1976,7 +1974,7 @@ export default function ProductManagementPage() {
                 </div>
                 <div>
                   <div className="font-medium">
-                    {categoryForm.categoryName || "Tên danh mục"}
+                    {categoryForm.categoryName || t("product:categoryForm.nameFallback")}
                   </div>
                 </div>
               </div>
@@ -1984,7 +1982,7 @@ export default function ProductManagementPage() {
 
             {editingCategory && (
               <div className="space-y-2 min-w-0">
-                <Label htmlFor="category-status">Trạng thái</Label>
+                <Label htmlFor="category-status">{t("product:categoryForm.fields.status")}</Label>
                 <Select
                   value={categoryForm.isActive ? "active" : "inactive"}
                   onValueChange={(value) =>
@@ -1998,8 +1996,8 @@ export default function ProductManagementPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Hoạt động</SelectItem>
-                    <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                    <SelectItem value="active">{t("product:active.active")}</SelectItem>
+                    <SelectItem value="inactive">{t("product:active.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -2012,13 +2010,13 @@ export default function ProductManagementPage() {
               onClick={() => setCategoryDialogOpen(false)}
               disabled={categoryFormLoading}
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <Button onClick={handleSaveCategory} disabled={categoryFormLoading}>
               {categoryFormLoading && (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               )}
-              {editingCategory ? "Cập nhật" : "Thêm"}
+              {editingCategory ? t("common:actions.saveChanges") : t("common:actions.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -2030,14 +2028,14 @@ export default function ProductManagementPage() {
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Mã sản phẩm</DialogTitle>
-            <DialogDescription>Mã sản phẩm của bạn</DialogDescription>
+            <DialogTitle>{t("product:barcodeDialog.title")}</DialogTitle>
+            <DialogDescription>{t("product:barcodeDialog.description")}</DialogDescription>
           </DialogHeader>
 
           <div className="py-4">
             <div className="p-4 bg-muted rounded-lg">
               <code className="text-sm font-mono break-all select-all text-foreground">
-                {barCodeToView || "Không có mã"}
+                {barCodeToView || t("product:barcodeDialog.empty")}
               </code>
             </div>
           </div>
@@ -2046,14 +2044,14 @@ export default function ProductManagementPage() {
             <Button
               onClick={() => {
                 navigator.clipboard.writeText(barCodeToView);
-                toast.success("Đã sao chép mã sản phẩm!");
+                toast.success(t("product:barcodeDialog.toast.copied"));
               }}
               variant="outline"
             >
-              Sao chép
+              {t("common:actions.copyJson")}
             </Button>
             <Button onClick={() => setBarCodeViewDialogOpen(false)}>
-              Đóng
+              {t("common:actions.close")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -2067,21 +2065,17 @@ export default function ProductManagementPage() {
           <DialogHeader>
             <DialogTitle>
               {productToToggle?.isActive
-                ? "Tạm ngừng hoạt động sản phẩm"
-                : "Kích hoạt sản phẩm"}
+                ? t("product:toggleProductDialog.titleDeactivate")
+                : t("product:toggleProductDialog.titleActivate")}
             </DialogTitle>
             <DialogDescription>
               {productToToggle?.isActive ? (
                 <>
-                  Bạn có chắc chắn muốn tạm ngừng hoạt động sản phẩm{" "}
-                  <strong>"{productToToggle?.productName}"</strong>? Sản phẩm sẽ
-                  không thể tiếp tục hoạt động sau khi được tạm ngừng.
+                  {t("product:toggleProductDialog.descriptionDeactivate", { name: productToToggle?.productName })}
                 </>
               ) : (
                 <>
-                  Bạn có chắc chắn muốn kích hoạt sản phẩm{" "}
-                  <strong>"{productToToggle?.productName}"</strong>? Sản phẩm sẽ
-                  được kích hoạt và có thể tiếp tục hoạt động.
+                  {t("product:toggleProductDialog.descriptionActivate", { name: productToToggle?.productName })}
                 </>
               )}
             </DialogDescription>
@@ -2091,10 +2085,10 @@ export default function ProductManagementPage() {
               variant="outline"
               onClick={() => setToggleProductDialogOpen(false)}
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <Button onClick={confirmToggleProductActive}>
-              {productToToggle?.isActive ? "Tạm ngừng" : "Kích hoạt"}
+              {productToToggle?.isActive ? t("product:toggle.deactivate") : t("product:toggle.activate")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -2110,27 +2104,23 @@ export default function ProductManagementPage() {
               {categoryToToggle?.isActive ? (
                 <>
                   <span className="w-3 h-3 rounded-full bg-yellow-500" />
-                  Tạm ngừng hoạt động danh mục
+                  {t("product:toggleCategoryDialog.titleDeactivate")}
                 </>
               ) : (
                 <>
                   <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                  Kích hoạt danh mục
+                  {t("product:toggleCategoryDialog.titleActivate")}
                 </>
               )}
             </DialogTitle>
             <DialogDescription>
               {categoryToToggle?.isActive ? (
                 <>
-                  Bạn có chắc chắn muốn tạm ngừng hoạt động danh mục{" "}
-                  <strong>"{categoryToToggle?.categoryName}"</strong>? Danh mục
-                  sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.
+                  {t("product:toggleCategoryDialog.descriptionDeactivate", { name: categoryToToggle?.categoryName })}
                 </>
               ) : (
                 <>
-                  Bạn có chắc chắn muốn kích hoạt danh mục{" "}
-                  <strong>"{categoryToToggle?.categoryName}"</strong>? Danh mục
-                  sẽ được kích hoạt và có thể tiếp tục hoạt động.
+                  {t("product:toggleCategoryDialog.descriptionActivate", { name: categoryToToggle?.categoryName })}
                 </>
               )}
             </DialogDescription>
@@ -2140,13 +2130,13 @@ export default function ProductManagementPage() {
               variant="outline"
               onClick={() => setToggleCategoryDialogOpen(false)}
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <Button
               onClick={confirmToggleCategoryActive}
               className={categoryToToggle?.isActive ? "bg-yellow-500 hover:bg-yellow-600" : "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:opacity-90"}
             >
-              {categoryToToggle?.isActive ? "Tạm ngừng" : "Kích hoạt"}
+              {categoryToToggle?.isActive ? t("product:toggle.deactivate") : t("product:toggle.activate")}
             </Button>
           </DialogFooter>
         </DialogContent>

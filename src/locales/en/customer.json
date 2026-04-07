@@ -32,13 +32,50 @@
   "insights": {
     "title": "Loyalty & Feedback",
     "subtitle": "Points balance and customer feedback.",
-    "selectCustomerHint": "Select a customer from the list to view details."
+    "selectCustomerHint": "Select a customer from the list to view details.",
+    "selectCustomerSubHint": "Click a customer on the left to see details"
+  },
+  "stats": {
+    "totalCustomers": "Total customers",
+    "totalRevenue": "Total revenue",
+    "vipCustomers": "VIP customers"
+  },
+  "list": {
+    "count": "{{count, number}} customer(s)"
+  },
+  "tabs": {
+    "info": "Info",
+    "loyalty": "Loyalty",
+    "feedback": "Feedback"
+  },
+  "detail": {
+    "title": "Details",
+    "cards": {
+      "totalOrders": "Total orders",
+      "totalSpend": "Total spend"
+    },
+    "fields": {
+      "fullName": "Full name",
+      "phone": "Phone number",
+      "email": "Email",
+      "joinedAt": "Joined at",
+      "status": "Status"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "misc": {
+    "dash": "-"
   },
   "loyalty": {
     "totalPointsLabel": "Total points",
     "totalPointsValue": "{{points, number}} pts",
     "rankHint": "A higher tier unlocks better perks. Configure loyalty rules in Loyalty Rules.",
     "empty": "This customer has no loyalty data yet.",
+    "loading": "Loading loyalty data...",
+    "unavailable": "The \"Loyalty points\" feature isn't available on your current plan.",
     "recentTransactions": {
       "title": "Recent point transactions",
       "latest": "Latest",
@@ -82,6 +119,40 @@
     "loadCustomersFailed": "Unable to load customers.",
     "saveCustomerFailed": "Unable to save customer. Please try again.",
     "deleteCustomerFailed": "Unable to delete customer. Please try again."
+  }
+  ,
+  "portal": {
+    "states": {
+      "noData": "No data"
+    },
+    "dashboard": {
+      "title": "Your orders",
+      "subtitle": "Review your order history and processing status."
+    },
+    "loyalty": {
+      "title": "Loyalty points",
+      "points": "{{points, number}} points",
+      "recent": {
+        "title": "Recent point transactions",
+        "fallback": "Point transaction"
+      }
+    },
+    "orders": {
+      "loading": "Loading orders...",
+      "empty": "You don't have any orders yet.",
+      "statusLabel": "Status",
+      "viewDetail": "Details"
+    },
+    "orderDetail": {
+      "loading": "Loading order...",
+      "notFound": "Order not found.",
+      "title": "Order {{code}}",
+      "createdAt": "Created at",
+      "statusLabel": "Status",
+      "itemsTitle": "Items",
+      "noItems": "No item information.",
+      "totalLabel": "Total"
+    }
   }
 }
 

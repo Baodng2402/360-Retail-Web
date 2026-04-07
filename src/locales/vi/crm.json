@@ -98,6 +98,7 @@
       "search": "Tìm",
       "selectedCustomerToast": "Đã chọn khách hàng: {{name}}",
       "ratingLabel": "Đánh giá",
+      "ratingOption": "{{stars}} sao",
       "contentLabel": "Nội dung (tùy chọn)",
       "contentPlaceholder": "Khách nhận xét...",
       "cancel": "Hủy",

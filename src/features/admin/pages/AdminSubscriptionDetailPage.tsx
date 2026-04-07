@@ -12,6 +12,7 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
 import { superAdminSaasApi } from "@/shared/lib/superAdminSaasApi";
 import { formatVnd } from "@/shared/utils/formatMoney";
+import { useTranslation } from "react-i18next";
 
 const getStr = (o: Record<string, unknown>, keys: string[]) => {
   for (const k of keys) {
@@ -31,6 +32,7 @@ const getNum = (o: Record<string, unknown>, keys: string[]) => {
 };
 
 export default function AdminSubscriptionDetailPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -47,14 +49,14 @@ export default function AdminSubscriptionDetailPage() {
       const list = await superAdminSaasApi.listDashboardSubscriptions();
       const found = list.find((x) => getStr(x, ["id", "subscriptionId", "subscription_id"]) === id) ?? null;
       if (!found) {
-        toast.error("Không tìm thấy subscription trong danh sách hiện tại.");
+        toast.error(t("admin:subscriptionDetail.toast.notFoundInList"));
         navigate("/admin/subscriptions", { replace: true });
         return;
       }
       setRaw(found);
     } catch (err) {
       console.error("Failed to load subscription detail:", err);
-      toast.error("Không tải được chi tiết subscription.");
+      toast.error(t("admin:subscriptionDetail.toast.loadError"));
       navigate("/admin/subscriptions", { replace: true });
     } finally {
       setLoading(false);
@@ -85,11 +87,11 @@ export default function AdminSubscriptionDetailPage() {
     try {
       setActing(true);
       await superAdminSaasApi.cancelSubscription(id);
-      toast.success("Đã huỷ subscription.");
+      toast.success(t("admin:subscriptionDetail.toast.cancelSuccess"));
       await load();
     } catch (err) {
       console.error("Failed to cancel subscription:", err);
-      toast.error("Huỷ subscription thất bại.");
+      toast.error(t("admin:subscriptionDetail.toast.cancelError"));
     } finally {
       setActing(false);
     }
@@ -100,11 +102,15 @@ export default function AdminSubscriptionDetailPage() {
     try {
       setActing(true);
       const r = await superAdminSaasApi.extendSubscription(id, Number(days) || 0);
-      toast.success(r?.newEndDate ? `Đã gia hạn tới ${r.newEndDate}` : "Đã gia hạn subscription.");
+      toast.success(
+        r?.newEndDate
+          ? t("admin:subscriptionDetail.toast.extendSuccessWithDate", { date: r.newEndDate })
+          : t("admin:subscriptionDetail.toast.extendSuccess"),
+      );
       await load();
     } catch (err) {
       console.error("Failed to extend subscription:", err);
-      toast.error("Gia hạn subscription thất bại.");
+      toast.error(t("admin:subscriptionDetail.toast.extendError"));
     } finally {
       setActing(false);
     }
@@ -144,7 +150,7 @@ export default function AdminSubscriptionDetailPage() {
           onClick={() => navigate("/admin/subscriptions")}
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại danh sách subscriptions
+          {t("admin:subscriptionDetail.backToList")}
         </Button>
       </motion.div>
 
@@ -162,11 +168,14 @@ export default function AdminSubscriptionDetailPage() {
                 <Badge variant="outline">{view.planName}</Badge>
                 <Badge variant="outline">{view.status}</Badge>
                 {view.daysRemaining > 0 && (
-                  <Badge variant="outline">{view.daysRemaining} days left</Badge>
+                  <Badge variant="outline">
+                    {t("admin:subscriptionDetail.daysLeft", { days: view.daysRemaining })}
+                  </Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                ID: <span className="font-mono break-all">{view.id}</span>
+                {t("admin:subscriptionDetail.fields.id")}:{" "}
+                <span className="font-mono break-all">{view.id}</span>
               </p>
             </div>
           </div>
@@ -174,22 +183,22 @@ export default function AdminSubscriptionDetailPage() {
           <div className="relative mt-5 grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Plan price</span>
+                <span className="text-xs text-muted-foreground">{t("admin:subscriptionDetail.fields.planPrice")}</span>
                 <span className="font-semibold">{formatVnd(view.planPrice ?? 0)}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Start</span>
+                <span className="text-xs text-muted-foreground">{t("admin:subscriptionDetail.fields.start")}</span>
                 <span className="font-mono text-xs">{view.startDate}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">End</span>
+                <span className="text-xs text-muted-foreground">{t("admin:subscriptionDetail.fields.end")}</span>
                 <span className="font-mono text-xs">{view.endDate}</span>
               </div>
             </div>
 
             <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-2">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Actions
+                {t("admin:subscriptionDetail.actions.title")}
               </div>
               <div className="flex flex-col gap-2">
                 <Button
@@ -199,7 +208,7 @@ export default function AdminSubscriptionDetailPage() {
                   disabled={acting}
                 >
                   <Ban className="h-4 w-4" />
-                  Cancel
+                  {t("admin:subscriptionDetail.actions.cancel")}
                 </Button>
                 <div className="flex items-center gap-2">
                   <Input
@@ -207,7 +216,7 @@ export default function AdminSubscriptionDetailPage() {
                     value={String(days)}
                     onChange={(e) => setDays(Number(e.target.value || 0))}
                     className="bg-background/80"
-                    placeholder="30"
+                    placeholder={t("admin:subscriptionDetail.actions.daysPlaceholder")}
                   />
                   <Button
                     className="gap-2 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white"
@@ -215,7 +224,7 @@ export default function AdminSubscriptionDetailPage() {
                     disabled={acting || Number(days) <= 0}
                   >
                     <CalendarPlus className="h-4 w-4" />
-                    Extend
+                    {t("admin:subscriptionDetail.actions.extend")}
                   </Button>
                 </div>
               </div>
@@ -226,30 +235,33 @@ export default function AdminSubscriptionDetailPage() {
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-2" onClick={() => void load()} disabled={acting}>
                 <RefreshCcw className="h-4 w-4" />
-                Reload
+                {t("admin:subscriptionDetail.actions.reload")}
               </Button>
               <Button variant="outline" size="sm" className="gap-2" onClick={() => setRawOpen(true)}>
                 <Braces className="h-4 w-4" />
-                Raw JSON
+                {t("admin:subscriptionDetail.actions.rawJson")}
               </Button>
             </div>
           </div>
         </Card>
 
         <Card className="p-5 space-y-3 hover:shadow-lg transition-shadow duration-300">
-          <div className="text-sm font-semibold">Tóm tắt subscription</div>
+          <div className="text-sm font-semibold">{t("admin:subscriptionDetail.summary.title")}</div>
           <div className="text-xs text-muted-foreground space-y-2">
             <div>
-              Trạng thái hiện tại: <span className="font-medium text-foreground">{view.status}</span>
+              {t("admin:subscriptionDetail.summary.currentStatus")}:{" "}
+              <span className="font-medium text-foreground">{view.status}</span>
             </div>
             <div>
-              Kỳ sử dụng:{" "}
+              {t("admin:subscriptionDetail.summary.period")}:{" "}
               <span className="font-medium text-foreground">
                 {view.startDate} → {view.endDate}
               </span>
             </div>
             <div>
-              Còn lại: <span className="font-medium text-foreground">{view.daysRemaining || 0}</span> ngày
+              {t("admin:subscriptionDetail.summary.remaining")}:{" "}
+              <span className="font-medium text-foreground">{view.daysRemaining || 0}</span>{" "}
+              {t("admin:subscriptionDetail.summary.days")}
             </div>
           </div>
         </Card>
@@ -258,7 +270,7 @@ export default function AdminSubscriptionDetailPage() {
       <JsonViewerDialog
         open={rawOpen}
         onOpenChange={setRawOpen}
-        title={`Subscription raw: ${view.id}`}
+        title={t("admin:subscriptionDetail.rawTitle", { id: view.id })}
         value={raw}
       />
     </motion.div>

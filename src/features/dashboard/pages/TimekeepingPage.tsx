@@ -64,7 +64,7 @@ const getDistanceMeters = (
 };
 
 const TimekeepingPage = () => {
-  const { t } = useTranslation("timekeeping");
+  const { t, i18n } = useTranslation("timekeeping");
   const { user } = useAuthStore();
   const { currentStore } = useStoreStore();
   const isStoreOwner = user?.role === "StoreOwner";
@@ -479,7 +479,8 @@ const TimekeepingPage = () => {
     } catch {
       return value;
     }
-    return new Intl.DateTimeFormat("vi-VN", {
+    const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
+    return new Intl.DateTimeFormat(locale, {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -496,7 +497,8 @@ const TimekeepingPage = () => {
     } catch {
       return value;
     }
-    return new Intl.DateTimeFormat("vi-VN", {
+    const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
+    return new Intl.DateTimeFormat(locale, {
       hour: "2-digit",
       minute: "2-digit",
       timeZone: "Asia/Ho_Chi_Minh",
@@ -555,7 +557,7 @@ const TimekeepingPage = () => {
               </div>
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>
-                  Check-in:{" "}
+                  {t("today.checkInLabel")}:{" "}
                   <span className="font-semibold text-teal-600">
                     {today?.hasCheckedIn ? t("today.checkedIn") : t("today.notCheckedIn")}
                   </span>
@@ -573,7 +575,7 @@ const TimekeepingPage = () => {
                   )}
                 </p>
                 <p>
-                  Check-out:{" "}
+                  {t("today.checkOutLabel")}:{" "}
                   <span className="font-semibold text-teal-600">
                     {today?.hasCheckedOut ? t("today.checkedOut") : t("today.notCheckedOut")}
                   </span>
@@ -726,7 +728,7 @@ const TimekeepingPage = () => {
                   {processingCheckIn && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Check-in
+                  {t("actions.checkIn")}
                 </Button>
                 <Button
                   onClick={handleCheckOut}
@@ -739,7 +741,7 @@ const TimekeepingPage = () => {
                   {processingCheckOut && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Check-out
+                  {t("actions.checkOut")}
                 </Button>
               </div>
             </Card>
@@ -818,10 +820,10 @@ const TimekeepingPage = () => {
                       </th>
                     )}
                     <th className="text-left py-2 px-3 font-medium">
-                      Check-in
+                      {t("history.table.checkIn")}
                     </th>
                     <th className="text-left py-2 px-3 font-medium">
-                      Check-out
+                      {t("history.table.checkOut")}
                     </th>
                     <th className="text-center py-2 px-3 font-medium">
                       {t("history.table.photo", {
@@ -943,7 +945,7 @@ const TimekeepingPage = () => {
                 <div className="rounded-lg border bg-muted/30 overflow-hidden">
                   <img
                     src={photoModalRecord.checkInImageUrl}
-                    alt="Check-in selfie"
+                    alt={t("history.photoModal.imageAlt")}
                     className="w-full h-auto max-h-[70vh] object-contain"
                   />
                 </div>

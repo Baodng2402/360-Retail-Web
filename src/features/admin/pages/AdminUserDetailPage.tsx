@@ -152,7 +152,7 @@ export default function AdminUserDetailPage() {
             <div className="relative mt-5 grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Roles
+                  {t("admin:userDetail.roles")}
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {(user.roles ?? []).length === 0 ? (
@@ -168,7 +168,7 @@ export default function AdminUserDetailPage() {
               <div className="space-y-2">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                   <StoreIcon className="h-3.5 w-3.5" />
-                  Store gắn với user
+                  {t("admin:userDetail.storeSection.title")}
                 </div>
                 {user.storeId ? (
                   <div className="space-y-1 text-sm text-muted-foreground rounded-lg border bg-background/60 px-3 py-2">
@@ -179,18 +179,20 @@ export default function AdminUserDetailPage() {
                     {store?.phone && <div>{store.phone}</div>}
                     <div className="flex flex-wrap items-center gap-2 text-xs mt-1">
                       <Badge variant={store?.isActive ? "outline" : "destructive"} className={store?.isActive ? "border-emerald-500/50 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30" : ""}>
-                        {store?.isActive ? "Active" : "Inactive"}
+                        {store?.isActive
+                          ? t("admin:plansPage.status.active")
+                          : t("admin:plansPage.status.inactive")}
                       </Badge>
                       {storeSub?.planName && (
                         <Badge variant="outline">{storeSub.planName}</Badge>
                       )}
                       {typeof storeSub?.daysRemaining === "number" && (
-                        <span>{storeSub.daysRemaining} ngày còn lại</span>
+                        <span>{t("admin:userDetail.storeSection.daysRemaining", { days: storeSub.daysRemaining })}</span>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">Không gắn với store nào.</div>
+                  <div className="text-sm text-muted-foreground">{t("admin:userDetail.storeSection.noStore")}</div>
                 )}
               </div>
             </div>
@@ -204,14 +206,13 @@ export default function AdminUserDetailPage() {
         >
           <Card className="p-5 space-y-3 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold">Ghi chú cho SuperAdmin</h2>
+              <h2 className="text-sm font-semibold">{t("admin:userDetail.notes.title")}</h2>
               <Badge variant="outline" className="text-[11px] border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-                System view
+                {t("admin:userDetail.notes.badge")}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Xem nhanh vai trò, trạng thái kích hoạt và thông tin store/gói dịch vụ đang gắn với
-              tài khoản để hỗ trợ quản trị người dùng hiệu quả.
+              {t("admin:userDetail.notes.description")}
             </p>
           </Card>
         </motion.div>

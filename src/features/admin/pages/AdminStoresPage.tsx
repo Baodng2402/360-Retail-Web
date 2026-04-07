@@ -20,7 +20,7 @@ export default function AdminStoresPage() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   const [rawOpen, setRawOpen] = useState(false);
-  const [rawTitle, setRawTitle] = useState("Raw JSON");
+  const [rawTitle, setRawTitle] = useState(() => t("stores.rawDialogDefaultTitle"));
   const [rawValue, setRawValue] = useState<unknown>(null);
 
   const load = async () => {
@@ -150,13 +150,13 @@ export default function AdminStoresPage() {
                       <TableHead>{t("stores.columns.name")}</TableHead>
                       <TableHead>{t("stores.columns.address")}</TableHead>
                       <TableHead>{t("stores.columns.phone")}</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Sub status</TableHead>
-                      <TableHead>End date</TableHead>
+                      <TableHead>{t("stores.columns.owner")}</TableHead>
+                      <TableHead>{t("stores.columns.plan")}</TableHead>
+                      <TableHead>{t("stores.columns.subStatus")}</TableHead>
+                      <TableHead>{t("stores.columns.endDate")}</TableHead>
                       <TableHead>{t("stores.columns.status")}</TableHead>
                       <TableHead>{t("stores.columns.createdAt")}</TableHead>
-                      <TableHead className="text-right">Raw</TableHead>
+                      <TableHead className="text-right">{t("stores.columns.raw")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -214,12 +214,12 @@ export default function AdminStoresPage() {
                               variant="ghost"
                               className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
                               onClick={() => {
-                                setRawTitle(`Store raw: ${String(s.id ?? "—")}`);
+                                setRawTitle(t("stores.rawTitle", { id: String(s.id ?? "—") }));
                                 setRawValue(s);
                                 setRawOpen(true);
                               }}
                             >
-                              Raw
+                              {t("stores.columns.raw")}
                             </Button>
                           </TableCell>
                         </motion.tr>

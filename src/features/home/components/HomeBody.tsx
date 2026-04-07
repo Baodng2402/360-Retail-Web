@@ -36,6 +36,8 @@ const itemVariants = {
 
 const HomeBody = () => {
   const { t } = useTranslation("home");
+  const tHome = (key: string, options?: Record<string, unknown>) =>
+    String(t(key as never, options as never));
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -75,7 +77,7 @@ const HomeBody = () => {
             className="text-center text-[9px] sm:text-[10px] font-semibold tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] uppercase mb-4 sm:mb-6"
             style={{ color: isDark ? "#64748b" : "#94a3b8" }}
           >
-            Được tin dùng bởi các thương hiệu bán lẻ tại Việt Nam
+            {tHome("trustBar.title")}
           </p>
           <motion.div
             initial={{ opacity: 0 }}
@@ -120,10 +122,13 @@ const HomeBody = () => {
             className="text-center mb-10 sm:mb-12 md:mb-20 max-w-2xl mx-auto px-2"
           >
             <h2 className="text-foreground text-[clamp(24px,4vw,48px)] font-extrabold mb-3 sm:mb-4 tracking-tight px-2">
-              Bắt đầu trong <span className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">3 bước</span>
+              {tHome("steps.titlePrefix")}{" "}
+              <span className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
+                {tHome("steps.titleHighlight")}
+              </span>
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base md:text-lg leading-relaxed px-2 sm:px-4">
-              Không cần am hiểu công nghệ, chỉ cần bạn đang vận hành cửa hàng.
+              {tHome("steps.subtitle")}
             </p>
           </motion.div>
 
@@ -168,12 +173,12 @@ const HomeBody = () => {
                 </motion.div>
 
                 <div className="inline-block px-3 sm:px-4 sm:py-2 py-1.5 bg-gradient-to-r from-[#FF7B21]/10 to-[#FF9F45]/10 rounded-full mb-3 sm:mb-5 border border-[#FF7B21]/20">
-                  <p className="text-[10px] sm:text-xs font-extrabold text-[#FF7B21] tracking-widest">STEP 1</p>
+                  <p className="text-[10px] sm:text-xs font-extrabold text-[#FF7B21] tracking-widest">{tHome("steps.items.0.step")}</p>
                 </div>
 
-                <h3 className="text-foreground text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3 tracking-tight">Thiết lập nhanh</h3>
+                <h3 className="text-foreground text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3 tracking-tight">{tHome("steps.items.0.title")}</h3>
                 <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-[220px] sm:max-w-[260px] lg:max-w-[280px] mx-auto">
-                  Nhập sản phẩm, nhân viên, ca làm theo hướng dẫn trực quan trong vài phút.
+                  {tHome("steps.items.0.description")}
                 </p>
               </motion.div>
 
@@ -187,12 +192,12 @@ const HomeBody = () => {
                 </motion.div>
 
                 <div className="inline-block px-3 sm:px-4 sm:py-2 py-1.5 bg-gradient-to-r from-orange-100 to-orange-50 rounded-full mb-3 sm:mb-5 border border-orange-200/50 dark:from-orange-900/30 dark:to-orange-950/20 dark:border-orange-800/30">
-                  <p className="text-[10px] sm:text-xs font-extrabold text-orange-600 dark:text-orange-400 tracking-widest">STEP 2</p>
+                  <p className="text-[10px] sm:text-xs font-extrabold text-orange-600 dark:text-orange-400 tracking-widest">{tHome("steps.items.1.step")}</p>
                 </div>
 
-                <h3 className="text-foreground text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3 tracking-tight">Bắt đầu bán hàng</h3>
+                <h3 className="text-foreground text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3 tracking-tight">{tHome("steps.items.1.title")}</h3>
                 <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-[220px] sm:max-w-[260px] lg:max-w-[280px] mx-auto">
-                  Tạo đơn đầu tiên, phần còn lại (tồn kho, báo cáo, tích điểm) được tự động hóa.
+                  {tHome("steps.items.1.description")}
                 </p>
               </motion.div>
 
@@ -206,12 +211,12 @@ const HomeBody = () => {
                 </motion.div>
 
                 <div className="inline-block px-3 sm:px-4 sm:py-2 py-1.5 bg-gradient-to-r from-[#FF7B21]/10 to-[#19D6C8]/10 rounded-full mb-3 sm:mb-5 border border-[#FF7B21]/20">
-                  <p className="text-[10px] sm:text-xs font-extrabold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent tracking-widest">STEP 3</p>
+                  <p className="text-[10px] sm:text-xs font-extrabold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent tracking-widest">{tHome("steps.items.2.step")}</p>
                 </div>
 
-                <h3 className="text-foreground text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3 tracking-tight">Xem cửa hàng tăng trưởng</h3>
+                <h3 className="text-foreground text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3 tracking-tight">{tHome("steps.items.2.title")}</h3>
                 <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-[220px] sm:max-w-[260px] lg:max-w-[280px] mx-auto">
-                  Nắm được mặt hàng bán chạy, khung giờ cao điểm để ra quyết định thông minh hơn.
+                  {tHome("steps.items.2.description")}
                 </p>
               </motion.div>
             </motion.div>
@@ -243,13 +248,13 @@ const HomeBody = () => {
               className="text-[clamp(22px,4vw,44px)] font-extrabold mb-3 sm:mb-4 md:mb-6 tracking-tight"
               style={{ color: isDark ? "#f1f5f9" : "#0f172a" }}
             >
-              Đồng hành cùng sự phát triển bán lẻ Việt Nam
+              {tHome("stats.title")}
             </h2>
             <p
               className="text-sm sm:text-base md:text-lg leading-relaxed mb-6 sm:mb-8 md:mb-10"
               style={{ color: isDark ? "#94a3b8" : "#475569" }}
             >
-              Từ trung tâm thành phố đến tỉnh lẻ, 360 Retail giúp chủ shop theo dõi doanh thu và khách hàng theo khu vực, từ đó tối ưu chiến dịch và nguồn lực.
+              {tHome("stats.subtitle")}
             </p>
 
             <motion.div
@@ -260,10 +265,10 @@ const HomeBody = () => {
               className="grid grid-cols-2 gap-6 sm:gap-8"
             >
               {[
-                { value: "5,000+", label: "Cửa hàng sử dụng", color: "#FF7B21" },
-                { value: "63", label: "Tỉnh thành có khách hàng", color: "#19D6C8" },
-                { value: "12+", label: "Ngành hàng khác nhau", color: "#FF7B21" },
-                { value: "24/7", label: "Hỗ trợ đội ngũ CSKH", color: "#19D6C8" },
+                { value: "5,000+", label: tHome("stats.items.stores"), color: "#FF7B21" },
+                { value: "63", label: tHome("stats.items.provinces"), color: "#19D6C8" },
+                { value: "12+", label: tHome("stats.items.industries"), color: "#FF7B21" },
+                { value: "24/7", label: tHome("stats.items.support"), color: "#19D6C8" },
               ].map((stat) => (
                 <motion.div key={stat.label} variants={itemVariants}>
                   <p
@@ -331,8 +336,12 @@ const HomeBody = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 sm:mb-10"
           >
-            <p className="text-[9px] sm:text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] uppercase text-muted-foreground mb-3 sm:mb-4">Đánh giá từ khách hàng</p>
-            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight">Chủ shop nói gì về 360 Retail</h2>
+            <p className="text-[9px] sm:text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] uppercase text-muted-foreground mb-3 sm:mb-4">
+              {tHome("testimonials.kicker")}
+            </p>
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight">
+              {tHome("testimonials.title")}
+            </h2>
           </motion.div>
 
           <div className="relative overflow-hidden">
@@ -341,16 +350,56 @@ const HomeBody = () => {
 
             <div className="review-marquee flex gap-4 sm:gap-6 w-[200%]">
               {[
-                { initials: "MH", name: "Mai Hương", role: "Chủ shop thời trang local brand, Hà Nội", content: "Trước khi dùng 360 Retail, mình phải vừa ghi sổ tay, vừa nhập excel nên rất dễ sót đơn, nhầm tồn kho. Giờ mọi thứ tự động, đỡ stress hẳn." },
-                { initials: "TN", name: "Tuấn Nguyễn", role: "Chuỗi cà phê 3 chi nhánh, TP.HCM", content: "Mình thích nhất là xem được doanh thu theo ca và theo chi nhánh trên cùng một màn hình, quyết định thay đổi menu hay khuyến mãi cũng tự tin hơn." },
-                { initials: "LH", name: "Lan Hạnh", role: "Shop mẹ & bé, Đà Nẵng", content: "Nhân viên chỉ mất một buổi là quen hệ thống. Tính năng tích điểm tự động giúp khách quay lại nhiều, doanh thu ổn định hơn." },
-                { initials: "QP", name: "Quốc Phong", role: "Cửa hàng điện thoại, Cần Thơ", content: "Trước đây hay bị nhầm tồn kho giữa online và cửa hàng. Từ khi dùng 360 Retail thì không còn cảnh xin lỗi khách vì hết hàng nữa." },
+                {
+                  initials: tHome("testimonials.items.0.initials"),
+                  name: tHome("testimonials.items.0.name"),
+                  role: tHome("testimonials.items.0.role"),
+                  content: tHome("testimonials.items.0.content"),
+                },
+                {
+                  initials: tHome("testimonials.items.1.initials"),
+                  name: tHome("testimonials.items.1.name"),
+                  role: tHome("testimonials.items.1.role"),
+                  content: tHome("testimonials.items.1.content"),
+                },
+                {
+                  initials: tHome("testimonials.items.2.initials"),
+                  name: tHome("testimonials.items.2.name"),
+                  role: tHome("testimonials.items.2.role"),
+                  content: tHome("testimonials.items.2.content"),
+                },
+                {
+                  initials: tHome("testimonials.items.3.initials"),
+                  name: tHome("testimonials.items.3.name"),
+                  role: tHome("testimonials.items.3.role"),
+                  content: tHome("testimonials.items.3.content"),
+                },
               ]
                 .concat([
-                  { initials: "MH", name: "Mai Hương", role: "Chủ shop thời trang local brand, Hà Nội", content: "Trước khi dùng 360 Retail, mình phải vừa ghi sổ tay, vừa nhập excel nên rất dễ sót đơn, nhầm tồn kho. Giờ mọi thứ tự động, đỡ stress hẳn." },
-                  { initials: "TN", name: "Tuấn Nguyễn", role: "Chuỗi cà phê 3 chi nhánh, TP.HCM", content: "Mình thích nhất là xem được doanh thu theo ca và theo chi nhánh trên cùng một màn hình, quyết định thay đổi menu hay khuyến mãi cũng tự tin hơn." },
-                  { initials: "LH", name: "Lan Hạnh", role: "Shop mẹ & bé, Đà Nẵng", content: "Nhân viên chỉ mất một buổi là quen hệ thống. Tính năng tích điểm tự động giúp khách quay lại nhiều, doanh thu ổn định hơn." },
-                  { initials: "QP", name: "Quốc Phong", role: "Cửa hàng điện thoại, Cần Thơ", content: "Trước đây hay bị nhầm tồn kho giữa online và cửa hàng. Từ khi dùng 360 Retail thì không còn cảnh xin lỗi khách vì hết hàng nữa." },
+                  {
+                    initials: tHome("testimonials.items.0.initials"),
+                    name: tHome("testimonials.items.0.name"),
+                    role: tHome("testimonials.items.0.role"),
+                    content: tHome("testimonials.items.0.content"),
+                  },
+                  {
+                    initials: tHome("testimonials.items.1.initials"),
+                    name: tHome("testimonials.items.1.name"),
+                    role: tHome("testimonials.items.1.role"),
+                    content: tHome("testimonials.items.1.content"),
+                  },
+                  {
+                    initials: tHome("testimonials.items.2.initials"),
+                    name: tHome("testimonials.items.2.name"),
+                    role: tHome("testimonials.items.2.role"),
+                    content: tHome("testimonials.items.2.content"),
+                  },
+                  {
+                    initials: tHome("testimonials.items.3.initials"),
+                    name: tHome("testimonials.items.3.name"),
+                    role: tHome("testimonials.items.3.role"),
+                    content: tHome("testimonials.items.3.content"),
+                  },
                 ])
                 .map((review, index) => (
                   <motion.div
@@ -394,11 +443,12 @@ const HomeBody = () => {
         />
 
         <div className="relative max-w-4xl mx-auto text-center px-2">
-          <h2 className="text-[clamp(24px,5vw,56px)] font-extrabold text-white mb-3 sm:mb-4 md:mb-5 tracking-tight leading-[1.1]">
-            Sẵn sàng tăng trưởng<br />với 360 Retail?
-          </h2>
+          <h2
+            className="text-[clamp(24px,5vw,56px)] font-extrabold text-white mb-3 sm:mb-4 md:mb-5 tracking-tight leading-[1.1]"
+            dangerouslySetInnerHTML={{ __html: tHome("cta.title") }}
+          />
           <p className="text-sm sm:text-base md:text-lg lg:text-[20px] text-white/95 mb-6 sm:mb-8 md:mb-10 leading-relaxed px-2 sm:px-4">
-            Gia nhập cộng đồng chủ shop đang vận hành cửa hàng hiệu quả, không còn phụ thuộc vào sổ sách.
+            {tHome("cta.subtitle")}
           </p>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} className="inline-block">
             <Link
@@ -406,11 +456,11 @@ const HomeBody = () => {
               className="group bg-white text-[#FF7B21] px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl transition-all shadow-2xl hover:shadow-3xl inline-flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center"
               style={{ fontSize: "clamp(13px, 2vw, 19px)", fontWeight: "700" }}
             >
-              Trải nghiệm 360 Retail ngay
+              {tHome("cta.primary")}
               <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
-          <p className="text-[10px] sm:text-xs md:text-sm text-white/85 mt-3 sm:mt-4 md:mt-6">Miễn phí cho giai đoạn thử nghiệm · Không cần thẻ thanh toán</p>
+          <p className="text-[10px] sm:text-xs md:text-sm text-white/85 mt-3 sm:mt-4 md:mt-6">{tHome("cta.note")}</p>
         </div>
       </motion.section>
 
@@ -427,7 +477,7 @@ const HomeBody = () => {
             <motion.div variants={itemVariants} className="sm:col-span-2 md:col-span-2">
               <h4 className="text-lg sm:text-xl md:text-2xl font-extrabold mb-3 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">360 Retail</h4>
               <p className="text-xs sm:text-sm opacity-70 leading-relaxed max-w-[320px]">
-                Nền tảng quản lý bán hàng đa kênh cho cửa hàng vừa và nhỏ, dễ dùng như một ứng dụng điện thoại.
+                {tHome("footer.tagline")}
               </p>
             </motion.div>
 

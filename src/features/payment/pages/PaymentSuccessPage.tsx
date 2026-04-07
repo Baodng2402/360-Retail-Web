@@ -7,15 +7,17 @@ import { CheckCircle, XCircle, Loader2, ArrowRight, Home, CreditCard } from "luc
 import { authApi, decodeTokenToUser } from "@/shared/lib/authApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import { GradientOrb, FloatingParticles, GlassCard } from "@/shared/components/ui/Globe3D";
+import { useTranslation } from "react-i18next";
 
 export default function PaymentSuccessPage() {
+  const { t } = useTranslation(["payment", "common"]);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setAuthFromToken } = useAuthStore();
 
   const paymentId = searchParams.get("paymentId");
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [message, setMessage] = useState("Đang xác nhận thanh toán...");
+  const [message, setMessage] = useState(() => t("payment:success.verifying"));
   const [planName, setPlanName] = useState<string | null>(null);
 
   const refreshUserData = useCallback(async () => {
@@ -37,7 +39,7 @@ export default function PaymentSuccessPage() {
   const verifyPayment = useCallback(async () => {
     if (!paymentId) {
       setStatus("error");
-      setMessage("Không tìm thấy mã thanh toán");
+      setMessage(t("payment:success.missingPaymentId"));
       return;
     }
     try {
@@ -48,11 +50,11 @@ export default function PaymentSuccessPage() {
       const subscriptionStatus = await authApi.checkStoreTrial();
       setPlanName(subscriptionStatus.planName);
       setStatus("success");
-      setMessage("Thanh toán thành công! Gói dịch vụ đã được kích hoạt.");
+      setMessage(t("payment:success.activated"));
     } catch (error) {
       console.error("Payment verification failed:", error);
       setStatus("error");
-      setMessage("Xác nhận thanh toán thất bại. Vui lòng liên hệ hỗ trợ.");
+      setMessage(t("payment:success.verifyFailed"));
     }
   }, [paymentId, refreshUserData]);
 
@@ -135,7 +137,7 @@ export default function PaymentSuccessPage() {
               className="mb-4"
             >
               <Badge variant="outline" className="text-xs">
-                Mã thanh toán: {paymentId.slice(0, 8)}...
+                {t("payment:common.paymentCodeLabel")}: {paymentId.slice(0, 8)}...
               </Badge>
             </motion.div>
           )}
@@ -153,9 +155,9 @@ export default function PaymentSuccessPage() {
                 : "text-blue-600 dark:text-blue-400"
             }`}
           >
-            {status === "loading" && "Đang xác nhận"}
-            {status === "success" && "Thanh toán thành công!"}
-            {status === "error" && "Có lỗi xảy ra"}
+            {status === "loading" && t("payment:success.titleLoading")}
+            {status === "success" && t("payment:success.titleSuccess")}
+            {status === "error" && t("payment:success.titleError")}
           </motion.h1>
 
           <motion.p
@@ -177,7 +179,7 @@ export default function PaymentSuccessPage() {
             >
               <div className="flex items-center justify-center gap-2 mb-2">
                 <CreditCard className="h-4 w-4 text-primary" />
-                <span className="text-sm text-muted-foreground">Gói dịch vụ của bạn</span>
+                <span className="text-sm text-muted-foreground">{t("payment:success.planLabel")}</span>
               </div>
               <p className="text-xl font-bold bg-gradient-to-r from-teal-500 to-blue-500 bg-clip-text text-transparent">
                 {planName}
@@ -198,7 +200,7 @@ export default function PaymentSuccessPage() {
                   className="w-full sm:w-auto gap-2 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF7B21]/90 hover:to-[#19D6C8]/90 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 border-0 transition-all duration-300"
                 >
                   <Home className="h-4 w-4" />
-                  Về trang chủ
+                  {t("common:actions.backToHome")}
                 </Button>
               </motion.div>
 
@@ -210,7 +212,7 @@ export default function PaymentSuccessPage() {
                   className="w-full sm:w-auto gap-2 border-[#FF7B21]/30 hover:border-[#FF7B21] hover:bg-[#FF7B21]/5 transition-all"
                 >
                   <ArrowRight className="h-4 w-4" />
-                  Xem gói dịch vụ
+                  {t("payment:success.viewPlans")}
                 </Button>
               </motion.div>
             )}
@@ -222,7 +224,7 @@ export default function PaymentSuccessPage() {
                   variant="outline"
                   className="w-full sm:w-auto gap-2 border-[#FF7B21]/30 hover:border-[#FF7B21] hover:bg-[#FF7B21]/5 transition-all"
                 >
-                  Thử lại
+                  {t("common:actions.retry")}
                 </Button>
               </motion.div>
             )}
@@ -236,7 +238,10 @@ export default function PaymentSuccessPage() {
             className="mt-8 pt-6 border-t"
           >
             <p className="text-xs text-muted-foreground">
-              Cần hỗ trợ? Liên hệ <a href="mailto:support@360retail.com" className="text-primary hover:underline">support@360retail.com</a>
+              {t("payment:common.needHelp")}{" "}
+              <a href="mailto:support@360retail.com" className="text-primary hover:underline">
+                support@360retail.com
+              </a>
             </p>
           </motion.div>
         </GlassCard>

@@ -36,6 +36,7 @@ import { useStoreStore } from "@/shared/store/storeStore";
 import type { Product, ProductVariant } from "@/shared/types/products";
 import type { Category } from "@/shared/types/categories";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 type VariantForm = {
     sku: string;
@@ -46,6 +47,7 @@ type VariantForm = {
 };
 
 const ProductDetailPage = () => {
+    const { t: tProduct, i18n } = useTranslation(["product", "common"]);
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { currentStore } = useStoreStore();
@@ -85,7 +87,7 @@ const ProductDetailPage = () => {
                 initForm(productData);
             } catch (err) {
                 console.error("Failed to load product:", err);
-                toast.error("Không thể tải thông tin sản phẩm");
+                toast.error(tProduct("product:detail.toasts.loadFailed"));
                 navigate("/dashboard/products");
             } finally {
                 setLoading(false);
@@ -137,7 +139,7 @@ setIsActive(p.isActive as boolean);
 
     const removeVariant = (index: number) => {
         if (variants.length <= 1) {
-            toast.error("Phải có ít nhất 1 biến thể");
+            toast.error(tProduct("product:detail.toasts.minOneVariant"));
             return;
         }
         setVariants(variants.filter((_, i) => i !== index));
@@ -146,11 +148,11 @@ setIsActive(p.isActive as boolean);
     const handleSave = async () => {
         if (!product) return;
         if (!productName.trim()) {
-            toast.error("Vui lòng nhập tên sản phẩm");
+            toast.error(tProduct("product:detail.toasts.productNameRequired"));
             return;
         }
         if (!price || parseFloat(price) <= 0) {
-            toast.error("Vui lòng nhập giá bán hợp lệ");
+            toast.error(tProduct("product:detail.toasts.priceInvalid"));
             return;
         }
 
@@ -180,14 +182,14 @@ setIsActive(p.isActive as boolean);
                 variantsJson: hasVariants && variantsPayload ? JSON.stringify(variantsPayload) : undefined,
             });
 
-            toast.success("Cập nhật sản phẩm thành công!");
+            toast.success(tProduct("product:detail.toasts.updateSuccess"));
             setEditing(false);
             // Reload
             const updated = await productsApi.getProductById(product.id, storeId);
             setProduct(updated);
         } catch (err: unknown) {
             console.error("Failed to save product:", err);
-            toast.error("Không thể cập nhật sản phẩm");
+            toast.error(tProduct("product:detail.toasts.updateFailed"));
         } finally {
             setSaving(false);
         }
@@ -206,10 +208,10 @@ setIsActive(p.isActive as boolean);
             <div className="space-y-4">
                 <Button variant="outline" onClick={() => navigate("/dashboard/products")}>
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Quay lại
+                    {tProduct("common:actions.back")}
                 </Button>
                 <Card className="p-6 text-center text-muted-foreground">
-                    Không tìm thấy sản phẩm
+                    {tProduct("product:detail.states.notFound")}
                 </Card>
             </div>
         );
@@ -228,10 +230,10 @@ setIsActive(p.isActive as boolean);
                     <div>
                         <h1 className="text-2xl font-bold">{product.productName}</h1>
                         <p className="text-sm text-muted-foreground">
-                            {category?.categoryName || "Không có danh mục"}
+                            {category?.categoryName || tProduct("product:detail.categoryFallback")}
                             {product.hasVariants && (
                                 <Badge variant="outline" className="ml-2">
-                                    Có biến thể
+                                    {tProduct("product:detail.badges.hasVariants")}
                                 </Badge>
                             )}
                         </p>
@@ -246,7 +248,7 @@ setIsActive(p.isActive as boolean);
                         className="gap-2"
                     >
                         <Edit className="h-4 w-4" />
-                        Chỉnh sửa
+                        {tProduct("common:actions.edit")}
                     </Button>
                 )}
             </div>
@@ -259,23 +261,23 @@ setIsActive(p.isActive as boolean);
                         <Card className="p-6 space-y-4">
                             <h3 className="font-semibold text-lg flex items-center gap-2">
                                 <Package className="h-5 w-5 text-teal-500" />
-                                Thông tin cơ bản
+                                {tProduct("product:detail.sections.basicInfo")}
                             </h3>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Tên sản phẩm *</Label>
+                                    <Label>{tProduct("product:detail.form.productName")} *</Label>
                                     <Input value={productName} onChange={(e) => setProductName(e.target.value)} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Mã sản phẩm (SKU/Barcode)</Label>
+                                    <Label>{tProduct("product:detail.form.productCode")}</Label>
                                     <Input value={barCode} onChange={(e) => setBarCode(e.target.value)} />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Danh mục *</Label>
+                                    <Label>{tProduct("product:detail.form.category")} *</Label>
                                     <Select value={categoryId} onValueChange={setCategoryId}>
                                         <SelectTrigger>
                                             <SelectValue />
@@ -290,10 +292,10 @@ setIsActive(p.isActive as boolean);
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Trạng thái</Label>
+                                    <Label>{tProduct("product:detail.form.status")}</Label>
                                     <div className="flex items-center gap-3 h-10 px-3 border rounded-md">
                                         <span className={isActive ? "text-green-600" : "text-red-500"}>
-                                            {isActive ? "Hoạt động" : "Ngừng hoạt động"}
+                                            {isActive ? tProduct("product:active.active") : tProduct("product:active.inactive")}
                                         </span>
                                         <Switch checked={isActive} onCheckedChange={setIsActive} className="ml-auto" />
                                     </div>
@@ -302,15 +304,15 @@ setIsActive(p.isActive as boolean);
 
                             <div className="grid grid-cols-3 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Giá bán (VND) *</Label>
+                                    <Label>{tProduct("product:detail.form.price")} *</Label>
                                     <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Giá vốn (VND)</Label>
+                                    <Label>{tProduct("product:detail.form.costPrice")}</Label>
                                     <Input type="number" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Tồn kho</Label>
+                                    <Label>{tProduct("product:detail.form.stock")}</Label>
                                     <Input
                                         type="number"
                                         value={stockQuantity}
@@ -318,13 +320,13 @@ setIsActive(p.isActive as boolean);
                                         disabled={hasVariants}
                                     />
                                     {hasVariants && (
-                                        <p className="text-xs text-muted-foreground">Tồn kho theo biến thể</p>
+                                        <p className="text-xs text-muted-foreground">{tProduct("product:detail.form.stockByVariantsHint")}</p>
                                     )}
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Mô tả</Label>
+                                <Label>{tProduct("product:detail.form.description")}</Label>
                                 <Textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
@@ -338,10 +340,10 @@ setIsActive(p.isActive as boolean);
                             <div className="flex items-center justify-between">
                                 <h3 className="font-semibold text-lg flex items-center gap-2">
                                     <Grid3x3 className="h-5 w-5 text-purple-500" />
-                                    Biến thể sản phẩm
+                                    {tProduct("product:detail.sections.variants")}
                                 </h3>
                                 <div className="flex items-center gap-3">
-                                    <span className="text-sm text-muted-foreground">Có biến thể</span>
+                                    <span className="text-sm text-muted-foreground">{tProduct("product:detail.form.hasVariants")}</span>
                                     <Switch checked={hasVariants} onCheckedChange={setHasVariants} />
                                 </div>
                             </div>
@@ -349,11 +351,11 @@ setIsActive(p.isActive as boolean);
                             {hasVariants && (
                                 <div className="space-y-3">
                                     <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-2">
-                                        <div className="col-span-3">Mã (SKU)</div>
-                                        <div className="col-span-2">Size</div>
-                                        <div className="col-span-2">Màu</div>
-                                        <div className="col-span-2">Giá riêng</div>
-                                        <div className="col-span-2">Tồn kho</div>
+                                        <div className="col-span-3">{tProduct("product:detail.variantsTable.sku")}</div>
+                                        <div className="col-span-2">{tProduct("product:detail.variantsTable.size")}</div>
+                                        <div className="col-span-2">{tProduct("product:detail.variantsTable.color")}</div>
+                                        <div className="col-span-2">{tProduct("product:detail.variantsTable.priceOverride")}</div>
+                                        <div className="col-span-2">{tProduct("product:detail.variantsTable.stock")}</div>
                                         <div className="col-span-1"></div>
                                     </div>
 
@@ -366,7 +368,7 @@ setIsActive(p.isActive as boolean);
                                                 className="col-span-3 h-9"
                                                 value={variant.sku}
                                                 onChange={(e) => updateVariant(index, "sku", e.target.value)}
-                                                placeholder="VD: POLO-M-DEN"
+                                                placeholder={tProduct("product:detail.variantsTable.skuPlaceholder")}
                                             />
                                             <Input
                                                 className="col-span-2 h-9"
@@ -385,7 +387,7 @@ setIsActive(p.isActive as boolean);
                                                 type="number"
                                                 value={variant.priceOverride}
                                                 onChange={(e) => updateVariant(index, "priceOverride", e.target.value)}
-                                                placeholder="Giá riêng"
+                                                placeholder={tProduct("product:detail.variantsTable.priceOverridePlaceholder")}
                                             />
                                             <Input
                                                 className="col-span-2 h-9"
@@ -408,7 +410,7 @@ setIsActive(p.isActive as boolean);
 
                                     <Button type="button" variant="outline" onClick={addVariant} className="w-full border-dashed">
                                         <Plus className="h-4 w-4 mr-2" />
-                                        Thêm biến thể
+                                        {tProduct("product:detail.actions.addVariant")}
                                     </Button>
                                 </div>
                             )}
@@ -420,7 +422,7 @@ setIsActive(p.isActive as boolean);
                         <Card className="p-6 space-y-4">
                             <h3 className="font-semibold text-lg flex items-center gap-2">
                                 <ImageIcon className="h-5 w-5 text-blue-500" />
-                                Hình ảnh
+                                {tProduct("product:detail.sections.image")}
                             </h3>
                             <div className="space-y-2">
                                 <Input
@@ -449,31 +451,31 @@ setIsActive(p.isActive as boolean);
                         <Card className="p-6 space-y-4">
                             <h3 className="font-semibold text-lg flex items-center gap-2">
                                 <TrendingUp className="h-5 w-5 text-green-500" />
-                                Thống kê nhanh
+                                {tProduct("product:detail.sections.quickStats")}
                             </h3>
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-muted-foreground">Tổng tồn kho</span>
+                                    <span className="text-sm text-muted-foreground">{tProduct("product:detail.stats.totalStock")}</span>
                                     <span className="font-semibold">{totalStock}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-muted-foreground">Giá bán</span>
+                                    <span className="text-sm text-muted-foreground">{tProduct("product:detail.stats.price")}</span>
                                     <span className="font-semibold text-teal-600">
-                                        {parseFloat(price).toLocaleString("vi-VN")}đ
+                                        {parseFloat(price).toLocaleString(i18n.language)}đ
                                     </span>
                                 </div>
                                 {costPrice && parseFloat(costPrice) > 0 && (
                                     <>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-sm text-muted-foreground">Giá vốn</span>
+                                            <span className="text-sm text-muted-foreground">{tProduct("product:detail.stats.costPrice")}</span>
                                             <span className="font-semibold">
-                                                {parseFloat(costPrice).toLocaleString("vi-VN")}đ
+                                                {parseFloat(costPrice).toLocaleString(i18n.language)}đ
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-sm text-muted-foreground">Lợi nhuận</span>
+                                            <span className="text-sm text-muted-foreground">{tProduct("product:detail.stats.profit")}</span>
                                             <span className="font-semibold text-green-600">
-                                                +{profit.toLocaleString("vi-VN")}đ ({margin.toFixed(1)}%)
+                                                +{profit.toLocaleString(i18n.language)}đ ({margin.toFixed(1)}%)
                                             </span>
                                         </div>
                                     </>
@@ -517,7 +519,9 @@ setIsActive(p.isActive as boolean);
                                                 </Badge>
                                                 )}
                                                 <Badge variant="outline">
-                                                    {product.hasVariants ? "Có biến thể" : "Không biến thể"}
+                                                    {product.hasVariants
+                                                      ? tProduct("product:detail.badges.hasVariants")
+                                                      : tProduct("product:detail.badges.noVariants")}
                                                 </Badge>
                                             </div>
                                         </div>
@@ -531,12 +535,12 @@ setIsActive(p.isActive as boolean);
                                             {product.isActive !== false ? (
                                                 <>
                                                     <CheckCircle className="h-3 w-3 mr-1" />
-                                                    Hoạt động
+                                                    {tProduct("product:active.active")}
                                                 </>
                                             ) : (
                                                 <>
                                                     <XCircle className="h-3 w-3 mr-1" />
-                                                    Ngừng
+                                                    {tProduct("product:active.inactiveShort")}
                                                 </>
                                             )}
                                         </Badge>
@@ -547,16 +551,16 @@ setIsActive(p.isActive as boolean);
                                         <div className="bg-gradient-to-br from-teal-50 to-white dark:from-teal-950/20 dark:to-background p-4 rounded-xl border border-teal-200 dark:border-teal-900">
                                             <div className="flex items-center gap-2 text-teal-600 mb-1">
                                                 <DollarSign className="h-4 w-4" />
-                                                <span className="text-sm font-medium">Giá bán</span>
+                                                <span className="text-sm font-medium">{tProduct("product:detail.stats.price")}</span>
                                             </div>
                                             <p className="text-2xl font-bold text-teal-700 dark:text-teal-400">
-                                                {product.price.toLocaleString("vi-VN")}đ
+                                                {product.price.toLocaleString(i18n.language)}đ
                                             </p>
                                         </div>
                                         <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background p-4 rounded-xl border border-blue-200 dark:border-blue-900">
                                             <div className="flex items-center gap-2 text-blue-600 mb-1">
                                                 <Package className="h-4 w-4" />
-                                                <span className="text-sm font-medium">Tồn kho</span>
+                                                <span className="text-sm font-medium">{tProduct("product:detail.form.stock")}</span>
                                             </div>
                                             <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                                                 {totalStock}
@@ -573,15 +577,15 @@ setIsActive(p.isActive as boolean);
                                     {product.costPrice && (
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="bg-muted/50 p-3 rounded-lg">
-                                                <p className="text-xs text-muted-foreground">Giá vốn</p>
+                                                <p className="text-xs text-muted-foreground">{tProduct("product:detail.stats.costPrice")}</p>
                                                 <p className="font-semibold">
-                                                    {product.costPrice.toLocaleString("vi-VN")}đ
+                                                    {product.costPrice.toLocaleString(i18n.language)}đ
                                                 </p>
                                             </div>
                                             <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200 dark:border-green-900">
-                                                <p className="text-xs text-green-600 dark:text-green-400">Lợi nhuận</p>
+                                                <p className="text-xs text-green-600 dark:text-green-400">{tProduct("product:detail.stats.profit")}</p>
                                                 <p className="font-semibold text-green-600 dark:text-green-400">
-                                                    +{(product.price - product.costPrice).toLocaleString("vi-VN")}đ
+                                                    +{(product.price - product.costPrice).toLocaleString(i18n.language)}đ
                                                     <span className="text-xs font-normal ml-1">
                                                         (
                                                         {(
@@ -609,7 +613,7 @@ setIsActive(p.isActive as boolean);
                                     {/* Description */}
                                     {product.description && (
                                         <div className="pt-2 border-t">
-                                            <p className="text-sm text-muted-foreground mb-1">Mô tả</p>
+                                            <p className="text-sm text-muted-foreground mb-1">{tProduct("product:detail.form.description")}</p>
                                             <p className="text-sm">{product.description}</p>
                                         </div>
                                     )}
@@ -628,12 +632,12 @@ setIsActive(p.isActive as boolean);
                                     <table className="w-full text-sm">
                                         <thead>
                                             <tr className="border-b bg-muted/50">
-                                                <th className="text-left py-3 px-4 font-medium">SKU</th>
-                                                <th className="text-left py-3 px-4 font-medium">Size</th>
-                                                <th className="text-left py-3 px-4 font-medium">Màu</th>
-                                                <th className="text-right py-3 px-4 font-medium">Giá</th>
-                                                <th className="text-right py-3 px-4 font-medium">Tồn kho</th>
-                                                <th className="text-center py-3 px-4 font-medium">Trạng thái</th>
+                                                <th className="text-left py-3 px-4 font-medium">{tProduct("product:detail.variantsTable.sku")}</th>
+                                                <th className="text-left py-3 px-4 font-medium">{tProduct("product:detail.variantsTable.size")}</th>
+                                                <th className="text-left py-3 px-4 font-medium">{tProduct("product:detail.variantsTable.color")}</th>
+                                                <th className="text-right py-3 px-4 font-medium">{tProduct("product:detail.variantsTable.price")}</th>
+                                                <th className="text-right py-3 px-4 font-medium">{tProduct("product:detail.variantsTable.stock")}</th>
+                                                <th className="text-center py-3 px-4 font-medium">{tProduct("product:detail.variantsTable.status")}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -649,10 +653,10 @@ setIsActive(p.isActive as boolean);
                                                         <td className="py-3 px-4">{variant.size || "-"}</td>
                                                         <td className="py-3 px-4">{variant.color || "-"}</td>
                                                         <td className="py-3 px-4 text-right font-medium">
-                                                            {variantPrice.toLocaleString("vi-VN")}đ
+                                                            {variantPrice.toLocaleString(i18n.language)}đ
                                                             {variant.priceOverride && (
                                                                 <span className="text-xs text-muted-foreground ml-1">
-                                                                    (riêng)
+                                                                    {tProduct("product:detail.variantsTable.overrideBadge")}
                                                                 </span>
                                                             )}
                                                         </td>
@@ -670,11 +674,11 @@ setIsActive(p.isActive as boolean);
                                                         <td className="py-3 px-4 text-center">
                                                             {(variant.stockQuantity ?? 0) > 0 ? (
                                                                 <Badge className="bg-green-500 text-white text-xs">
-                                                                    Còn hàng
+                                                                    {tProduct("product:status.inStock")}
                                                                 </Badge>
                                                             ) : (
                                                                 <Badge variant="destructive" className="text-xs">
-                                                                    Hết hàng
+                                                                    {tProduct("product:status.outOfStock")}
                                                                 </Badge>
                                                             )}
                                                         </td>
@@ -692,14 +696,14 @@ setIsActive(p.isActive as boolean);
                     <div className="space-y-6">
                         {/* Quick Actions */}
                         <Card className="p-6 space-y-3">
-                            <h3 className="font-semibold">Thao tác nhanh</h3>
+                            <h3 className="font-semibold">{tProduct("product:detail.sections.quickActions")}</h3>
                             <Button
                                 variant="outline"
                                 className="w-full justify-start"
                                 onClick={() => navigate(`/dashboard/inventory?product=${product.id}`)}
                             >
                                 <Package className="h-4 w-4 mr-2" />
-                                Nhập/Xuất kho
+                                {tProduct("product:detail.actions.inventoryInOut")}
                             </Button>
                             <Button
                                 variant="outline"
@@ -707,32 +711,32 @@ setIsActive(p.isActive as boolean);
                                 onClick={() => navigate("/dashboard/sales")}
                             >
                                 <DollarSign className="h-4 w-4 mr-2" />
-                                Bán hàng
+                                {tProduct("product:detail.actions.sales")}
                             </Button>
                         </Card>
 
                         {/* Product Meta */}
                         <Card className="p-6 space-y-3">
-                            <h3 className="font-semibold">Thông tin bổ sung</h3>
+                            <h3 className="font-semibold">{tProduct("product:detail.sections.meta")}</h3>
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">ID sản phẩm</span>
+                                    <span className="text-muted-foreground">{tProduct("product:detail.meta.id")}</span>
                                     <code className="text-xs">{product.id.slice(0, 8)}...</code>
                                 </div>
                                 {product.createdAt && (
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Ngày tạo</span>
-                                        <span>{new Date(product.createdAt).toLocaleDateString("vi-VN")}</span>
+                                        <span className="text-muted-foreground">{tProduct("product:detail.meta.createdAt")}</span>
+                                        <span>{new Date(product.createdAt).toLocaleDateString(i18n.language)}</span>
                                     </div>
                                 )}
                                 {product.updatedAt && (
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Cập nhật lần cuối</span>
-                                        <span>{new Date(product.updatedAt).toLocaleDateString("vi-VN")}</span>
+                                        <span className="text-muted-foreground">{tProduct("product:detail.meta.updatedAt")}</span>
+                                        <span>{new Date(product.updatedAt).toLocaleDateString(i18n.language)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Số biến thể</span>
+                                    <span className="text-muted-foreground">{tProduct("product:detail.meta.variantsCount")}</span>
                                     <span>{product.variants?.length || 0}</span>
                                 </div>
                             </div>
@@ -753,12 +757,12 @@ setIsActive(p.isActive as boolean);
                             }}
                             disabled={saving}
                         >
-                            Hủy
+                            {tProduct("common:actions.cancel")}
                         </Button>
                         <Button onClick={handleSave} disabled={saving} className="gap-2 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700">
                             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                             <Save className="h-4 w-4" />
-                            Lưu thay đổi
+                            {tProduct("common:actions.saveChanges")}
                         </Button>
                     </div>
                 </div>

@@ -15,6 +15,286 @@
   },
   "search": {
     "productsPlaceholder": "Search products..."
+  },
+  "addModal": {
+    "title": "Add new product",
+    "description": "Enter product information to add it to inventory",
+    "fields": {
+      "productName": "Product name",
+      "category": "Category",
+      "icon": "Icon",
+      "price": "Price (₫)",
+      "stock": "Stock",
+      "barcode": "Barcode"
+    },
+    "placeholders": {
+      "productName": "Example: Men's crew neck t-shirt...",
+      "category": "Select category"
+    },
+    "states": {
+      "noCategories": "No categories yet — create one in the Products tab"
+    },
+    "hints": {
+      "barcodeOptional": "Leave blank to auto-generate"
+    },
+    "actions": {
+      "generateBarcode": "Generate",
+      "submit": "Add product",
+      "submitting": "Adding..."
+    },
+    "preview": {
+      "title": "Preview"
+    },
+    "toast": {
+      "loadCategoriesError": "Unable to load categories.",
+      "productNameRequired": "Please enter a product name.",
+      "categoryRequired": "Please select a category.",
+      "priceInvalid": "Please enter a valid price.",
+      "stockInvalid": "Please enter a valid stock quantity.",
+      "success": "Product \"{{name}}\" added successfully!",
+      "needCategoryFirst": "Please create at least one category before adding a product.",
+      "defaultError": "Unable to add product. Please try again."
+    }
+  }
+  ,
+  "filters": {
+    "category": {
+      "placeholder": "All categories",
+      "all": "All categories"
+    },
+    "stockStatus": {
+      "placeholder": "All statuses",
+      "all": "All statuses"
+    },
+    "active": {
+      "placeholder": "All activity",
+      "all": "All"
+    }
+  },
+  "table": {
+    "code": "Code",
+    "image": "Image",
+    "product": "Product",
+    "category": "Category",
+    "price": "Price",
+    "costPrice": "Cost",
+    "profit": "Profit",
+    "stock": "Stock",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": {
+    "inStock": "In stock",
+    "lowStock": "Low stock",
+    "outOfStock": "Out of stock"
+  },
+  "active": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "inactiveShort": "Off",
+    "paused": "Paused"
+  },
+  "actions": {
+    "addProduct": "Add product",
+    "addCategory": "Add category",
+    "addFirstCategory": "Add first category",
+    "viewBarcode": "View product code"
+  },
+  "states": {
+    "noProducts": "No products found"
+  },
+  "errors": {
+    "selectStoreFirst": "Please select a store.",
+    "storeRequired": "No store found. Please sign in again or start a trial to be assigned a store.",
+    "loadCategoriesFailed": "Unable to load categories. Please try again.",
+    "loadProductsFailed": "Unable to load products. Please try again.",
+    "updateProductStatusFailed": "Unable to update product status",
+    "updateCategoryStatusFailed": "Unable to update category status"
+  },
+  "toast": {
+    "createProductSuccess": "Product created successfully!",
+    "updateProductSuccess": "Product updated successfully!",
+    "createCategorySuccess": "Category created successfully!",
+    "updateCategorySuccess": "Category updated successfully!",
+    "activatingProduct": "Activating product \"{{name}}\"...",
+    "deactivatingProduct": "Deactivating product \"{{name}}\"...",
+    "productActivated": "Product \"{{name}}\" activated",
+    "productDeactivated": "Product \"{{name}}\" deactivated",
+    "activatingCategory": "Activating category \"{{name}}\"...",
+    "deactivatingCategory": "Deactivating category \"{{name}}\"...",
+    "categoryActivated": "Category \"{{name}}\" activated",
+    "categoryDeactivated": "Category \"{{name}}\" deactivated"
+  },
+  "productForm": {
+    "titleCreate": "Add product",
+    "titleEdit": "Edit product",
+    "description": "Fill in the product details below",
+    "fields": {
+      "price": "Price (VND)",
+      "costPrice": "Cost (VND)",
+      "stock": "Stock",
+      "variants": "Variants",
+      "description": "Description",
+      "image": "Image",
+      "status": "Status"
+    },
+    "stockWhenNoVariants": "when no variants",
+    "variantStockHint": "Products with variants manage stock per variant",
+    "variantHint": "Enable if the product has size/color variants. Stock will be tracked per variant.",
+    "profitLabel": "Profit",
+    "placeholders": {
+      "productName": "Example: Coca Cola 330ml",
+      "barcode": "Example: BEV-001",
+      "price": "15000",
+      "costPrice": "12000",
+      "stock": "100",
+      "description": "Product description...",
+      "variantSku": "e.g. POLO-M-BLK",
+      "variantSize": "e.g. M",
+      "variantColor": "e.g. Black",
+      "variantPriceOverride": "e.g. 350000",
+      "variantStock": "e.g. 20"
+    },
+    "variantColumns": {
+      "sku": "Variant SKU",
+      "size": "Size",
+      "color": "Color",
+      "priceOverride": "Price override",
+      "stock": "Stock"
+    },
+    "actions": {
+      "addVariant": "Add variant",
+      "removeVariant": "Remove variant #{{index}}"
+    },
+    "toast": {
+      "variantRequired": "Please add at least 1 variant.",
+      "variantInvalid": "Please fill in variant details (SKU, stock, and price > 0)."
+    },
+    "variantCount": "({{count, number}} variants)"
+  },
+  "categoryForm": {
+    "titleCreate": "Add category",
+    "titleEdit": "Edit category",
+    "description": "Fill in the category details below",
+    "noneParent": "None (root category)",
+    "fields": {
+      "name": "Category name",
+      "parent": "Parent category",
+      "color": "Color",
+      "status": "Status"
+    },
+    "placeholders": {
+      "name": "Example: Beverages",
+      "parent": "None (root category)"
+      ,
+      "color": "HSL color"
+    },
+    "nameFallback": "Category name",
+    "toast": {
+      "nameRequired": "Please enter a category name."
+    }
+  },
+  "categories": {
+    "title": "Product categories",
+    "subtitle": "Manage categories and product groups",
+    "parentLabel": "Parent category",
+    "productLabel": "Products",
+    "states": {
+      "emptyTitle": "No categories yet",
+      "emptySubtitle": "Create your first category to start managing products"
+    }
+  },
+  "barcodeDialog": {
+    "title": "Product code",
+    "description": "Your product code",
+    "toast": {
+      "copied": "Product code copied."
+    },
+    "empty": "No code"
+  },
+  "toggle": {
+    "activate": "Activate",
+    "deactivate": "Deactivate"
+  },
+  "toggleProductDialog": {
+    "titleDeactivate": "Deactivate product",
+    "titleActivate": "Activate product",
+    "descriptionDeactivate": "Are you sure you want to deactivate product \"{{name}}\"? It will no longer be active after deactivation.",
+    "descriptionActivate": "Are you sure you want to activate product \"{{name}}\"? It will become active again."
+  },
+  "toggleCategoryDialog": {
+    "titleDeactivate": "Deactivate category",
+    "titleActivate": "Activate category",
+    "descriptionDeactivate": "Are you sure you want to deactivate category \"{{name}}\"? It will no longer be active after deactivation.",
+    "descriptionActivate": "Are you sure you want to activate category \"{{name}}\"? It will become active again."
+  }
+  ,
+  "detail": {
+    "states": {
+      "notFound": "Product not found"
+    },
+    "categoryFallback": "No category",
+    "badges": {
+      "hasVariants": "Has variants",
+      "noVariants": "No variants"
+    },
+    "sections": {
+      "basicInfo": "Basic info",
+      "variants": "Product variants",
+      "image": "Image",
+      "quickStats": "Quick stats",
+      "quickActions": "Quick actions",
+      "meta": "More info"
+    },
+    "form": {
+      "productName": "Product name",
+      "productCode": "Product code (SKU/Barcode)",
+      "category": "Category",
+      "status": "Status",
+      "price": "Price (VND)",
+      "costPrice": "Cost price (VND)",
+      "stock": "Stock",
+      "stockByVariantsHint": "Stock by variant",
+      "description": "Description",
+      "hasVariants": "Has variants"
+    },
+    "variantsTable": {
+      "sku": "SKU",
+      "size": "Size",
+      "color": "Color",
+      "price": "Price",
+      "priceOverride": "Override price",
+      "stock": "Stock",
+      "status": "Status",
+      "overrideBadge": "(override)",
+      "skuPlaceholder": "e.g. POLO-M-BLK",
+      "priceOverridePlaceholder": "Override price"
+    },
+    "stats": {
+      "totalStock": "Total stock",
+      "price": "Price",
+      "costPrice": "Cost",
+      "profit": "Profit"
+    },
+    "actions": {
+      "addVariant": "Add variant",
+      "inventoryInOut": "Stock in/out",
+      "sales": "Sales"
+    },
+    "meta": {
+      "id": "Product ID",
+      "createdAt": "Created at",
+      "updatedAt": "Last updated",
+      "variantsCount": "Variant count"
+    },
+    "toasts": {
+      "loadFailed": "Unable to load product information.",
+      "minOneVariant": "At least one variant is required.",
+      "productNameRequired": "Please enter a product name.",
+      "priceInvalid": "Please enter a valid price.",
+      "updateSuccess": "Product updated successfully!",
+      "updateFailed": "Unable to update product."
+    }
   }
 }
 

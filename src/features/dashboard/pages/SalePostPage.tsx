@@ -95,7 +95,7 @@ interface CartItem {
 }
 
 const SalePostPage = () => {
-  const { t } = useTranslation(["sale"]);
+  const { t, i18n } = useTranslation(["sale", "common"]);
   const { currentStore } = useStoreStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -459,7 +459,10 @@ const SalePostPage = () => {
       // Tạo phiếu kho
       const ticketId = await inventoryApi.createTicket({
         type: stockOperation === "in" ? "Import" : "Export",
-        note: `${stockOperation === "in" ? "Nhập" : "Xuất"} kho: ${selectedProduct.name}`,
+        note: t("sale:stock.ticketNote", {
+          mode: stockOperation === "in" ? t("sale:actions.stockIn") : t("sale:actions.stockOut"),
+          name: selectedProduct.name,
+        }),
         items: [
           {
             productId: selectedProduct.id,
@@ -486,10 +489,7 @@ const SalePostPage = () => {
       setSelectedProduct(null);
     } catch (error) {
       console.error("Stock operation failed:", error);
-      toast.error(
-        t("sale:toasts.stockOperationFailed") ||
-          "Không thể thực hiện thao tác kho",
-      );
+      toast.error(t("sale:toasts.stockOperationFailed"));
     }
   };
 
@@ -580,7 +580,7 @@ const SalePostPage = () => {
                               variant="outline"
                               className="text-[10px] px-1.5 py-0 shrink-0 border-[#FF7B21]/50 text-[#FF7B21] bg-[#FF7B21]/5 whitespace-nowrap"
                             >
-                              Biến thể
+                              {t("sale:misc.variants")}
                             </Badge>
                           )}
                         </div>
@@ -599,13 +599,13 @@ const SalePostPage = () => {
                             className="text-xs"
                           >
                             {product.stock === 0
-                              ? t("sale:misc.outOfStock", { defaultValue: "Hết hàng" })
+                              ? t("sale:misc.outOfStock")
                               : t("sale:misc.left", { count: product.stock })}
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-primary">
-                            {product.price.toLocaleString("vi-VN")} ₫
+                            {product.price.toLocaleString(i18n.language)} ₫
                           </span>
                           {product.stock > 0 && !product.hasVariants ? (
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -657,7 +657,7 @@ const SalePostPage = () => {
                             </div>
                           ) : product.hasVariants ? (
                             <span className="text-[10px] text-[#FF7B21] opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-                              Chọn biến thể
+                              {t("sale:misc.chooseVariant")}
                             </span>
                           ) : null}
                         </div>
@@ -669,12 +669,14 @@ const SalePostPage = () => {
                               e.stopPropagation();
                               const qty = productQty[product.id] ?? 1;
                               addToCart(product, undefined, qty);
-                              toast.success(`Đã thêm ${qty} × ${product.name} vào giỏ`);
+                              toast.success(
+                                t("sale:toasts.addToCart", { qty, name: product.name }),
+                              );
                               setProductQty((q) => ({ ...q, [product.id]: 1 }));
                             }}
                           >
                             <Plus className="h-4 w-4 mr-1" />
-                            Thêm
+                            {t("sale:actions.add")}
                           </Button>
                         )}
                       </Card>
@@ -733,20 +735,20 @@ const SalePostPage = () => {
                                     return (
                                       <>
                                         <Badge variant="outline" className="text-xs mt-0.5 mb-1">
-                                          {variantLabel || v?.variantName || "Biến thể"}
+                                          {variantLabel || v?.variantName || t("sale:misc.variant")}
                                         </Badge>
                                         <p className="text-xs text-muted-foreground">
-                                          SKU: {v?.sku ?? "—"}
+                                          {t("sale:misc.sku")}: {v?.sku ?? t("sale:misc.dash")}
                                         </p>
                                         <p className="text-xs font-medium">
-                                          {(v?.priceOverride ?? item.product.price).toLocaleString("vi-VN")} ₫
+                                          {(v?.priceOverride ?? item.product.price).toLocaleString(i18n.language)} ₫
                                         </p>
                                       </>
                                     );
                                   })()
                                 : (
                                   <p className="text-xs text-muted-foreground">
-                                    {item.product.price.toLocaleString("vi-VN")} ₫
+                                    {item.product.price.toLocaleString(i18n.language)} ₫
                                   </p>
                                 )}
                             </div>
@@ -814,7 +816,7 @@ const SalePostPage = () => {
                       <div className="flex items-center justify-between text-lg font-bold">
                         <span>{t("sale:cart.total")}:</span>
                         <span className="text-primary">
-                          {calculateTotal().toLocaleString("vi-VN")} ₫
+                          {calculateTotal().toLocaleString(i18n.language)} ₫
                         </span>
                       </div>
 
@@ -882,7 +884,7 @@ const SalePostPage = () => {
                       </TableCell>
                       <TableCell>{product.category}</TableCell>
                       <TableCell className="font-medium">
-                        {product.price.toLocaleString("vi-VN")} ₫
+                        {product.price.toLocaleString(i18n.language)} ₫
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge
@@ -964,7 +966,7 @@ const SalePostPage = () => {
                         formatter={(value: number, name: string) =>
                           name === "sold"
                             ? [value, t("sale:reports.sold")]
-                            : [`${value.toLocaleString("vi-VN")} ₫`, t("sale:reports.revenue")]
+                            : [`${value.toLocaleString(i18n.language)} ₫`, t("sale:reports.revenue")]
                         }
                       />
                       <Legend />
@@ -998,13 +1000,11 @@ const SalePostPage = () => {
                           </TableCell>
                           <TableCell className="text-right">{item.sold}</TableCell>
                           <TableCell className="text-right font-medium">
-                            {item.revenue.toLocaleString("vi-VN")} ₫
+                            {item.revenue.toLocaleString(i18n.language)} ₫
                           </TableCell>
                           <TableCell className="text-right text-muted-foreground">
                             {item.sold > 0
-                              ? Math.round(item.revenue / item.sold).toLocaleString(
-                                  "vi-VN",
-                                )
+                              ? Math.round(item.revenue / item.sold).toLocaleString(i18n.language)
                               : "-"}{" "}
                             ₫
                           </TableCell>
@@ -1093,7 +1093,7 @@ const SalePostPage = () => {
               {variantPickerProduct?.name}
             </DialogTitle>
             <DialogDescription>
-              Nhập số lượng cho từng biến thể muốn thêm vào giỏ
+              {t("sale:variantPicker.description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -1118,19 +1118,21 @@ const SalePostPage = () => {
                   {/* info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">
-                      {[v.variantName, v.size, v.color].filter(Boolean).join(" / ") || "Biến thể"}
+                      {[v.variantName, v.size, v.color].filter(Boolean).join(" / ") || t("sale:misc.variant")}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      SKU: {v.sku ?? "—"}
+                      {t("sale:misc.sku")}: {v.sku ?? t("sale:misc.dash")}
                     </p>
                     <p className="text-sm font-medium mt-0.5">
-                      {(v.priceOverride ?? variantPickerProduct.price).toLocaleString("vi-VN")} ₫
+                      {(v.priceOverride ?? variantPickerProduct.price).toLocaleString(i18n.language)} ₫
                     </p>
                   </div>
 
                   {/* stock badge */}
                   <Badge variant={inStock ? "secondary" : "destructive"} className="shrink-0 text-xs">
-                    {inStock ? `${v.stockQuantity} tồn` : "Hết hàng"}
+                    {inStock
+                      ? t("sale:misc.inStock", { count: v.stockQuantity ?? 0 })
+                      : t("sale:misc.outOfStock")}
                   </Badge>
 
                   {/* qty controls */}
@@ -1186,7 +1188,7 @@ const SalePostPage = () => {
               className="flex-1"
               onClick={() => setVariantQty({})}
             >
-              Reset
+              {t("common:actions.reset")}
             </Button>
             <Button
               className="flex-[2] bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:opacity-90 text-white shadow-md"
@@ -1201,7 +1203,10 @@ const SalePostPage = () => {
                   if (stock <= 0) continue;
                   if (qty > stock) {
                     toast.error(
-                      `${[v.variantName, v.size, v.color].filter(Boolean).join(" / ")}: chỉ còn ${stock} sản phẩm`,
+                      t("sale:toasts.variantOutOfStock", {
+                        variant: [v.variantName, v.size, v.color].filter(Boolean).join(" / "),
+                        stock,
+                      }),
                     );
                     continue;
                   }
@@ -1209,16 +1214,14 @@ const SalePostPage = () => {
                   added++;
                 }
                 if (added > 0) {
-                  toast.success(
-                    `Đã thêm ${added} biến thể vào giỏ`,
-                  );
+                  toast.success(t("sale:toasts.addVariantsToCart", { count: added }));
                   setVariantPickerProduct(null);
                 } else {
-                  toast.error("Không có biến thể nào để thêm");
+                  toast.error(t("sale:toasts.noVariantsToAdd"));
                 }
               }}
             >
-              Thêm vào giỏ hàng
+              {t("sale:actions.addToCart")}
             </Button>
           </div>
         </DialogContent>

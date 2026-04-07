@@ -1,2 +1,31 @@
-{}
+{
+  "brand": "360 Retail Feedback",
+  "title": "Đánh giá trải nghiệm mua hàng",
+  "subtitle": "Bạn vui lòng dành vài giây để đánh giá đơn hàng vừa rồi nhé.",
+  "invalidLink": {
+    "title": "Đường dẫn không hợp lệ",
+    "description": "Thiếu thông tin đơn hàng hoặc khách hàng. Vui lòng quét lại QR trên hóa đơn để gửi đánh giá."
+  },
+  "success": {
+    "title": "Cảm ơn bạn đã đánh giá!",
+    "description": "Phản hồi của bạn giúp cửa hàng cải thiện dịch vụ ngày càng tốt hơn."
+  },
+  "form": {
+    "ratingLabel": "Mức độ hài lòng",
+    "ratingAria": "{{stars}} sao",
+    "ratingSummary": "{{rating}}/5 sao",
+    "contentLabel": "Góp ý của bạn (không bắt buộc)",
+    "contentPlaceholder": "Bạn thích điều gì? Cần cải thiện điều gì?",
+    "submit": "Gửi đánh giá",
+    "submitting": "Đang gửi đánh giá...",
+    "legal": "Bằng cách gửi đánh giá, bạn đồng ý cho phép cửa hàng sử dụng feedback này để cải thiện chất lượng dịch vụ.",
+    "errors": {
+      "ratingRequired": "Vui lòng chọn số sao đánh giá."
+    }
+  },
+  "toast": {
+    "success": "Cảm ơn bạn đã đánh giá!",
+    "failed": "Không thể gửi đánh giá. Vui lòng thử lại sau."
+  }
+}
 

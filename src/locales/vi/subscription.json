@@ -3,11 +3,13 @@
     "title": "Chọn gói dịch vụ",
     "loadingTitle": "Chọn gói dịch vụ",
     "errorTitle": "Chọn gói dịch vụ",
+    "storeSelectorDescription": "Chọn cửa hàng để xem và mua gói dịch vụ đúng chi nhánh.",
     "heroSubtitle": "Nâng cấp để mở khóa đầy đủ tính năng cho {{storeName}}.",
     "heroSubtitleFallbackStore": "cửa hàng của bạn",
     "inactiveNotice": "Cửa hàng hiện tại chưa có gói Trial hoặc Active. Vui lòng chọn một gói bên dưới để bắt đầu.",
     "currentPlanTitle": "Gói dịch vụ hiện tại của {{storeName}}",
     "currentPlanStoreFallback": "cửa hàng bạn",
+    "daysRemaining": "Còn {{days}} ngày",
     "status": {
       "trial": "Đang dùng thử (Trial)",
       "active": "Đang hoạt động (Active)",
@@ -39,6 +41,7 @@
   "sepayDialog": {
     "title": "Thanh toán QR (SePay)",
     "description": "Quét mã QR hoặc chuyển khoản theo thông tin bên dưới. Sau khi thanh toán, bạn có thể bấm vào nút kiểm tra trạng thái để hệ thống tự động cập nhật gói.",
+    "qrAlt": "QR thanh toán SePay",
     "paymentCode": "Mã thanh toán:",
     "bankInfoTitle": "Thông tin chuyển khoản",
     "bankName": "Ngân hàng:",
@@ -64,14 +67,44 @@
   "toasts": {
     "refreshAccessSuccess": "Đã làm mới quyền và gói dịch vụ.",
     "refreshAccessError": "Không thể làm mới quyền. Vui lòng thử đăng nhập lại.",
+    "missingAccessToken": "Không nhận được token mới từ server",
+    "missingPaymentId": "Không nhận được paymentId từ server",
+    "invalidSepayResponse": "Phản hồi thanh toán SePay không hợp lệ",
+    "openedVnpayDemo": "Đã mở trang thanh toán VNPay demo",
+    "invalidVnpayResponse": "Phản hồi thanh toán VNPay không hợp lệ",
     "paymentInitError": "Không thể khởi tạo thanh toán. Vui lòng thử lại.",
     "paymentStatusPending": "Thanh toán vẫn đang ở trạng thái chờ xử lý (Pending). Vui lòng đợi thêm một chút rồi thử lại.",
     "paymentStatusCompleted": "Thanh toán đã được xác nhận thành công. Đang làm mới quyền...",
     "paymentStatusFailed": "Thanh toán thất bại. Vui lòng thử lại hoặc chọn phương thức khác.",
     "noPaymentId": "Không tìm thấy mã thanh toán để kiểm tra trạng thái.",
+    "paymentStatusCheckError": "Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại.",
     "loadError": "Không thể tải dữ liệu. Vui lòng thử lại.",
     "submitReviewSuccess": "Đã gửi đánh giá gói dịch vụ. Cảm ơn bạn!",
     "submitReviewError": "Không thể gửi đánh giá. Vui lòng thử lại."
+  },
+  "features": {
+    "capacity": {
+      "unlimited": "Không giới hạn {{label}}",
+      "max": "Tối đa {{value, number}} {{label}}"
+    },
+    "capacityLabels": {
+      "max_orders": "đơn hàng",
+      "max_products": "sản phẩm",
+      "max_employees": "nhân viên"
+    },
+    "featureLabels": {
+      "has_tasks": "Quản lý công việc nhân viên",
+      "has_loyalty": "Chương trình tích điểm khách hàng",
+      "has_variants": "Sản phẩm có phân loại (size/màu...)",
+      "has_dashboard": "Dashboard bán hàng nâng cao",
+      "has_feedback_qr": "Feedback qua QR trên hóa đơn",
+      "has_gps_checkin": "Chấm công GPS & cảnh báo khoảng cách",
+      "has_multi_store": "Quản lý nhiều chi nhánh",
+      "has_export_excel": "Xuất báo cáo Excel",
+      "has_invite_staff": "Mời nhân viên bằng email",
+      "has_inventory_tickets": "Phiếu nhập / xuất kho",
+      "has_realtime_notifications": "Thông báo realtime"
+    }
   }
 }
 

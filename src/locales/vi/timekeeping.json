@@ -22,7 +22,9 @@
     "notCheckedIn": "Chưa check-in",
     "checkedOut": "Đã check-out",
     "notCheckedOut": "Chưa check-out",
-    "checkInTime": "Giờ check-in:"
+    "checkInTime": "Giờ check-in:",
+    "checkInLabel": "Check-in",
+    "checkOutLabel": "Check-out"
   },
   "map": {
     "title": "Bản đồ cửa hàng (OpenStreetMap)",
@@ -38,7 +40,9 @@
     "title": "Thao tác chấm công",
     "hint": "Hệ thống sẽ sử dụng vị trí GPS hiện tại của bạn. Vui lòng cho phép trình duyệt truy cập Location khi được hỏi.",
     "hintOwnerDisabled": "Chủ cửa hàng không cần chấm công.",
-    "ownerCannotCheckIn": "Chủ cửa hàng không cần check-in/check-out."
+    "ownerCannotCheckIn": "Chủ cửa hàng không cần check-in/check-out.",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out"
   },
   "history": {
     "title": "Lịch sử & tổng quan chấm công",
@@ -54,6 +58,8 @@
     "table": {
       "date": "Ngày",
       "employee": "Nhân viên",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
       "photo": "Ảnh check-in",
       "viewPhoto": "Xem ảnh",
       "noPhoto": "—",
@@ -64,7 +70,8 @@
     "photoModal": {
       "title": "Ảnh check-in",
       "employee": "Nhân viên",
-      "time": "Thời gian"
+      "time": "Thời gian",
+      "imageAlt": "Ảnh selfie check-in"
     }
   },
   "monthly": {

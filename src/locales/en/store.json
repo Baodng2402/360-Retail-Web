@@ -50,5 +50,180 @@
       "toastError": "Unable to create a trial store."
     }
   }
+  ,
+  "storeSelector": {
+    "label": {
+      "selectStore": "Select store",
+      "currentStore": "Current store"
+    },
+    "placeholder": {
+      "selectStore": "Select store"
+    },
+    "description": {
+      "multiStore": "Switch to manage another store's data",
+      "singleStore": "Managing data for {{name}}"
+    },
+    "badges": {
+      "default": "Default",
+      "notActivated": "Not activated"
+    },
+    "toast": {
+      "loadStoresError": "Unable to load stores. Please try again.",
+      "storeNotActivated": "This store is not activated because subscription payment hasn't been completed. Please complete payment when creating the store or contact support.",
+      "switchSuccess": "Switched to store: {{name}}",
+      "trialExpired": "This store's trial has expired. Please purchase a plan before switching to this store.",
+      "subscriptionExpired": "This store's subscription has expired. Please renew before switching to this store.",
+      "switchBlocked": "Unable to switch due to plan limits. Please check the subscription.",
+      "switchError": "Unable to switch store. Please try again."
+    }
+  }
+  ,
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "detail": {
+    "backToList": "Back to store management",
+    "createdAt": "Created at",
+    "address": {
+      "empty": "No address yet"
+    },
+    "phone": {
+      "empty": "No phone number yet"
+    },
+    "gps": {
+      "label": "GPS",
+      "empty": "Not configured"
+    },
+    "subscription": {
+      "title": "Subscription",
+      "badge": "Subscription",
+      "currentPlan": "Current plan",
+      "status": "Status",
+      "endDate": "End date",
+      "remaining": "Remaining",
+      "remainingDays": "{{days, number}} days",
+      "unavailable": "Unable to retrieve subscription status for this store.",
+      "viewOrUpgrade": "View / upgrade plan"
+    },
+    "toast": {
+      "loadError": "Failed to load store details."
+    }
+  }
+  ,
+  "management": {
+    "searchPlaceholder": "Search stores...",
+    "createdAt": "Created",
+    "view": {
+      "grid": "Grid",
+      "list": "List"
+    },
+    "kpis": {
+      "totalStores": "Total stores",
+      "activeStoresTitle": "Active stores",
+      "activeStores": "{{count, number}} active",
+      "inactiveStores": "{{count, number}} paused"
+    },
+    "filters": {
+      "status": {
+        "placeholder": "All statuses",
+        "all": "All"
+      }
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "paused": "Paused"
+    },
+    "actions": {
+      "addStore": "Add store",
+      "pay": "Pay"
+    },
+    "states": {
+      "noStores": "No stores found"
+    },
+    "toggle": {
+      "activate": "Activate",
+      "deactivate": "Deactivate"
+    },
+    "toggleDialog": {
+      "titleDeactivate": "Deactivate store",
+      "titleActivate": "Activate store",
+      "descriptionDeactivate": "Are you sure you want to deactivate store \"{{name}}\"? It will no longer be active after deactivation.",
+      "descriptionActivate": "Are you sure you want to activate store \"{{name}}\"? It will become active again."
+    },
+    "paymentDialog": {
+      "title": "QR payment (SePay)",
+      "description": "Scan the QR code or transfer using the information below to activate the store.",
+      "qrAlt": "SePay payment QR",
+      "fields": {
+        "paymentCode": "Transaction code"
+      },
+      "transfer": {
+        "title": "Bank transfer",
+        "accountNumber": "Account no.",
+        "accountName": "Account name",
+        "amount": "Amount",
+        "content": "Content"
+      },
+      "actions": {
+        "checkPaid": "Paid / Check status"
+      },
+      "toast": {
+        "paid": "Payment successful!",
+        "notYet": "Payment not recorded yet. Please try again later.",
+        "checkFailed": "Unable to check status. Please try again later."
+      }
+    },
+    "toast": {
+      "loadError": "Unable to load stores",
+      "storeNameRequired": "Please enter a store name.",
+      "planRequired": "Please select a plan to create a store.",
+      "createSuccessNeedPay": "Store \"{{name}}\" created. Please complete payment using the information below.",
+      "createSuccessOpeningPayment": "Store \"{{name}}\" created. Opening the payment page.",
+      "createSuccessButPaymentInitFailed": "Store created but payment initialization failed. Please retry from the Subscription page.",
+      "paymentInitFailed": "Unable to initialize payment for the new store. Please retry from the Subscription page.",
+      "createSuccessNoPayment": "Store \"{{name}}\" created. To use it, purchase a subscription plan from the Subscription page.",
+      "createFailed": "Unable to create store.",
+      "updateSuccess": "Store updated successfully!",
+      "updateFailed": "Unable to update store.",
+      "activating": "Activating store \"{{name}}\"...",
+      "deactivating": "Deactivating store \"{{name}}\"...",
+      "activated": "Store \"{{name}}\" activated",
+      "deactivated": "Store \"{{name}}\" deactivated",
+      "toggleFailed": "Unable to update store status",
+      "paymentInitFailedLater": "Unable to initialize payment. Please try again later."
+    }
+  }
+  ,
+  "formDialog": {
+    "titles": {
+      "mandatory": "Create your first store",
+      "edit": "Edit store",
+      "create": "Add store"
+    },
+    "descriptions": {
+      "mandatory": "You need to create at least one store to continue using the system.",
+      "default": "Fill in the store information below."
+    },
+    "fields": {
+      "storeName": "Store name",
+      "address": "Address",
+      "phone": "Phone number",
+      "status": "Status",
+      "plan": "Plan"
+    },
+    "placeholders": {
+      "storeName": "Example: VIPP",
+      "address": "Enter store address...",
+      "phone": "Example: 0789357788",
+      "plan": "Select a plan",
+      "planManual": "Couldn't load plans — enter a planId if you know it"
+    },
+    "planHint": "Select a subscription plan for this store. By default, choose the same plan as your current store.",
+    "planLoading": "Loading plans...",
+    "planLoadError": "Unable to load plans. You can still enter a planId manually if you know it.",
+    "planPrice": "- {{price}}₫ / {{days, number}} days"
+  }
 }
 

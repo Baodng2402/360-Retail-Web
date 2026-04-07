@@ -41,6 +41,7 @@ import {
 } from "@/shared/types/subscription";
 import toast from "react-hot-toast";
 import { StoreFormDialog } from "../components/StoreFormDialog";
+import { useTranslation } from "react-i18next";
 
 interface StoreData extends Store {
   status?: "active" | "inactive";
@@ -70,6 +71,7 @@ const savePendingPayments = (next: PendingStorePayments) => {
 };
 
 const StoreManagementPage = () => {
+  const { t, i18n } = useTranslation(["store", "common"]);
   const navigate = useNavigate();
   const [stores, setStores] = useState<StoreData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -142,10 +144,10 @@ const StoreManagementPage = () => {
         window.open((payment as { paymentUrl: string }).paymentUrl, "_blank");
         return;
       }
-      toast.error("Không khởi tạo được thanh toán. Vui lòng thử lại sau.");
+      toast.error(t("store:management.toast.paymentInitFailedLater"));
     } catch (e) {
       console.error("Retry store payment failed:", e);
-      toast.error("Không khởi tạo được thanh toán. Vui lòng thử lại sau.");
+      toast.error(t("store:management.toast.paymentInitFailedLater"));
     }
   };
 
@@ -188,7 +190,7 @@ const StoreManagementPage = () => {
       console.error("Failed to fetch stores:", error);
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Không thể tải danh sách cửa hàng";
+          ?.data?.message || t("store:management.toast.loadError");
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -237,7 +239,7 @@ const StoreManagementPage = () => {
 
   const handleSaveStore = async () => {
     if (!storeForm.storeName.trim()) {
-      toast.error("Vui lòng nhập tên cửa hàng");
+      toast.error(t("store:management.toast.storeNameRequired"));
       return;
     }
 
@@ -265,10 +267,10 @@ const StoreManagementPage = () => {
               : s,
           ),
         );
-        toast.success("Cập nhật cửa hàng thành công!");
+        toast.success(t("store:management.toast.updateSuccess"));
       } else {
         if (!storeForm.planId.trim()) {
-          toast.error("Vui lòng chọn gói (plan) để tạo cửa hàng.");
+          toast.error(t("store:management.toast.planRequired"));
           return;
         }
         const createResult = await storesApi.createStore({
@@ -304,7 +306,7 @@ const StoreManagementPage = () => {
               setSepayData(payment as SePayPaymentData);
               setSepayDialogOpen(true);
               toast.success(
-                `Tạo cửa hàng "${storeForm.storeName}" thành công. Vui lòng thanh toán theo thông tin bên dưới.`,
+                t("store:management.toast.createSuccessNeedPay", { name: storeForm.storeName }),
                 { duration: 6000 },
               );
             } else if (
@@ -315,13 +317,13 @@ const StoreManagementPage = () => {
             ) {
               const { paymentUrl } = payment as { paymentUrl: string };
               toast.success(
-                `Tạo cửa hàng "${storeForm.storeName}" thành công. Đang mở trang thanh toán.`,
+                t("store:management.toast.createSuccessOpeningPayment", { name: storeForm.storeName }),
                 { duration: 8000 },
               );
               window.open(paymentUrl, "_blank");
             } else {
               toast.error(
-                "Tạo cửa hàng thành công nhưng không khởi tạo được thanh toán. Vui lòng thử lại từ trang Gói dịch vụ.",
+                t("store:management.toast.createSuccessButPaymentInitFailed"),
               );
             }
           } catch (err) {
@@ -333,12 +335,12 @@ const StoreManagementPage = () => {
               (err as {
                 response?: { data?: { message?: string } };
               })?.response?.data?.message ||
-              "Không thể khởi tạo thanh toán cho cửa hàng mới. Vui lòng thử lại từ trang Gói dịch vụ.";
+              t("store:management.toast.paymentInitFailed");
             toast.error(message);
           }
         } else {
           toast.success(
-            `Tạo cửa hàng "${storeForm.storeName}" thành công. Để sử dụng, hãy mua gói dịch vụ cho cửa hàng này trong trang Gói dịch vụ.`,
+            t("store:management.toast.createSuccessNoPayment", { name: storeForm.storeName }),
             { duration: 5000 },
           );
         }
@@ -349,9 +351,10 @@ const StoreManagementPage = () => {
       console.error("Failed to save store:", error);
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || editingStore
-          ? "Không thể cập nhật cửa hàng"
-          : "Không thể tạo cửa hàng";
+          ?.data?.message ||
+        (editingStore
+          ? t("store:management.toast.updateFailed")
+          : t("store:management.toast.createFailed"));
       toast.error(errorMessage);
     } finally {
       setSavingStore(false);
@@ -372,8 +375,8 @@ const StoreManagementPage = () => {
     setToggleDialogOpen(false);
 
     const confirmMessage = newActiveState
-      ? `Đang kích hoạt cửa hàng "${storeToToggle.storeName}"...`
-      : `Đang tạm ngừng cửa hàng "${storeToToggle.storeName}"...`;
+      ? t("store:management.toast.activating", { name: storeToToggle.storeName })
+      : t("store:management.toast.deactivating", { name: storeToToggle.storeName });
 
     const loadingToast = toast.loading(confirmMessage);
 
@@ -402,14 +405,14 @@ const StoreManagementPage = () => {
       toast.dismiss(loadingToast);
       toast.success(
         newActiveState
-          ? `Cửa hàng "${storeToToggle.storeName}" đã được kích hoạt`
-          : `Cửa hàng "${storeToToggle.storeName}" đã được tạm ngừng hoạt động`,
+          ? t("store:management.toast.activated", { name: storeToToggle.storeName })
+          : t("store:management.toast.deactivated", { name: storeToToggle.storeName }),
       );
     } catch (error) {
       console.error("Failed to toggle store active state:", error);
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Không thể cập nhật trạng thái cửa hàng";
+          ?.data?.message || t("store:management.toast.toggleFailed");
 
       toast.dismiss(loadingToast);
       toast.error(errorMessage);
@@ -430,7 +433,7 @@ const StoreManagementPage = () => {
       return (
         <Badge className="bg-green-500 gap-1 min-w-fit flex-shrink-0">
           <CheckCircle className="h-3 w-3" />
-          Hoạt động
+          {t("store:management.status.active")}
         </Badge>
       );
     }
@@ -438,7 +441,7 @@ const StoreManagementPage = () => {
     return (
       <Badge className="bg-gray-500 gap-1 min-w-fit flex-shrink-0">
         <XCircle className="h-3 w-3" />
-        Ngừng hoạt động
+        {t("store:management.status.inactive")}
       </Badge>
     );
   };
@@ -459,7 +462,7 @@ const StoreManagementPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Đang tải...</p>
+        <p className="text-muted-foreground">{t("common:states.loading")}</p>
       </div>
     );
   }
@@ -471,13 +474,13 @@ const StoreManagementPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Tổng cửa hàng
+                {t("store:management.kpis.totalStores")}
               </p>
               <h3 className="text-2xl font-bold text-foreground">
                 {totalStores}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
-                {activeStores} đang hoạt động
+                {t("store:management.kpis.activeStores", { count: activeStores })}
               </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -490,13 +493,13 @@ const StoreManagementPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Cửa hàng đang hoạt động
+                {t("store:management.kpis.activeStoresTitle")}
               </p>
               <h3 className="text-2xl font-bold text-foreground">
                 {activeStores}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
-                {stores.length - activeStores} đã tạm ngừng
+                {t("store:management.kpis.inactiveStores", { count: stores.length - activeStores })}
               </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
@@ -511,7 +514,7 @@ const StoreManagementPage = () => {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Tìm cửa hàng..."
+              placeholder={t("store:management.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -520,18 +523,18 @@ const StoreManagementPage = () => {
 
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="w-full lg:w-[200px]">
-              <SelectValue placeholder="Tất cả trạng thái" />
+              <SelectValue placeholder={t("store:management.filters.status.placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="active">Hoạt động</SelectItem>
-              <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+              <SelectItem value="all">{t("store:management.filters.status.all")}</SelectItem>
+              <SelectItem value="active">{t("store:management.status.active")}</SelectItem>
+              <SelectItem value="inactive">{t("store:management.status.inactive")}</SelectItem>
             </SelectContent>
           </Select>
 
           <Button onClick={handleAddStore} className="gap-2 whitespace-nowrap">
             <Plus className="h-4 w-4" />
-            Thêm cửa hàng
+            {t("store:management.actions.addStore")}
           </Button>
         </div>
 
@@ -541,14 +544,14 @@ const StoreManagementPage = () => {
             size="sm"
             onClick={() => setSelectedView("grid")}
           >
-            Lưới
+            {t("store:management.view.grid")}
           </Button>
           <Button
             variant={selectedView === "list" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedView("list")}
           >
-            Danh sách
+            {t("store:management.view.list")}
           </Button>
         </div>
 
@@ -556,7 +559,7 @@ const StoreManagementPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStores.length === 0 ? (
               <div className="col-span-full text-center text-muted-foreground py-12">
-                Không tìm thấy cửa hàng
+                {t("store:management.states.noStores")}
               </div>
             ) : (
               filteredStores.map((store) => (
@@ -610,9 +613,9 @@ const StoreManagementPage = () => {
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">
-                          Tạo:{" "}
+                          {t("store:management.createdAt")}:{" "}
                           {new Date(store.createdAt).toLocaleDateString(
-                            "vi-VN",
+                            i18n.language,
                           )}
                         </span>
                       </div>
@@ -630,7 +633,7 @@ const StoreManagementPage = () => {
                           className="h-8"
                           onClick={() => void retryPaymentForStore(store.id)}
                         >
-                          Thanh toán
+                          {t("store:management.actions.pay")}
                         </Button>
                       )}
                       <Button
@@ -645,7 +648,7 @@ const StoreManagementPage = () => {
                       </Button>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {store.isActive ? "Hoạt động" : "Tạm dừng"}
+                          {store.isActive ? t("store:management.status.active") : t("store:management.status.paused")}
                         </span>
                         <Switch
                           checked={store.isActive}
@@ -665,7 +668,7 @@ const StoreManagementPage = () => {
             <div className="space-y-4">
               {filteredStores.length === 0 ? (
                 <div className="text-center text-muted-foreground py-12">
-                  Không tìm thấy cửa hàng
+                  {t("store:management.states.noStores")}
                 </div>
               ) : (
                 filteredStores.map((store) => (
@@ -695,7 +698,7 @@ const StoreManagementPage = () => {
                             </h4>
                             {getStatusBadge(store.status || store.isActive)}
                             {store.isDefault && (
-                              <Badge variant="secondary">Mặc định</Badge>
+                              <Badge variant="secondary">{t("store:storeSelector.badges.default")}</Badge>
                             )}
                           </div>
 
@@ -720,9 +723,9 @@ const StoreManagementPage = () => {
                               <div className="flex items-center gap-2 text-sm">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-muted-foreground">
-                                  Tạo:{" "}
+                                  {t("store:management.createdAt")}:{" "}
                                   {new Date(store.createdAt).toLocaleDateString(
-                                    "vi-VN",
+                                    i18n.language,
                                   )}
                                 </span>
                               </div>
@@ -740,7 +743,7 @@ const StoreManagementPage = () => {
                             className="h-8"
                             onClick={() => void retryPaymentForStore(store.id)}
                           >
-                            Thanh toán
+                            {t("store:management.actions.pay")}
                           </Button>
                         )}
                         <Button
@@ -755,7 +758,7 @@ const StoreManagementPage = () => {
                         </Button>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {store.isActive ? "Hoạt động" : "Tạm dừng"}
+                            {store.isActive ? t("store:management.status.active") : t("store:management.status.paused")}
                           </span>
                           <Switch
                             checked={store.isActive}
@@ -790,21 +793,17 @@ const StoreManagementPage = () => {
           <DialogHeader>
             <DialogTitle>
               {storeToToggle?.isActive
-                ? "Tạm ngừng hoạt động cửa hàng"
-                : "Kích hoạt cửa hàng"}
+                ? t("store:management.toggleDialog.titleDeactivate")
+                : t("store:management.toggleDialog.titleActivate")}
             </DialogTitle>
             <DialogDescription>
               {storeToToggle?.isActive ? (
                 <>
-                  Bạn có chắc chắn muốn tạm ngừng hoạt động cửa hàng{" "}
-                  <strong>"{storeToToggle?.storeName}"</strong>? Cửa hàng sẽ
-                  không thể tiếp tục hoạt động sau khi được tạm ngừng.
+                  {t("store:management.toggleDialog.descriptionDeactivate", { name: storeToToggle?.storeName })}
                 </>
               ) : (
                 <>
-                  Bạn có chắc chắn muốn kích hoạt cửa hàng{" "}
-                  <strong>"{storeToToggle?.storeName}"</strong>? Cửa hàng sẽ
-                  được kích hoạt và có thể tiếp tục hoạt động.
+                  {t("store:management.toggleDialog.descriptionActivate", { name: storeToToggle?.storeName })}
                 </>
               )}
             </DialogDescription>
@@ -814,10 +813,10 @@ const StoreManagementPage = () => {
               variant="outline"
               onClick={() => setToggleDialogOpen(false)}
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <Button onClick={confirmToggleStoreActive}>
-              {storeToToggle?.isActive ? "Tạm ngừng" : "Kích hoạt"}
+              {storeToToggle?.isActive ? t("store:management.toggle.deactivate") : t("store:management.toggle.activate")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -826,9 +825,9 @@ const StoreManagementPage = () => {
       <Dialog open={sepayDialogOpen} onOpenChange={setSepayDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Thanh toán QR (SePay)</DialogTitle>
+            <DialogTitle>{t("store:management.paymentDialog.title")}</DialogTitle>
             <DialogDescription>
-              Quét mã hoặc chuyển khoản theo thông tin bên dưới để kích hoạt cửa hàng.
+              {t("store:management.paymentDialog.description")}
             </DialogDescription>
           </DialogHeader>
           {sepayData ? (
@@ -836,21 +835,21 @@ const StoreManagementPage = () => {
               <div className="flex justify-center">
                 <img
                   src={sepayData.qrCodeUrl}
-                  alt="QR thanh toán SePay"
+                  alt={t("store:management.paymentDialog.qrAlt")}
                   className="w-48 h-48 object-contain border rounded-lg"
                 />
               </div>
               <div className="rounded-lg border bg-muted/50 p-3 space-y-1 text-sm">
-                <p className="font-mono text-xs text-muted-foreground">Mã GD</p>
+                <p className="font-mono text-xs text-muted-foreground">{t("store:management.paymentDialog.fields.paymentCode")}</p>
                 <span className="font-mono">{sepayData.paymentCode}</span>
               </div>
               <div className="rounded-lg border p-3 space-y-2 text-sm">
-                <p className="font-medium">Chuyển khoản</p>
+                <p className="font-medium">{t("store:management.paymentDialog.transfer.title")}</p>
                 <p>{sepayData.bankInfo.bankName}</p>
-                <p>STK: {sepayData.bankInfo.accountNumber}</p>
-                <p>Chủ TK: {sepayData.bankInfo.accountName}</p>
-                <p>Số tiền: {formatPriceVnd(sepayData.bankInfo.amount)}</p>
-                <p>Nội dung: {sepayData.bankInfo.content}</p>
+                <p>{t("store:management.paymentDialog.transfer.accountNumber")}: {sepayData.bankInfo.accountNumber}</p>
+                <p>{t("store:management.paymentDialog.transfer.accountName")}: {sepayData.bankInfo.accountName}</p>
+                <p>{t("store:management.paymentDialog.transfer.amount")}: {formatPriceVnd(sepayData.bankInfo.amount)}</p>
+                <p>{t("store:management.paymentDialog.transfer.content")}: {sepayData.bankInfo.content}</p>
               </div>
               {sepayData.instruction && (
                 <p className="text-xs text-muted-foreground">
@@ -864,7 +863,7 @@ const StoreManagementPage = () => {
                   try {
                     const status = await subscriptionApi.getPaymentStatus(lastPaymentId);
                     if (status.status === "Completed" || status.status === "Paid") {
-                      toast.success("Thanh toán thành công!");
+                      toast.success(t("store:management.paymentDialog.toast.paid"));
                       setSepayDialogOpen(false);
                       setSepayData(null);
                       // Xóa pending payment nếu tìm được storeId tương ứng
@@ -875,18 +874,18 @@ const StoreManagementPage = () => {
                       setLastPaymentId(null);
                       await fetchStores();
                     } else {
-                      toast("Chưa ghi nhận thanh toán. Vui lòng thử lại sau.");
+                      toast(t("store:management.paymentDialog.toast.notYet"));
                     }
                   } catch {
-                    toast.error("Không kiểm tra được trạng thái. Thử lại sau.");
+                    toast.error(t("store:management.paymentDialog.toast.checkFailed"));
                   }
                 }}
               >
-                Đã thanh toán / Kiểm tra
+                {t("store:management.paymentDialog.actions.checkPaid")}
               </Button>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Đang tải thông tin...</p>
+            <p className="text-sm text-muted-foreground">{t("common:states.loading")}</p>
           )}
         </DialogContent>
       </Dialog>

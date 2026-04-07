@@ -63,5 +63,21 @@
   },
   "personalInfo": {
     "title": "Thông tin cá nhân"
+  },
+  "editForm": {
+    "actions": {
+      "edit": "Sửa thông tin"
+    },
+    "fields": {
+      "fullName": "Họ và tên",
+      "email": "Email",
+      "phone": "Điện thoại",
+      "role": "Vai trò"
+    },
+    "emailReadonly": "Email không thể thay đổi",
+    "toast": {
+      "success": "Cập nhật thông tin thành công!",
+      "error": "Cập nhật thất bại. Vui lòng thử lại."
+    }
   }
 }

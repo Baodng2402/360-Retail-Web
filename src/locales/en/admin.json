@@ -16,12 +16,19 @@
       "title": "SuperAdmin",
       "subtitle": "System administration area."
     },
-    "logout": "Sign out"
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "logout": "Sign out",
+    "userAlt": "User"
   },
   "sidebar": {
     "brand": {
       "title": "SuperAdmin",
       "subtitle": "System Console"
+    },
+    "toggle": {
+      "expand": "Expand sidebar",
+      "collapse": "Collapse sidebar"
     },
     "nav": {
       "dashboard": {
@@ -54,6 +61,17 @@
       }
     }
   },
+  "common": {
+    "id": "ID",
+    "createdAt": "Created at"
+  },
+  "roles": {
+    "storeOwner": "StoreOwner",
+    "manager": "Manager",
+    "staff": "Staff",
+    "customer": "Customer",
+    "potentialOwner": "PotentialOwner"
+  },
   "stores": {
     "title": "Stores management",
     "badge": "SuperAdmin",
@@ -64,14 +82,114 @@
       "name": "Store name",
       "address": "Address",
       "phone": "Phone",
+      "owner": "Owner",
+      "plan": "Plan",
+      "subStatus": "Sub status",
+      "endDate": "End date",
       "status": "Status",
-      "createdAt": "Created at"
+      "createdAt": "Created at",
+      "raw": "Raw"
     },
     "status": {
       "active": "Active",
       "inactive": "Inactive"
     },
-    "noData": "No stores."
+    "noData": "No stores.",
+    "rawTitle": "Store raw: {{id}}",
+    "rawDialogDefaultTitle": "Raw JSON"
+  },
+  "storeDetail": {
+    "backToList": "Back to stores",
+    "toast": {
+      "loadError": "Failed to load store information."
+    },
+    "sections": {
+      "addressAndContact": "Address & contact",
+      "subscription": "Subscription"
+    },
+    "address": {
+      "empty": "No address yet"
+    },
+    "phone": {
+      "empty": "No phone number yet"
+    },
+    "gps": {
+      "label": "GPS",
+      "empty": "Not configured"
+    },
+    "subscription": {
+      "currentPlan": "Current plan",
+      "unknown": "Unknown",
+      "status": "Status",
+      "endDate": "End date",
+      "empty": "No subscription data for this store, or you don't have permission to view it."
+    },
+    "peopleAndPermissions": {
+      "title": "People & permissions",
+      "badge": "SuperAdmin view",
+      "description": "This section summarizes staff and store-level access to support quick operational checks."
+    }
+  },
+  "superAdminLegacy": {
+    "header": {
+      "title": "Plan Reviews & system",
+      "subtitle": "Monitor SaaS plan reviews and quickly check subscription expiry."
+    },
+    "actions": {
+      "checkExpiry": "Check Expiry"
+    },
+    "users": {
+      "title": "System users",
+      "states": {
+        "loading": "Loading users...",
+        "empty": "No user data (or you don't have permission)."
+      }
+    },
+    "reviews": {
+      "title": "SaaS plan reviews",
+      "states": {
+        "empty": "No reviews yet, or you don't have permission to view them."
+      }
+    },
+    "plans": {
+      "title": "Available SaaS plans",
+      "states": {
+        "empty": "Unable to load plans."
+      },
+      "durationDays": "{{days}} days"
+    },
+    "userDialog": {
+      "titleCreate": "Create new user",
+      "titleEdit": "Edit user",
+      "descriptionCreate": "Create a new account with the specified role.",
+      "descriptionEdit": "Update user information.",
+      "fields": {
+        "email": "Email",
+        "password": "Password",
+        "fullName": "Full name",
+        "phoneNumber": "Phone number",
+        "role": "Role"
+      },
+      "placeholders": {
+        "email": "user@example.com",
+        "password": "Password...",
+        "fullName": "John Doe",
+        "phoneNumber": "0912345678"
+      }
+    },
+    "deleteDialog": {
+      "title": "Confirm user deletion",
+      "description": "Are you sure you want to delete {{name}}? This action cannot be undone."
+    },
+    "toast": {
+      "createUserSuccess": "User created successfully.",
+      "updateUserSuccess": "User updated successfully.",
+      "saveUserError": "Failed to save user.",
+      "deleteUserSuccess": "User deleted.",
+      "deleteUserError": "Failed to delete user.",
+      "checkExpirySuccess": "Warning emails have been sent for subscriptions that are about to expire.",
+      "checkExpiryError": "Expiry check failed."
+    }
   },
   "dashboard": {
     "badge": "SuperAdmin",
@@ -80,6 +198,7 @@
       "from": "From",
       "to": "To",
       "groupBy": "Group by",
+      "selectPlaceholder": "Select...",
       "groupByOptions": {
         "day": "Day",
         "week": "Week",
@@ -87,6 +206,16 @@
       },
       "refresh": "Refresh",
       "refreshLoading": "Loading"
+    },
+    "formats": {
+      "monthLabel": "M{{month}}/{{year}}",
+      "weekLabel": "Week {{week}}/{{year}}"
+    },
+    "validation": {
+      "fromDateNotAfterToday": "Start date cannot be later than today.",
+      "fromDateNotAfterToDate": "Start date cannot be later than end date.",
+      "toDateNotAfterToday": "End date cannot be later than today.",
+      "toDateNotBeforeFromDate": "End date cannot be earlier than start date."
     },
     "kpis": {
       "totalRevenue": "Total revenue",
@@ -101,6 +230,10 @@
         "day": "Revenue trend by day",
         "week": "Revenue trend by week",
         "month": "Revenue trend by month"
+      },
+      "growth": {
+        "upLabel": "12-month growth",
+        "downLabel": "12-month decline"
       }
     },
     "revenueChart": {
@@ -135,8 +268,20 @@
       "badge": "Registrations",
       "label": "Registrations"
     },
+    "storeStatus": {
+      "active": "Active",
+      "trial": "Trial",
+      "expired": "Expired"
+    },
+    "storeStatusSection": {
+      "title": "Store status",
+      "badge": "Overview",
+      "valueLabel": "Stores"
+    },
     "states": {
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "noRevenueData": "No revenue data in the selected range.",
+      "noStoreData": "No store data."
     },
     "toast": {
       "loadError": "Failed to load SuperAdmin dashboard data."
@@ -152,7 +297,10 @@
       "status": "Status",
       "all": "All",
       "search": "Search",
-      "searchPlaceholder": "Search by store, plan, transaction..."
+      "searchPlaceholder": "Search by store, plan, transaction...",
+      "statusCompleted": "Completed",
+      "statusPending": "Pending",
+      "statusFailed": "Failed"
     },
     "actions": {
       "thisMonth": "This month",
@@ -181,8 +329,362 @@
       "loadError": "Failed to load monthly revenue data."
     }
   },
+  "paymentsPage": {
+    "badge": "SuperAdmin",
+    "caption": "Payments list",
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "status": "Status",
+      "search": "Search",
+      "searchPlaceholder": "Search by store, plan, id..."
+    },
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "refresh": "Refresh"
+    },
+    "list": {
+      "title": "Payments"
+    },
+    "columns": {
+      "store": "Store",
+      "plan": "Plan",
+      "status": "Status",
+      "amount": "Amount",
+      "createdPaid": "Created/Paid",
+      "raw": "Raw"
+    },
+    "rawTitle": "Payment raw: {{id}}",
+    "rawDialogDefaultTitle": "Raw JSON",
+    "pagination": {
+      "summary": "Showing {{from}} - {{to}} of {{total}} payments",
+      "prev": "Previous",
+      "next": "Next",
+      "page": "Page {{page}} / {{totalPages}}"
+    },
+    "toast": {
+      "loadError": "Failed to load payments."
+    }
+  },
+  "reviewDetail": {
+    "backToList": "Back to reviews",
+    "reviewId": "Review ID",
+    "fields": {
+      "storeId": "Store ID",
+      "planId": "Plan ID",
+      "userId": "User ID",
+      "created": "Created",
+      "content": "Content"
+    },
+    "moderation": {
+      "title": "Moderation",
+      "delete": "Delete review",
+      "deleting": "Deleting..."
+    },
+    "rawTitle": "Review raw: {{id}}",
+    "toast": {
+      "notFound": "Review not found.",
+      "loadError": "Failed to load review details."
+    }
+  },
+  "paymentDetail": {
+    "backToList": "Back to payments",
+    "fields": {
+      "amount": "Amount",
+      "provider": "Provider",
+      "paymentDate": "Payment date",
+      "transaction": "Transaction"
+    },
+    "currentStatus": {
+      "title": "Current payment status",
+      "status": "Status",
+      "unavailable": "Unable to fetch payment status."
+    },
+    "status": {
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "summary": {
+      "title": "Transaction summary",
+      "status": "Status",
+      "amount": "Amount",
+      "provider": "Provider"
+    },
+    "rawTitle": "Payment raw: {{id}}",
+    "toast": {
+      "notFound": "Payment not found.",
+      "loadError": "Failed to load payment details."
+    }
+  },
+  "subscriptionsPage": {
+    "badge": "SuperAdmin",
+    "caption": "Subscriptions (list / cancel / extend)",
+    "filters": {
+      "status": "Status",
+      "plan": "Plan",
+      "search": "Search",
+      "searchPlaceholder": "Search by store, plan, id..."
+    },
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "trial": "Trial",
+      "expired": "Expired",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "extend": "Extend",
+      "cancel": "Cancel"
+    },
+    "list": {
+      "title": "Subscriptions"
+    },
+    "columns": {
+      "store": "Store",
+      "plan": "Plan",
+      "status": "Status",
+      "start": "Start",
+      "end": "End",
+      "daysLeft": "Days left",
+      "actions": "Actions",
+      "raw": "Raw"
+    },
+    "rawTitle": "Subscription raw: {{id}}",
+    "rawDialogDefaultTitle": "Raw JSON",
+    "pagination": {
+      "summary": "Showing {{from}} - {{to}} of {{total}} subscriptions",
+      "prev": "Previous",
+      "next": "Next",
+      "page": "Page {{page}} / {{totalPages}}"
+    },
+    "dialog": {
+      "cancelTitle": "Cancel subscription",
+      "extendTitle": "Extend subscription",
+      "description": "Confirm your action for the selected subscription.",
+      "daysLabel": "Extension days",
+      "daysPlaceholder": "30"
+    },
+    "toast": {
+      "loadError": "Failed to load subscriptions.",
+      "missingId": "Cannot determine subscription id.",
+      "cancelSuccess": "Subscription cancelled.",
+      "extendSuccess": "Subscription extended.",
+      "extendSuccessWithDate": "Extended. New end date: {{date}}",
+      "actionFailed": "Action failed."
+    }
+  },
+  "subscriptionDetail": {
+    "backToList": "Back to subscriptions",
+    "daysLeft": "{{days}} days left",
+    "fields": {
+      "id": "ID",
+      "planPrice": "Plan price",
+      "start": "Start",
+      "end": "End"
+    },
+    "actions": {
+      "title": "Actions",
+      "cancel": "Cancel",
+      "extend": "Extend",
+      "reload": "Reload",
+      "rawJson": "Raw JSON",
+      "daysPlaceholder": "30"
+    },
+    "summary": {
+      "title": "Subscription summary",
+      "currentStatus": "Current status",
+      "period": "Period",
+      "remaining": "Remaining",
+      "days": "days"
+    },
+    "rawTitle": "Subscription raw: {{id}}",
+    "toast": {
+      "notFoundInList": "Subscription not found in the current list.",
+      "loadError": "Failed to load subscription detail.",
+      "cancelSuccess": "Subscription cancelled.",
+      "cancelError": "Failed to cancel subscription.",
+      "extendSuccess": "Subscription extended.",
+      "extendSuccessWithDate": "Extended until {{date}}",
+      "extendError": "Failed to extend subscription."
+    }
+  },
+  "reviewsPage": {
+    "filters": {
+      "rating": "Rating",
+      "all": "All",
+      "search": "Search",
+      "searchPlaceholder": "Search by store, plan, content..."
+    },
+    "actions": {
+      "refresh": "Refresh"
+    },
+    "dashboard": {
+      "title": "Review dashboard",
+      "badge": "Overview",
+      "totalReviews": "Total reviews",
+      "avgRating": "Avg rating",
+      "thisMonth": "This month"
+    },
+    "pagination": {
+      "title": "Pagination",
+      "page": "Page {{page}} / {{totalPages}}",
+      "prev": "Prev",
+      "next": "Next",
+      "total": "Total: {{total}}"
+    },
+    "list": {
+      "title": "Reviews list",
+      "count": "{{count}} items (page)"
+    },
+    "columns": {
+      "store": "Store",
+      "plan": "Plan",
+      "rating": "Rating",
+      "content": "Content",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "toast": {
+      "deleteSuccess": "Review deleted.",
+      "deleteError": "Failed to delete review."
+    }
+  },
+  "plansPage": {
+    "caption": "Plan management (CRUD)",
+    "searchPlaceholder": "Search by name or id...",
+    "actions": {
+      "create": "Create plan"
+    },
+    "list": {
+      "title": "Plans"
+    },
+    "states": {
+      "noPlans": "No plans yet."
+    },
+    "columns": {
+      "name": "Name",
+      "price": "Price",
+      "duration": "Duration",
+      "status": "Status",
+      "activeSubs": "Active subs",
+      "actions": "Actions"
+    },
+    "durationDays": "{{days}} days",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "pagination": {
+      "summary": "Showing {{from}} - {{to}} of {{total}} plans",
+      "prev": "Previous",
+      "next": "Next",
+      "page": "Page {{page}} / {{totalPages}}"
+    },
+    "dialog": {
+      "titleCreate": "Create plan",
+      "titleEdit": "Update plan",
+      "description": "Update plan information and feature configuration.",
+      "fields": {
+        "name": "Plan name",
+        "price": "Price (VND)",
+        "durationDays": "Duration (days)",
+        "features": "Feature flags configuration"
+      },
+      "placeholders": {
+        "name": "Pro",
+        "price": "199000",
+        "durationDays": "30"
+      },
+      "sections": {
+        "limits": "Limits",
+        "features": "Features"
+      },
+      "limits": {
+        "maxOrders": "Max orders",
+        "maxProducts": "Max products",
+        "maxEmployees": "Max employees"
+      },
+      "featureFlags": {
+        "has_dashboard": "Overview dashboard",
+        "has_tasks": "Task management",
+        "has_loyalty": "Loyalty points",
+        "has_variants": "Product variants",
+        "has_feedback_qr": "QR feedback",
+        "has_gps_checkin": "GPS check-in",
+        "has_multi_store": "Multi-store",
+        "has_export_excel": "Export Excel",
+        "has_invite_staff": "Invite staff",
+        "has_inventory_tickets": "Inventory tickets",
+        "has_realtime_notifications": "Realtime notifications"
+      },
+      "keepExtrasHint": "Advanced configuration fields (if present) are kept unchanged when saving."
+    },
+    "deactivateDialog": {
+      "title": "Deactivate plan",
+      "description": "Are you sure you want to deactivate {{name}}?",
+      "confirm": "Deactivate"
+    },
+    "toast": {
+      "loadError": "Failed to load plans.",
+      "createSuccess": "Plan created.",
+      "updateSuccess": "Plan updated.",
+      "saveError": "Failed to save plan.",
+      "deactivateSuccess": "Plan deactivated.",
+      "deactivateError": "Failed to deactivate plan."
+    }
+  },
+  "planDetail": {
+    "backToList": "Back to plans",
+    "activeSubs": "Active subs: {{count, number}}",
+    "sections": {
+      "pricing": "Pricing",
+      "metadata": "Metadata"
+    },
+    "fields": {
+      "id": "ID",
+      "price": "Price",
+      "duration": "Duration",
+      "created": "Created",
+      "isActive": "Is active"
+    },
+    "actions": {
+      "featuresJson": "Features JSON"
+    },
+    "preview": {
+      "title": "Features (preview)",
+      "readOnly": "Read-only",
+      "fullHint": "See full details in “Features JSON”.",
+      "noFeatures": "No feature data."
+    },
+    "rawTitle": "Plan features: {{name}}",
+    "toast": {
+      "loadError": "Failed to load plan detail."
+    }
+  },
+  "userDetail": {
+    "roles": "Roles",
+    "storeSection": {
+      "title": "User store",
+      "daysRemaining": "{{days}} days remaining",
+      "noStore": "No store associated."
+    },
+    "notes": {
+      "title": "SuperAdmin notes",
+      "badge": "System view",
+      "description": "Quickly review roles, activation status, and associated store/subscription details to support user administration."
+    }
+  },
   "users": {
     "badge": "SuperAdmin",
+    "caption": "User Management",
+    "count": "{{count}} user",
     "caption": "User Management",
     "description": "CRUD via identity/super-admin/users",
     "searchPlaceholder": "Search by email or id...",
@@ -204,13 +706,18 @@
     "pagination": {
       "summary": "Showing {{from}} - {{to}} of {{total}} users",
       "prev": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "page": "Page {{page}} / {{totalPages}}"
     },
     "dialog": {
       "titleCreate": "Create user",
       "titleEdit": "Update user",
       "descriptionCreate": "Create a new user (SuperAdmin role is not allowed here).",
       "descriptionEdit": "Update activation/status. Current role/email are not changed by this API.",
+      "placeholders": {
+        "email": "new@example.com",
+        "password": "Password123!"
+      },
       "fields": {
         "email": "Email",
         "password": "Password",
@@ -234,7 +741,8 @@
       "updateSuccess": "User updated.",
       "deleteSuccess": "User deleted.",
       "saveError": "Failed to save user.",
-      "deleteError": "Failed to delete user."
+      "deleteError": "Failed to delete user.",
+      "softDeleteSuccess": "User deactivated (soft delete)."
     }
   },
   "profile": {

@@ -17,7 +17,9 @@
     "stockOut": "Xuất kho",
     "cancel": "Hủy",
     "confirm": "Xác nhận",
-    "completeOrder": "Hoàn tất đơn"
+    "completeOrder": "Hoàn tất đơn",
+    "addToCart": "Thêm vào giỏ hàng",
+    "add": "Thêm"
   },
   "states": {
     "loadingProducts": "Đang tải sản phẩm...",
@@ -51,7 +53,8 @@
     "noProductSelected": "Chưa chọn sản phẩm",
     "currentStock": "Tồn kho hiện tại: {{stock}}",
     "amountLabel": "Số lượng {{mode}}",
-    "amountPlaceholder": "Nhập số lượng..."
+    "amountPlaceholder": "Nhập số lượng...",
+    "ticketNote": "{{mode}} kho: {{name}}"
   },
   "confirmRemoveLast": {
     "title": "Xóa sản phẩm cuối cùng",
@@ -70,11 +73,23 @@
     "stockInSuccess": "Nhập kho thành công!",
     "stockOutSuccess": "Xuất kho thành công!",
     "stockOperationFailed": "Không thể thực hiện thao tác kho"
+    ,
+    "addToCart": "Đã thêm {{qty, number}} × {{name}} vào giỏ",
+    "variantOutOfStock": "{{variant}}: chỉ còn {{stock, number}} sản phẩm",
+    "addVariantsToCart": "Đã thêm {{count, number}} biến thể vào giỏ",
+    "noVariantsToAdd": "Không có biến thể nào để thêm"
   },
   "misc": {
     "uncategorized": "Chưa phân loại",
     "productAlt": "Sản phẩm",
-    "left": "còn {{count}}"
+    "left": "còn {{count}}",
+    "outOfStock": "Hết hàng",
+    "inStock": "{{count, number}} tồn",
+    "variants": "Biến thể",
+    "chooseVariant": "Chọn biến thể",
+    "variant": "Biến thể",
+    "sku": "SKU",
+    "dash": "—"
   },
   "reports": {
     "title": "Sản phẩm bán chạy",
@@ -84,6 +99,10 @@
     "revenueLegend": "Doanh thu",
     "avgPrice": "Giá TB",
     "quantitySold": "Số lượng"
+  }
+  ,
+  "variantPicker": {
+    "description": "Nhập số lượng cho từng biến thể muốn thêm vào giỏ"
   }
 }
 

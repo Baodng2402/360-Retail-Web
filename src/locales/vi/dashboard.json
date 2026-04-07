@@ -53,7 +53,7 @@
       },
       "subscription": {
         "label": "Gói dịch vụ",
-        "subLabel": "Subscription"
+        "subLabel": "Gói dịch vụ"
       },
       "settings": {
         "label": "Cài đặt",
@@ -202,7 +202,8 @@
         "addressLabel": "Địa chỉ",
         "addressPlaceholder": "Nhập địa chỉ...",
         "addressSuggesting": "Đang gợi ý địa chỉ...",
-        "phoneLabel": "Số điện thoại"
+        "phoneLabel": "Số điện thoại",
+        "phonePlaceholder": "Nhập số điện thoại..."
       },
       "gps": {
         "mapPreviewLabel": "Vị trí GPS (xem bản đồ)",
@@ -357,6 +358,140 @@
       "today": "Hôm nay",
       "days7": "7 ngày",
       "days30": "30 ngày"
+    }
+  }
+  ,
+  "quickModals": {
+    "newSale": {
+      "title": "Tạo đơn hàng nhanh",
+      "description": "Tìm kiếm và chọn sản phẩm để tạo đơn hàng",
+      "fields": {
+        "search": "Tìm sản phẩm",
+        "product": "Sản phẩm",
+        "variant": "Biến thể (Size/Màu)",
+        "quantity": "Số lượng"
+      },
+      "placeholders": {
+        "search": "Tìm theo tên hoặc mã sản phẩm...",
+        "product": "Chọn sản phẩm",
+        "variant": "Chọn biến thể"
+      },
+      "states": {
+        "loadingProducts": "Đang tải sản phẩm...",
+        "noProducts": "Không có sản phẩm"
+      },
+      "badges": {
+        "hasVariants": "(có biến thể)"
+      },
+      "variantStock": "Tồn: {{stock}}",
+      "summary": {
+        "price": "Giá bán",
+        "total": "Tổng tiền"
+      },
+      "actions": {
+        "submit": "Tạo đơn hàng",
+        "creating": "Đang tạo..."
+      },
+      "toast": {
+        "currentStoreError": "Không thể lấy thông tin cửa hàng hiện tại.",
+        "loadProductsError": "Không thể tải danh sách sản phẩm.",
+        "productRequired": "Vui lòng chọn sản phẩm",
+        "variantRequired": "Vui lòng chọn biến thể cụ thể",
+        "quantityInvalid": "Số lượng phải lớn hơn 0",
+        "createSuccess": "Đã tạo đơn hàng nhanh thành công!",
+        "createError": "Không thể tạo đơn hàng nhanh. Vui lòng thử lại."
+      }
+    },
+    "staffCheckIn": {
+      "title": "Chấm công nhân viên",
+      "description": "Chấm công đầu giờ hoặc kết thúc ca làm việc",
+      "fields": {
+        "staff": "Nhân viên",
+        "action": "Hành động"
+      },
+      "placeholders": {
+        "staff": "Chọn nhân viên"
+      },
+      "actionOptions": {
+        "in": "Check In / Vào ca",
+        "out": "Check Out / Kết thúc ca"
+      },
+      "actions": {
+        "checkIn": "check-in",
+        "checkOut": "check-out"
+      },
+      "currentTime": "Thời gian hiện tại",
+      "toast": {
+        "currentStoreError": "Không thể lấy thông tin cửa hàng.",
+        "loadStaffError": "Không thể tải danh sách nhân viên.",
+        "staffRequired": "Vui lòng chọn nhân viên",
+        "success": "Đã {{action}} thành công lúc {{time}}!",
+        "error": "Không thể chấm công. Vui lòng thử lại."
+      }
+    },
+    "feedback": {
+      "title": "Gửi phản hồi",
+      "description": "Chia sẻ ý kiến của bạn để chúng tôi cải thiện dịch vụ",
+      "fields": {
+        "rating": "Đánh giá",
+        "content": "Nội dung phản hồi"
+      },
+      "ratingSummary": "{{rating}}/5 sao",
+      "placeholders": {
+        "content": "Nhập nội dung phản hồi của bạn..."
+      },
+      "actions": {
+        "submit": "Gửi phản hồi",
+        "submitting": "Đang gửi..."
+      },
+      "toast": {
+        "contentRequired": "Vui lòng nhập nội dung phản hồi",
+        "success": "Gửi phản hồi thành công!",
+        "error": "Không thể gửi phản hồi. Vui lòng thử lại."
+      }
+    },
+    "report": {
+      "title": "Tạo báo cáo",
+      "description": "Chọn loại báo cáo và khoảng thời gian",
+      "fields": {
+        "type": "Loại báo cáo",
+        "from": "Từ ngày",
+        "to": "Đến ngày",
+        "format": "Định dạng xuất"
+      },
+      "placeholders": {
+        "type": "Chọn loại báo cáo"
+      },
+      "types": {
+        "sales": "Báo cáo doanh số",
+        "inventory": "Báo cáo tồn kho",
+        "staff": "Hiệu suất nhân viên",
+        "customer": "Báo cáo khách hàng"
+      },
+      "actions": {
+        "submit": "Tạo báo cáo"
+      },
+      "toast": {
+        "required": "Vui lòng điền đầy đủ thông tin",
+        "generating": "Đang tạo báo cáo... Bạn sẽ nhận được file qua email!"
+      }
+    }
+  }
+  ,
+  "recentTransactions": {
+    "title": "Giao dịch gần đây",
+    "subtitle": "Các giao dịch mới nhất",
+    "actions": {
+      "viewAll": "Xem tất cả"
+    },
+    "states": {
+      "empty": "Chưa có giao dịch nào"
+    },
+    "time": {
+      "yesterday": "Hôm qua",
+      "minutesAgo": "{{count, number}} phút trước",
+      "hoursAgo": "{{count, number}} giờ trước",
+      "daysAgo": "{{count, number}} ngày trước"
     }
   }
 }

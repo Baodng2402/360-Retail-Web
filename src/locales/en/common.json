@@ -1,6 +1,51 @@
 {
   "appName": "360 Retail",
   "smePlatform": "SME Platform",
+  "language": {
+    "ariaLabel": "Language",
+    "label": "Language",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+  },
+  "pages": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are trying to access does not exist or has been moved."
+    },
+    "unauthorized": {
+      "title": "Access denied",
+      "description": "Your account is not permitted to access this page.",
+      "backToLogin": "Back to Login"
+    },
+    "loyaltyCheck": {
+      "badges": {
+        "loyalty": "Loyalty",
+        "public": "Public"
+      },
+      "title": "Check loyalty points",
+      "subtitle": "Enter a phone number to view customer name, points, and tier.",
+      "storeLabel": "Store",
+      "phoneLabel": "Phone number",
+      "actions": {
+        "search": "Search",
+        "searching": "Searching..."
+      },
+      "result": {
+        "title": "Result",
+        "customerLabel": "Customer",
+        "totalPointsLabel": "Total points"
+      },
+      "states": {
+        "emptyHint": "No data yet. Please enter a phone number to search."
+      },
+      "errors": {
+        "missingStoreId": "Missing storeId in the URL. Please scan the correct QR or check the link.",
+        "invalidStoreId": "Invalid storeId.",
+        "phoneRequired": "Please enter a phone number.",
+        "lookupFailed": "Lookup failed."
+      }
+    }
+  },
   "actions": {
     "save": "Save",
     "saveChanges": "Save changes",
@@ -11,6 +56,10 @@
     "backToLogin": "Back to Login",
     "confirm": "Confirm",
     "retry": "Retry",
+    "reload": "Reload",
+    "reset": "Reset",
+    "copyJson": "Copy JSON",
+    "rawJson": "Raw JSON",
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create"
@@ -35,7 +84,17 @@
   },
   "toast": {
     "unknownError": "An unexpected error occurred. Please try again.",
-    "networkError": "Cannot connect to server. Please check your network."
+    "networkError": "Cannot connect to server. Please check your network.",
+    "copyJsonSuccess": "JSON copied.",
+    "copyFailed": "Copy failed.",
+    "loyaltyLookupError": "Unable to retrieve loyalty points."
+  },
+  "boolean": {
+    "true": "true",
+    "false": "false"
+  },
+  "jsonViewer": {
+    "raw": "Raw"
   }
 }
 

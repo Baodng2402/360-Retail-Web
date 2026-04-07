@@ -51,11 +51,11 @@ const getNum = (o: Record<string, unknown>, keys: string[]) => {
   return 0;
 };
 
-const formatRevenueLabel = (label: string, groupBy: SuperAdminGroupBy) => {
+const formatRevenueLabel = (label: string, groupBy: SuperAdminGroupBy, t: (key: string, options?: Record<string, unknown>) => string) => {
   if (!label) return label;
   if (groupBy === "month" && /^\d{4}-\d{2}$/.test(label)) {
     const [year, month] = label.split("-");
-    return `T${Number(month)}/${year}`;
+    return t("dashboard.formats.monthLabel", { month: Number(month), year });
   }
   if (groupBy === "day" && /^\d{4}-\d{2}-\d{2}$/.test(label)) {
     const [, month, day] = label.split("-");
@@ -63,7 +63,7 @@ const formatRevenueLabel = (label: string, groupBy: SuperAdminGroupBy) => {
   }
   if (groupBy === "week" && /^\d{4}-W\d{1,2}$/.test(label)) {
     const [year, week] = label.split("-W");
-    return `Tuần ${Number(week)}/${year}`;
+    return t("dashboard.formats.weekLabel", { week: Number(week), year });
   }
   return label;
 };
@@ -79,6 +79,8 @@ const getThisMonthRange = () => {
 
 export default function AdminRevenuePage() {
   const { t } = useTranslation("admin");
+  const tAny = (key: string, options?: Record<string, unknown>) =>
+    String(t(key as never, options as never));
 
   const [groupBy, setGroupBy] = useState<SuperAdminGroupBy>("month");
   const [status, setStatus] = useState<PaymentStatusFilter>("Completed");
@@ -185,7 +187,7 @@ export default function AdminRevenuePage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
-                SuperAdmin
+                {t("sidebar.brand.title")}
               </Badge>
               <span className="text-sm text-muted-foreground">{t("revenuePage.caption")}</span>
             </div>
@@ -218,7 +220,7 @@ export default function AdminRevenuePage() {
                 onValueChange={(v) => setGroupBy(v as SuperAdminGroupBy)}
               >
                 <SelectTrigger className="bg-background/80 backdrop-blur-sm">
-                  <SelectValue placeholder="Chọn..." />
+                  <SelectValue placeholder={t("dashboard.filters.selectPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {groupByOptions.map((opt) => (
@@ -233,12 +235,12 @@ export default function AdminRevenuePage() {
               <div className="text-xs text-muted-foreground">{t("revenuePage.filters.status")}</div>
               <Select value={status} onValueChange={(v) => setStatus(v as PaymentStatusFilter)}>
                 <SelectTrigger className="bg-background/80 backdrop-blur-sm">
-                  <SelectValue placeholder="Chọn..." />
+                  <SelectValue placeholder={t("dashboard.filters.selectPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Failed">Failed</SelectItem>
+                  <SelectItem value="Completed">{t("revenuePage.filters.statusCompleted")}</SelectItem>
+                  <SelectItem value="Pending">{t("revenuePage.filters.statusPending")}</SelectItem>
+                  <SelectItem value="Failed">{t("revenuePage.filters.statusFailed")}</SelectItem>
                   <SelectItem value="all">{t("revenuePage.filters.all")}</SelectItem>
                 </SelectContent>
               </Select>
@@ -347,7 +349,7 @@ export default function AdminRevenuePage() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(value: string) => formatRevenueLabel(value, groupBy)}
+                  tickFormatter={(value: string) => formatRevenueLabel(value, groupBy, tAny)}
                 />
                 <YAxis tickLine={false} axisLine={false} tickMargin={8} />
                 <ChartTooltip content={<ChartTooltipContent />} cursor={false} />

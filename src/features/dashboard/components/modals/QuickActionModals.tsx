@@ -32,6 +32,7 @@ import { useDashboardEventsStore } from "@/shared/store/dashboardEventsStore";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
+import { useTranslation } from "react-i18next";
 
 interface NewSaleModalProps {
   open: boolean;
@@ -39,6 +40,7 @@ interface NewSaleModalProps {
 }
 
 export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
+  const { t, i18n } = useTranslation(["dashboard", "common"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedVariantId, setSelectedVariantId] = useState("");
@@ -64,7 +66,7 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
             const myStore = await storesApi.getMyStore();
             storeId = myStore.id;
           } catch {
-            toast.error("Không thể lấy thông tin cửa hàng hiện tại.");
+            toast.error(t("dashboard:quickModals.newSale.toast.currentStoreError"));
             return;
           }
         }
@@ -81,13 +83,13 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
         }
       } catch (err) {
         console.error("Failed to load products for quick sale:", err);
-        toast.error("Không thể tải danh sách sản phẩm.");
+        toast.error(t("dashboard:quickModals.newSale.toast.loadProductsError"));
       } finally {
         setLoading(false);
       }
     };
     void loadProducts();
-  }, [open, currentStore?.id]);
+  }, [open, currentStore?.id, t]);
 
   const filteredProducts = products.filter(
     (p) =>
@@ -101,16 +103,16 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
   const handleQuickSale = () => {
     void (async () => {
       if (!selectedProductId) {
-        toast.error("Vui lòng chọn sản phẩm");
+        toast.error(t("dashboard:quickModals.newSale.toast.productRequired"));
         return;
       }
       if (hasVariants && !selectedVariantId) {
-        toast.error("Vui lòng chọn biến thể cụ thể");
+        toast.error(t("dashboard:quickModals.newSale.toast.variantRequired"));
         return;
       }
       const qty = Number(quantity) || 1;
       if (qty <= 0) {
-        toast.error("Số lượng phải lớn hơn 0");
+        toast.error(t("dashboard:quickModals.newSale.toast.quantityInvalid"));
         return;
       }
       try {
@@ -128,11 +130,11 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
           ],
         });
         emitOrderCreated(orderId);
-        toast.success("Đã tạo đơn hàng nhanh thành công!");
+        toast.success(t("dashboard:quickModals.newSale.toast.createSuccess"));
         onOpenChange(false);
       } catch (err) {
         console.error("Quick sale failed:", err);
-        toast.error("Không thể tạo đơn hàng nhanh. Vui lòng thử lại.");
+        toast.error(t("dashboard:quickModals.newSale.toast.createError"));
       } finally {
         setCreating(false);
       }
@@ -148,20 +150,20 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-md shadow-[#FF7B21]/20">
                 <ShoppingCart className="h-4 w-4 text-white" />
               </div>
-              Tạo đơn hàng nhanh
+              {t("dashboard:quickModals.newSale.title")}
             </DialogTitle>
             <DialogDescription>
-              Tìm kiếm và chọn sản phẩm để tạo đơn hàng
+              {t("dashboard:quickModals.newSale.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Tìm sản phẩm</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.newSale.fields.search")}</Label>
               <div className="relative group">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-[#FF7B21]" />
                 <Input
-                  placeholder="Tìm theo tên hoặc mã sản phẩm..."
+                  placeholder={t("dashboard:quickModals.newSale.placeholders.search")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 transition-all focus-visible:ring-2 focus-visible:ring-[#FF7B21]/50 focus-visible:border-[#FF7B21]"
@@ -170,7 +172,7 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Sản phẩm</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.newSale.fields.product")}</Label>
               <Select
                 value={selectedProductId}
                 onValueChange={(v) => {
@@ -186,10 +188,10 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
                   <SelectValue
                     placeholder={
                       loading
-                        ? "Đang tải sản phẩm..."
+                        ? t("dashboard:quickModals.newSale.states.loadingProducts")
                         : filteredProducts.length === 0
-                        ? "Không có sản phẩm"
-                        : "Chọn sản phẩm"
+                        ? t("dashboard:quickModals.newSale.states.noProducts")
+                        : t("dashboard:quickModals.newSale.placeholders.product")
                     }
                   />
                 </SelectTrigger>
@@ -197,8 +199,10 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
                   {filteredProducts.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.productName}{" "}
-                      {p.hasVariants && "(có biến thể)"}
-                      {typeof p.price === "number" ? `- ${p.price.toLocaleString("vi-VN")}₫` : ""}
+                      {p.hasVariants && t("dashboard:quickModals.newSale.badges.hasVariants")}
+                      {typeof p.price === "number"
+                        ? `- ${p.price.toLocaleString(i18n.language)}₫`
+                        : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -207,18 +211,18 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
 
             {hasVariants && selectedProduct?.variants && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Biến thể (Size/Màu)</Label>
+                <Label className="text-sm font-medium">{t("dashboard:quickModals.newSale.fields.variant")}</Label>
                 <Select
                   value={selectedVariantId}
                   onValueChange={setSelectedVariantId}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn biến thể" />
+                    <SelectValue placeholder={t("dashboard:quickModals.newSale.placeholders.variant")} />
                   </SelectTrigger>
                   <SelectContent>
                     {selectedProduct.variants.map((v) => (
                       <SelectItem key={v.id} value={v.id!}>
-                        {[v.size, v.color, v.sku].filter(Boolean).join(" • ")} - Tồn: {v.stockQuantity ?? 0}
+                        {[v.size, v.color, v.sku].filter(Boolean).join(" • ")} - {t("dashboard:quickModals.newSale.variantStock", { stock: v.stockQuantity ?? 0 })}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -227,7 +231,7 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
             )}
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Số lượng</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.newSale.fields.quantity")}</Label>
               <Input
                 type="number"
                 min="1"
@@ -244,15 +248,15 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
                 className="p-4 bg-gradient-to-br from-[#FF7B21]/5 to-[#19D6C8]/5 dark:from-[#FF7B21]/10 dark:to-[#19D6C8]/10 rounded-xl border border-[#FF7B21]/20 dark:border-[#FF7B21]/30"
               >
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Giá bán:</span>
+                  <span className="text-muted-foreground">{t("dashboard:quickModals.newSale.summary.price")}:</span>
                   <span className="font-medium">
-                    {selectedProduct.price.toLocaleString("vi-VN")}đ
+                    {selectedProduct.price.toLocaleString(i18n.language)}đ
                   </span>
                 </div>
                 <div className="flex justify-between text-sm mt-2 pt-2 border-t border-border/50">
-                  <span className="text-muted-foreground">Tổng tiền:</span>
+                  <span className="text-muted-foreground">{t("dashboard:quickModals.newSale.summary.total")}:</span>
                   <span className="font-bold text-lg bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
-                    {(selectedProduct.price * (Number(quantity) || 1)).toLocaleString("vi-VN")}đ
+                    {(selectedProduct.price * (Number(quantity) || 1)).toLocaleString(i18n.language)}đ
                   </span>
                 </div>
               </motion.div>
@@ -266,7 +270,7 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
               disabled={creating}
               className="transition-all hover:bg-muted/80"
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -281,12 +285,12 @@ export const NewSaleModal = ({ open, onOpenChange }: NewSaleModalProps) => {
                 {creating ? (
                   <>
                     <Search className="mr-2 h-4 w-4 animate-spin" />
-                    Đang tạo...
+                    {t("dashboard:quickModals.newSale.actions.creating")}
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    Tạo đơn hàng
+                    {t("dashboard:quickModals.newSale.actions.submit")}
                   </>
                 )}
               </Button>
@@ -304,6 +308,7 @@ interface StaffCheckInModalProps {
 }
 
 export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps) => {
+  const { t, i18n } = useTranslation(["dashboard", "common"]);
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [staffId, setStaffId] = useState("");
   const [action, setAction] = useState<"in" | "out">("in");
@@ -324,7 +329,7 @@ export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps
             const myStore = await storesApi.getMyStore();
             storeId = myStore.id;
           } catch {
-            toast.error("Không thể lấy thông tin cửa hàng.");
+            toast.error(t("dashboard:quickModals.staffCheckIn.toast.currentStoreError"));
             return;
           }
         }
@@ -332,30 +337,35 @@ export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps
         setStaffList(list);
       } catch (err) {
         console.error("Failed to load staff:", err);
-        toast.error("Không thể tải danh sách nhân viên.");
+        toast.error(t("dashboard:quickModals.staffCheckIn.toast.loadStaffError"));
       } finally {
         setLoading(false);
       }
     };
     void loadStaff();
-  }, [open, currentStore?.id]);
+  }, [open, currentStore?.id, t]);
 
   const handleCheckIn = () => {
     void (async () => {
       if (!staffId) {
-        toast.error("Vui lòng chọn nhân viên");
+        toast.error(t("dashboard:quickModals.staffCheckIn.toast.staffRequired"));
         return;
       }
       try {
         setSubmitting(true);
         await timekeepingApi.checkIn({ locationGps: "" });
         toast.success(
-          `Đã ${action === "in" ? "check-in" : "check-out"} thành công lúc ${new Date().toLocaleTimeString("vi-VN")}!`,
+          t("dashboard:quickModals.staffCheckIn.toast.success", {
+            action: action === "in"
+              ? t("dashboard:quickModals.staffCheckIn.actions.checkIn")
+              : t("dashboard:quickModals.staffCheckIn.actions.checkOut"),
+            time: new Date().toLocaleTimeString(i18n.language),
+          }),
         );
         onOpenChange(false);
       } catch (err) {
         console.error("Check-in failed:", err);
-        toast.error("Không thể chấm công. Vui lòng thử lại.");
+        toast.error(t("dashboard:quickModals.staffCheckIn.toast.error"));
       } finally {
         setSubmitting(false);
       }
@@ -371,19 +381,23 @@ export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-md shadow-[#FF7B21]/20">
                 <Users className="h-4 w-4 text-white" />
               </div>
-              Chấm công nhân viên
+              {t("dashboard:quickModals.staffCheckIn.title")}
             </DialogTitle>
             <DialogDescription>
-              Chấm công đầu giờ hoặc kết thúc ca làm việc
+              {t("dashboard:quickModals.staffCheckIn.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Nhân viên</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.staffCheckIn.fields.staff")}</Label>
               <Select value={staffId} onValueChange={setStaffId} disabled={loading}>
                 <SelectTrigger>
-                  <SelectValue placeholder={loading ? "Đang tải..." : "Chọn nhân viên"} />
+                  <SelectValue
+                    placeholder={loading
+                      ? t("common:states.loading")
+                      : t("dashboard:quickModals.staffCheckIn.placeholders.staff")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {staffList.map((s) => (
@@ -396,7 +410,7 @@ export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Hành động</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.staffCheckIn.fields.action")}</Label>
               <Select
                 value={action}
                 onValueChange={(val) => setAction(val as "in" | "out")}
@@ -405,8 +419,8 @@ export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="in">Check In / Vào ca</SelectItem>
-                  <SelectItem value="out">Check Out / Kết thúc ca</SelectItem>
+                  <SelectItem value="in">{t("dashboard:quickModals.staffCheckIn.actionOptions.in")}</SelectItem>
+                  <SelectItem value="out">{t("dashboard:quickModals.staffCheckIn.actionOptions.out")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -417,9 +431,9 @@ export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps
               className="p-4 bg-gradient-to-br from-[#FF7B21]/5 to-[#19D6C8]/5 dark:from-[#FF7B21]/10 dark:to-[#19D6C8]/10 rounded-xl border border-[#FF7B21]/20 dark:border-[#FF7B21]/30"
             >
               <p className="text-sm text-foreground">
-                Thời gian hiện tại:{" "}
+                {t("dashboard:quickModals.staffCheckIn.currentTime")}:{" "}
                 <span className="font-bold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
-                  {new Date().toLocaleString("vi-VN")}
+                  {new Date().toLocaleString(i18n.language)}
                 </span>
               </p>
             </motion.div>
@@ -432,7 +446,7 @@ export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps
               disabled={submitting}
               className="transition-all hover:bg-muted/80"
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -446,10 +460,10 @@ export const StaffCheckInModal = ({ open, onOpenChange }: StaffCheckInModalProps
                 {submitting ? (
                   <>
                     <Search className="mr-2 h-4 w-4 animate-spin" />
-                    Đang xử lý...
+                    {t("common:states.saving")}
                   </>
                 ) : (
-                  "Xác nhận"
+                  t("common:actions.confirm")
                 )}
               </Button>
             </motion.div>
@@ -466,6 +480,7 @@ interface FeedbackModalProps {
 }
 
 export const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
+  const { t } = useTranslation(["dashboard", "common"]);
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(5);
   const [submitting, setSubmitting] = useState(false);
@@ -473,19 +488,19 @@ export const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
   const handleSubmitFeedback = () => {
     void (async () => {
       if (!content.trim()) {
-        toast.error("Vui lòng nhập nội dung phản hồi");
+        toast.error(t("dashboard:quickModals.feedback.toast.contentRequired"));
         return;
       }
       try {
         setSubmitting(true);
         await feedbackApi.createStaffFeedback({ customerId: "", content, rating });
-        toast.success("Gửi phản hồi thành công!");
+        toast.success(t("dashboard:quickModals.feedback.toast.success"));
         setContent("");
         setRating(5);
         onOpenChange(false);
       } catch (err) {
         console.error("Submit feedback failed:", err);
-        toast.error("Không thể gửi phản hồi. Vui lòng thử lại.");
+        toast.error(t("dashboard:quickModals.feedback.toast.error"));
       } finally {
         setSubmitting(false);
       }
@@ -501,16 +516,16 @@ export const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-md shadow-[#FF7B21]/20">
                 <FileText className="h-4 w-4 text-white" />
               </div>
-              Gửi phản hồi
+              {t("dashboard:quickModals.feedback.title")}
             </DialogTitle>
             <DialogDescription>
-              Chia sẻ ý kiến của bạn để chúng tôi cải thiện dịch vụ
+              {t("dashboard:quickModals.feedback.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Đánh giá</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.feedback.fields.rating")}</Label>
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <motion.button
@@ -530,17 +545,17 @@ export const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
                   </motion.button>
                 ))}
                 <span className="text-sm text-muted-foreground ml-2 font-medium">
-                  {rating}/5 sao
+                  {t("dashboard:quickModals.feedback.ratingSummary", { rating })}
                 </span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Nội dung phản hồi</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.feedback.fields.content")}</Label>
               <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Nhập nội dung phản hồi của bạn..."
+                placeholder={t("dashboard:quickModals.feedback.placeholders.content")}
                 rows={5}
                 className="resize-none transition-all focus-visible:ring-2 focus-visible:ring-[#FF7B21]/50 focus-visible:border-[#FF7B21] bg-gradient-to-br from-white to-[#FF7B21]/5 dark:from-gray-900 dark:to-[#FF7B21]/10"
               />
@@ -554,7 +569,7 @@ export const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
               disabled={submitting}
               className="transition-all hover:bg-muted/80"
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -568,10 +583,10 @@ export const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
                 {submitting ? (
                   <>
                     <Search className="mr-2 h-4 w-4 animate-spin" />
-                    Đang gửi...
+                    {t("dashboard:quickModals.feedback.actions.submitting")}
                   </>
                 ) : (
-                  "Gửi phản hồi"
+                  t("dashboard:quickModals.feedback.actions.submit")
                 )}
               </Button>
             </motion.div>
@@ -591,6 +606,7 @@ export const GenerateReportModal = ({
   open,
   onOpenChange,
 }: GenerateReportModalProps) => {
+  const { t } = useTranslation(["dashboard", "common"]);
   const [reportType, setReportType] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -598,12 +614,12 @@ export const GenerateReportModal = ({
 
   const handleGenerate = () => {
     if (!reportType || !dateFrom || !dateTo) {
-      toast.error("Vui lòng điền đầy đủ thông tin");
+      toast.error(t("dashboard:quickModals.report.toast.required"));
       return;
     }
 
     console.log("Generate report:", { reportType, dateFrom, dateTo, format });
-    toast.success("Đang tạo báo cáo... Bạn sẽ nhận được file qua email!");
+    toast.success(t("dashboard:quickModals.report.toast.generating"));
     onOpenChange(false);
   };
 
@@ -616,32 +632,32 @@ export const GenerateReportModal = ({
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-md shadow-[#FF7B21]/20">
                 <FileText className="h-4 w-4 text-white" />
               </div>
-              Tạo báo cáo
+              {t("dashboard:quickModals.report.title")}
             </DialogTitle>
             <DialogDescription>
-              Chọn loại báo cáo và khoảng thời gian
+              {t("dashboard:quickModals.report.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Loại báo cáo</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.report.fields.type")}</Label>
               <Select value={reportType} onValueChange={setReportType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Chọn loại báo cáo" />
+                  <SelectValue placeholder={t("dashboard:quickModals.report.placeholders.type")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="sales">Báo cáo doanh số</SelectItem>
-                  <SelectItem value="inventory">Báo cáo tồn kho</SelectItem>
-                  <SelectItem value="staff">Hiệu suất nhân viên</SelectItem>
-                  <SelectItem value="customer">Báo cáo khách hàng</SelectItem>
+                  <SelectItem value="sales">{t("dashboard:quickModals.report.types.sales")}</SelectItem>
+                  <SelectItem value="inventory">{t("dashboard:quickModals.report.types.inventory")}</SelectItem>
+                  <SelectItem value="staff">{t("dashboard:quickModals.report.types.staff")}</SelectItem>
+                  <SelectItem value="customer">{t("dashboard:quickModals.report.types.customer")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Từ ngày</Label>
+                <Label className="text-sm font-medium">{t("dashboard:quickModals.report.fields.from")}</Label>
                 <Input
                   type="date"
                   value={dateFrom}
@@ -650,7 +666,7 @@ export const GenerateReportModal = ({
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Đến ngày</Label>
+                <Label className="text-sm font-medium">{t("dashboard:quickModals.report.fields.to")}</Label>
                 <Input
                   type="date"
                   value={dateTo}
@@ -661,7 +677,7 @@ export const GenerateReportModal = ({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Định dạng xuất</Label>
+              <Label className="text-sm font-medium">{t("dashboard:quickModals.report.fields.format")}</Label>
               <Select value={format} onValueChange={setFormat}>
                 <SelectTrigger>
                   <SelectValue />
@@ -681,7 +697,7 @@ export const GenerateReportModal = ({
               onClick={() => onOpenChange(false)}
               className="transition-all hover:bg-muted/80"
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -692,7 +708,7 @@ export const GenerateReportModal = ({
                 onClick={handleGenerate}
               >
                 <FileText className="mr-2 h-4 w-4" />
-                Tạo báo cáo
+                {t("dashboard:quickModals.report.actions.submit")}
               </Button>
             </motion.div>
           </DialogFooter>

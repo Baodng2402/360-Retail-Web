@@ -5,7 +5,84 @@
     "brandAlt": "Logo 360 Retail",
     "brandTitle": "360 Retail"
   },
+  "trustBar": {
+    "title": "Được tin dùng bởi các thương hiệu bán lẻ tại Việt Nam"
+  },
+  "steps": {
+    "titlePrefix": "Bắt đầu trong",
+    "titleHighlight": "3 bước",
+    "subtitle": "Không cần am hiểu công nghệ, chỉ cần bạn đang vận hành cửa hàng.",
+    "items": [
+      {
+        "step": "STEP 1",
+        "title": "Thiết lập nhanh",
+        "description": "Nhập sản phẩm, nhân viên, ca làm theo hướng dẫn trực quan trong vài phút."
+      },
+      {
+        "step": "STEP 2",
+        "title": "Bắt đầu bán hàng",
+        "description": "Tạo đơn đầu tiên, phần còn lại (tồn kho, báo cáo, tích điểm) được tự động hóa."
+      },
+      {
+        "step": "STEP 3",
+        "title": "Xem cửa hàng tăng trưởng",
+        "description": "Nắm được mặt hàng bán chạy, khung giờ cao điểm để ra quyết định thông minh hơn."
+      }
+    ]
+  },
+  "stats": {
+    "title": "Đồng hành cùng sự phát triển bán lẻ Việt Nam",
+    "subtitle": "Từ trung tâm thành phố đến tỉnh lẻ, 360 Retail giúp chủ shop theo dõi doanh thu và khách hàng theo khu vực, từ đó tối ưu chiến dịch và nguồn lực.",
+    "items": {
+      "stores": "Cửa hàng sử dụng",
+      "provinces": "Tỉnh thành có khách hàng",
+      "industries": "Ngành hàng khác nhau",
+      "support": "Hỗ trợ đội ngũ CSKH"
+    }
+  },
+  "testimonials": {
+    "kicker": "Đánh giá từ khách hàng",
+    "title": "Chủ shop nói gì về 360 Retail",
+    "items": [
+      {
+        "initials": "MH",
+        "name": "Mai Hương",
+        "role": "Chủ shop thời trang local brand, Hà Nội",
+        "content": "Trước khi dùng 360 Retail, mình phải vừa ghi sổ tay, vừa nhập excel nên rất dễ sót đơn, nhầm tồn kho. Giờ mọi thứ tự động, đỡ stress hẳn."
+      },
+      {
+        "initials": "TN",
+        "name": "Tuấn Nguyễn",
+        "role": "Chuỗi cà phê 3 chi nhánh, TP.HCM",
+        "content": "Mình thích nhất là xem được doanh thu theo ca và theo chi nhánh trên cùng một màn hình, quyết định thay đổi menu hay khuyến mãi cũng tự tin hơn."
+      },
+      {
+        "initials": "LH",
+        "name": "Lan Hạnh",
+        "role": "Shop mẹ & bé, Đà Nẵng",
+        "content": "Nhân viên chỉ mất một buổi là quen hệ thống. Tính năng tích điểm tự động giúp khách quay lại nhiều, doanh thu ổn định hơn."
+      },
+      {
+        "initials": "QP",
+        "name": "Quốc Phong",
+        "role": "Cửa hàng điện thoại, Cần Thơ",
+        "content": "Trước đây hay bị nhầm tồn kho giữa online và cửa hàng. Từ khi dùng 360 Retail thì không còn cảnh xin lỗi khách vì hết hàng nữa."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Sẵn sàng tăng trưởng<br />với 360 Retail?",
+    "subtitle": "Gia nhập cộng đồng chủ shop đang vận hành cửa hàng hiệu quả, không còn phụ thuộc vào sổ sách.",
+    "primary": "Trải nghiệm 360 Retail ngay",
+    "note": "Miễn phí cho giai đoạn thử nghiệm · Không cần thẻ thanh toán"
+  },
   "hero": {
+    "headline": "Quản lý bán hàng đa kênh",
+    "focusSentence": "Cùng 360 Retail",
+    "cta": {
+      "startFree": "Bắt đầu miễn phí"
+    },
+    "scrollHint": "Scroll để khám phá",
     "trust": {
       "noCreditCard": "Không cần thẻ thanh toán",
       "fiveMinSetup": "Thiết lập ~5 phút",
@@ -17,7 +94,57 @@
     "company": "CÔNG TY",
     "productItems": ["Tính năng", "Bảng giá", "Bảo mật"],
     "companyItems": ["Giới thiệu", "Blog", "Liên hệ"],
+    "tagline": "Nền tảng quản lý bán hàng đa kênh cho cửa hàng vừa và nhỏ, dễ dùng như một ứng dụng điện thoại.",
     "copyright": "© 2025 360 Retail. Xây dựng cho chủ shop, bởi đội ngũ thấu hiểu vận hành."
+  }
+  ,
+  "platform": {
+    "badge": "360° Nền tảng all-in-one",
+    "headline": {
+      "line1": "Mọi thứ bạn cần,",
+      "line2": "trong một nền tảng"
+    },
+    "subtitle": "Ba module chính hoạt động đồng bộ: People quản lý nhân sự, Product quản lý hàng hóa, Customer quản lý khách hàng. Dữ liệu liên thông, vận hành trơn tru.",
+    "stats": {
+      "modules": "Module tích hợp",
+      "singleUi": "Giao diện duy nhất",
+      "cloud": "Cloud tự động"
+    },
+    "modules": {
+      "people": {
+        "label": "People",
+        "subtitle": "Quản lý Nhân viên & Ca làm",
+        "description": "Hệ thống chấm công GPS, phân ca tự động, tính lương thông minh. Không còn sổ sách, không còn nhầm lẫn.",
+        "features": {
+          "gpsTimekeeping": "Chấm công GPS",
+          "autoShifts": "Phân ca tự động",
+          "smartPayroll": "Tính lương thông minh",
+          "hrReports": "Báo cáo nhân sự"
+        }
+      },
+      "product": {
+        "label": "Product",
+        "subtitle": "POS & Quản lý Hàng hóa",
+        "description": "Bán hàng cực nhanh, tự động trừ tồn kho, đồng bộ online-offline. Một điểm bán, mọi kênh đều quản lý được.",
+        "features": {
+          "fastPos": "POS cực nhanh",
+          "autoDeductStock": "Tự động trừ tồn",
+          "syncOnline": "Đồng bộ kênh online",
+          "salesReports": "Báo cáo bán hàng"
+        }
+      },
+      "customer": {
+        "label": "Customer",
+        "subtitle": "CRM & Chương trình Loyalty",
+        "description": "Khách mua là có điểm, có ưu đãi. Hệ thống tự ghi nhận, tự động chăm sóc khách hàng theo segment.",
+        "features": {
+          "autoPoints": "Tích điểm tự động",
+          "smartVouchers": "Voucher thông minh",
+          "segmentation": "Phân khúc khách hàng",
+          "autoCare": "Chăm sóc tự động"
+        }
+      }
+    }
   }
 }
 

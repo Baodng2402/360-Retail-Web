@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Star,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { planReviewsApi } from "@/shared/lib/planReviewsApi";
 import { authApi, decodeTokenToUser } from "@/shared/lib/authApi";
@@ -37,6 +38,7 @@ import {
 import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
 import { Textarea } from "@/shared/components/ui/textarea";
 import toast from "react-hot-toast";
+import type { TFunction } from "i18next";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -48,47 +50,30 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const parseFeatures = (featuresJson: string | null | undefined | string[]): string[] => {
+const parseFeatures = (
+  featuresJson: string | null | undefined | string[],
+  t: TFunction<"subscription">,
+): string[] => {
   if (!featuresJson) return [];
   if (Array.isArray(featuresJson)) return featuresJson;
   try {
     const parsed = JSON.parse(featuresJson) as Record<string, unknown>;
     const result: string[] = [];
 
-    const capacityLabels: Record<string, string> = {
-      max_orders: "đơn hàng",
-      max_products: "sản phẩm",
-      max_employees: "nhân viên",
-    };
-
-    const featureLabels: Record<string, string> = {
-      has_tasks: "Quản lý công việc nhân viên",
-      has_loyalty: "Chương trình tích điểm khách hàng",
-      has_variants: "Sản phẩm có phân loại (size/màu...)",
-      has_dashboard: "Dashboard bán hàng nâng cao",
-      has_feedback_qr: "Feedback qua QR trên hóa đơn",
-      has_gps_checkin: "Chấm công GPS & cảnh báo khoảng cách",
-      has_multi_store: "Quản lý nhiều chi nhánh",
-      has_export_excel: "Xuất báo cáo Excel",
-      has_invite_staff: "Mời nhân viên bằng email",
-      has_inventory_tickets: "Phiếu nhập / xuất kho",
-      has_realtime_notifications: "Thông báo realtime",
-    };
-
     for (const [key, value] of Object.entries(parsed)) {
-      if (key in capacityLabels && typeof value === "number") {
-        const label = capacityLabels[key];
+      if (key.startsWith("max_") && typeof value === "number") {
+        const label = t(`features.capacityLabels.${key}` as never);
         if (value === -1) {
-          result.push(`Không giới hạn ${label}`);
+          result.push(t("features.capacity.unlimited", { label }));
         } else {
-          result.push(`Tối đa ${value.toLocaleString("vi-VN")} ${label}`);
+          result.push(t("features.capacity.max", { value, label }));
         }
         continue;
       }
 
-      if (key in featureLabels && typeof value === "boolean") {
+      if (key.startsWith("has_") && typeof value === "boolean") {
         if (value) {
-          result.push(featureLabels[key]);
+          result.push(t(`features.featureLabels.${key}` as never));
         }
         continue;
       }
@@ -101,6 +86,8 @@ const parseFeatures = (featuresJson: string | null | undefined | string[]): stri
 };
 
 export default function SubscriptionPlansPage() {
+  const { t } = useTranslation("subscription");
+  const { t: tCommon } = useTranslation("common");
   const [plans, setPlans] = useState<Plan[]>([]);
   const [mySubscription, setMySubscription] = useState<MySubscription | null>(null);
   const [storeStatus, setStoreStatus] = useState<SubscriptionStatus | null>(null);
@@ -138,7 +125,7 @@ export default function SubscriptionPlansPage() {
       setStoreStatus(statusData);
     } catch (err) {
       console.error("Failed to load data:", err);
-      setError("Không thể tải dữ liệu. Vui lòng thử lại.");
+      setError(t("toasts.loadError"));
     } finally {
       setLoading(false);
     }
@@ -154,7 +141,7 @@ export default function SubscriptionPlansPage() {
       setRefreshingAccess(true);
       const refreshRes = await authApi.refreshAccess();
       if (!refreshRes.accessToken) {
-        throw new Error("Không nhận được token mới từ server");
+        throw new Error(t("toasts.missingAccessToken"));
       }
 
       localStorage.setItem("token", refreshRes.accessToken);
@@ -162,14 +149,14 @@ export default function SubscriptionPlansPage() {
       const newUser = decodeTokenToUser(refreshRes.accessToken);
       setAuth(newUser, refreshRes.accessToken);
 
-      toast.success("Đã làm mới quyền và gói dịch vụ.");
+      toast.success(t("toasts.refreshAccessSuccess"));
       setSepayDialogOpen(false);
       await loadData();
     } catch (err) {
       console.error("Failed to refresh access after payment:", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Không thể làm mới quyền. Vui lòng thử đăng nhập lại.";
+          ?.message || t("toasts.refreshAccessError");
       toast.error(message);
     } finally {
       setRefreshingAccess(false);
@@ -181,7 +168,7 @@ export default function SubscriptionPlansPage() {
       setPurchasingPlanId(plan.id);
       const purchaseRes = await subscriptionApi.purchasePlan({ planId: plan.id });
       if (!purchaseRes.paymentId) {
-        throw new Error("Không nhận được paymentId từ server");
+        throw new Error(t("toasts.missingPaymentId"));
       }
 
       const payment = await subscriptionApi.initiatePayment(
@@ -199,7 +186,7 @@ export default function SubscriptionPlansPage() {
           setSepayData(payment as SePayPaymentData);
           setSepayDialogOpen(true);
         } else {
-          throw new Error("Phản hồi thanh toán SePay không hợp lệ");
+          throw new Error(t("toasts.invalidSepayResponse"));
         }
       } else {
         if (
@@ -208,16 +195,16 @@ export default function SubscriptionPlansPage() {
           payment.paymentUrl
         ) {
           window.open(payment.paymentUrl, "_blank");
-          toast.success("Đã mở trang thanh toán VNPay demo");
+          toast.success(t("toasts.openedVnpayDemo"));
         } else {
-          throw new Error("Phản hồi thanh toán VNPay không hợp lệ");
+          throw new Error(t("toasts.invalidVnpayResponse"));
         }
       }
     } catch (err) {
       console.error("Failed to initiate payment:", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Không thể khởi tạo thanh toán. Vui lòng thử lại.";
+          ?.message || t("toasts.paymentInitError");
       toast.error(message);
     } finally {
       setPurchasingPlanId(null);
@@ -226,25 +213,25 @@ export default function SubscriptionPlansPage() {
 
   const handleCheckPaymentStatus = async () => {
     if (!lastPaymentId) {
-      toast.error("Không tìm thấy mã thanh toán để kiểm tra trạng thái.");
+      toast.error(t("toasts.noPaymentId"));
       return;
     }
     try {
       setRefreshingAccess(true);
       const status = await subscriptionApi.getPaymentStatus(lastPaymentId);
       if (status.status === "Completed") {
-        toast.success("Thanh toán đã được xác nhận thành công. Đang làm mới quyền...");
+        toast.success(t("toasts.paymentStatusCompleted"));
         await handleRefreshAccess();
       } else if (status.status === "Failed") {
-        toast.error("Thanh toán thất bại. Vui lòng thử lại hoặc chọn phương thức khác.");
+        toast.error(t("toasts.paymentStatusFailed"));
       } else {
-        toast("Thanh toán vẫn đang ở trạng thái chờ xử lý (Pending). Vui lòng đợi thêm một chút rồi thử lại.");
+        toast(t("toasts.paymentStatusPending"));
       }
     } catch (err) {
       console.error("Failed to check payment status:", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại.";
+          ?.message || t("toasts.paymentStatusCheckError");
       toast.error(message);
     } finally {
       setRefreshingAccess(false);
@@ -277,7 +264,7 @@ export default function SubscriptionPlansPage() {
         rating: reviewRating,
         content: reviewContent.trim() || undefined,
       });
-      toast.success("Đã gửi đánh giá gói dịch vụ. Cảm ơn bạn!");
+      toast.success(t("toasts.submitReviewSuccess"));
       setReviewDialogOpen(false);
       const summaries = await planReviewsApi.getSummaries();
       setReviewSummaries(summaries);
@@ -285,7 +272,7 @@ export default function SubscriptionPlansPage() {
       console.error("Failed to submit review:", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Không thể gửi đánh giá. Vui lòng thử lại.";
+          ?.message || t("toasts.submitReviewError");
       toast.error(message);
     } finally {
       setSubmittingReview(false);
@@ -314,7 +301,7 @@ export default function SubscriptionPlansPage() {
         className="container mx-auto py-12 px-4"
       >
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-foreground">Chọn gói dịch vụ</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t("page.loadingTitle")}</h1>
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
           <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
@@ -333,7 +320,7 @@ export default function SubscriptionPlansPage() {
         className="container mx-auto py-12 px-4"
       >
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-foreground">Chọn gói dịch vụ</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t("page.errorTitle")}</h1>
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
@@ -341,7 +328,7 @@ export default function SubscriptionPlansPage() {
             <p className="mb-4 text-muted-foreground">{error}</p>
             <Button onClick={loadData} variant="outline">
               <Loader2 className="h-4 w-4 mr-2" />
-              Thử lại
+              {tCommon("actions.retry")}
             </Button>
           </div>
         </div>
@@ -351,7 +338,7 @@ export default function SubscriptionPlansPage() {
 
   return (
     <div className="container mx-auto py-12 px-4 space-y-12">
-      <StoreSelector pageDescription="Chọn cửa hàng để xem và mua gói dịch vụ đúng chi nhánh." />
+      <StoreSelector pageDescription={t("page.storeSelectorDescription")} />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
@@ -359,14 +346,13 @@ export default function SubscriptionPlansPage() {
         className="text-center space-y-4"
       >
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
-          Chọn gói dịch vụ
+          {t("page.title")}
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Nâng cấp để mở khóa đầy đủ tính năng cho{" "}
           {currentStore ? (
-            <span className="font-semibold">{currentStore.storeName}</span>
+            t("page.heroSubtitle", { storeName: currentStore.storeName })
           ) : (
-            "cửa hàng của bạn"
+            t("page.heroSubtitle", { storeName: t("page.heroSubtitleFallbackStore") })
           )}
         </p>
       </motion.div>
@@ -380,8 +366,7 @@ export default function SubscriptionPlansPage() {
           <Card className="border-dashed border-amber-300 bg-amber-50/60 dark:bg-amber-900/10">
             <CardContent className="p-4 md:p-5">
               <p className="text-sm md:text-base text-amber-900 dark:text-amber-100">
-                Cửa hàng hiện tại chưa có gói <span className="font-semibold">Trial</span> hoặc{" "}
-                <span className="font-semibold">Active</span>. Vui lòng chọn một gói bên dưới để bắt đầu.
+                {t("page.inactiveNotice")}
               </p>
             </CardContent>
           </Card>
@@ -409,8 +394,11 @@ export default function SubscriptionPlansPage() {
                   </motion.div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      Gói dịch vụ hiện tại của{" "}
-                      {currentStore ? currentStore.storeName : "cửa hàng bạn"}
+                      {t("page.currentPlanTitle", {
+                        storeName: currentStore
+                          ? currentStore.storeName
+                          : t("page.currentPlanStoreFallback"),
+                      })}
                     </p>
                     <p className="text-2xl font-bold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
                       {storeStatus?.planName || mySubscription?.planName}
@@ -428,9 +416,9 @@ export default function SubscriptionPlansPage() {
                           }
                         >
                           {storeStatus.status === "Trial"
-                            ? "Đang dùng thử (Trial)"
+                            ? t("page.status.trial")
                             : storeStatus.status === "Active"
-                            ? "Đang hoạt động (Active)"
+                            ? t("page.status.active")
                             : storeStatus.status}
                         </Badge>
                       </p>
@@ -445,17 +433,16 @@ export default function SubscriptionPlansPage() {
                       transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
                     >
                       <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
-                        Còn {storeStatus.daysRemaining} ngày
+                        {t("page.daysRemaining", { days: storeStatus.daysRemaining })}
                       </Badge>
                     </motion.div>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Hết hạn:{" "}
-                    <span className="font-medium">
-                      {formatDate(
+                    {t("page.expiresLabel", {
+                      date: formatDate(
                         storeStatus?.subscriptionEndDate ?? mySubscription?.endDate,
-                      )}
-                    </span>
+                      ),
+                    })}
                   </p>
                 </div>
               </div>
@@ -501,14 +488,14 @@ export default function SubscriptionPlansPage() {
             viewport={{ once: true }}
             className="font-semibold mb-6 text-center text-xl bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent"
           >
-            Tại sao chọn chúng tôi?
+            {t("page.whyUsTitle")}
           </motion.h3>
           <div className="grid gap-4 md:grid-cols-2">
             {[
-              { icon: Check, text: "Thanh toán an toàn qua QR SePay", color: "text-green-500" },
-              { icon: Check, text: "Kích hoạt tài khoản ngay lập tức", color: "text-blue-500" },
-              { icon: Check, text: "Hỗ trợ khách hàng 24/7", color: "text-purple-500" },
-              { icon: Check, text: "Cập nhật tính năng miễn phí", color: "text-teal-500" },
+              { icon: Check, text: t("page.whyUs.securePayment"), color: "text-green-500" },
+              { icon: Check, text: t("page.whyUs.instantActivation"), color: "text-blue-500" },
+              { icon: Check, text: t("page.whyUs.support"), color: "text-purple-500" },
+              { icon: Check, text: t("page.whyUs.updates"), color: "text-teal-500" },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -535,11 +522,10 @@ export default function SubscriptionPlansPage() {
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-md shadow-[#FF7B21]/20">
                   <CreditCard className="h-4 w-4 text-white" />
                 </div>
-                Thanh toán QR (SePay)
+                {t("sepayDialog.title")}
               </DialogTitle>
               <DialogDescription>
-                Quét mã QR hoặc chuyển khoản theo thông tin bên dưới. Sau khi thanh toán,
-                bạn có thể bấm vào nút kiểm tra trạng thái để hệ thống tự động cập nhật gói.
+                {t("sepayDialog.description")}
               </DialogDescription>
             </DialogHeader>
           {sepayData ? (
@@ -547,45 +533,45 @@ export default function SubscriptionPlansPage() {
               <div className="w-full flex justify-center">
                 <img
                   src={sepayData.qrCodeUrl}
-                  alt="QR thanh toán SePay"
+                  alt={t("sepayDialog.qrAlt")}
                   className="w-56 h-56 rounded-lg border bg-white object-contain"
                 />
               </div>
               <div className="space-y-2 text-sm">
                 <p className="font-semibold text-foreground">
-                  Mã thanh toán:{" "}
+                  {t("sepayDialog.paymentCode")}{" "}
                   <span className="font-mono">{sepayData.paymentCode}</span>
                 </p>
                 <div className="rounded-md border bg-muted/40 p-3 space-y-1">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Thông tin chuyển khoản
+                    {t("sepayDialog.bankInfoTitle")}
                   </p>
                   <p>
-                    Ngân hàng:{" "}
+                    {t("sepayDialog.bankName")}{" "}
                     <span className="font-medium">
                       {sepayData.bankInfo.bankName}
                     </span>
                   </p>
                   <p>
-                    Số tài khoản:{" "}
+                    {t("sepayDialog.accountNumber")}{" "}
                     <span className="font-medium">
                       {sepayData.bankInfo.accountNumber}
                     </span>
                   </p>
                   <p>
-                    Tên tài khoản:{" "}
+                    {t("sepayDialog.accountName")}{" "}
                     <span className="font-medium">
                       {sepayData.bankInfo.accountName}
                     </span>
                   </p>
                   <p>
-                    Số tiền:{" "}
+                    {t("sepayDialog.amount")}{" "}
                     <span className="font-medium">
                       {formatPriceVnd(sepayData.bankInfo.amount)}
                     </span>
                   </p>
                   <p>
-                    Nội dung:{" "}
+                    {t("sepayDialog.content")}{" "}
                     <span className="font-medium">
                       {sepayData.bankInfo.content}
                     </span>
@@ -601,7 +587,7 @@ export default function SubscriptionPlansPage() {
                     onClick={() => setSepayDialogOpen(false)}
                     disabled={refreshingAccess}
                   >
-                    Đóng
+                    {t("sepayDialog.close")}
                   </Button>
                   <Button
                     type="button"
@@ -612,10 +598,10 @@ export default function SubscriptionPlansPage() {
                     {refreshingAccess ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Đang kiểm tra trạng thái...
+                        {t("sepayDialog.checkingStatus")}
                       </>
                     ) : (
-                      "Kiểm tra trạng thái thanh toán"
+                      t("sepayDialog.checkStatus")
                     )}
                   </Button>
                 </div>
@@ -638,16 +624,16 @@ export default function SubscriptionPlansPage() {
                   <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center shadow-md shadow-[#FF7B21]/20">
                     <Star className="h-4 w-4 text-white" />
                   </div>
-                  Đánh giá gói {selectedPlanForReview?.planName}
+                  {t("reviewDialog.title", { planName: selectedPlanForReview?.planName || "" })}
                 </DialogTitle>
                 <DialogDescription>
-                  Chia sẻ trải nghiệm sử dụng gói SaaS để giúp những chủ shop khác tham khảo.
+                  {t("reviewDialog.description")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-2">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-foreground">
-                    Mức độ hài lòng
+                    {t("reviewDialog.ratingLabel")}
                   </p>
                   <div className="flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((value) => {
@@ -662,7 +648,7 @@ export default function SubscriptionPlansPage() {
                               ? "border-amber-400 bg-amber-50 text-amber-500"
                               : "border-border bg-background text-muted-foreground hover:border-amber-300 hover:text-amber-400"
                           }`}
-                          aria-label={`${value} sao`}
+                          aria-label={t("reviewDialog.ratingAria", { value })}
                         >
                           <Star
                             className={`h-4 w-4 ${
@@ -677,13 +663,13 @@ export default function SubscriptionPlansPage() {
 
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-foreground">
-                    Nhận xét (không bắt buộc)
+                    {t("reviewDialog.contentLabel")}
                   </p>
                   <Textarea
                     rows={4}
                     value={reviewContent}
                     onChange={(e) => setReviewContent(e.target.value)}
-                    placeholder="Bạn thấy gói này phù hợp với cửa hàng nào? Ưu điểm và hạn chế là gì?"
+                    placeholder={t("reviewDialog.contentPlaceholder")}
                   />
                 </div>
               </div>
@@ -693,7 +679,7 @@ export default function SubscriptionPlansPage() {
                   onClick={() => setReviewDialogOpen(false)}
                   disabled={submittingReview}
                 >
-                  Hủy
+                  {t("reviewDialog.cancel")}
                 </Button>
                 <Button
                   onClick={handleSubmitReview}
@@ -703,12 +689,12 @@ export default function SubscriptionPlansPage() {
                   {submittingReview ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang gửi...
+                      {t("reviewDialog.submitting")}
                     </>
                   ) : (
                     <>
                       <Star className="mr-2 h-4 w-4" />
-                      Gửi đánh giá
+                      {t("reviewDialog.submit")}
                     </>
                   )}
                 </Button>
@@ -737,7 +723,8 @@ function PlanCard({
   reviewSummary?: PlanReviewSummary;
   onOpenReview: () => void;
 }) {
-  const features = parseFeatures(plan.features ?? null);
+  const { t } = useTranslation("subscription");
+  const features = parseFeatures(plan.features ?? null, t);
   const { currentStore } = useStoreStore();
 
   return (
@@ -755,7 +742,7 @@ function PlanCard({
           >
             <Badge className="bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-md px-3 py-1 flex items-center gap-1">
               <Star className="h-3 w-3" />
-              Phổ biến nhất
+              {t("planCard.mostPopular")}
             </Badge>
           </motion.div>
         )}
@@ -768,7 +755,7 @@ function PlanCard({
           >
             <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md gap-1 px-3 py-1 flex items-center">
               <Check className="h-3 w-3" />
-              Đang sử dụng
+              {t("planCard.currentPlanBadge")}
             </Badge>
           </motion.div>
         )}
@@ -781,7 +768,9 @@ function PlanCard({
           >
             <CardTitle className="text-2xl font-bold text-foreground">{plan.planName}</CardTitle>
           </motion.div>
-          <CardDescription className="text-base">{plan.durationDays} ngày sử dụng</CardDescription>
+          <CardDescription className="text-base">
+            {t("planCard.durationDays", { days: plan.durationDays })}
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="flex-1 pt-0 px-6 min-h-0 overflow-hidden">
@@ -792,7 +781,7 @@ function PlanCard({
             className="text-center mb-4"
           >
             <span className="text-4xl font-bold text-foreground">{formatPriceVnd(plan.price)}</span>
-            <span className="text-muted-foreground ml-2">/tháng</span>
+            <span className="text-muted-foreground ml-2">{t("planCard.pricePerMonth")}</span>
           </motion.div>
 
           <div className="mb-4 flex items-center justify-center gap-2 text-sm">
@@ -805,12 +794,12 @@ function PlanCard({
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  ({reviewSummary.totalReviews} đánh giá)
+                  {t("planCard.reviewsSummary", { count: reviewSummary.totalReviews })}
                 </span>
               </>
             ) : (
               <span className="text-xs text-muted-foreground">
-                Chưa có đánh giá
+                {t("planCard.noReviews")}
               </span>
             )}
           </div>
@@ -849,7 +838,7 @@ function PlanCard({
                   variant="outline"
                 >
                   <Check className="mr-2 h-4 w-4" />
-                  Bạn đang sở hữu gói này
+                  {t("planCard.owningPlan")}
                 </Button>
               <Button
                   type="button"
@@ -857,7 +846,7 @@ function PlanCard({
                   className="w-full h-8 text-xs font-medium text-teal-600 hover:text-teal-700"
                   onClick={onOpenReview}
                 >
-                  Viết đánh giá cho gói này
+                  {t("planCard.writeReview")}
                 </Button>
               </div>
             </motion.div>
@@ -871,17 +860,17 @@ function PlanCard({
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang xử lý...
+                    {t("planCard.processing")}
                   </>
                 ) : currentStore ? (
                   <>
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Mua gói cho {currentStore.storeName}
+                    {t("planCard.buyForStore", { storeName: currentStore.storeName })}
                   </>
                 ) : (
                   <>
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Thanh toán QR (SePay)
+                    {t("planCard.payWithSepay")}
                   </>
                 )}
               </Button>

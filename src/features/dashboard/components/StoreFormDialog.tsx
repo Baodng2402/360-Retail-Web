@@ -22,6 +22,7 @@ import { Loader2 } from "lucide-react";
 // nên modal tạo cửa hàng chỉ dùng input địa chỉ + toạ độ đơn giản.
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import type { Plan } from "@/shared/types/subscription";
+import { useTranslation } from "react-i18next";
 
 interface StoreFormData {
   storeName: string;
@@ -52,6 +53,7 @@ export const StoreFormDialog = ({
   isSaving,
   mandatory = false,
 }: StoreFormDialogProps) => {
+  const { t, i18n } = useTranslation(["store", "common"]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = useState(false);
   const [plansError, setPlansError] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export const StoreFormDialog = ({
       } catch (err) {
         console.error("Failed to load subscription plans for store dialog:", err);
         if (!cancelled) {
-          setPlansError("Không thể tải danh sách gói dịch vụ. Bạn vẫn có thể nhập planId thủ công nếu biết.");
+          setPlansError(t("store:formDialog.planLoadError"));
         }
       } finally {
         if (!cancelled) {
@@ -82,7 +84,7 @@ export const StoreFormDialog = ({
     return () => {
       cancelled = true;
     };
-  }, [open, isEditing]);
+  }, [open, isEditing, t]);
 
   return (
     <Dialog open={open} onOpenChange={mandatory ? () => {} : onOpenChange}>
@@ -94,58 +96,58 @@ export const StoreFormDialog = ({
         <DialogHeader>
           <DialogTitle>
             {mandatory
-              ? "Tạo cửa hàng đầu tiên"
+              ? t("store:formDialog.titles.mandatory")
               : isEditing
-                ? "Sửa cửa hàng"
-                : "Thêm cửa hàng"}
+                ? t("store:formDialog.titles.edit")
+                : t("store:formDialog.titles.create")}
           </DialogTitle>
           <DialogDescription>
             {mandatory
-              ? "Bạn cần tạo ít nhất một cửa hàng để tiếp tục sử dụng hệ thống"
-              : "Điền thông tin cửa hàng bên dưới"}
+              ? t("store:formDialog.descriptions.mandatory")
+              : t("store:formDialog.descriptions.default")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-6 py-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="store-name">Tên cửa hàng *</Label>
+              <Label htmlFor="store-name">{t("store:formDialog.fields.storeName")} *</Label>
               <Input
                 id="store-name"
                 value={formData.storeName}
                 onChange={(e) =>
                   onFormChange({ ...formData, storeName: e.target.value })
                 }
-                placeholder="Ví dụ: VIPP"
+                placeholder={t("store:formDialog.placeholders.storeName")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="store-address">Address / Địa chỉ</Label>
+              <Label htmlFor="store-address">{t("store:formDialog.fields.address")}</Label>
               <Input
                 id="store-address"
                 value={formData.address}
                 onChange={(e) =>
                   onFormChange({ ...formData, address: e.target.value })
                 }
-                placeholder="Nhập địa chỉ cửa hàng..."
+                placeholder={t("store:formDialog.placeholders.address")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="store-phone">Số điện thoại</Label>
+              <Label htmlFor="store-phone">{t("store:formDialog.fields.phone")}</Label>
               <Input
                 id="store-phone"
                 value={formData.phone}
                 onChange={(e) =>
                   onFormChange({ ...formData, phone: e.target.value })
                 }
-                placeholder="Ví dụ: 0789357788"
+                placeholder={t("store:formDialog.placeholders.phone")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="store-status">Trạng thái</Label>
+              <Label htmlFor="store-status">{t("store:formDialog.fields.status")}</Label>
               <Select
                 value={formData.isActive ? "active" : "inactive"}
                 onValueChange={(value) =>
@@ -156,21 +158,21 @@ export const StoreFormDialog = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Hoạt động</SelectItem>
-                  <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                  <SelectItem value="active">{t("store:management.status.active")}</SelectItem>
+                  <SelectItem value="inactive">{t("store:management.status.inactive")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             {!isEditing && (
               <div className="space-y-2">
-                <Label htmlFor="store-plan">Gói dịch vụ (plan)</Label>
+                <Label htmlFor="store-plan">{t("store:formDialog.fields.plan")}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Chọn gói subscription cho cửa hàng này. Mặc định nên chọn cùng gói với store hiện tại.
+                  {t("store:formDialog.planHint")}
                 </p>
                 {plansLoading ? (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    <span>Đang tải danh sách gói dịch vụ...</span>
+                    <span>{t("store:formDialog.planLoading")}</span>
                   </div>
                 ) : plans.length > 0 ? (
                   <Select
@@ -180,15 +182,17 @@ export const StoreFormDialog = ({
                     }
                   >
                     <SelectTrigger id="store-plan">
-                      <SelectValue placeholder="Chọn gói dịch vụ" />
+                      <SelectValue placeholder={t("store:formDialog.placeholders.plan")} />
                     </SelectTrigger>
                     <SelectContent>
                       {plans.map((plan) => (
                         <SelectItem key={plan.id} value={plan.id}>
                           {plan.planName}{" "}
                           {typeof plan.price === "number"
-                            ? `- ${plan.price.toLocaleString("vi-VN")}₫/${plan.durationDays || 30
-                              } ngày`
+                            ? t("store:formDialog.planPrice", {
+                                price: plan.price.toLocaleString(i18n.language),
+                                days: plan.durationDays || 30,
+                              })
                             : ""}
                         </SelectItem>
                       ))}
@@ -198,7 +202,7 @@ export const StoreFormDialog = ({
                   <>
                     <Input
                       id="store-plan"
-                      placeholder="Không tải được danh sách gói - nhập planId nếu biết"
+                      placeholder={t("store:formDialog.placeholders.planManual")}
                       value={formData.planId}
                       onChange={(e) =>
                         onFormChange({ ...formData, planId: e.target.value })
@@ -222,19 +226,19 @@ export const StoreFormDialog = ({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
           )}
           <Button onClick={onSave} disabled={isSaving}>
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Đang xử lý...
+                {t("common:states.saving")}
               </>
             ) : isEditing ? (
-              "Cập nhật"
+              t("common:actions.saveChanges")
             ) : (
-              "Thêm"
+              t("common:actions.create")
             )}
           </Button>
         </DialogFooter>

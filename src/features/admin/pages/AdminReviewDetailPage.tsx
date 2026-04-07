@@ -10,8 +10,10 @@ import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
 import { planReviewsApi, type PlanReview } from "@/shared/lib/planReviewsApi";
+import { useTranslation } from "react-i18next";
 
 export default function AdminReviewDetailPage() {
+  const { t, i18n } = useTranslation(["admin", "common"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -26,14 +28,14 @@ export default function AdminReviewDetailPage() {
       const res = await planReviewsApi.getAdminReviews({ page: 1, pageSize: 200 });
       const found = res.items.find((x) => x.id === id) ?? null;
       if (!found) {
-        toast.error("Không tìm thấy review.");
+        toast.error(t("admin:reviewDetail.toast.notFound"));
         navigate("/admin/reviews", { replace: true });
         return;
       }
       setReview(found);
     } catch (err) {
       console.error("Failed to load review detail:", err);
-      toast.error("Không tải được chi tiết review.");
+      toast.error(t("admin:reviewDetail.toast.loadError"));
       navigate("/admin/reviews", { replace: true });
     } finally {
       setLoading(false);
@@ -47,19 +49,19 @@ export default function AdminReviewDetailPage() {
 
   const createdAt = useMemo(() => {
     if (!review?.createdAt) return "—";
-    return new Date(review.createdAt).toLocaleString("vi-VN");
-  }, [review?.createdAt]);
+    return new Date(review.createdAt).toLocaleString(i18n.language);
+  }, [i18n.language, review?.createdAt]);
 
   const onDelete = async () => {
     if (!review) return;
     try {
       setDeleting(true);
       await planReviewsApi.deleteReview(review.id);
-      toast.success("Đã xoá review.");
+      toast.success(t("admin:reviewsPage.toast.deleteSuccess"));
       navigate("/admin/reviews", { replace: true });
     } catch (err) {
       console.error("Failed to delete review:", err);
-      toast.error("Xoá review thất bại.");
+      toast.error(t("admin:reviewsPage.toast.deleteError"));
     } finally {
       setDeleting(false);
     }
@@ -99,7 +101,7 @@ export default function AdminReviewDetailPage() {
           onClick={() => navigate("/admin/reviews")}
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại danh sách reviews
+          {t("admin:reviewDetail.backToList")}
         </Button>
       </motion.div>
 
@@ -121,7 +123,7 @@ export default function AdminReviewDetailPage() {
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                Review ID: <span className="font-mono break-all">{review.id}</span>
+                {t("admin:reviewDetail.reviewId")}: <span className="font-mono break-all">{review.id}</span>
               </p>
             </div>
           </div>
@@ -129,26 +131,26 @@ export default function AdminReviewDetailPage() {
           <div className="relative mt-5 grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Store ID</span>
+                <span className="text-xs text-muted-foreground">{t("admin:reviewDetail.fields.storeId")}</span>
                 <span className="font-mono text-xs truncate">{review.storeId}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Plan ID</span>
+                <span className="text-xs text-muted-foreground">{t("admin:reviewDetail.fields.planId")}</span>
                 <span className="font-mono text-xs truncate">{review.planId}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">User ID</span>
+                <span className="text-xs text-muted-foreground">{t("admin:reviewDetail.fields.userId")}</span>
                 <span className="font-mono text-xs truncate">{review.userId}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Created</span>
+                <span className="text-xs text-muted-foreground">{t("admin:reviewDetail.fields.created")}</span>
                 <span className="font-mono text-xs">{createdAt}</span>
               </div>
             </div>
 
             <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-2">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Content
+                {t("admin:reviewDetail.fields.content")}
               </div>
               <div className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
                 {review.content || "—"}
@@ -160,18 +162,18 @@ export default function AdminReviewDetailPage() {
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-2" onClick={() => void load()} disabled={deleting}>
                 <RefreshCcw className="h-4 w-4" />
-                Reload
+                {t("common:actions.reload")}
               </Button>
               <Button variant="outline" size="sm" className="gap-2" onClick={() => setRawOpen(true)}>
                 <Braces className="h-4 w-4" />
-                Raw JSON
+                {t("common:actions.rawJson")}
               </Button>
             </div>
           </div>
         </Card>
 
         <Card className="p-5 space-y-3 hover:shadow-lg transition-shadow duration-300">
-          <div className="text-sm font-semibold">Moderation</div>
+          <div className="text-sm font-semibold">{t("admin:reviewDetail.moderation.title")}</div>
           <Button
             variant="destructive"
             className="w-full justify-start gap-2"
@@ -179,7 +181,7 @@ export default function AdminReviewDetailPage() {
             disabled={deleting}
           >
             <Trash2 className="h-4 w-4" />
-            {deleting ? "Đang xoá..." : "Xoá review"}
+            {deleting ? t("admin:reviewDetail.moderation.deleting") : t("admin:reviewDetail.moderation.delete")}
           </Button>
         </Card>
       </div>
@@ -187,7 +189,7 @@ export default function AdminReviewDetailPage() {
       <JsonViewerDialog
         open={rawOpen}
         onOpenChange={setRawOpen}
-        title={`Review raw: ${review.id}`}
+        title={t("admin:reviewDetail.rawTitle", { id: review.id })}
         value={review}
       />
     </motion.div>

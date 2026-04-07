@@ -15,6 +15,7 @@ import { Button } from "@/shared/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 import { ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
+import { useTranslation } from "react-i18next";
 
 interface RestockModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ interface RestockModalProps {
 }
 
 const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
+  const { t } = useTranslation(["inventory", "common"]);
   const [operation, setOperation] = useState<"in" | "out">("in");
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
@@ -34,7 +36,7 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
 
   const handleSubmit = () => {
     if (!quantity || parseInt(quantity) <= 0) {
-      toast.error("Vui lòng nhập số lượng hợp lệ");
+      toast.error(t("inventory:restockModal.toast.invalidQuantity"));
       return;
     }
 
@@ -49,9 +51,11 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
       });
 
       toast.success(
-        `Đã ${operation === "in" ? "nhập" : "xuất"} ${quantity} ${
-          product.name
-        } thành công!`
+        t("inventory:restockModal.toast.success", {
+          operation: operation === "in" ? t("inventory:restockModal.operations.in") : t("inventory:restockModal.operations.out"),
+          quantity,
+          name: product.name,
+        }),
       );
 
       setIsSubmitting(false);
@@ -79,12 +83,12 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
                   <ArrowUpFromLine className="h-4 w-4" />
                 </div>
-                Stock Out / Xuất kho
+                {t("inventory:restockModal.title.out")}
               </>
             )}
           </DialogTitle>
           <DialogDescription>
-            Cập nhật số lượng tồn kho cho sản phẩm
+            {t("inventory:restockModal.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -99,14 +103,14 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             <div className="flex-1">
               <p className="font-semibold text-foreground">{product.name}</p>
               <p className="text-sm text-muted-foreground">
-                Tồn kho hiện tại:{" "}
+                {t("inventory:restockModal.currentStock")}:{" "}
                 <span className="font-bold text-[#FF7B21]">{product.stock}</span>
               </p>
             </div>
           </motion.div>
 
           <div className="space-y-2">
-            <Label>Operation Type / Loại thao tác</Label>
+            <Label>{t("inventory:restockModal.fields.operationType")}</Label>
             <RadioGroup
               value={operation}
               onValueChange={(val) => setOperation(val as "in" | "out")}
@@ -115,14 +119,14 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
                 <RadioGroupItem value="in" id="in" />
                 <Label htmlFor="in" className="font-normal cursor-pointer flex items-center gap-2">
                   <ArrowDownToLine className="h-4 w-4 text-emerald-500" />
-                  Stock In / Nhập kho
+                  {t("inventory:restockModal.title.in")}
                 </Label>
               </div>
               <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                 <RadioGroupItem value="out" id="out" />
                 <Label htmlFor="out" className="font-normal cursor-pointer flex items-center gap-2">
                   <ArrowUpFromLine className="h-4 w-4 text-orange-500" />
-                  Stock Out / Xuất kho
+                  {t("inventory:restockModal.title.out")}
                 </Label>
               </div>
             </RadioGroup>
@@ -130,13 +134,13 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="quantity">
-              Quantity / Số lượng <span className="text-red-500">*</span>
+              {t("inventory:restockModal.fields.quantity")} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="quantity"
               type="number"
               min="1"
-              placeholder="Nhập số lượng..."
+              placeholder={t("inventory:restockModal.placeholders.quantity")}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               className="w-full bg-background/80 backdrop-blur-sm"
@@ -144,10 +148,10 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason / Lý do</Label>
+            <Label htmlFor="reason">{t("inventory:restockModal.fields.reason")}</Label>
             <Input
               id="reason"
-              placeholder="Nhà cung cấp hoặc lý do..."
+              placeholder={t("inventory:restockModal.placeholders.reason")}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               className="w-full bg-background/80 backdrop-blur-sm"
@@ -161,14 +165,14 @@ const RestockModal = ({ open, onOpenChange, product }: RestockModalProps) => {
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
-            Cancel / Hủy
+            {t("common:actions.cancel")}
           </Button>
           <Button
             className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Đang xử lý..." : "Confirm / Xác nhận"}
+            {isSubmitting ? t("inventory:restockModal.actions.submitting") : t("common:actions.confirm")}
           </Button>
         </DialogFooter>
         </WowDialogInner>

@@ -13,6 +13,7 @@ import { formatVnd } from "@/shared/utils/formatMoney";
 import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
 import { Loader2, Receipt } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const getStr = (o: Record<string, unknown>, keys: string[]) => {
   for (const k of keys) {
@@ -38,6 +39,7 @@ const toIsoFromDateInput = (date: string, endOfDay = false) => {
 };
 
 export default function AdminPaymentsPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
@@ -49,7 +51,7 @@ export default function AdminPaymentsPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [rawOpen, setRawOpen] = useState(false);
-  const [rawTitle, setRawTitle] = useState("Raw JSON");
+  const [rawTitle, setRawTitle] = useState(() => t("admin:paymentsPage.rawDialogDefaultTitle"));
   const [rawValue, setRawValue] = useState<unknown>(null);
 
   const query = useMemo(() => {
@@ -69,7 +71,7 @@ export default function AdminPaymentsPage() {
       setItems(list);
     } catch (err) {
       console.error("Failed to load payments:", err);
-      toast.error("Không tải được danh sách payments.");
+      toast.error(t("admin:paymentsPage.toast.loadError"));
       setItems([]);
     } finally {
       setLoading(false);
@@ -141,41 +143,41 @@ export default function AdminPaymentsPage() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
-                  SuperAdmin
+                  {t("admin:paymentsPage.badge")}
                 </Badge>
-                <span className="text-sm text-muted-foreground">Payments (list)</span>
+                <span className="text-sm text-muted-foreground">{t("admin:paymentsPage.caption")}</span>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-5">
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">From</div>
+                <div className="text-xs text-muted-foreground">{t("admin:paymentsPage.filters.from")}</div>
                 <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="bg-background/80 backdrop-blur-sm" />
               </div>
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">To</div>
+                <div className="text-xs text-muted-foreground">{t("admin:paymentsPage.filters.to")}</div>
                 <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="bg-background/80 backdrop-blur-sm" />
               </div>
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Status</div>
+                <div className="text-xs text-muted-foreground">{t("admin:paymentsPage.filters.status")}</div>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger className="bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Chọn..." />
+                    <SelectValue placeholder={t("admin:dashboard.filters.selectPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="Failed">Failed</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                    <SelectItem value="all">{t("admin:paymentsPage.status.all")}</SelectItem>
+                    <SelectItem value="Pending">{t("admin:paymentsPage.status.pending")}</SelectItem>
+                    <SelectItem value="Completed">{t("admin:paymentsPage.status.completed")}</SelectItem>
+                    <SelectItem value="Failed">{t("admin:paymentsPage.status.failed")}</SelectItem>
+                    <SelectItem value="Cancelled">{t("admin:paymentsPage.status.cancelled")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Tìm kiếm</div>
+                <div className="text-xs text-muted-foreground">{t("admin:paymentsPage.filters.search")}</div>
                 <Input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Tìm theo store, plan, id..."
+                  placeholder={t("admin:paymentsPage.filters.searchPlaceholder")}
                   className="bg-background/80 backdrop-blur-sm"
                 />
               </div>
@@ -185,7 +187,11 @@ export default function AdminPaymentsPage() {
                   className="w-full bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
                   disabled={loading}
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Làm mới"}
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    t("admin:paymentsPage.actions.refresh")
+                  )}
                 </Button>
               </div>
             </div>
@@ -202,7 +208,7 @@ export default function AdminPaymentsPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold flex items-center gap-2">
               <Receipt className="h-4 w-4 text-[#FF7B21]" />
-              Danh sách payments
+              {t("admin:paymentsPage.list.title")}
             </h3>
             <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
               {rows.length.toLocaleString()}
@@ -218,19 +224,19 @@ export default function AdminPaymentsPage() {
               </div>
             ) : rows.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
-                Không có dữ liệu.
+                {t("common:states.noData")}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5">
-                      <TableHead>Store</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Created/Paid</TableHead>
-                      <TableHead className="text-right">Raw</TableHead>
+                      <TableHead>{t("admin:paymentsPage.columns.store")}</TableHead>
+                      <TableHead>{t("admin:paymentsPage.columns.plan")}</TableHead>
+                      <TableHead>{t("admin:paymentsPage.columns.status")}</TableHead>
+                      <TableHead>{t("admin:paymentsPage.columns.amount")}</TableHead>
+                      <TableHead>{t("admin:paymentsPage.columns.createdPaid")}</TableHead>
+                      <TableHead className="text-right">{t("admin:paymentsPage.columns.raw")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -266,12 +272,16 @@ export default function AdminPaymentsPage() {
                             className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setRawTitle(`Payment raw: ${r.id || "—"}`);
+                              setRawTitle(
+                                t("admin:paymentsPage.rawTitle", {
+                                  id: r.id || t("common:states.noData"),
+                                }),
+                              );
                               setRawValue(r.raw);
                               setRawOpen(true);
                             }}
                           >
-                            Raw
+                            {t("admin:paymentsPage.columns.raw")}
                           </Button>
                         </TableCell>
                       </motion.tr>
@@ -292,15 +302,11 @@ export default function AdminPaymentsPage() {
           transition={{ duration: 0.3, delay: 0.2 }}
         >
           <div>
-            Hiển thị{" "}
-            <span className="font-semibold">
-              {pagedRows.length > 0 ? (page - 1) * pageSize + 1 : 0}
-            </span>{" "}
-            -{" "}
-            <span className="font-semibold">
-              {(page - 1) * pageSize + pagedRows.length}
-            </span>{" "}
-            trong <span className="font-semibold">{rows.length}</span> payments
+            {t("admin:paymentsPage.pagination.summary", {
+              from: pagedRows.length > 0 ? (page - 1) * pageSize + 1 : 0,
+              to: (page - 1) * pageSize + pagedRows.length,
+              total: rows.length,
+            })}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -309,11 +315,10 @@ export default function AdminPaymentsPage() {
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Trang trước
+              {t("admin:paymentsPage.pagination.prev")}
             </Button>
             <span>
-              Trang <span className="font-semibold">{page}</span> /{" "}
-              <span className="font-semibold">{totalPages}</span>
+              {t("admin:paymentsPage.pagination.page", { page, totalPages })}
             </span>
             <Button
               variant="outline"
@@ -321,7 +326,7 @@ export default function AdminPaymentsPage() {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              Trang sau
+              {t("admin:paymentsPage.pagination.next")}
             </Button>
           </div>
         </motion.div>

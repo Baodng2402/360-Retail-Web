@@ -3,8 +3,10 @@ import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { storeApi } from "@/shared/lib/storeApi";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 export function StoreInformationContent() {
+  const { t } = useTranslation(["dashboard", "common"]);
   const [storeName, setStoreName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
@@ -24,11 +26,11 @@ export function StoreInformationContent() {
         }
       } catch (error: unknown) {
         console.error("Failed to get store:", error);
-        toast.error("Failed to get store / Không thể lấy thông tin cửa hàng");
+        toast.error(t("dashboard:settingsPage.toasts.loadStoreFailed"));
       }
     };
     getStore();
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,12 +44,10 @@ export function StoreInformationContent() {
         phone,
       });
       console.log("Store created successfully:", result);
-      toast.success(
-        "✅ Settings saved successfully! / Đã lưu cài đặt thành công!",
-      );
+      toast.success(t("dashboard:settingsPage.toasts.saveStoreSuccess"));
     } catch (err: unknown) {
       console.error("Failed to create store:", err);
-      toast.error("Failed to save settings / Không thể lưu cài đặt");
+      toast.error(t("dashboard:settingsPage.toasts.saveStoreFailed"));
     } finally {
       setLoading(false);
     }
@@ -57,14 +57,14 @@ export function StoreInformationContent() {
     <Card className="p-6">
       {/* ... Phần JSX giữ nguyên ... */}
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-1">Store Information</h2>
-        <p className="text-muted-foreground">Thông tin chi tiết về cửa hàng</p>
+        <h2 className="text-2xl font-semibold mb-1">{t("dashboard:settingsPage.store.title")}</h2>
+        <p className="text-muted-foreground">{t("dashboard:settingsPage.tabs.store")}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="storeName" className="mb-1 block text-sm font-medium">
-            Store Name / Tên cửa hàng
+            {t("dashboard:settingsPage.store.fields.nameLabel")}
           </label>
           <input
             id="storeName"
@@ -72,7 +72,7 @@ export function StoreInformationContent() {
             value={storeName} // State này giờ đã có dữ liệu từ useEffect
             onChange={(e) => setStoreName(e.target.value)}
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
-            placeholder="Enter store name"
+            placeholder={t("dashboard:settingsPage.store.fields.namePlaceholder")}
             required
           />
         </div>
@@ -83,7 +83,7 @@ export function StoreInformationContent() {
             htmlFor="storeAddress"
             className="mb-1 block text-sm font-medium"
           >
-            Address / Địa chỉ
+            {t("dashboard:settingsPage.store.fields.addressLabel")}
           </label>
           <input
             id="storeAddress"
@@ -91,7 +91,7 @@ export function StoreInformationContent() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
-            placeholder="Enter store address"
+            placeholder={t("dashboard:settingsPage.store.fields.addressPlaceholder")}
             required
           />
         </div>
@@ -101,7 +101,7 @@ export function StoreInformationContent() {
             htmlFor="storePhone"
             className="mb-1 block text-sm font-medium"
           >
-            Phone Number / Số điện thoại
+            {t("dashboard:settingsPage.store.fields.phoneLabel")}
           </label>
           <input
             id="storePhone"
@@ -109,7 +109,7 @@ export function StoreInformationContent() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
-            placeholder="Enter phone number"
+            placeholder={t("dashboard:settingsPage.store.fields.phonePlaceholder")}
             required
           />
         </div>
@@ -121,8 +121,8 @@ export function StoreInformationContent() {
             className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
-              ? "Saving... / Đang lưu..."
-              : "Save Changes / Lưu thay đổi"}
+              ? t("common:states.saving")
+              : t("common:actions.saveChanges")}
           </Button>
         </div>
       </form>

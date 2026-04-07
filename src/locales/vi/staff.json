@@ -43,6 +43,7 @@
     },
     "form": {
       "fullName": "Họ tên",
+      "email": "Email",
       "position": "Chức danh",
       "positionModePreset": "Chọn từ danh sách",
       "positionModeCustom": "Nhập thủ công",
@@ -67,6 +68,41 @@
       "updateFailed": "Không thể cập nhật thông tin nhân viên.",
       "deactivateSuccess": "Đã ngừng hoạt động nhân viên.",
       "deactivateFailed": "Không thể xóa/ngừng hoạt động nhân viên. Vui lòng thử lại."
+    }
+  }
+  ,
+  "positions": {
+    "StoreOwner": "Chủ cửa hàng",
+    "Manager": "Quản lý",
+    "Staff": "Nhân viên",
+    "Cashier": "Thu ngân",
+    "Sales": "Bán hàng",
+    "Warehouse": "Thủ kho"
+  }
+  ,
+  "inviteModal": {
+    "title": "Mời nhân viên",
+    "description": "Gửi email mời nhân viên tham gia cửa hàng",
+    "fields": {
+      "email": "Email",
+      "role": "Vai trò"
+    },
+    "placeholders": {
+      "email": "staff@example.com"
+    },
+    "roles": {
+      "staff": "Staff / Nhân viên",
+      "manager": "Manager / Quản lý"
+    },
+    "actions": {
+      "submit": "Gửi lời mời",
+      "submitting": "Đang gửi..."
+    },
+    "toast": {
+      "emailRequired": "Vui lòng nhập email",
+      "storeRequired": "Không tìm thấy cửa hàng. Vui lòng chọn cửa hàng trước.",
+      "success": "Đã gửi lời mời thành công!",
+      "error": "Không thể gửi lời mời. Vui lòng thử lại."
     }
   }
 }

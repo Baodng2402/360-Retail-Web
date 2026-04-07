@@ -3,11 +3,13 @@
     "title": "Choose a subscription plan",
     "loadingTitle": "Choose a subscription plan",
     "errorTitle": "Choose a subscription plan",
+    "storeSelectorDescription": "Select a store to view and purchase the correct plan for that branch.",
     "heroSubtitle": "Upgrade to unlock full features for {{storeName}}.",
     "heroSubtitleFallbackStore": "your store",
     "inactiveNotice": "The current store does not have a Trial or Active plan yet. Please choose a plan below to get started.",
     "currentPlanTitle": "Current plan of {{storeName}}",
     "currentPlanStoreFallback": "your store",
+    "daysRemaining": "{{days}} days remaining",
     "status": {
       "trial": "Trial",
       "active": "Active",
@@ -39,6 +41,7 @@
   "sepayDialog": {
     "title": "QR Payment (SePay)",
     "description": "Scan the QR code or transfer money using the details below. After payment, click the check status button to let the system refresh your plan automatically.",
+    "qrAlt": "SePay payment QR",
     "paymentCode": "Payment code:",
     "bankInfoTitle": "Bank transfer details",
     "bankName": "Bank:",
@@ -64,14 +67,44 @@
   "toasts": {
     "refreshAccessSuccess": "Access and subscription refreshed successfully.",
     "refreshAccessError": "Cannot refresh access. Please sign in again.",
+    "missingAccessToken": "Missing new access token from server",
+    "missingPaymentId": "Missing paymentId from server",
+    "invalidSepayResponse": "Invalid SePay payment response",
+    "openedVnpayDemo": "Opened VNPay demo payment page",
+    "invalidVnpayResponse": "Invalid VNPay payment response",
     "paymentInitError": "Cannot initiate payment. Please try again.",
     "paymentStatusPending": "Payment is still pending. Please wait a bit and try again.",
     "paymentStatusCompleted": "Payment confirmed successfully. Refreshing access...",
     "paymentStatusFailed": "Payment failed. Please try again or choose another method.",
     "noPaymentId": "No payment id found to check status.",
+    "paymentStatusCheckError": "Cannot check payment status. Please try again.",
     "loadError": "Failed to load data. Please try again.",
     "submitReviewSuccess": "Your plan review has been submitted. Thank you!",
     "submitReviewError": "Cannot submit review. Please try again."
+  },
+  "features": {
+    "capacity": {
+      "unlimited": "Unlimited {{label}}",
+      "max": "Up to {{value, number}} {{label}}"
+    },
+    "capacityLabels": {
+      "max_orders": "orders",
+      "max_products": "products",
+      "max_employees": "employees"
+    },
+    "featureLabels": {
+      "has_tasks": "Staff task management",
+      "has_loyalty": "Customer loyalty program",
+      "has_variants": "Product variants (size/color...)",
+      "has_dashboard": "Advanced sales dashboard",
+      "has_feedback_qr": "Receipt QR feedback",
+      "has_gps_checkin": "GPS check-in & distance alerts",
+      "has_multi_store": "Multi-branch management",
+      "has_export_excel": "Excel report export",
+      "has_invite_staff": "Invite staff via email",
+      "has_inventory_tickets": "Inventory in/out tickets",
+      "has_realtime_notifications": "Realtime notifications"
+    }
   }
 }
 

@@ -5,8 +5,10 @@ import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { XCircle, Home, CreditCard } from "lucide-react";
 import { FloatingParticles, GradientOrb, GlassCard } from "@/shared/components/ui/Globe3D";
+import { useTranslation } from "react-i18next";
 
 export default function PaymentFailedPage() {
+  const { t } = useTranslation(["payment", "common"]);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -14,9 +16,9 @@ export default function PaymentFailedPage() {
   const message = useMemo(() => {
     return (
       searchParams.get("message") ||
-      "Giao dịch thanh toán không thành công. Vui lòng thử lại hoặc chọn phương thức thanh toán khác."
+      t("payment:failed.defaultMessage")
     );
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleGoToDashboard = () => {
     navigate("/dashboard");
@@ -67,7 +69,7 @@ export default function PaymentFailedPage() {
               className="mb-4"
             >
               <Badge variant="outline" className="text-xs">
-                Mã giao dịch: {paymentId.slice(0, 8)}...
+                {t("payment:common.transactionCodeLabel")}: {paymentId.slice(0, 8)}...
               </Badge>
             </motion.div>
           )}
@@ -79,7 +81,7 @@ export default function PaymentFailedPage() {
             transition={{ delay: 0.4 }}
             className="text-2xl font-bold mb-2 text-red-600 dark:text-red-400"
           >
-            Thanh toán thất bại
+            {t("payment:failed.title")}
           </motion.h1>
 
           <motion.p
@@ -104,7 +106,7 @@ export default function PaymentFailedPage() {
                 className="w-full sm:w-auto gap-2 bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF7B21]/90 hover:to-[#19D6C8]/90 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 border-0 transition-all duration-300"
               >
                 <Home className="h-4 w-4" />
-                Về trang chủ
+                {t("common:actions.backToHome")}
               </Button>
             </motion.div>
 
@@ -115,7 +117,7 @@ export default function PaymentFailedPage() {
                 className="w-full sm:w-auto gap-2 border-[#FF7B21]/30 hover:border-[#FF7B21] hover:bg-[#FF7B21]/5 transition-all"
               >
                 <CreditCard className="h-4 w-4" />
-                Thử thanh toán lại
+                {t("payment:failed.retryPayment")}
               </Button>
             </motion.div>
           </motion.div>
@@ -128,7 +130,7 @@ export default function PaymentFailedPage() {
             className="mt-8 pt-6 border-t"
           >
             <p className="text-xs text-muted-foreground">
-              Cần hỗ trợ? Liên hệ{" "}
+              {t("payment:common.needHelp")}{" "}
               <a
                 href="mailto:support@360retail.com"
                 className="text-primary hover:underline"

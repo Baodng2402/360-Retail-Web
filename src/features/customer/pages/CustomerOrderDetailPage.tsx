@@ -6,8 +6,10 @@ import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { ordersApi } from "@/shared/lib/ordersApi";
 import type { Order } from "@/shared/types/orders";
 import { formatVnd } from "@/shared/utils/formatMoney";
+import { useTranslation } from "react-i18next";
 
 const CustomerOrderDetailPage = () => {
+  const { t: tCustomer, i18n } = useTranslation(["customer", "orders", "common"]);
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
@@ -38,15 +40,15 @@ const CustomerOrderDetailPage = () => {
         onClick={() => navigate(-1)}
       >
         <ArrowLeft className="h-4 w-4" />
-        Quay lại
+        {tCustomer("common:actions.back")}
       </Button>
 
       <Card className="p-6 space-y-4">
         {loading ? (
-          <p className="text-sm text-muted-foreground">Đang tải đơn hàng...</p>
+          <p className="text-sm text-muted-foreground">{tCustomer("portal.orderDetail.loading")}</p>
         ) : !order ? (
           <p className="text-sm text-muted-foreground">
-            Không tìm thấy đơn hàng.
+            {tCustomer("portal.orderDetail.notFound")}
           </p>
         ) : (
           <>
@@ -57,22 +59,24 @@ const CustomerOrderDetailPage = () => {
                 </div>
                 <div>
                   <h1 className="text-lg font-semibold text-foreground">
-                    Đơn hàng {order.code || order.id.slice(0, 8)}
+                    {tCustomer("portal.orderDetail.title", { code: order.code || order.id.slice(0, 8) })}
                   </h1>
                   <p className="text-xs text-muted-foreground">
-                    Ngày tạo:{" "}
-                    {new Date(order.createdAt).toLocaleString("vi-VN")}
+                    {tCustomer("portal.orderDetail.createdAt")}:{" "}
+                    {new Date(order.createdAt).toLocaleString(i18n.language)}
                   </p>
                 </div>
               </div>
               <div className="text-right text-sm">
-                <p className="text-muted-foreground">Trạng thái</p>
-                <p className="font-semibold text-foreground">{order.status}</p>
+                <p className="text-muted-foreground">{tCustomer("portal.orderDetail.statusLabel")}</p>
+                <p className="font-semibold text-foreground">
+                  {tCustomer(`orders:statusLabels.${order.status}` as const, { defaultValue: order.status })}
+                </p>
               </div>
             </div>
 
             <div className="border-t pt-4 space-y-2 text-sm">
-              <h2 className="font-semibold mb-1">Sản phẩm</h2>
+              <h2 className="font-semibold mb-1">{tCustomer("portal.orderDetail.itemsTitle")}</h2>
               {order.orderItems && order.orderItems.length > 0 ? (
                 <ul className="space-y-1">
                   {order.orderItems.map((item) => (
@@ -91,13 +95,13 @@ const CustomerOrderDetailPage = () => {
                 </ul>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Không có thông tin sản phẩm.
+                  {tCustomer("portal.orderDetail.noItems")}
                 </p>
               )}
             </div>
 
             <div className="border-t pt-4 text-sm flex justify-between">
-              <span className="text-muted-foreground">Tổng tiền</span>
+              <span className="text-muted-foreground">{tCustomer("portal.orderDetail.totalLabel")}</span>
               <span className="font-semibold text-foreground">
                 {formatVnd(order.totalAmount)}
               </span>

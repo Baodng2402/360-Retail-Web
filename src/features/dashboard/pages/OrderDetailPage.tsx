@@ -45,12 +45,12 @@ const ORDER_STATUSES = [
   "Refunded",
 ] as const satisfies readonly OrderStatus[];
 
-const statusConfig: Record<OrderStatus, { label: string; color: string; bg: string }> = {
-  Pending: { label: "Chờ xử lý", color: "text-yellow-700", bg: "bg-yellow-50 border-yellow-200" },
-  Processing: { label: "Đang xử lý", color: "text-blue-700", bg: "bg-blue-50 border-blue-200" },
-  Completed: { label: "Hoàn thành", color: "text-green-700", bg: "bg-green-50 border-green-200" },
-  Cancelled: { label: "Đã hủy", color: "text-red-700", bg: "bg-red-50 border-red-200" },
-  Refunded: { label: "Hoàn tiền", color: "text-purple-700", bg: "bg-purple-50 border-purple-200" },
+const statusConfig: Record<OrderStatus, { color: string; bg: string }> = {
+  Pending: { color: "text-yellow-700", bg: "bg-yellow-50 border-yellow-200" },
+  Processing: { color: "text-blue-700", bg: "bg-blue-50 border-blue-200" },
+  Completed: { color: "text-green-700", bg: "bg-green-50 border-green-200" },
+  Cancelled: { color: "text-red-700", bg: "bg-red-50 border-red-200" },
+  Refunded: { color: "text-purple-700", bg: "bg-purple-50 border-purple-200" },
 };
 
 const OrderDetailPage = () => {
@@ -165,29 +165,32 @@ const OrderDetailPage = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              Đơn hàng {order.code || order.id.slice(0, 8).toUpperCase()}
+              {tOrders("detail.title", {
+                code: order.code || order.id.slice(0, 8).toUpperCase(),
+              })}
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
                 onClick={() => {
                   navigator.clipboard.writeText(order.code || order.id);
-                  toast.success("Đã copy mã đơn hàng!");
+                  toast.success(tOrders("detail.toasts.copyOrderCodeSuccess"));
                 }}
               >
                 <Copy className="h-4 w-4" />
               </Button>
             </h1>
             <p className="text-sm text-muted-foreground">
-              Ngày tạo: {new Intl.DateTimeFormat(
+              {tOrders("detail.createdAtLabel")}:{" "}
+              {new Intl.DateTimeFormat(
                 i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN",
-                { dateStyle: "full", timeStyle: "short" }
+                { dateStyle: "full", timeStyle: "short" },
               ).format(new Date(order.createdAt))}
             </p>
           </div>
         </div>
         <Badge className={`${statusInfo.bg} ${statusInfo.color} border px-4 py-2 text-sm font-medium`}>
-          {statusInfo.label}
+          {tOrders(`statusLabels.${order.status}`)}
         </Badge>
       </div>
 
@@ -199,18 +202,18 @@ const OrderDetailPage = () => {
             <div className="bg-gradient-to-r from-teal-500/10 to-blue-500/10 p-4 border-b">
               <h2 className="font-semibold flex items-center gap-2">
                 <Package className="h-5 w-5 text-teal-600" />
-                Sản phẩm ({order.orderItems.length})
+                {tOrders("detail.itemsTitle")} ({order.orderItems.length})
               </h2>
             </div>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="w-[50%]">Sản phẩm</TableHead>
-                    <TableHead className="text-center">Size/Màu</TableHead>
-                    <TableHead className="text-right">Đơn giá</TableHead>
-                    <TableHead className="text-center">SL</TableHead>
-                    <TableHead className="text-right">Thành tiền</TableHead>
+                    <TableHead className="w-[50%]">{tOrders("detail.itemsTable.product")}</TableHead>
+                    <TableHead className="text-center">{tOrders("detail.itemsTable.sizeColor")}</TableHead>
+                    <TableHead className="text-right">{tOrders("detail.itemsTable.unitPrice")}</TableHead>
+                    <TableHead className="text-center">{tOrders("detail.itemsTable.quantity")}</TableHead>
+                    <TableHead className="text-right">{tOrders("detail.itemsTable.lineTotal")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -222,9 +225,11 @@ const OrderDetailPage = () => {
                             <Package className="h-6 w-6 text-muted-foreground" />
                           </div>
                           <div>
-                            <p className="font-medium">{item.productName || "Sản phẩm"}</p>
+                            <p className="font-medium">
+                              {item.productName || tOrders("detail.itemsTable.productFallback")}
+                            </p>
                             <p className="text-xs text-muted-foreground font-mono">
-                              {item.barCode || item.sku || "Không có mã"}
+                              {item.barCode || item.sku || tOrders("detail.itemsTable.noCode")}
                             </p>
                           </div>
                         </div>
@@ -256,17 +261,17 @@ const OrderDetailPage = () => {
             {/* Summary */}
             <div className="border-t p-4 space-y-2 bg-muted/20">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Tạm tính</span>
+                <span className="text-muted-foreground">{tOrders("detail.summary.subtotal")}</span>
                 <span>{formatVnd(subtotal)}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-sm text-green-600">
-                  <span>Giảm giá</span>
+                  <span>{tOrders("detail.summary.discount")}</span>
                   <span>-{formatVnd(discount)}</span>
                 </div>
               )}
               <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                <span>Tổng cộng</span>
+                <span>{tOrders("detail.summary.total")}</span>
                 <span className="text-teal-600">{formatVnd(order.totalAmount)}</span>
               </div>
             </div>
@@ -277,26 +282,28 @@ const OrderDetailPage = () => {
             <Card className="p-4">
               <h3 className="font-semibold flex items-center gap-2 mb-3">
                 <Clock className="h-5 w-5 text-muted-foreground" />
-                Lịch sử đơn hàng
+                {tOrders("detail.timeline.title")}
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${order.status === "Completed" ? "bg-green-500" : "bg-red-500"}`} />
                   <div className="flex-1">
                     <p className="font-medium">
-                      {order.status === "Completed" ? "Đơn hàng hoàn thành" : "Đơn hàng đã hủy"}
+                      {order.status === "Completed"
+                        ? tOrders("detail.timeline.completed")
+                        : tOrders("detail.timeline.cancelled")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(order.updatedAt).toLocaleString("vi-VN")}
+                      {new Date(order.updatedAt).toLocaleString(i18n.language)}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-blue-500" />
                   <div className="flex-1">
-                    <p className="font-medium">Đơn hàng được tạo</p>
+                    <p className="font-medium">{tOrders("detail.timeline.created")}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(order.createdAt).toLocaleString("vi-VN")}
+                      {new Date(order.createdAt).toLocaleString(i18n.language)}
                     </p>
                   </div>
                 </div>
@@ -310,7 +317,7 @@ const OrderDetailPage = () => {
           {/* Order Actions */}
           {canUpdateStatus && (
             <Card className="p-5">
-              <h3 className="font-semibold mb-4">Cập nhật trạng thái</h3>
+              <h3 className="font-semibold mb-4">{tOrders("detail.actions.updateStatusTitle")}</h3>
               <div className="space-y-4">
                 <Select
                   value={newStatus}
@@ -318,12 +325,12 @@ const OrderDetailPage = () => {
                   disabled={updating}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn trạng thái" />
+                    <SelectValue placeholder={tOrders("detail.newStatusPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {ORDER_STATUSES.map((s) => (
                       <SelectItem key={s} value={s}>
-                        {statusConfig[s].label}
+                        {tOrders(`statusLabels.${s}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -334,7 +341,7 @@ const OrderDetailPage = () => {
                   className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700"
                 >
                   {updating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  Lưu trạng thái
+                  {tOrders("detail.save")}
                 </Button>
                 {(order.status === "Pending" || order.status === "Processing") && (
                   <Button
@@ -344,7 +351,7 @@ const OrderDetailPage = () => {
                     disabled={cancelling}
                   >
                     <XCircle className="h-4 w-4 mr-2" />
-                    Hủy đơn hàng
+                    {tOrders("detail.cancelOrder")}
                   </Button>
                 )}
               </div>
@@ -355,7 +362,7 @@ const OrderDetailPage = () => {
           <Card className="p-5">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <User className="h-5 w-5 text-muted-foreground" />
-              Khách hàng
+              {tOrders("detail.customerLabel")}
             </h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -363,7 +370,9 @@ const OrderDetailPage = () => {
                   {(order.customerName || "K")[0].toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-medium">{order.customerName || "Khách vãng lai"}</p>
+                  <p className="font-medium">
+                    {order.customerName || tOrders("table.walkInCustomer")}
+                  </p>
                   {order.customerId && (
                     <p className="text-xs text-muted-foreground">ID: {order.customerId.slice(0, 8)}...</p>
                   )}
@@ -376,21 +385,23 @@ const OrderDetailPage = () => {
           <Card className="p-5">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-muted-foreground" />
-              Thanh toán
+              {tOrders("detail.paymentLabel")}
             </h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Phương thức</span>
-                <Badge variant="outline">{order.paymentMethod || "Tiền mặt"}</Badge>
+                <span className="text-muted-foreground">{tOrders("detail.payment.method")}</span>
+                <Badge variant="outline">
+                  {order.paymentMethod || tOrders("detail.payment.cash")}
+                </Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Trạng thái</span>
+                <span className="text-muted-foreground">{tOrders("detail.payment.status")}</span>
                 <Badge className={order.paymentStatus === "Paid" ? "bg-green-500" : "bg-yellow-500"}>
-                  {order.paymentStatus || "Chưa thanh toán"}
+                  {order.paymentStatus || tOrders("detail.payment.unpaid")}
                 </Badge>
               </div>
               <div className="flex justify-between items-center pt-2 border-t">
-                <span className="font-medium">Tổng tiền</span>
+                <span className="font-medium">{tOrders("detail.totalLabel")}</span>
                 <span className="font-bold text-lg text-teal-600">{formatVnd(order.totalAmount)}</span>
               </div>
             </div>
@@ -401,16 +412,16 @@ const OrderDetailPage = () => {
             <Card className="p-5">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                Khảo sát khách hàng
+                {tOrders("detail.feedbackQrTitle")}
               </h3>
               <p className="text-xs text-muted-foreground mb-3">
-                Quét mã QR để gửi khảo sát phản hồi
+                {tOrders("detail.feedbackQrHint")}
               </p>
               <div className="flex justify-center">
                 <div className="bg-white p-3 rounded-xl border shadow-sm inline-block">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(feedbackUrl)}`}
-                    alt="Feedback QR"
+                    alt={tOrders("detail.feedbackQrAlt")}
                     className="h-44 w-44"
                   />
                 </div>
@@ -420,37 +431,37 @@ const OrderDetailPage = () => {
                 className="w-full mt-3"
                 onClick={() => {
                   navigator.clipboard.writeText(feedbackUrl);
-                  toast.success("Đã copy link khảo sát!");
+                  toast.success(tOrders("detail.toasts.copyFeedbackLinkSuccess"));
                 }}
               >
                 <Copy className="h-4 w-4 mr-2" />
-                Copy link
+                {tOrders("detail.feedback.copyLink")}
               </Button>
             </Card>
           )}
 
           {/* Order Meta */}
           <Card className="p-5">
-            <h3 className="font-semibold mb-4">Thông tin đơn hàng</h3>
+            <h3 className="font-semibold mb-4">{tOrders("detail.meta.title")}</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Mã đơn</span>
+                <span className="text-muted-foreground">{tOrders("detail.meta.code")}</span>
                 <code className="font-mono text-xs">{order.code || order.id.slice(0, 8)}</code>
               </div>
               {order.storeId && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cửa hàng</span>
+                  <span className="text-muted-foreground">{tOrders("detail.meta.store")}</span>
                   <span>{order.storeId.slice(0, 8)}...</span>
                 </div>
               )}
               {order.employeeId && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Nhân viên</span>
+                  <span className="text-muted-foreground">{tOrders("detail.meta.employee")}</span>
                   <span>{order.employeeId.slice(0, 8)}...</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Số sản phẩm</span>
+                <span className="text-muted-foreground">{tOrders("detail.meta.itemsCount")}</span>
                 <span>{order.orderItems.length}</span>
               </div>
             </div>
@@ -467,12 +478,16 @@ const OrderDetailPage = () => {
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Hủy đơn hàng</h3>
-                <p className="text-sm text-muted-foreground">Hành động này không thể hoàn tác</p>
+                <h3 className="text-lg font-semibold">{tOrders("detail.cancelDialog.title")}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {tOrders("detail.cancelDialog.irreversible")}
+                </p>
               </div>
             </div>
             <p className="text-sm">
-              Bạn có chắc muốn hủy đơn hàng <strong>{order.code || order.id.slice(0, 8)}</strong> không?
+              {tOrders("detail.cancelDialog.description", {
+                code: order.code || order.id.slice(0, 8),
+              })}
             </p>
             <div className="flex justify-end gap-2">
               <Button
@@ -480,7 +495,7 @@ const OrderDetailPage = () => {
                 onClick={() => setShowCancelDialog(false)}
                 disabled={cancelling}
               >
-                Không
+                {tOrders("detail.cancelDialog.no")}
               </Button>
               <Button
                 variant="destructive"
@@ -488,7 +503,7 @@ const OrderDetailPage = () => {
                 disabled={cancelling}
               >
                 {cancelling && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                Hủy đơn
+                {tOrders("detail.cancelDialog.confirm")}
               </Button>
             </div>
           </Card>

@@ -202,7 +202,8 @@
         "addressLabel": "Address",
         "addressPlaceholder": "Enter address...",
         "addressSuggesting": "Suggesting addresses...",
-        "phoneLabel": "Phone number"
+        "phoneLabel": "Phone number",
+        "phonePlaceholder": "Enter phone number..."
       },
       "gps": {
         "mapPreviewLabel": "GPS location (map preview)",
@@ -357,6 +358,143 @@
       "today": "Today",
       "days7": "7 days",
       "days30": "30 days"
+    }
+  }
+  ,
+  "quickModals": {
+    "newSale": {
+      "title": "Quick order",
+      "description": "Search and select products to create an order",
+      "fields": {
+        "search": "Search products",
+        "product": "Product",
+        "variant": "Variant (Size/Color)",
+        "quantity": "Quantity"
+      },
+      "placeholders": {
+        "search": "Search by name or product code...",
+        "product": "Select product",
+        "variant": "Select variant"
+      },
+      "states": {
+        "loadingProducts": "Loading products...",
+        "noProducts": "No products"
+      },
+      "badges": {
+        "hasVariants": "(has variants)"
+      },
+      "variantStock": "Stock: {{stock}}",
+      "summary": {
+        "price": "Price",
+        "total": "Total"
+      },
+      "actions": {
+        "submit": "Create order",
+        "creating": "Creating..."
+      },
+      "toast": {
+        "currentStoreError": "Unable to retrieve current store information.",
+        "loadProductsError": "Unable to load products.",
+        "productRequired": "Please select a product.",
+        "variantRequired": "Please select a specific variant.",
+        "quantityInvalid": "Quantity must be greater than 0.",
+        "createSuccess": "Quick order created successfully!",
+        "createError": "Unable to create quick order. Please try again."
+      }
+    },
+    "staffCheckIn": {
+      "title": "Staff check-in",
+      "description": "Check in at the start of a shift or check out at the end",
+      "fields": {
+        "staff": "Staff",
+        "action": "Action"
+      },
+      "placeholders": {
+        "staff": "Select staff"
+      },
+      "actionOptions": {
+        "in": "Check In",
+        "out": "Check Out"
+      },
+      "actions": {
+        "checkIn": "check-in",
+        "checkOut": "check-out"
+      },
+      "currentTime": "Current time",
+      "toast": {
+        "currentStoreError": "Unable to retrieve store information.",
+        "loadStaffError": "Unable to load staff list.",
+        "staffRequired": "Please select a staff member.",
+        "success": "Successfully {{action}} at {{time}}!",
+        "error": "Unable to submit timekeeping. Please try again."
+      }
+    },
+    "feedback": {
+      "title": "Send feedback",
+      "description": "Share your feedback so we can improve our service",
+      "fields": {
+        "rating": "Rating",
+        "content": "Feedback"
+      },
+      "ratingSummary": "{{rating}}/5 stars",
+      "placeholders": {
+        "content": "Enter your feedback..."
+      },
+      "actions": {
+        "submit": "Send feedback",
+        "submitting": "Sending..."
+      },
+      "toast": {
+        "contentRequired": "Please enter feedback content.",
+        "success": "Feedback sent successfully!",
+        "error": "Unable to send feedback. Please try again."
+      }
+    },
+    "report": {
+      "title": "Generate report",
+      "description": "Choose report type and date range",
+      "fields": {
+        "type": "Report type",
+        "from": "From",
+        "to": "To",
+        "format": "Export format"
+      },
+      "placeholders": {
+        "type": "Select report type"
+      },
+      "types": {
+        "sales": "Sales report",
+        "inventory": "Inventory report",
+        "staff": "Staff performance",
+        "customer": "Customer report"
+      },
+      "actions": {
+        "submit": "Generate"
+      },
+      "toast": {
+        "required": "Please fill in all required fields.",
+        "generating": "Generating report... You'll receive the file via email!"
+      }
+    }
+  }
+  ,
+  "recentTransactions": {
+    "title": "Recent transactions",
+    "subtitle": "Latest activity",
+    "actions": {
+      "viewAll": "View all"
+    },
+    "states": {
+      "empty": "No transactions yet"
+    },
+    "time": {
+      "yesterday": "Yesterday",
+      "minutesAgo_one": "{{count}} minute ago",
+      "minutesAgo_other": "{{count}} minutes ago",
+      "hoursAgo_one": "{{count}} hour ago",
+      "hoursAgo_other": "{{count}} hours ago",
+      "daysAgo_one": "{{count}} day ago",
+      "daysAgo_other": "{{count}} days ago"
     }
   }
 }

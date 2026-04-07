@@ -5,7 +5,84 @@
     "brandAlt": "360 Retail logo",
     "brandTitle": "360 Retail"
   },
+  "trustBar": {
+    "title": "Trusted by retail brands in Vietnam"
+  },
+  "steps": {
+    "titlePrefix": "Get started in",
+    "titleHighlight": "3 steps",
+    "subtitle": "No tech expertise required — just run your store the way you already do.",
+    "items": [
+      {
+        "step": "STEP 1",
+        "title": "Quick setup",
+        "description": "Add products, staff, and shifts with an intuitive guide in just minutes."
+      },
+      {
+        "step": "STEP 2",
+        "title": "Start selling",
+        "description": "Create your first order — stock, reports, and loyalty are automated."
+      },
+      {
+        "step": "STEP 3",
+        "title": "See growth",
+        "description": "Track best-sellers and peak hours to make smarter decisions."
+      }
+    ]
+  },
+  "stats": {
+    "title": "Growing with Vietnam’s retail ecosystem",
+    "subtitle": "From big cities to smaller towns, 360 Retail helps shop owners track revenue and customers by region to optimize campaigns and resources.",
+    "items": {
+      "stores": "Stores using",
+      "provinces": "Provinces covered",
+      "industries": "Industries",
+      "support": "Customer support"
+    }
+  },
+  "testimonials": {
+    "kicker": "Customer reviews",
+    "title": "What shop owners say about 360 Retail",
+    "items": [
+      {
+        "initials": "MH",
+        "name": "Mai Huong",
+        "role": "Local fashion brand owner, Hanoi",
+        "content": "Before 360 Retail, I had to write things down and then enter Excel, which caused missed orders and stock mistakes. Now everything is automated and far less stressful."
+      },
+      {
+        "initials": "TN",
+        "name": "Tuan Nguyen",
+        "role": "Coffee chain (3 branches), Ho Chi Minh City",
+        "content": "I love seeing revenue by shift and by branch on one screen. It makes menu and promo decisions much more confident."
+      },
+      {
+        "initials": "LH",
+        "name": "Lan Hanh",
+        "role": "Mom & baby shop, Da Nang",
+        "content": "Staff learned the system in one session. Automatic loyalty points bring customers back and stabilize revenue."
+      },
+      {
+        "initials": "QP",
+        "name": "Quoc Phong",
+        "role": "Phone store, Can Tho",
+        "content": "We used to mix up stock between online and in-store. With 360 Retail, we no longer have to apologize for out-of-stock items."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to grow<br />with 360 Retail?",
+    "subtitle": "Join a community of shop owners running stores efficiently — without paperwork.",
+    "primary": "Try 360 Retail now",
+    "note": "Free during trial · No credit card required"
+  },
   "hero": {
+    "headline": "Omnichannel sales management",
+    "focusSentence": "With 360 Retail",
+    "cta": {
+      "startFree": "Start for free"
+    },
+    "scrollHint": "Scroll to explore",
     "trust": {
       "noCreditCard": "No credit card required",
       "fiveMinSetup": "~5 min setup",
@@ -17,7 +94,57 @@
     "company": "COMPANY",
     "productItems": ["Features", "Pricing", "Security"],
     "companyItems": ["About", "Blog", "Contact"],
+    "tagline": "An omnichannel sales platform for small and medium stores — as easy as a mobile app.",
     "copyright": "© 2025 360 Retail. Built for shop owners, by shop owners."
+  }
+  ,
+  "platform": {
+    "badge": "360° All-in-one platform",
+    "headline": {
+      "line1": "Everything you need,",
+      "line2": "in one platform"
+    },
+    "subtitle": "Three core modules work together: People for workforce, Product for inventory, Customer for CRM. Connected data, smooth operations.",
+    "stats": {
+      "modules": "Integrated modules",
+      "singleUi": "Single interface",
+      "cloud": "Automated cloud"
+    },
+    "modules": {
+      "people": {
+        "label": "People",
+        "subtitle": "Staff & shift management",
+        "description": "GPS timekeeping, automatic shift planning, and smart payroll. No more paperwork and mistakes.",
+        "features": {
+          "gpsTimekeeping": "GPS timekeeping",
+          "autoShifts": "Automatic shifts",
+          "smartPayroll": "Smart payroll",
+          "hrReports": "HR reports"
+        }
+      },
+      "product": {
+        "label": "Product",
+        "subtitle": "POS & inventory",
+        "description": "Fast selling, automatic stock deduction, and online-offline sync. One POS, manage all channels.",
+        "features": {
+          "fastPos": "Fast POS",
+          "autoDeductStock": "Auto deduct stock",
+          "syncOnline": "Sync online channels",
+          "salesReports": "Sales reports"
+        }
+      },
+      "customer": {
+        "label": "Customer",
+        "subtitle": "CRM & loyalty",
+        "description": "Points and perks for every purchase. Automatic tracking and customer care by segment.",
+        "features": {
+          "autoPoints": "Automatic points",
+          "smartVouchers": "Smart vouchers",
+          "segmentation": "Customer segmentation",
+          "autoCare": "Automated care"
+        }
+      }
+    }
   }
 }
 

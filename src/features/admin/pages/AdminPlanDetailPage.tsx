@@ -11,6 +11,7 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
 import { formatVnd } from "@/shared/utils/formatMoney";
 import { superAdminSaasApi, type SuperAdminPlan } from "@/shared/lib/superAdminSaasApi";
+import { useTranslation } from "react-i18next";
 
 const tryParseJson = (raw: string | null | undefined): unknown => {
   if (!raw) return null;
@@ -24,6 +25,7 @@ const tryParseJson = (raw: string | null | undefined): unknown => {
 };
 
 export default function AdminPlanDetailPage() {
+  const { t, i18n } = useTranslation(["admin", "common"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -37,24 +39,25 @@ export default function AdminPlanDetailPage() {
         setLoading(true);
         const p = await superAdminSaasApi.getPlan(id);
         if (!p) {
-          toast.error("Không tải được chi tiết plan.");
+          toast.error(t("admin:planDetail.toast.loadError"));
           navigate("/admin/plans", { replace: true });
           return;
         }
         setPlan(p);
       } catch (err) {
         console.error("Failed to load plan detail:", err);
-        toast.error("Không tải được chi tiết plan.");
+        toast.error(t("admin:planDetail.toast.loadError"));
         navigate("/admin/plans", { replace: true });
       } finally {
         setLoading(false);
       }
     };
     void load();
-  }, [id, navigate]);
+  }, [id, navigate, t]);
 
   const featuresJson = useMemo(() => tryParseJson(plan?.features ?? null), [plan?.features]);
-  const createdAt = plan?.createdAt ? new Date(plan.createdAt).toLocaleString("vi-VN") : "—";
+  const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
+  const createdAt = plan?.createdAt ? new Date(plan.createdAt).toLocaleString(locale) : "—";
 
   if (loading) {
     return (
@@ -90,7 +93,7 @@ export default function AdminPlanDetailPage() {
           onClick={() => navigate("/admin/plans")}
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại danh sách plans
+          {t("admin:planDetail.backToList")}
         </Button>
       </motion.div>
 
@@ -118,16 +121,21 @@ export default function AdminPlanDetailPage() {
                     variant={plan.isActive ? "outline" : "destructive"}
                     className={plan.isActive ? "border-emerald-500/50 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30" : ""}
                   >
-                    {plan.isActive ? "Active" : "Inactive"}
+                    {plan.isActive
+                      ? t("admin:plansPage.status.active")
+                      : t("admin:plansPage.status.inactive")}
                   </Badge>
                   {plan.activeSubscriptions != null && (
                     <Badge variant="outline">
-                      Active subs: {plan.activeSubscriptions.toLocaleString()}
+                      {t("admin:planDetail.activeSubs", {
+                        count: plan.activeSubscriptions,
+                      })}
                     </Badge>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  ID: <span className="font-mono break-all">{plan.id}</span>
+                  {t("admin:planDetail.fields.id")}:{" "}
+                  <span className="font-mono break-all">{plan.id}</span>
                 </p>
               </div>
             </div>
@@ -136,16 +144,20 @@ export default function AdminPlanDetailPage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   <Tag className="h-3.5 w-3.5" />
-                  Pricing
+                  {t("admin:planDetail.sections.pricing")}
                 </div>
                 <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground">Price</span>
+                    <span className="text-xs text-muted-foreground">{t("admin:planDetail.fields.price")}</span>
                     <span className="font-semibold">{formatVnd(plan.price ?? 0)}</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground">Duration</span>
-                    <span className="font-medium">{(plan.durationDays ?? 0).toLocaleString()} days</span>
+                    <span className="text-xs text-muted-foreground">{t("admin:planDetail.fields.duration")}</span>
+                    <span className="font-medium">
+                      {t("admin:plansPage.durationDays", {
+                        days: (plan.durationDays ?? 0).toLocaleString(),
+                      })}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -153,23 +165,23 @@ export default function AdminPlanDetailPage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   <Calendar className="h-3.5 w-3.5" />
-                  Metadata
+                  {t("admin:planDetail.sections.metadata")}
                 </div>
                 <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground">Created</span>
+                    <span className="text-xs text-muted-foreground">{t("admin:planDetail.fields.created")}</span>
                     <span className="font-mono text-xs">{createdAt}</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground">Is active</span>
+                    <span className="text-xs text-muted-foreground">{t("admin:planDetail.fields.isActive")}</span>
                     <span className="inline-flex items-center gap-2 font-medium">
                       {plan.isActive ? (
                         <>
-                          <ToggleRight className="h-4 w-4 text-emerald-600" /> true
+                          <ToggleRight className="h-4 w-4 text-emerald-600" /> {t("common:boolean.true")}
                         </>
                       ) : (
                         <>
-                          <ToggleLeft className="h-4 w-4 text-red-600" /> false
+                          <ToggleLeft className="h-4 w-4 text-red-600" /> {t("common:boolean.false")}
                         </>
                       )}
                     </span>
@@ -186,7 +198,7 @@ export default function AdminPlanDetailPage() {
                 onClick={() => setRawOpen(true)}
               >
                 <Braces className="h-4 w-4" />
-                Features JSON
+                {t("admin:planDetail.actions.featuresJson")}
               </Button>
             </div>
           </Card>
@@ -199,9 +211,9 @@ export default function AdminPlanDetailPage() {
         >
           <Card className="p-5 space-y-3 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold">Features (preview)</h2>
+              <h2 className="text-sm font-semibold">{t("admin:planDetail.preview.title")}</h2>
               <Badge variant="outline" className="text-[11px] border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-                Read-only
+                {t("admin:planDetail.preview.readOnly")}
               </Badge>
             </div>
             {typeof plan.features === "string" && plan.features.trim() !== "" ? (
@@ -217,7 +229,7 @@ export default function AdminPlanDetailPage() {
                         </div>
                       ))}
                     <div className="pt-2 text-[11px]">
-                      Xem đầy đủ trong “Features JSON”.
+                      {t("admin:planDetail.preview.fullHint")}
                     </div>
                   </div>
                 ) : (
@@ -227,7 +239,7 @@ export default function AdminPlanDetailPage() {
                 )}
               </>
             ) : (
-              <div className="text-xs text-muted-foreground">Không có dữ liệu features.</div>
+              <div className="text-xs text-muted-foreground">{t("admin:planDetail.preview.noFeatures")}</div>
             )}
           </Card>
         </motion.div>
@@ -236,7 +248,7 @@ export default function AdminPlanDetailPage() {
       <JsonViewerDialog
         open={rawOpen}
         onOpenChange={setRawOpen}
-        title={`Plan features: ${plan.planName}`}
+        title={t("admin:planDetail.rawTitle", { name: plan.planName })}
         value={featuresJson ?? plan.features ?? null}
       />
     </motion.div>

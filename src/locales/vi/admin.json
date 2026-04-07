@@ -16,12 +16,19 @@
       "title": "SuperAdmin",
       "subtitle": "Khu vực quản trị hệ thống."
     },
-    "logout": "Đăng xuất"
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "logout": "Đăng xuất",
+    "userAlt": "Người dùng"
   },
   "sidebar": {
     "brand": {
       "title": "SuperAdmin",
       "subtitle": "System Console"
+    },
+    "toggle": {
+      "expand": "Mở rộng sidebar",
+      "collapse": "Thu gọn sidebar"
     },
     "nav": {
       "dashboard": {
@@ -54,6 +61,17 @@
       }
     }
   },
+  "common": {
+    "id": "ID",
+    "createdAt": "Ngày tạo"
+  },
+  "roles": {
+    "storeOwner": "StoreOwner",
+    "manager": "Manager",
+    "staff": "Staff",
+    "customer": "Khách hàng",
+    "potentialOwner": "PotentialOwner"
+  },
   "stores": {
     "title": "Quản lý Stores",
     "badge": "SuperAdmin",
@@ -64,14 +82,114 @@
       "name": "Tên store",
       "address": "Địa chỉ",
       "phone": "Số điện thoại",
+      "owner": "Chủ sở hữu",
+      "plan": "Gói",
+      "subStatus": "Trạng thái gói",
+      "endDate": "Ngày hết hạn",
       "status": "Trạng thái",
-      "createdAt": "Ngày tạo"
+      "createdAt": "Ngày tạo",
+      "raw": "Dữ liệu thô"
     },
     "status": {
-      "active": "Active",
-      "inactive": "Inactive"
+      "active": "Đang hoạt động",
+      "inactive": "Ngừng hoạt động"
     },
-    "noData": "Không có store nào."
+    "noData": "Không có store nào.",
+    "rawTitle": "Store raw: {{id}}",
+    "rawDialogDefaultTitle": "Raw JSON"
+  },
+  "storeDetail": {
+    "backToList": "Quay lại danh sách stores",
+    "toast": {
+      "loadError": "Không tải được thông tin store."
+    },
+    "sections": {
+      "addressAndContact": "Địa chỉ & Liên hệ",
+      "subscription": "Gói dịch vụ"
+    },
+    "address": {
+      "empty": "Chưa có địa chỉ"
+    },
+    "phone": {
+      "empty": "Chưa có số điện thoại"
+    },
+    "gps": {
+      "label": "GPS",
+      "empty": "Chưa cấu hình"
+    },
+    "subscription": {
+      "currentPlan": "Gói hiện tại",
+      "unknown": "Không rõ",
+      "status": "Trạng thái",
+      "endDate": "Ngày hết hạn",
+      "empty": "Chưa có dữ liệu subscription cho store này hoặc bạn chưa có quyền xem."
+    },
+    "peopleAndPermissions": {
+      "title": "Nhân sự & quyền",
+      "badge": "SuperAdmin view",
+      "description": "Khu vực này tập trung tóm tắt thông tin nhân sự và quyền truy cập ở cấp cửa hàng để hỗ trợ kiểm tra nhanh trong quá trình vận hành."
+    }
+  },
+  "superAdminLegacy": {
+    "header": {
+      "title": "Plan Reviews & hệ thống",
+      "subtitle": "Giám sát đánh giá các gói SaaS và kiểm tra nhanh expiry subscriptions."
+    },
+    "actions": {
+      "checkExpiry": "Check Expiry"
+    },
+    "users": {
+      "title": "Người dùng hệ thống",
+      "states": {
+        "loading": "Đang tải danh sách users...",
+        "empty": "Chưa có dữ liệu người dùng (hoặc bạn không có quyền)."
+      }
+    },
+    "reviews": {
+      "title": "Đánh giá gói SaaS",
+      "states": {
+        "empty": "Chưa có review nào hoặc bạn không có quyền xem."
+      }
+    },
+    "plans": {
+      "title": "Gói SaaS hiện có",
+      "states": {
+        "empty": "Chưa tải được danh sách gói."
+      },
+      "durationDays": "{{days}} ngày"
+    },
+    "userDialog": {
+      "titleCreate": "Tạo User mới",
+      "titleEdit": "Chỉnh sửa User",
+      "descriptionCreate": "Tạo tài khoản mới với role được chỉ định.",
+      "descriptionEdit": "Cập nhật thông tin người dùng.",
+      "fields": {
+        "email": "Email",
+        "password": "Mật khẩu",
+        "fullName": "Họ tên",
+        "phoneNumber": "Số điện thoại",
+        "role": "Role"
+      },
+      "placeholders": {
+        "email": "user@example.com",
+        "password": "Mật khẩu...",
+        "fullName": "Nguyễn Văn A",
+        "phoneNumber": "0912345678"
+      }
+    },
+    "deleteDialog": {
+      "title": "Xác nhận xóa user",
+      "description": "Bạn có chắc muốn xóa {{name}}? Hành động này không thể hoàn tác."
+    },
+    "toast": {
+      "createUserSuccess": "Tạo user mới thành công.",
+      "updateUserSuccess": "Cập nhật user thành công.",
+      "saveUserError": "Lưu user thất bại.",
+      "deleteUserSuccess": "Đã xóa user.",
+      "deleteUserError": "Xóa user thất bại.",
+      "checkExpirySuccess": "Đã gửi email cảnh báo cho các subscription sắp hết hạn.",
+      "checkExpiryError": "Kiểm tra hết hạn thất bại."
+    }
   },
   "dashboard": {
     "badge": "SuperAdmin",
@@ -80,6 +198,7 @@
       "from": "Từ ngày",
       "to": "Đến ngày",
       "groupBy": "Group by",
+      "selectPlaceholder": "Chọn...",
       "groupByOptions": {
         "day": "Ngày",
         "week": "Tuần",
@@ -88,12 +207,22 @@
       "refresh": "Làm mới",
       "refreshLoading": "Đang tải"
     },
+    "formats": {
+      "monthLabel": "T{{month}}/{{year}}",
+      "weekLabel": "Tuần {{week}}/{{year}}"
+    },
+    "validation": {
+      "fromDateNotAfterToday": "Ngày bắt đầu không được vượt quá hôm nay.",
+      "fromDateNotAfterToDate": "Ngày bắt đầu không được lớn hơn ngày kết thúc.",
+      "toDateNotAfterToday": "Ngày kết thúc không được vượt quá hôm nay.",
+      "toDateNotBeforeFromDate": "Ngày kết thúc không được nhỏ hơn ngày bắt đầu."
+    },
     "kpis": {
       "totalRevenue": "Tổng doanh thu",
       "mrr": "Doanh thu tháng này",
-      "activeStores": "Active Stores",
-      "trialStores": "Trial Stores",
-      "expiredStores": "Expired Stores",
+      "activeStores": "Cửa hàng đang hoạt động",
+      "trialStores": "Cửa hàng dùng thử",
+      "expiredStores": "Cửa hàng hết hạn",
       "conversionRate": "Tỉ lệ chuyển đổi"
     },
     "revenueTrend": {
@@ -101,6 +230,10 @@
         "day": "Xu hướng doanh thu theo ngày",
         "week": "Xu hướng doanh thu theo tuần",
         "month": "Xu hướng doanh thu theo tháng"
+      },
+      "growth": {
+        "upLabel": "Tăng trưởng 12 tháng",
+        "downLabel": "Suy giảm 12 tháng"
       }
     },
     "revenueChart": {
@@ -135,8 +268,20 @@
       "badge": "Registrations",
       "label": "Đăng ký mới"
     },
+    "storeStatus": {
+      "active": "Đang hoạt động",
+      "trial": "Dùng thử",
+      "expired": "Hết hạn"
+    },
+    "storeStatusSection": {
+      "title": "Trạng thái cửa hàng",
+      "badge": "Tổng quan",
+      "valueLabel": "Cửa hàng"
+    },
     "states": {
-      "loading": "Đang tải..."
+      "loading": "Đang tải...",
+      "noRevenueData": "Không có dữ liệu doanh thu trong khoảng thời gian đã chọn.",
+      "noStoreData": "Không có dữ liệu cửa hàng."
     },
     "toast": {
       "loadError": "Không tải được dữ liệu dashboard SuperAdmin."
@@ -153,6 +298,10 @@
       "all": "Tất cả",
       "search": "Tìm kiếm",
       "searchPlaceholder": "Tìm theo store, plan, mã giao dịch..."
+      ,
+      "statusCompleted": "Hoàn tất",
+      "statusPending": "Đang xử lý",
+      "statusFailed": "Thất bại"
     },
     "actions": {
       "thisMonth": "Tháng này",
@@ -163,13 +312,13 @@
       "title": "Danh sách payments",
       "count": "Số giao dịch",
       "columns": {
-        "store": "Store",
-        "plan": "Plan",
-        "status": "Status",
-        "amount": "Amount",
-        "date": "Payment date",
-        "provider": "Provider",
-        "transaction": "Transaction"
+        "store": "Cửa hàng",
+        "plan": "Gói",
+        "status": "Trạng thái",
+        "amount": "Số tiền",
+        "date": "Ngày thanh toán",
+        "provider": "Nhà cung cấp",
+        "transaction": "Mã giao dịch"
       },
       "limitNote": "Đang hiển thị tối đa {{count}} dòng đầu tiên. Dùng lọc/tìm kiếm để thu hẹp."
     },
@@ -181,9 +330,362 @@
       "loadError": "Không tải được dữ liệu Doanh thu tháng."
     }
   },
+  "paymentsPage": {
+    "badge": "SuperAdmin",
+    "caption": "Danh sách payments",
+    "filters": {
+      "from": "Từ ngày",
+      "to": "Đến ngày",
+      "status": "Trạng thái",
+      "search": "Tìm kiếm",
+      "searchPlaceholder": "Tìm theo store, plan, id..."
+    },
+    "status": {
+      "all": "Tất cả",
+      "pending": "Đang xử lý",
+      "completed": "Hoàn tất",
+      "failed": "Thất bại",
+      "cancelled": "Đã hủy"
+    },
+    "actions": {
+      "refresh": "Làm mới"
+    },
+    "list": {
+      "title": "Danh sách payments"
+    },
+    "columns": {
+      "store": "Cửa hàng",
+      "plan": "Gói",
+      "status": "Trạng thái",
+      "amount": "Số tiền",
+      "createdPaid": "Created/Paid",
+      "raw": "Dữ liệu thô"
+    },
+    "rawTitle": "Payment raw: {{id}}",
+    "rawDialogDefaultTitle": "Raw JSON",
+    "pagination": {
+      "summary": "Hiển thị {{from}} - {{to}} trong {{total}} payments",
+      "prev": "Trang trước",
+      "next": "Trang sau",
+      "page": "Trang {{page}} / {{totalPages}}"
+    },
+    "toast": {
+      "loadError": "Không tải được danh sách payments."
+    }
+  },
+  "reviewDetail": {
+    "backToList": "Quay lại danh sách reviews",
+    "reviewId": "Review ID",
+    "fields": {
+      "storeId": "Store ID",
+      "planId": "Plan ID",
+      "userId": "User ID",
+      "created": "Ngày tạo",
+      "content": "Nội dung"
+    },
+    "moderation": {
+      "title": "Kiểm duyệt",
+      "delete": "Xoá review",
+      "deleting": "Đang xoá..."
+    },
+    "rawTitle": "Review raw: {{id}}",
+    "toast": {
+      "notFound": "Không tìm thấy review.",
+      "loadError": "Không tải được chi tiết review."
+    }
+  },
+  "paymentDetail": {
+    "backToList": "Quay lại danh sách payments",
+    "fields": {
+      "amount": "Số tiền",
+      "provider": "Nhà cung cấp",
+      "paymentDate": "Ngày thanh toán",
+      "transaction": "Mã giao dịch"
+    },
+    "currentStatus": {
+      "title": "Trạng thái thanh toán hiện tại",
+      "status": "Trạng thái",
+      "unavailable": "Không lấy được payment status."
+    },
+    "status": {
+      "completed": "Hoàn tất",
+      "failed": "Thất bại"
+    },
+    "summary": {
+      "title": "Tóm tắt giao dịch",
+      "status": "Trạng thái",
+      "amount": "Giá trị",
+      "provider": "Nhà cung cấp"
+    },
+    "rawTitle": "Payment raw: {{id}}",
+    "toast": {
+      "notFound": "Không tìm thấy payment.",
+      "loadError": "Không tải được chi tiết payment."
+    }
+  },
+  "subscriptionsPage": {
+    "badge": "SuperAdmin",
+    "caption": "Danh sách subscriptions (list / cancel / extend)",
+    "filters": {
+      "status": "Trạng thái",
+      "plan": "Gói",
+      "search": "Tìm kiếm",
+      "searchPlaceholder": "Tìm theo store, plan, id..."
+    },
+    "status": {
+      "all": "Tất cả",
+      "active": "Đang hoạt động",
+      "trial": "Dùng thử",
+      "expired": "Hết hạn",
+      "cancelled": "Đã hủy"
+    },
+    "actions": {
+      "refresh": "Làm mới",
+      "extend": "Gia hạn",
+      "cancel": "Huỷ"
+    },
+    "list": {
+      "title": "Danh sách subscriptions"
+    },
+    "columns": {
+      "store": "Cửa hàng",
+      "plan": "Gói",
+      "status": "Trạng thái",
+      "start": "Bắt đầu",
+      "end": "Kết thúc",
+      "daysLeft": "Còn lại",
+      "actions": "Thao tác",
+      "raw": "Dữ liệu thô"
+    },
+    "rawTitle": "Subscription raw: {{id}}",
+    "rawDialogDefaultTitle": "Raw JSON",
+    "pagination": {
+      "summary": "Hiển thị {{from}} - {{to}} trong {{total}} subscriptions",
+      "prev": "Trang trước",
+      "next": "Trang sau",
+      "page": "Trang {{page}} / {{totalPages}}"
+    },
+    "dialog": {
+      "cancelTitle": "Huỷ subscription",
+      "extendTitle": "Gia hạn subscription",
+      "description": "Xác nhận thao tác cho subscription đã chọn.",
+      "daysLabel": "Số ngày gia hạn",
+      "daysPlaceholder": "30"
+    },
+    "toast": {
+      "loadError": "Không tải được danh sách subscriptions.",
+      "missingId": "Không xác định được subscription id.",
+      "cancelSuccess": "Đã huỷ subscription.",
+      "extendSuccess": "Đã gia hạn subscription.",
+      "extendSuccessWithDate": "Đã gia hạn. New end date: {{date}}",
+      "actionFailed": "Thao tác thất bại."
+    }
+  },
+  "subscriptionDetail": {
+    "backToList": "Quay lại danh sách subscriptions",
+    "daysLeft": "Còn {{days}} ngày",
+    "fields": {
+      "id": "ID",
+      "planPrice": "Giá gói",
+      "start": "Bắt đầu",
+      "end": "Kết thúc"
+    },
+    "actions": {
+      "title": "Thao tác",
+      "cancel": "Hủy",
+      "extend": "Gia hạn",
+      "reload": "Tải lại",
+      "rawJson": "JSON thô",
+      "daysPlaceholder": "30"
+    },
+    "summary": {
+      "title": "Tóm tắt subscription",
+      "currentStatus": "Trạng thái hiện tại",
+      "period": "Kỳ sử dụng",
+      "remaining": "Còn lại",
+      "days": "ngày"
+    },
+    "rawTitle": "Subscription raw: {{id}}",
+    "toast": {
+      "notFoundInList": "Không tìm thấy subscription trong danh sách hiện tại.",
+      "loadError": "Không tải được chi tiết subscription.",
+      "cancelSuccess": "Đã huỷ subscription.",
+      "cancelError": "Huỷ subscription thất bại.",
+      "extendSuccess": "Đã gia hạn subscription.",
+      "extendSuccessWithDate": "Đã gia hạn tới {{date}}",
+      "extendError": "Gia hạn subscription thất bại."
+    }
+  },
+  "reviewsPage": {
+    "filters": {
+      "rating": "Rating",
+      "all": "Tất cả",
+      "search": "Tìm kiếm",
+      "searchPlaceholder": "Tìm theo store, plan, nội dung..."
+    },
+    "actions": {
+      "refresh": "Làm mới"
+    },
+    "dashboard": {
+      "title": "Tổng quan đánh giá",
+      "badge": "Tổng quan đánh giá",
+      "totalReviews": "Tổng số đánh giá",
+      "avgRating": "Điểm trung bình",
+      "thisMonth": "Tháng này"
+    },
+    "pagination": {
+      "title": "Pagination",
+      "page": "Trang {{page}} / {{totalPages}}",
+      "prev": "Trang trước",
+      "next": "Trang sau",
+      "total": "Tổng: {{total}}"
+    },
+    "list": {
+      "title": "Danh sách reviews",
+      "count": "{{count}} items (page)"
+    },
+    "columns": {
+      "store": "Cửa hàng",
+      "plan": "Gói",
+      "rating": "Rating",
+      "content": "Nội dung",
+      "created": "Ngày tạo",
+      "actions": "Thao tác"
+    },
+    "toast": {
+      "deleteSuccess": "Đã xoá review.",
+      "deleteError": "Xoá review thất bại."
+    }
+  },
+  "plansPage": {
+    "caption": "CRUD gói dịch vụ (Plans)",
+    "searchPlaceholder": "Tìm theo tên hoặc id...",
+    "actions": {
+      "create": "Tạo gói"
+    },
+    "list": {
+      "title": "Danh sách Plans"
+    },
+    "states": {
+      "noPlans": "Chưa có plan nào."
+    },
+    "columns": {
+      "name": "Tên",
+      "price": "Giá",
+      "duration": "Thời hạn",
+      "status": "Trạng thái",
+      "activeSubs": "Subscriptions đang hoạt động",
+      "actions": "Thao tác"
+    },
+    "durationDays": "{{days}} ngày",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "pagination": {
+      "summary": "Hiển thị {{from}} - {{to}} trong {{total}} plans",
+      "prev": "Trang trước",
+      "next": "Trang sau",
+      "page": "Trang {{page}} / {{totalPages}}"
+    },
+    "dialog": {
+      "titleCreate": "Tạo Plan mới",
+      "titleEdit": "Cập nhật Plan",
+      "description": "Cập nhật thông tin gói và cấu hình tính năng.",
+      "fields": {
+        "name": "Tên gói",
+        "price": "Giá (VND)",
+        "durationDays": "Thời hạn (ngày)",
+        "features": "Cấu hình tính năng (feature flags)"
+      },
+      "placeholders": {
+        "name": "Pro",
+        "price": "199000",
+        "durationDays": "30"
+      },
+      "sections": {
+        "limits": "Giới hạn",
+        "features": "Tính năng"
+      },
+      "limits": {
+        "maxOrders": "Max orders",
+        "maxProducts": "Max products",
+        "maxEmployees": "Max employees"
+      },
+      "featureFlags": {
+        "has_dashboard": "Dashboard tổng quan",
+        "has_tasks": "Quản lý tasks",
+        "has_loyalty": "Loyalty/điểm tích lũy",
+        "has_variants": "Sản phẩm có variants",
+        "has_feedback_qr": "Feedback QR",
+        "has_gps_checkin": "GPS check-in",
+        "has_multi_store": "Multi-store",
+        "has_export_excel": "Export Excel",
+        "has_invite_staff": "Mời nhân viên",
+        "has_inventory_tickets": "Phiếu kho",
+        "has_realtime_notifications": "Realtime notifications"
+      },
+      "keepExtrasHint": "Các trường cấu hình nâng cao (nếu có trong dữ liệu hiện tại) vẫn được giữ nguyên khi lưu."
+    },
+    "deactivateDialog": {
+      "title": "Vô hiệu hoá plan",
+      "description": "Bạn có chắc muốn vô hiệu hoá {{name}}?",
+      "confirm": "Vô hiệu hoá"
+    },
+    "toast": {
+      "loadError": "Không tải được danh sách gói dịch vụ.",
+      "createSuccess": "Đã tạo gói dịch vụ.",
+      "updateSuccess": "Đã cập nhật gói dịch vụ.",
+      "saveError": "Lưu gói thất bại.",
+      "deactivateSuccess": "Đã vô hiệu hóa gói.",
+      "deactivateError": "Vô hiệu hóa thất bại."
+    }
+  },
+  "planDetail": {
+    "backToList": "Quay lại danh sách plans",
+    "activeSubs": "Subscriptions đang hoạt động: {{count, number}}",
+    "sections": {
+      "pricing": "Giá & thời hạn",
+      "metadata": "Thông tin"
+    },
+    "fields": {
+      "id": "ID",
+      "price": "Giá",
+      "duration": "Thời hạn",
+      "created": "Ngày tạo",
+      "isActive": "Đang hoạt động"
+    },
+    "actions": {
+      "featuresJson": "Features JSON"
+    },
+    "preview": {
+      "title": "Features (preview)",
+      "readOnly": "Read-only",
+      "fullHint": "Xem đầy đủ trong “Features JSON”.",
+      "noFeatures": "Không có dữ liệu features."
+    },
+    "rawTitle": "Plan features: {{name}}",
+    "toast": {
+      "loadError": "Không tải được chi tiết plan."
+    }
+  },
+  "userDetail": {
+    "roles": "Roles",
+    "storeSection": {
+      "title": "Store gắn với user",
+      "daysRemaining": "{{days}} ngày còn lại",
+      "noStore": "Không gắn với store nào."
+    },
+    "notes": {
+      "title": "Ghi chú cho SuperAdmin",
+      "badge": "System view",
+      "description": "Xem nhanh vai trò, trạng thái kích hoạt và thông tin store/gói dịch vụ đang gắn với tài khoản để hỗ trợ quản trị người dùng hiệu quả."
+    }
+  },
   "users": {
     "badge": "SuperAdmin",
     "caption": "Quản lý Users",
+    "count": "{{count}} user",
     "description": "CRUD theo identity/super-admin/users",
     "searchPlaceholder": "Tìm theo email hoặc id...",
     "create": "Tạo user",
@@ -192,7 +694,7 @@
     "columns": {
       "email": "Email",
       "roles": "Roles",
-      "status": "Status",
+      "status": "Trạng thái",
       "activated": "Kích hoạt",
       "storeId": "StoreId",
       "actions": "Thao tác"
@@ -204,13 +706,18 @@
     "pagination": {
       "summary": "Hiển thị {{from}} - {{to}} trong {{total}} users",
       "prev": "Trang trước",
-      "next": "Trang sau"
+      "next": "Trang sau",
+      "page": "Trang {{page}} / {{totalPages}}"
     },
     "dialog": {
       "titleCreate": "Tạo user",
       "titleEdit": "Cập nhật user",
       "descriptionCreate": "Tạo user mới (không cho tạo role SuperAdmin).",
       "descriptionEdit": "Chỉnh trạng thái/kích hoạt. (Role/email hiện tại không đổi theo API này)",
+      "placeholders": {
+        "email": "new@example.com",
+        "password": "Password123!"
+      },
       "fields": {
         "email": "Email",
         "password": "Mật khẩu",
@@ -234,7 +741,8 @@
       "updateSuccess": "Đã cập nhật user.",
       "deleteSuccess": "Đã xoá user.",
       "saveError": "Lưu user thất bại.",
-      "deleteError": "Xoá user thất bại."
+      "deleteError": "Xoá user thất bại.",
+      "softDeleteSuccess": "Đã vô hiệu hóa user (soft delete)."
     }
   },
   "profile": {

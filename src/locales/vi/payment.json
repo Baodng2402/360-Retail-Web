@@ -1,2 +1,24 @@
-{}
+{
+  "common": {
+    "paymentCodeLabel": "Mã thanh toán",
+    "transactionCodeLabel": "Mã giao dịch",
+    "needHelp": "Cần hỗ trợ? Liên hệ"
+  },
+  "success": {
+    "verifying": "Đang xác nhận thanh toán...",
+    "missingPaymentId": "Không tìm thấy mã thanh toán",
+    "activated": "Thanh toán thành công! Gói dịch vụ đã được kích hoạt.",
+    "verifyFailed": "Xác nhận thanh toán thất bại. Vui lòng liên hệ hỗ trợ.",
+    "titleLoading": "Đang xác nhận",
+    "titleSuccess": "Thanh toán thành công!",
+    "titleError": "Có lỗi xảy ra",
+    "planLabel": "Gói dịch vụ của bạn",
+    "viewPlans": "Xem gói dịch vụ"
+  },
+  "failed": {
+    "title": "Thanh toán thất bại",
+    "defaultMessage": "Giao dịch thanh toán không thành công. Vui lòng thử lại hoặc chọn phương thức thanh toán khác.",
+    "retryPayment": "Thử thanh toán lại"
+  }
+}
 

@@ -19,7 +19,7 @@ import type {
 import { useTranslation } from "react-i18next";
 
 const ReportPage = () => {
-  const { t } = useTranslation("reports");
+  const { t, i18n } = useTranslation("reports");
   const [summary, setSummary] = useState<FeedbackSummary | null>(null);
   const [feedbackPaged, setFeedbackPaged] = useState<FeedbackPagedResult>({
     items: [],
@@ -202,7 +202,7 @@ const ReportPage = () => {
                   <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                     <span>{f.source}</span>
                     <span>
-                      {new Date(f.createdAt).toLocaleDateString("vi-VN")}
+                      {new Date(f.createdAt).toLocaleDateString(i18n.language)}
                     </span>
                   </div>
                 </div>

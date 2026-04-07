@@ -1,6 +1,51 @@
 {
   "appName": "360 Retail",
   "smePlatform": "Nền tảng cho SME",
+  "language": {
+    "ariaLabel": "Ngôn ngữ",
+    "label": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+  },
+  "pages": {
+    "notFound": {
+      "title": "Không tìm thấy trang",
+      "description": "Đường dẫn bạn truy cập không tồn tại hoặc đã bị thay đổi."
+    },
+    "unauthorized": {
+      "title": "Bạn không có quyền truy cập",
+      "description": "Tài khoản của bạn không được cấp quyền để truy cập trang này.",
+      "backToLogin": "Đăng nhập lại"
+    },
+    "loyaltyCheck": {
+      "badges": {
+        "loyalty": "Loyalty",
+        "public": "Public"
+      },
+      "title": "Tra cứu điểm tích lũy",
+      "subtitle": "Nhập số điện thoại để xem tên khách hàng, điểm và hạng.",
+      "storeLabel": "Cửa hàng",
+      "phoneLabel": "Số điện thoại",
+      "actions": {
+        "search": "Tra cứu",
+        "searching": "Đang tra cứu..."
+      },
+      "result": {
+        "title": "Kết quả",
+        "customerLabel": "Khách hàng",
+        "totalPointsLabel": "Tổng điểm"
+      },
+      "states": {
+        "emptyHint": "Chưa có dữ liệu. Vui lòng nhập số điện thoại để tra cứu."
+      },
+      "errors": {
+        "missingStoreId": "Thiếu storeId trong đường dẫn. Vui lòng quét đúng QR hoặc kiểm tra lại link.",
+        "invalidStoreId": "storeId không hợp lệ.",
+        "phoneRequired": "Vui lòng nhập số điện thoại.",
+        "lookupFailed": "Tra cứu thất bại."
+      }
+    }
+  },
   "actions": {
     "save": "Lưu",
     "saveChanges": "Lưu thay đổi",
@@ -11,6 +56,10 @@
     "backToLogin": "Quay lại đăng nhập",
     "confirm": "Xác nhận",
     "retry": "Thử lại",
+    "reload": "Reload",
+    "reset": "Đặt lại",
+    "copyJson": "Copy JSON",
+    "rawJson": "Raw JSON",
     "delete": "Xóa",
     "edit": "Chỉnh sửa",
     "create": "Tạo mới"
@@ -35,7 +84,17 @@
   },
   "toast": {
     "unknownError": "Đã xảy ra lỗi không xác định. Vui lòng thử lại.",
-    "networkError": "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng."
+    "networkError": "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng.",
+    "copyJsonSuccess": "Đã copy JSON.",
+    "copyFailed": "Copy thất bại.",
+    "loyaltyLookupError": "Không tra được điểm loyalty."
+  },
+  "boolean": {
+    "true": "true",
+    "false": "false"
+  },
+  "jsonViewer": {
+    "raw": "Raw"
   }
 }
 

@@ -9,10 +9,12 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { Label } from "@/shared/components/ui/label";
 import { feedbackApi } from "@/shared/lib/feedbackApi";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const RATINGS = [1, 2, 3, 4, 5] as const;
 
 const FeedbackPage = () => {
+  const { t } = useTranslation("feedback");
   const { orderId } = useParams<{ orderId: string }>();
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get("customerId") ?? "";
@@ -47,11 +49,10 @@ const FeedbackPage = () => {
             <AlertCircle className="h-7 w-7 text-white" />
           </motion.div>
           <h1 className="mb-2 text-xl font-bold text-foreground bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
-            Đường dẫn không hợp lệ
+            {t("invalidLink.title")}
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Thiếu thông tin đơn hàng hoặc khách hàng. Vui lòng quét lại QR trên hóa
-            đơn để gửi đánh giá.
+            {t("invalidLink.description")}
           </p>
         </motion.div>
       </motion.div>
@@ -63,7 +64,7 @@ const FeedbackPage = () => {
     setError(null);
 
     if (!rating) {
-      setError("Vui lòng chọn số sao đánh giá.");
+      setError(t("form.errors.ratingRequired"));
       return;
     }
 
@@ -76,13 +77,13 @@ const FeedbackPage = () => {
         content: content.trim() || undefined,
       });
       setSubmitted(true);
-      toast.success("Cảm ơn bạn đã đánh giá!");
+      toast.success(t("toast.success"));
     } catch (err: unknown) {
       console.error("Submit feedback error", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ||
-        "Không thể gửi đánh giá. Vui lòng thử lại sau.";
+        t("toast.failed");
       setError(message);
       toast.error(message);
     } finally {
@@ -112,10 +113,10 @@ const FeedbackPage = () => {
             <CheckCircle2 className="h-7 w-7 text-white" />
           </motion.div>
           <h1 className="mb-2 text-xl font-bold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
-            Cảm ơn bạn đã đánh giá!
+            {t("success.title")}
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Phản hồi của bạn giúp cửa hàng cải thiện dịch vụ ngày càng tốt hơn.
+            {t("success.description")}
           </p>
         </motion.div>
       </motion.div>
@@ -151,13 +152,13 @@ const FeedbackPage = () => {
             <Star className="h-6 w-6 text-white" />
           </motion.div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
-            360 Retail Feedback
+            {t("brand")}
           </p>
           <h1 className="mt-3 text-2xl font-bold text-foreground tracking-tight">
-            Đánh giá trải nghiệm mua hàng
+            {t("title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Bạn vui lòng dành vài giây để đánh giá đơn hàng vừa rồi nhé.
+            {t("subtitle")}
           </p>
         </motion.div>
 
@@ -170,7 +171,7 @@ const FeedbackPage = () => {
             className="space-y-3"
           >
             <Label className="text-sm font-semibold text-foreground">
-              Mức độ hài lòng
+              {t("form.ratingLabel")}
             </Label>
             <div className="flex items-center justify-center gap-3">
               {RATINGS.map((value, index) => {
@@ -191,7 +192,7 @@ const FeedbackPage = () => {
                         ? "border-transparent bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] shadow-lg shadow-[#FF7B21]/30"
                         : "border-border bg-background/80 hover:border-[#FF7B21]/50 hover:bg-[#FF7B21]/5"
                     )}
-                    aria-label={`${value} sao`}
+                    aria-label={t("form.ratingAria", { stars: value })}
                   >
                     <Star
                       className={cn(
@@ -220,7 +221,7 @@ const FeedbackPage = () => {
             >
               {rating && (
                 <span className="font-semibold bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
-                  {rating}/5 sao
+                  {t("form.ratingSummary", { rating })}
                 </span>
               )}
             </motion.p>
@@ -234,14 +235,14 @@ const FeedbackPage = () => {
             className="space-y-2"
           >
             <Label htmlFor="content" className="text-sm font-semibold text-foreground">
-              Góp ý của bạn (không bắt buộc)
+              {t("form.contentLabel")}
             </Label>
             <Textarea
               id="content"
               rows={4}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Bạn thích điều gì? Cần cải thiện điều gì?"
+              placeholder={t("form.contentPlaceholder")}
               className="resize-none transition-all focus-visible:ring-2 focus-visible:ring-[#FF7B21]/50 focus-visible:border-[#FF7B21] bg-gradient-to-br from-white to-[#FF7B21]/5 dark:from-gray-900 dark:to-[#FF7B21]/10"
             />
           </motion.div>
@@ -272,20 +273,19 @@ const FeedbackPage = () => {
               {submitting ? (
                 <>
                   <Star className="mr-2 h-4 w-4 animate-spin" />
-                  Đang gửi đánh giá...
+                  {t("form.submitting")}
                 </>
               ) : (
                 <>
                   <Star className="mr-2 h-4 w-4" />
-                  Gửi đánh giá
+                  {t("form.submit")}
                 </>
               )}
             </Button>
           </motion.div>
 
           <p className="mt-2 text-center text-[11px] text-muted-foreground leading-relaxed">
-            Bằng cách gửi đánh giá, bạn đồng ý cho phép cửa hàng sử dụng feedback này
-            để cải thiện chất lượng dịch vụ.
+            {t("form.legal")}
           </p>
         </form>
       </motion.div>
