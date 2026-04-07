@@ -276,7 +276,7 @@ export default function EmployeeDetailPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>{tStaff("detail.form.email")}</Label>
               <Input value={employee.email} disabled />
             </div>
             <div className="space-y-2">
@@ -312,7 +312,7 @@ export default function EmployeeDetailPage() {
                     <SelectContent>
                       {POSITION_OPTIONS.map((p) => (
                         <SelectItem key={p} value={p}>
-                          {p}
+                          {tStaff(`positions.${p}` as const, { defaultValue: p })}
                         </SelectItem>
                       ))}
                     </SelectContent>

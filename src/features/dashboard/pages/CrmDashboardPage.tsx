@@ -427,7 +427,7 @@ const CrmDashboardPage = () => {
                         <div className="text-[11px] text-muted-foreground">
                           {tCrm("loyalty.minOrderLabel")}{" "}
                           <span className="font-medium">
-                            {rule.minSpend.toLocaleString("vi-VN")}₫
+                            {rule.minSpend.toLocaleString(i18n.language)}₫
                           </span>
                           {" • "}
                           {tCrm("loyalty.statusLabel")}{" "}
@@ -930,11 +930,21 @@ const CrmDashboardPage = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5">⭐⭐⭐⭐⭐ 5 sao</SelectItem>
-                  <SelectItem value="4">⭐⭐⭐⭐ 4 sao</SelectItem>
-                  <SelectItem value="3">⭐⭐⭐ 3 sao</SelectItem>
-                  <SelectItem value="2">⭐⭐ 2 sao</SelectItem>
-                  <SelectItem value="1">⭐ 1 sao</SelectItem>
+                  <SelectItem value="5">
+                    {tCrm("dialogs.staffFeedback.ratingOption", { stars: 5 })}
+                  </SelectItem>
+                  <SelectItem value="4">
+                    {tCrm("dialogs.staffFeedback.ratingOption", { stars: 4 })}
+                  </SelectItem>
+                  <SelectItem value="3">
+                    {tCrm("dialogs.staffFeedback.ratingOption", { stars: 3 })}
+                  </SelectItem>
+                  <SelectItem value="2">
+                    {tCrm("dialogs.staffFeedback.ratingOption", { stars: 2 })}
+                  </SelectItem>
+                  <SelectItem value="1">
+                    {tCrm("dialogs.staffFeedback.ratingOption", { stars: 1 })}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

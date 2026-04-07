@@ -69,14 +69,49 @@
     "itemsTable": {
       "product": "Product",
       "barcodeSku": "Barcode / SKU",
+      "sizeColor": "Size/Color",
       "quantity": "Qty",
       "unitPrice": "Unit price",
       "lineTotal": "Line total",
+      "productFallback": "Product",
+      "noCode": "No code",
       "sizeLabel": "Size: {{size}}",
       "colorLabel": "Color: {{color}}"
     },
+    "summary": {
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "total": "Total"
+    },
+    "timeline": {
+      "title": "Order timeline",
+      "completed": "Order completed",
+      "cancelled": "Order cancelled",
+      "created": "Order created"
+    },
+    "actions": {
+      "updateStatusTitle": "Update status"
+    },
+    "payment": {
+      "method": "Method",
+      "cash": "Cash",
+      "status": "Status",
+      "unpaid": "Unpaid"
+    },
+    "feedback": {
+      "copyLink": "Copy link"
+    },
+    "feedbackQrAlt": "Feedback QR",
+    "meta": {
+      "title": "Order info",
+      "code": "Order code",
+      "store": "Store",
+      "employee": "Employee",
+      "itemsCount": "Items"
+    },
     "cancelDialog": {
       "title": "Confirm order cancellation",
+      "irreversible": "This action cannot be undone",
       "description": "Are you sure you want to cancel order <strong>{{code}}</strong>? This action cannot be undone.",
       "no": "No",
       "confirm": "Cancel order",
@@ -87,7 +122,9 @@
       "updateStatusSuccess": "Order status updated successfully.",
       "updateStatusFailed": "Unable to update order status.",
       "cancelSuccess": "Order cancelled successfully.",
-      "cancelFailed": "Unable to cancel order."
+      "cancelFailed": "Unable to cancel order.",
+      "copyOrderCodeSuccess": "Order code copied.",
+      "copyFeedbackLinkSuccess": "Feedback link copied."
     }
   }
 }

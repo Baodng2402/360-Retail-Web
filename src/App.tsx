@@ -74,7 +74,7 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
-      <div className="min-h-screen bg-background text-foreground transition-colors duration-300 safe-area-bottom">
+      <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
         <Suspense fallback={<div className="p-4 text-sm">Loading...</div>}>
           <BrowserRouter>
             <SubscriptionUpgradeDialog />

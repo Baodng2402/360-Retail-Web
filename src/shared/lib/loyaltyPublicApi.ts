@@ -1,4 +1,5 @@
 import { crmApi } from "@/shared/lib/axios-instances";
+import i18next from "@/i18n";
 import type { ApiResponse } from "@/shared/types/api-response";
 
 export type LoyaltyPublicCheckResult = {
@@ -23,7 +24,7 @@ const unwrap = (raw: LoyaltyPublicCheckResponse): LoyaltyPublicCheckResult => {
       data?: LoyaltyPublicCheckResult;
     };
     if (r.success && r.data) return r.data;
-    throw new Error(r.message || "Không tra được điểm loyalty.");
+    throw new Error(r.message || i18next.t("common:toast.loyaltyLookupError"));
   }
   return raw as LoyaltyPublicCheckResult;
 };

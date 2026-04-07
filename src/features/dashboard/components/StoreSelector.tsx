@@ -14,12 +14,14 @@ import { useStoreStore } from "@/shared/store/storeStore";
 import { storesApi } from "@/shared/lib/storesApi";
 import type { Store } from "@/shared/types/stores";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface StoreSelectorProps {
   pageDescription?: string;
 }
 
 export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
+  const { t } = useTranslation(["store", "common"]);
   const { currentStore, switchStore } = useStoreStore();
   const storeId = currentStore?.id;
 
@@ -83,7 +85,7 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
       }
     } catch (error) {
       console.error("Error loading stores:", error);
-      toast.error("Không thể tải danh sách cửa hàng. Vui lòng thử lại.");
+      toast.error(t("store:storeSelector.toast.loadStoresError"));
     } finally {
       setStoresLoading(false);
     }
@@ -104,7 +106,7 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
     // chỉ giải thích rõ cho người dùng và dừng tại đây.
     if (!selectedStore.isActive) {
       toast.error(
-        "Cửa hàng này chưa được kích hoạt vì chưa hoàn tất thanh toán gói dịch vụ. Vui lòng hoàn tất thanh toán khi tạo cửa hàng hoặc liên hệ hỗ trợ.",
+        t("store:storeSelector.toast.storeNotActivated"),
       );
       return;
     }
@@ -112,7 +114,7 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
     try {
       setSwitchingStore(true);
       await switchStore(selectedStore);
-      toast.success(`Đã chuyển sang cửa hàng: ${selectedStore.storeName}`);
+      toast.success(t("store:storeSelector.toast.switchSuccess", { name: selectedStore.storeName }));
       // Reload page data if needed - each page should handle this in their useEffect
     } catch (error) {
       const err = error as {
@@ -129,22 +131,22 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
         if (code === "TrialExpired") {
           toast.error(
             message ||
-              "Thời gian dùng thử của cửa hàng này đã hết. Vui lòng mua gói dịch vụ trước khi chuyển sang cửa hàng đó.",
+              t("store:storeSelector.toast.trialExpired"),
           );
         } else if (code === "SubscriptionExpired") {
           toast.error(
             message ||
-              "Gói dịch vụ của cửa hàng này đã hết hạn. Vui lòng gia hạn gói trước khi chuyển sang cửa hàng đó.",
+              t("store:storeSelector.toast.subscriptionExpired"),
           );
         } else {
           toast.error(
             message ||
-              "Không thể chuyển sang cửa hàng này do giới hạn gói dịch vụ. Vui lòng kiểm tra lại subscription.",
+              t("store:storeSelector.toast.switchBlocked"),
           );
         }
       } else {
         console.error("Error switching store:", error);
-        toast.error("Không thể chuyển cửa hàng. Vui lòng thử lại.");
+        toast.error(t("store:storeSelector.toast.switchError"));
       }
     } finally {
       setSwitchingStore(false);
@@ -162,8 +164,8 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
   const defaultDescription =
     pageDescription ||
     (stores.length > 1
-      ? "Chuyển đổi để quản lý dữ liệu của cửa hàng khác"
-      : `Quản lý dữ liệu của ${currentStore.storeName}`);
+      ? t("store:storeSelector.description.multiStore")
+      : t("store:storeSelector.description.singleStore", { name: currentStore.storeName }));
 
   return (
     <Card className="p-4">
@@ -172,7 +174,9 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
           <StoreIcon className="h-5 w-5 text-muted-foreground" />
           <div>
             <Label className="text-sm font-medium">
-              {stores.length > 1 ? "Chọn cửa hàng" : "Cửa hàng hiện tại"}
+              {stores.length > 1
+                ? t("store:storeSelector.label.selectStore")
+                : t("store:storeSelector.label.currentStore")}
             </Label>
             <p className="text-xs text-muted-foreground">{defaultDescription}</p>
           </div>
@@ -184,9 +188,9 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
             disabled={switchingStore || storesLoading}
           >
             <SelectTrigger className="w-[300px]" disabled={switchingStore || storesLoading}>
-              <SelectValue placeholder="Chọn cửa hàng">
+              <SelectValue placeholder={t("store:storeSelector.placeholder.selectStore")}>
                 {currentStore?.storeName}
-                {currentStore?.isDefault && " (Mặc định)"}
+                {currentStore?.isDefault && ` (${t("store:storeSelector.badges.default")})`}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -197,8 +201,8 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
                   disabled={!store.isActive}
                 >
                   {store.storeName}
-                  {store.isDefault && " (Mặc định)"}
-                  {!store.isActive && " - Chưa kích hoạt"}
+                  {store.isDefault && ` (${t("store:storeSelector.badges.default")})`}
+                  {!store.isActive && ` - ${t("store:storeSelector.badges.notActivated")}`}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -208,7 +212,7 @@ export default function StoreSelector({ pageDescription }: StoreSelectorProps) {
             <span className="text-sm font-medium">{currentStore.storeName}</span>
             {currentStore.isDefault && (
               <Badge variant="secondary" className="text-xs">
-                Mặc định
+                {t("store:storeSelector.badges.default")}
               </Badge>
             )}
           </div>

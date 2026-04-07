@@ -5,6 +5,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Textarea } from "@/shared/components/ui/textarea";
 import toast from "react-hot-toast";
 import { Copy, FileJson } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type JsonViewerDialogProps = {
   open: boolean;
@@ -22,14 +23,15 @@ const safeStringify = (v: unknown) => {
 };
 
 export function JsonViewerDialog({ open, onOpenChange, title, value }: JsonViewerDialogProps) {
+  const { t } = useTranslation("common");
   const text = useMemo(() => safeStringify(value), [value]);
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Đã copy JSON.");
+      toast.success(t("toast.copyJsonSuccess"));
     } catch {
-      toast.error("Copy thất bại.");
+      toast.error(t("toast.copyFailed"));
     }
   };
 
@@ -41,7 +43,7 @@ export function JsonViewerDialog({ open, onOpenChange, title, value }: JsonViewe
             <span className="truncate">{title}</span>
             <Badge variant="outline" className="gap-1">
               <FileJson className="h-3.5 w-3.5" />
-              Raw
+              {t("jsonViewer.raw")}
             </Badge>
           </DialogTitle>
         </DialogHeader>
@@ -49,7 +51,7 @@ export function JsonViewerDialog({ open, onOpenChange, title, value }: JsonViewe
         <div className="flex items-center justify-end gap-2">
           <Button variant="outline" size="sm" className="gap-2" onClick={() => void copy()}>
             <Copy className="h-4 w-4" />
-            Copy JSON
+            {t("actions.copyJson")}
           </Button>
         </div>
 

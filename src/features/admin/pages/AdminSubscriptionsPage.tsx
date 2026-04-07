@@ -14,6 +14,7 @@ import { superAdminSaasApi, type SuperAdminPlan } from "@/shared/lib/superAdminS
 import { Ban, CalendarPlus, Loader2, CreditCard } from "lucide-react";
 import { JsonViewerDialog } from "@/shared/components/JsonViewerDialog";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const getStr = (o: Record<string, unknown>, keys: string[]) => {
   for (const k of keys) {
@@ -33,6 +34,7 @@ const getNum = (o: Record<string, unknown>, keys: string[]) => {
 };
 
 export default function AdminSubscriptionsPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
@@ -49,7 +51,7 @@ export default function AdminSubscriptionsPage() {
   const [days, setDays] = useState(30);
   const [acting, setActing] = useState(false);
   const [rawOpen, setRawOpen] = useState(false);
-  const [rawTitle, setRawTitle] = useState("Raw JSON");
+  const [rawTitle, setRawTitle] = useState(() => t("admin:subscriptionsPage.rawDialogDefaultTitle"));
   const [rawValue, setRawValue] = useState<unknown>(null);
 
   const load = async () => {
@@ -66,7 +68,7 @@ export default function AdminSubscriptionsPage() {
       setPlans(planList);
     } catch (err) {
       console.error("Failed to load subscriptions:", err);
-      toast.error("Không tải được danh sách subscriptions.");
+      toast.error(t("admin:subscriptionsPage.toast.loadError"));
       setItems([]);
     } finally {
       setLoading(false);
@@ -128,18 +130,20 @@ export default function AdminSubscriptionsPage() {
     if (!actionTarget || !actionType) return;
     const id = getStr(actionTarget, ["id", "subscriptionId", "subscription_id"]);
     if (!id) {
-      toast.error("Không xác định được subscription id.");
+      toast.error(t("admin:subscriptionsPage.toast.missingId"));
       return;
     }
     try {
       setActing(true);
       if (actionType === "cancel") {
         await superAdminSaasApi.cancelSubscription(id);
-        toast.success("Đã huỷ subscription.");
+        toast.success(t("admin:subscriptionsPage.toast.cancelSuccess"));
       } else {
         const r = await superAdminSaasApi.extendSubscription(id, Number(days) || 0);
         toast.success(
-          r?.newEndDate ? `Đã gia hạn. New end date: ${r.newEndDate}` : "Đã gia hạn subscription.",
+          r?.newEndDate
+            ? t("admin:subscriptionsPage.toast.extendSuccessWithDate", { date: r.newEndDate })
+            : t("admin:subscriptionsPage.toast.extendSuccess"),
         );
       }
       setActionTarget(null);
@@ -150,7 +154,7 @@ export default function AdminSubscriptionsPage() {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
         (err as Error)?.message ||
-        "Thao tác thất bại.";
+        t("admin:subscriptionsPage.toast.actionFailed");
       toast.error(message);
     } finally {
       setActing(false);
@@ -174,37 +178,37 @@ export default function AdminSubscriptionsPage() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
-                  SuperAdmin
+                  {t("admin:subscriptionsPage.badge")}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  Subscriptions (list / cancel / extend)
+                  {t("admin:subscriptionsPage.caption")}
                 </span>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-4">
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Status</div>
+                <div className="text-xs text-muted-foreground">{t("admin:subscriptionsPage.filters.status")}</div>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger className="bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Chọn..." />
+                    <SelectValue placeholder={t("admin:dashboard.filters.selectPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Trial">Trial</SelectItem>
-                    <SelectItem value="Expired">Expired</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                    <SelectItem value="all">{t("admin:subscriptionsPage.status.all")}</SelectItem>
+                    <SelectItem value="Active">{t("admin:subscriptionsPage.status.active")}</SelectItem>
+                    <SelectItem value="Trial">{t("admin:subscriptionsPage.status.trial")}</SelectItem>
+                    <SelectItem value="Expired">{t("admin:subscriptionsPage.status.expired")}</SelectItem>
+                    <SelectItem value="Cancelled">{t("admin:subscriptionsPage.status.cancelled")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Plan</div>
+                <div className="text-xs text-muted-foreground">{t("admin:subscriptionsPage.filters.plan")}</div>
                 <Select value={planId} onValueChange={setPlanId}>
                   <SelectTrigger className="bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Chọn..." />
+                    <SelectValue placeholder={t("admin:dashboard.filters.selectPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">{t("admin:subscriptionsPage.status.all")}</SelectItem>
                     {plans.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.planName}
@@ -214,11 +218,11 @@ export default function AdminSubscriptionsPage() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Tìm kiếm</div>
+                <div className="text-xs text-muted-foreground">{t("admin:subscriptionsPage.filters.search")}</div>
                 <Input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Tìm theo store, plan, id..."
+                  placeholder={t("admin:subscriptionsPage.filters.searchPlaceholder")}
                   className="bg-background/80 backdrop-blur-sm"
                 />
               </div>
@@ -228,7 +232,11 @@ export default function AdminSubscriptionsPage() {
                   className="w-full bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
                   disabled={loading}
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Làm mới"}
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    t("admin:subscriptionsPage.actions.refresh")
+                  )}
                 </Button>
               </div>
             </div>
@@ -245,7 +253,7 @@ export default function AdminSubscriptionsPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-[#FF7B21]" />
-              Danh sách subscriptions
+              {t("admin:subscriptionsPage.list.title")}
             </h3>
             <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
               {tableRows.length.toLocaleString()}
@@ -261,20 +269,20 @@ export default function AdminSubscriptionsPage() {
               </div>
             ) : tableRows.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
-                Không có dữ liệu.
+                {t("common:states.noData")}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5">
-                      <TableHead>Store</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Start</TableHead>
-                      <TableHead>End</TableHead>
-                      <TableHead>Days left</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("admin:subscriptionsPage.columns.store")}</TableHead>
+                      <TableHead>{t("admin:subscriptionsPage.columns.plan")}</TableHead>
+                      <TableHead>{t("admin:subscriptionsPage.columns.status")}</TableHead>
+                      <TableHead>{t("admin:subscriptionsPage.columns.start")}</TableHead>
+                      <TableHead>{t("admin:subscriptionsPage.columns.end")}</TableHead>
+                      <TableHead>{t("admin:subscriptionsPage.columns.daysLeft")}</TableHead>
+                      <TableHead className="text-right">{t("admin:subscriptionsPage.columns.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -305,7 +313,9 @@ export default function AdminSubscriptionsPage() {
                         <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">
                           {r.endDate || "—"}
                         </TableCell>
-                        <TableCell>{r.daysRemaining ? r.daysRemaining.toLocaleString() : "—"}</TableCell>
+                        <TableCell>
+                          {r.daysRemaining ? r.daysRemaining.toLocaleString() : "—"}
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                             <Button
@@ -315,7 +325,7 @@ export default function AdminSubscriptionsPage() {
                               onClick={() => openExtend(r.raw)}
                             >
                               <CalendarPlus className="h-4 w-4" />
-                              Extend
+                              {t("admin:subscriptionsPage.actions.extend")}
                             </Button>
                             <Button
                               size="sm"
@@ -324,19 +334,19 @@ export default function AdminSubscriptionsPage() {
                               onClick={() => openCancel(r.raw)}
                             >
                               <Ban className="h-4 w-4" />
-                              Cancel
+                              {t("admin:subscriptionsPage.actions.cancel")}
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
                               className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
                               onClick={() => {
-                                setRawTitle(`Subscription raw: ${r.id || "—"}`);
+                                setRawTitle(t("admin:subscriptionsPage.rawTitle", { id: r.id || "—" }));
                                 setRawValue(r.raw);
                                 setRawOpen(true);
                               }}
                             >
-                              Raw
+                              {t("admin:subscriptionsPage.columns.raw")}
                             </Button>
                           </div>
                         </TableCell>
@@ -358,15 +368,11 @@ export default function AdminSubscriptionsPage() {
           transition={{ duration: 0.3, delay: 0.2 }}
         >
           <div>
-            Hiển thị{" "}
-            <span className="font-semibold">
-              {pagedRows.length > 0 ? (page - 1) * pageSize + 1 : 0}
-            </span>{" "}
-            -{" "}
-            <span className="font-semibold">
-              {(page - 1) * pageSize + pagedRows.length}
-            </span>{" "}
-            trong <span className="font-semibold">{tableRows.length}</span> subscriptions
+            {t("admin:subscriptionsPage.pagination.summary", {
+              from: pagedRows.length > 0 ? (page - 1) * pageSize + 1 : 0,
+              to: (page - 1) * pageSize + pagedRows.length,
+              total: tableRows.length,
+            })}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -375,11 +381,10 @@ export default function AdminSubscriptionsPage() {
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Trang trước
+              {t("admin:subscriptionsPage.pagination.prev")}
             </Button>
             <span>
-              Trang <span className="font-semibold">{page}</span> /{" "}
-              <span className="font-semibold">{totalPages}</span>
+              {t("admin:subscriptionsPage.pagination.page", { page, totalPages })}
             </span>
             <Button
               variant="outline"
@@ -387,7 +392,7 @@ export default function AdminSubscriptionsPage() {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              Trang sau
+              {t("admin:subscriptionsPage.pagination.next")}
             </Button>
           </div>
         </motion.div>
@@ -400,28 +405,28 @@ export default function AdminSubscriptionsPage() {
               {actionType === "cancel" ? (
                 <>
                   <Ban className="h-5 w-5 text-red-500" />
-                  Huỷ subscription
+                  {t("admin:subscriptionsPage.dialog.cancelTitle")}
                 </>
               ) : (
                 <>
                   <CalendarPlus className="h-5 w-5 text-[#FF7B21]" />
-                  Gia hạn subscription
+                  {t("admin:subscriptionsPage.dialog.extendTitle")}
                 </>
               )}
             </DialogTitle>
             <DialogDescription>
-              Xác nhận thao tác cho subscription đã chọn.
+              {t("admin:subscriptionsPage.dialog.description")}
             </DialogDescription>
           </DialogHeader>
 
           {actionType === "extend" && (
             <div className="space-y-2 pt-2">
-              <Label>Số ngày gia hạn</Label>
+              <Label>{t("admin:subscriptionsPage.dialog.daysLabel")}</Label>
               <Input
                 inputMode="numeric"
                 value={String(days)}
                 onChange={(e) => setDays(Number(e.target.value || 0))}
-                placeholder="30"
+                placeholder={t("admin:subscriptionsPage.dialog.daysPlaceholder")}
                 className="bg-background/80"
               />
             </div>
@@ -429,7 +434,7 @@ export default function AdminSubscriptionsPage() {
 
           <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => { setActionType(null); setActionTarget(null); }} disabled={acting}>
-              Huỷ
+              {t("common:actions.cancel")}
             </Button>
             <Button
               variant={actionType === "cancel" ? "destructive" : "default"}
@@ -438,7 +443,7 @@ export default function AdminSubscriptionsPage() {
               className={actionType === "extend" ? "bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300" : undefined}
             >
               {acting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Xác nhận
+              {t("common:actions.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

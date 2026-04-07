@@ -3,7 +3,6 @@ import { Outlet } from "react-router-dom";
 import { AdminSidebar } from "@/features/admin/components/AdminSidebar";
 import { AdminHeader } from "@/features/admin/components/AdminHeader";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X } from "lucide-react";
 
 export function AdminLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -52,27 +51,10 @@ export function AdminLayout() {
       </div>
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile Header with hamburger */}
-        <div className="lg:hidden flex items-center justify-between px-4 h-[60px] border-b border-border/50 bg-background">
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent/50 hover:bg-accent transition-all duration-200 active:scale-95"
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            <motion.div
-              animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </motion.div>
-          </button>
-        </div>
-
-        <AdminHeader />
+        <AdminHeader
+          onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          isMobileMenuOpen={isMobileMenuOpen}
+        />
         <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 pb-6 safe-area-bottom">
           <Outlet />
         </main>

@@ -1,2 +1,135 @@
-{}
+{
+  "restockModal": {
+    "title": {
+      "in": "Stock in",
+      "out": "Stock out"
+    },
+    "description": "Update product stock quantity",
+    "currentStock": "Current stock",
+    "fields": {
+      "operationType": "Operation type",
+      "quantity": "Quantity",
+      "reason": "Reason"
+    },
+    "placeholders": {
+      "quantity": "Enter quantity...",
+      "reason": "Supplier or reason..."
+    },
+    "operations": {
+      "in": "stocked in",
+      "out": "stocked out"
+    },
+    "actions": {
+      "submitting": "Processing..."
+    },
+    "toast": {
+      "invalidQuantity": "Please enter a valid quantity.",
+      "success": "Successfully {{operation}} {{quantity}} {{name}}!"
+    }
+  }
+  ,
+  "page": {
+    "title": "Inventory management",
+    "subtitle": "Stock in/out & inventory tickets",
+    "actions": {
+      "createTicket": "Create ticket",
+      "viewDetail": "View details",
+      "confirmTicket": "Confirm ticket",
+      "cancelTicket": "Cancel ticket",
+      "deleteTicket": "Delete ticket"
+    },
+    "states": {
+      "empty": "No inventory tickets yet",
+      "createFirst": "Create your first ticket"
+    },
+    "toast": {
+      "loadTicketsError": "Unable to load inventory tickets",
+      "ticketNotFound": "Inventory ticket not found",
+      "loadProductsError": "Unable to load products",
+      "loadTicketDetailError": "Unable to load ticket details"
+    }
+  },
+  "filters": {
+    "all": "All"
+  },
+  "labels": {
+    "code": "Ticket code",
+    "type": "Type",
+    "status": "Status",
+    "note": "Note",
+    "createdAt": "Created at"
+  },
+  "table": {
+    "code": "Ticket code",
+    "type": "Type",
+    "status": "Status",
+    "note": "Note",
+    "createdAt": "Created at",
+    "actions": "Actions"
+  },
+  "type": {
+    "import": "Import",
+    "export": "Export"
+  },
+  "status": {
+    "draft": "Draft",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled"
+  },
+  "create": {
+    "title": "Create inventory ticket",
+    "description": "Select ticket type, add products, and quantities.",
+    "fields": {
+      "items": "Items",
+      "variant": "Variant",
+      "itemNote": "Note"
+    },
+    "placeholders": {
+      "note": "Ticket note...",
+      "selectProduct": "Select product",
+      "selectVariant": "Select variant (size/color)",
+      "quantity": "Qty",
+      "itemNote": "Note"
+    },
+    "states": {
+      "loadingProducts": "Loading products...",
+      "emptyItems": "No items yet. Click \"Add\" to start.",
+      "variantRequired": "Please select a specific variant"
+    },
+    "actions": {
+      "createImport": "Create import ticket",
+      "createExport": "Create export ticket"
+    },
+    "variantStock": "Stock: {{stock, number}}",
+    "toast": {
+      "needAtLeastOneProduct": "Please add at least 1 product.",
+      "invalidItems": "Please select products and enter valid quantities.",
+      "importSuccess": "Import ticket created successfully.",
+      "exportSuccess": "Export ticket created successfully.",
+      "createFailed": "Failed to create inventory ticket."
+    }
+  },
+  "detail": {
+    "title": "Ticket details",
+    "itemsTitle": "Items ({{count, number}})",
+    "variantLabel": "Variant"
+  },
+  "actions": {
+    "dialog": {
+      "titleConfirm": "Confirm inventory ticket",
+      "titleCancel": "Cancel inventory ticket",
+      "titleDelete": "Delete inventory ticket",
+      "descriptionConfirm": "Confirming will update inventory. This action cannot be undone.",
+      "descriptionCancel": "Cancelling will set status to Cancelled. Inventory will not change.",
+      "descriptionDelete": "Delete the inventory ticket permanently. This action cannot be undone.",
+      "confirmCancel": "Cancel ticket"
+    },
+    "toast": {
+      "confirmSuccess": "Ticket confirmed — inventory updated.",
+      "cancelSuccess": "Ticket cancelled.",
+      "deleteSuccess": "Ticket deleted.",
+      "actionFailed": "Action failed."
+    }
+  }
+}
 

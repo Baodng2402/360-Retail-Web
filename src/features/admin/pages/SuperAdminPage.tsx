@@ -44,8 +44,10 @@ import {
   type PlanReviewsAdminDashboard,
 } from "@/shared/lib/planReviewsApi";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 const SuperAdminPage = () => {
+  const { t, i18n } = useTranslation(["admin", "common"]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [users, setUsers] = useState<AdminUser[] | null>(null);
   const [reviews, setReviews] = useState<PlanReview[]>([]);
@@ -133,16 +135,16 @@ const SuperAdminPage = () => {
         setUsers((prev) =>
           prev?.map((u) => (u.id === editingUser.id ? updated : u)) ?? null,
         );
-        toast.success("Cập nhật user thành công.");
+        toast.success(t("admin:superAdminLegacy.toast.updateUserSuccess"));
       } else {
         const created = await adminUsersApi.createUser(userForm);
         setUsers((prev) => (prev ? [created, ...prev] : [created]));
-        toast.success("Tạo user mới thành công.");
+        toast.success(t("admin:superAdminLegacy.toast.createUserSuccess"));
       }
       setUserDialogOpen(false);
     } catch (err) {
       console.error("Failed to save user:", err);
-      toast.error("Lưu user thất bại.");
+      toast.error(t("admin:superAdminLegacy.toast.saveUserError"));
     } finally {
       setUserSaving(false);
     }
@@ -157,10 +159,10 @@ const SuperAdminPage = () => {
         prev?.filter((u) => u.id !== deleteConfirm.id) ?? null,
       );
       setDeleteConfirm(null);
-      toast.success("Đã xóa user.");
+      toast.success(t("admin:superAdminLegacy.toast.deleteUserSuccess"));
     } catch (err) {
       console.error("Failed to delete user:", err);
-      toast.error("Xóa user thất bại.");
+      toast.error(t("admin:superAdminLegacy.toast.deleteUserError"));
     } finally {
       setDeleting(false);
     }
@@ -170,10 +172,10 @@ const SuperAdminPage = () => {
     try {
       setCheckingExpiry(true);
       await subscriptionApi.checkExpiry(7);
-      toast.success("Đã gửi email cảnh báo cho các subscription sắp hết hạn.");
+      toast.success(t("admin:superAdminLegacy.toast.checkExpirySuccess"));
     } catch (err) {
       console.error("Failed to check expiry:", err);
-      toast.error("Kiểm tra hết hạn thất bại.");
+      toast.error(t("admin:superAdminLegacy.toast.checkExpiryError"));
     } finally {
       setCheckingExpiry(false);
     }
@@ -188,10 +190,10 @@ const SuperAdminPage = () => {
           </div>
           <div>
             <h1 className="text-base md:text-lg font-semibold text-foreground">
-              Plan Reviews & hệ thống
+              {t("admin:superAdminLegacy.header.title")}
             </h1>
             <p className="text-[11px] md:text-xs text-muted-foreground">
-              Giám sát đánh giá các gói SaaS và kiểm tra nhanh expiry subscriptions.
+              {t("admin:superAdminLegacy.header.subtitle")}
             </p>
           </div>
         </div>
@@ -208,9 +210,9 @@ const SuperAdminPage = () => {
             ) : (
               <Bell className="h-4 w-4" />
             )}
-            Check Expiry
+            {t("admin:superAdminLegacy.actions.checkExpiry")}
           </Button>
-          <Badge className="bg-purple-600 text-white">SuperAdmin</Badge>
+          <Badge className="bg-purple-600 text-white">{t("admin:sidebar.brand.title")}</Badge>
         </div>
       </Card>
 
@@ -220,7 +222,7 @@ const SuperAdminPage = () => {
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-teal-600" />
-              <h2 className="text-base font-semibold">Người dùng hệ thống</h2>
+              <h2 className="text-base font-semibold">{t("admin:superAdminLegacy.users.title")}</h2>
             </div>
             <Button
               size="sm"
@@ -228,16 +230,16 @@ const SuperAdminPage = () => {
               onClick={openCreateUser}
             >
               <Plus className="h-3 w-3" />
-              Thêm
+              {t("common:actions.create")}
             </Button>
           </div>
           {users === null ? (
             <p className="text-xs text-muted-foreground">
-              Đang tải danh sách users...
+              {t("admin:superAdminLegacy.users.states.loading")}
             </p>
           ) : users.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              Chưa có dữ liệu người dùng (hoặc bạn không có quyền).
+              {t("admin:superAdminLegacy.users.states.empty")}
             </p>
           ) : (
             <div className="max-h-72 overflow-y-auto text-xs space-y-2">
@@ -261,7 +263,7 @@ const SuperAdminPage = () => {
                       </Badge>
                       {!u.isActive && (
                         <Badge variant="destructive" className="text-[10px]">
-                          Inactive
+                          {t("admin:plansPage.status.inactive")}
                         </Badge>
                       )}
                     </div>
@@ -293,7 +295,7 @@ const SuperAdminPage = () => {
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-teal-600" />
-              <h2 className="text-base font-semibold">Đánh giá gói SaaS</h2>
+              <h2 className="text-base font-semibold">{t("admin:superAdminLegacy.reviews.title")}</h2>
             </div>
             {reviewDashboard && (
               <Badge className="gap-1 bg-amber-500 text-white">
@@ -305,7 +307,7 @@ const SuperAdminPage = () => {
           </div>
           {reviews.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              Chưa có review nào hoặc bạn không có quyền xem.
+              {t("admin:superAdminLegacy.reviews.states.empty")}
             </p>
           ) : (
             <div className="max-h-72 overflow-y-auto text-xs space-y-2">
@@ -347,7 +349,7 @@ const SuperAdminPage = () => {
                     </p>
                   )}
                   <span className="text-[11px] text-muted-foreground">
-                    {new Date(r.createdAt).toLocaleString("vi-VN")}
+                    {new Date(r.createdAt).toLocaleString(i18n.language)}
                   </span>
                 </div>
               ))}
@@ -360,11 +362,11 @@ const SuperAdminPage = () => {
       <Card className="p-6 space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Database className="h-5 w-5 text-teal-600" />
-          <h2 className="text-base font-semibold">Gói SaaS hiện có</h2>
+          <h2 className="text-base font-semibold">{t("admin:superAdminLegacy.plans.title")}</h2>
         </div>
         {plans.length === 0 ? (
           <p className="text-xs text-muted-foreground">
-            Chưa tải được danh sách gói.
+            {t("admin:superAdminLegacy.plans.states.empty")}
           </p>
         ) : (
           <ul className="space-y-1 text-xs">
@@ -372,7 +374,7 @@ const SuperAdminPage = () => {
               <li key={p.id} className="flex items-center justify-between">
                 <span className="font-medium">{p.planName}</span>
                 <span className="text-muted-foreground text-[11px]">
-                  {p.durationDays} ngày
+                  {t("admin:superAdminLegacy.plans.durationDays", { days: p.durationDays })}
                 </span>
               </li>
             ))}
@@ -386,29 +388,27 @@ const SuperAdminPage = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-purple-500" />
-              {editingUser ? "Chỉnh sửa User" : "Tạo User mới"}
+              {editingUser ? t("admin:superAdminLegacy.userDialog.titleEdit") : t("admin:superAdminLegacy.userDialog.titleCreate")}
             </DialogTitle>
             <DialogDescription>
-              {editingUser
-                ? "Cập nhật thông tin người dùng."
-                : "Tạo tài khoản mới với role được chỉ định."}
+              {editingUser ? t("admin:superAdminLegacy.userDialog.descriptionEdit") : t("admin:superAdminLegacy.userDialog.descriptionCreate")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div className="space-y-1">
-              <Label>Email</Label>
+              <Label>{t("admin:superAdminLegacy.userDialog.fields.email")}</Label>
               <Input
                 value={userForm.email}
                 onChange={(e) =>
                   setUserForm((prev) => ({ ...prev, email: e.target.value }))
                 }
-                placeholder="user@example.com"
+                placeholder={t("admin:superAdminLegacy.userDialog.placeholders.email")}
                 disabled={!!editingUser}
               />
             </div>
             {!editingUser && (
               <div className="space-y-1">
-                <Label>Mật khẩu</Label>
+                <Label>{t("admin:superAdminLegacy.userDialog.fields.password")}</Label>
                 <Input
                   type="password"
                   value={userForm.password}
@@ -418,12 +418,12 @@ const SuperAdminPage = () => {
                       password: e.target.value,
                     }))
                   }
-                  placeholder="Mật khẩu..."
+                  placeholder={t("admin:superAdminLegacy.userDialog.placeholders.password")}
                 />
               </div>
             )}
             <div className="space-y-1">
-              <Label>Họ tên</Label>
+              <Label>{t("admin:superAdminLegacy.userDialog.fields.fullName")}</Label>
               <Input
                 value={userForm.fullName}
                 onChange={(e) =>
@@ -432,11 +432,11 @@ const SuperAdminPage = () => {
                     fullName: e.target.value,
                   }))
                 }
-                placeholder="Nguyễn Văn A"
+                placeholder={t("admin:superAdminLegacy.userDialog.placeholders.fullName")}
               />
             </div>
             <div className="space-y-1">
-              <Label>Số điện thoại</Label>
+              <Label>{t("admin:superAdminLegacy.userDialog.fields.phoneNumber")}</Label>
               <Input
                 value={userForm.phoneNumber}
                 onChange={(e) =>
@@ -445,11 +445,11 @@ const SuperAdminPage = () => {
                     phoneNumber: e.target.value,
                   }))
                 }
-                placeholder="0912345678"
+                placeholder={t("admin:superAdminLegacy.userDialog.placeholders.phoneNumber")}
               />
             </div>
             <div className="space-y-1">
-              <Label>Role</Label>
+              <Label>{t("admin:superAdminLegacy.userDialog.fields.role")}</Label>
               <Select
                 value={userForm.role}
                 onValueChange={(v) =>
@@ -460,11 +460,11 @@ const SuperAdminPage = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="StoreOwner">StoreOwner</SelectItem>
-                  <SelectItem value="Manager">Manager</SelectItem>
-                  <SelectItem value="Staff">Staff</SelectItem>
-                  <SelectItem value="Customer">Customer</SelectItem>
-                  <SelectItem value="PotentialOwner">PotentialOwner</SelectItem>
+                  <SelectItem value="StoreOwner">{t("admin:roles.storeOwner")}</SelectItem>
+                  <SelectItem value="Manager">{t("admin:roles.manager")}</SelectItem>
+                  <SelectItem value="Staff">{t("admin:roles.staff")}</SelectItem>
+                  <SelectItem value="Customer">{t("admin:roles.customer")}</SelectItem>
+                  <SelectItem value="PotentialOwner">{t("admin:roles.potentialOwner")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -475,7 +475,7 @@ const SuperAdminPage = () => {
               onClick={() => setUserDialogOpen(false)}
               disabled={userSaving}
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <Button
               onClick={() => void handleSaveUser()}
@@ -487,7 +487,7 @@ const SuperAdminPage = () => {
               className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white"
             >
               {userSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {editingUser ? "Cập nhật" : "Tạo"}
+              {editingUser ? t("common:actions.saveChanges") : t("common:actions.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -500,13 +500,9 @@ const SuperAdminPage = () => {
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Xác nhận xóa user</DialogTitle>
+            <DialogTitle>{t("admin:superAdminLegacy.deleteDialog.title")}</DialogTitle>
             <DialogDescription>
-              Bạn có chắc muốn xóa{" "}
-              <strong>
-                {deleteConfirm?.fullName || deleteConfirm?.email}
-              </strong>
-              ? Hành động này không thể hoàn tác.
+              {t("admin:superAdminLegacy.deleteDialog.description", { name: deleteConfirm?.fullName || deleteConfirm?.email })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="pt-2">
@@ -515,7 +511,7 @@ const SuperAdminPage = () => {
               onClick={() => setDeleteConfirm(null)}
               disabled={deleting}
             >
-              Hủy
+              {t("common:actions.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -523,7 +519,7 @@ const SuperAdminPage = () => {
               disabled={deleting}
             >
               {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Xóa
+              {t("common:actions.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -12,6 +12,7 @@ import { storesApi } from "@/shared/lib/storesApi";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import type { Store as StoreType } from "@/shared/types/stores";
 import type { SubscriptionStatus } from "@/shared/types/subscription";
+import { useTranslation } from "react-i18next";
 
 const toDate = (v?: string | null) => {
   if (!v) return null;
@@ -20,6 +21,7 @@ const toDate = (v?: string | null) => {
 };
 
 export default function StoreDetailPage() {
+  const { t, i18n } = useTranslation(["store", "common"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -39,14 +41,14 @@ export default function StoreDetailPage() {
         setSub(ss);
       } catch (err) {
         console.error("Failed to load store detail:", err);
-        toast.error("Không tải được chi tiết cửa hàng.");
+        toast.error(t("store:detail.toast.loadError"));
         navigate("/dashboard/stores", { replace: true });
       } finally {
         setLoading(false);
       }
     };
     void load();
-  }, [id, navigate]);
+  }, [id, navigate, t]);
 
   const endDate = useMemo(() => {
     return (
@@ -90,7 +92,7 @@ export default function StoreDetailPage() {
           onClick={() => navigate("/dashboard/stores")}
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại quản lý cửa hàng
+          {t("store:detail.backToList")}
         </Button>
         <Badge variant="outline" className="font-mono text-[11px]">
           {store.id}
@@ -115,36 +117,36 @@ export default function StoreDetailPage() {
                       : ""
                   }
                 >
-                  {store.isActive ? "Active" : "Inactive"}
+                  {store.isActive ? t("store:status.active") : t("store:status.inactive")}
                 </Badge>
               </div>
               <div className="mt-2 grid gap-2 text-sm">
                 <div className="flex items-start gap-2 text-muted-foreground">
                   <MapPin className="mt-0.5 h-4 w-4" />
-                  <span className="break-words">{store.address || "Chưa có địa chỉ"}</span>
+                  <span className="break-words">{store.address || t("store:detail.address.empty")}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Phone className="h-4 w-4" />
-                  <span>{store.phone || "Chưa có số điện thoại"}</span>
+                  <span>{store.phone || t("store:detail.phone.empty")}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    Ngày tạo:{" "}
+                    {t("store:detail.createdAt")}:{" "}
                     <span className="font-mono">
-                      {createdDateObj ? createdDateObj.toLocaleString("vi-VN") : "—"}
+                      {createdDateObj ? createdDateObj.toLocaleString(i18n.language) : "—"}
                     </span>
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <BadgeCheck className="h-4 w-4" />
                   <span className="font-mono">
-                    GPS:{" "}
+                    {t("store:detail.gps.label")}:{" "}
                     {store.latitude != null && store.longitude != null
                       ? `${store.latitude.toFixed?.(5) ?? store.latitude}, ${
                           store.longitude.toFixed?.(5) ?? store.longitude
                         }`
-                      : "Chưa cấu hình"}
+                      : t("store:detail.gps.empty")}
                   </span>
                 </div>
               </div>
@@ -156,41 +158,41 @@ export default function StoreDetailPage() {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-[#FF7B21]" />
-              <h2 className="text-sm font-semibold">Gói dịch vụ</h2>
+              <h2 className="text-sm font-semibold">{t("store:detail.subscription.title")}</h2>
             </div>
             <Badge variant="outline" className="text-[11px] border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-              Subscription
+              {t("store:detail.subscription.badge")}
             </Badge>
           </div>
 
           {sub ? (
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Gói hiện tại</span>
+                <span className="text-xs text-muted-foreground">{t("store:detail.subscription.currentPlan")}</span>
                 <Badge variant="outline" className="text-xs">
                   {sub.planName || "—"}
                 </Badge>
               </div>
               <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                <span>Trạng thái</span>
+                <span>{t("store:detail.subscription.status")}</span>
                 <span className="font-medium">{sub.status || "—"}</span>
               </div>
               <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                <span>Ngày hết hạn</span>
+                <span>{t("store:detail.subscription.endDate")}</span>
                 <span className="font-mono">
-                  {endDateObj ? endDateObj.toLocaleDateString("vi-VN") : "—"}
+                  {endDateObj ? endDateObj.toLocaleDateString(i18n.language) : "—"}
                 </span>
               </div>
               {typeof sub.daysRemaining === "number" && (
                 <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                  <span>Còn lại</span>
-                  <span className="font-medium">{sub.daysRemaining.toLocaleString("vi-VN")} ngày</span>
+                  <span>{t("store:detail.subscription.remaining")}</span>
+                  <span className="font-medium">{t("store:detail.subscription.remainingDays", { days: sub.daysRemaining })}</span>
                 </div>
               )}
             </div>
           ) : (
             <div className="text-xs text-muted-foreground">
-              Chưa lấy được subscription status cho cửa hàng này.
+              {t("store:detail.subscription.unavailable")}
             </div>
           )}
 
@@ -199,7 +201,7 @@ export default function StoreDetailPage() {
             className="w-full mt-2"
             onClick={() => navigate("/dashboard/subscription")}
           >
-            Xem / nâng cấp gói
+            {t("store:detail.subscription.viewOrUpgrade")}
           </Button>
         </Card>
       </div>

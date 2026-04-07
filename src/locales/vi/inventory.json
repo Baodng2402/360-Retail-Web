@@ -1,2 +1,135 @@
-{}
+{
+  "restockModal": {
+    "title": {
+      "in": "Nhập kho",
+      "out": "Xuất kho"
+    },
+    "description": "Cập nhật số lượng tồn kho cho sản phẩm",
+    "currentStock": "Tồn kho hiện tại",
+    "fields": {
+      "operationType": "Loại thao tác",
+      "quantity": "Số lượng",
+      "reason": "Lý do"
+    },
+    "placeholders": {
+      "quantity": "Nhập số lượng...",
+      "reason": "Nhà cung cấp hoặc lý do..."
+    },
+    "operations": {
+      "in": "nhập",
+      "out": "xuất"
+    },
+    "actions": {
+      "submitting": "Đang xử lý..."
+    },
+    "toast": {
+      "invalidQuantity": "Vui lòng nhập số lượng hợp lệ",
+      "success": "Đã {{operation}} {{quantity}} {{name}} thành công!"
+    }
+  }
+  ,
+  "page": {
+    "title": "Quản lý tồn kho",
+    "subtitle": "Nhập kho, xuất kho & quản lý phiếu kho",
+    "actions": {
+      "createTicket": "Tạo phiếu kho",
+      "viewDetail": "Xem chi tiết",
+      "confirmTicket": "Xác nhận phiếu",
+      "cancelTicket": "Hủy phiếu",
+      "deleteTicket": "Xóa phiếu"
+    },
+    "states": {
+      "empty": "Chưa có phiếu kho nào",
+      "createFirst": "Tạo phiếu kho đầu tiên"
+    },
+    "toast": {
+      "loadTicketsError": "Không thể tải danh sách phiếu kho",
+      "ticketNotFound": "Không tìm thấy phiếu kho",
+      "loadProductsError": "Không thể tải danh sách sản phẩm",
+      "loadTicketDetailError": "Không thể tải chi tiết phiếu"
+    }
+  },
+  "filters": {
+    "all": "Tất cả"
+  },
+  "labels": {
+    "code": "Mã phiếu",
+    "type": "Loại",
+    "status": "Trạng thái",
+    "note": "Ghi chú",
+    "createdAt": "Ngày tạo"
+  },
+  "table": {
+    "code": "Mã phiếu",
+    "type": "Loại",
+    "status": "Trạng thái",
+    "note": "Ghi chú",
+    "createdAt": "Ngày tạo",
+    "actions": "Thao tác"
+  },
+  "type": {
+    "import": "Nhập kho",
+    "export": "Xuất kho"
+  },
+  "status": {
+    "draft": "Nháp",
+    "confirmed": "Đã xác nhận",
+    "cancelled": "Đã hủy"
+  },
+  "create": {
+    "title": "Tạo phiếu kho mới",
+    "description": "Chọn loại phiếu, thêm sản phẩm và số lượng.",
+    "fields": {
+      "items": "Sản phẩm",
+      "variant": "Biến thể",
+      "itemNote": "Ghi chú"
+    },
+    "placeholders": {
+      "note": "Ghi chú cho phiếu kho...",
+      "selectProduct": "Chọn sản phẩm",
+      "selectVariant": "Chọn biến thể (size/màu)",
+      "quantity": "SL",
+      "itemNote": "Ghi chú"
+    },
+    "states": {
+      "loadingProducts": "Đang tải sản phẩm...",
+      "emptyItems": "Chưa có sản phẩm nào. Nhấn \"Thêm\" để bắt đầu.",
+      "variantRequired": "Vui lòng chọn biến thể cụ thể"
+    },
+    "actions": {
+      "createImport": "Tạo phiếu nhập",
+      "createExport": "Tạo phiếu xuất"
+    },
+    "variantStock": "Tồn: {{stock, number}}",
+    "toast": {
+      "needAtLeastOneProduct": "Vui lòng thêm ít nhất 1 sản phẩm",
+      "invalidItems": "Vui lòng chọn sản phẩm và nhập số lượng hợp lệ",
+      "importSuccess": "Tạo phiếu nhập kho thành công",
+      "exportSuccess": "Tạo phiếu xuất kho thành công",
+      "createFailed": "Tạo phiếu kho thất bại"
+    }
+  },
+  "detail": {
+    "title": "Chi tiết phiếu kho",
+    "itemsTitle": "Danh sách sản phẩm ({{count, number}})",
+    "variantLabel": "Biến thể"
+  },
+  "actions": {
+    "dialog": {
+      "titleConfirm": "Xác nhận phiếu kho",
+      "titleCancel": "Hủy phiếu kho",
+      "titleDelete": "Xóa phiếu kho",
+      "descriptionConfirm": "Xác nhận sẽ cập nhật tồn kho. Hành động này không thể hoàn tác.",
+      "descriptionCancel": "Hủy phiếu sẽ chuyển trạng thái sang Cancelled. Tồn kho không thay đổi.",
+      "descriptionDelete": "Xóa phiếu kho vĩnh viễn. Hành động này không thể hoàn tác.",
+      "confirmCancel": "Hủy phiếu"
+    },
+    "toast": {
+      "confirmSuccess": "Xác nhận phiếu thành công — tồn kho đã cập nhật",
+      "cancelSuccess": "Đã hủy phiếu",
+      "deleteSuccess": "Đã xóa phiếu",
+      "actionFailed": "Thao tác thất bại"
+    }
+  }
+}
 

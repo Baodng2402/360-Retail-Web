@@ -7,6 +7,7 @@ import { Edit, Save, X, Loader2 } from "lucide-react";
 import { employeesApi } from "@/shared/lib/employeesApi";
 import { useAuthStore } from "@/shared/store/authStore";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 // Types
 export interface UserProfile {
@@ -22,6 +23,7 @@ interface EditProfileFormProps {
 }
 
 export function EditProfileForm({ user }: EditProfileFormProps) {
+  const { t } = useTranslation(["profile", "common"]);
   const setUser = useAuthStore((s) => s.setUser);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -57,12 +59,12 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
         ...user,
         name: updated.fullName,
       });
-      toast.success("Cập nhật thông tin thành công!");
+      toast.success(t("profile:editForm.toast.success"));
       setIsEditing(false);
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Cập nhật thất bại. Vui lòng thử lại.";
+          ?.message || t("profile:editForm.toast.error");
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -95,11 +97,11 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {saving ? "Đang lưu..." : "Save / Lưu"}
+              {saving ? t("common:states.saving") : t("common:actions.save")}
             </Button>
             <Button variant="outline" onClick={handleCancel} className="gap-2">
               <X className="h-4 w-4" />
-              Cancel / Hủy
+              {t("common:actions.cancel")}
             </Button>
           </>
         ) : (
@@ -108,7 +110,7 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
             className="gap-2 bg-teal-400 text-white hover:bg-teal-500"
           >
             <Edit className="h-4 w-4" />
-            Edit Profile / Sửa thông tin
+            {t("profile:editForm.actions.edit")}
           </Button>
         )}
       </div>
@@ -116,7 +118,7 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
       <div className="grid gap-6">
         {/* Name */}
         <div className="space-y-2">
-          <Label htmlFor="name">Full Name / Họ và tên</Label>
+          <Label htmlFor="name">{t("profile:editForm.fields.fullName")}</Label>
           <Input
             id="name"
             value={isEditing ? formData.name : user?.name}
@@ -128,7 +130,7 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
         {/* Contact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("profile:editForm.fields.email")}</Label>
             <Input
               id="email"
               type="email"
@@ -136,11 +138,11 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
               disabled
               readOnly
               className="bg-muted cursor-not-allowed"
-              title="Email không thể thay đổi"
+              title={t("profile:editForm.emailReadonly")}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone / Điện thoại</Label>
+            <Label htmlFor="phone">{t("profile:editForm.fields.phone")}</Label>
             <Input
               id="phone"
               value={isEditing ? formData.phone : user?.phone}
@@ -152,7 +154,7 @@ export function EditProfileForm({ user }: EditProfileFormProps) {
 
         {/* Role - Read only */}
         <div className="space-y-2">
-          <Label htmlFor="role">Role / Vai trò</Label>
+          <Label htmlFor="role">{t("profile:editForm.fields.role")}</Label>
           <Input
             id="role"
             value={user?.role}

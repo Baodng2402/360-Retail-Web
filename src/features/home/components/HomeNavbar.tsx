@@ -76,6 +76,8 @@ const HomeNavbar = ({
   className,
 }: HomeNavbarProps) => {
   const { t } = useTranslation("home");
+  const tHome = (key: string, options?: Record<string, unknown>) =>
+    String(t(key as never, options as never));
 
   const translatedLogo = {
     ...logo,
@@ -86,11 +88,11 @@ const HomeNavbar = ({
   const translatedAuth = {
     login: {
       ...auth.login,
-      title: t("navbar.login", { defaultValue: auth.login.title }),
+      title: tHome("navbar.login", { defaultValue: auth.login.title }),
     },
     signup: {
       ...auth.signup,
-      title: t("navbar.signup", { defaultValue: auth.signup.title }),
+      title: tHome("navbar.signup", { defaultValue: auth.signup.title }),
     },
   };
 

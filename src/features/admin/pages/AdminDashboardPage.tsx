@@ -55,11 +55,15 @@ const formatDateFilter = (value: string) => {
   return `${dd}/${mm}/${yyyy}`;
 };
 
-const formatRevenueLabel = (label: string, groupBy: SuperAdminGroupBy) => {
+const formatRevenueLabel = (
+  label: string,
+  groupBy: SuperAdminGroupBy,
+  t: (key: string, options?: Record<string, unknown>) => string,
+) => {
   if (!label) return label;
   if (groupBy === "month" && /^\d{4}-\d{2}$/.test(label)) {
     const [year, month] = label.split("-");
-    return `T${Number(month)}/${year}`;
+    return t("dashboard.formats.monthLabel", { month: Number(month), year });
   }
   if (groupBy === "day" && /^\d{4}-\d{2}-\d{2}$/.test(label)) {
     const [, month, day] = label.split("-");
@@ -67,13 +71,15 @@ const formatRevenueLabel = (label: string, groupBy: SuperAdminGroupBy) => {
   }
   if (groupBy === "week" && /^\d{4}-W\d{1,2}$/.test(label)) {
     const [year, week] = label.split("-W");
-    return `Tuần ${Number(week)}/${year}`;
+    return t("dashboard.formats.weekLabel", { week: Number(week), year });
   }
   return label;
 };
 
 export default function AdminDashboardPage() {
   const { t } = useTranslation("admin");
+  const tAny = (key: string, options?: Record<string, unknown>) =>
+    String(t(key as never, options as never));
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [groupBy, setGroupBy] = useState<SuperAdminGroupBy>("month");
@@ -154,13 +160,13 @@ export default function AdminDashboardPage() {
       setFunnel({ landing: fun.landing, signup: fun.signup });
       setRegistrations(regs);
       setStoreStatus([
-        { name: "Đang hoạt động", value: ov.activeStores, fill: "#22c55e" },
-        { name: "Dùng thử", value: ov.trialStores, fill: "#f59e0b" },
-        { name: "Hết hạn", value: ov.expiredStores, fill: "#ef4444" },
+        { name: t("dashboard.storeStatus.active"), value: ov.activeStores, fill: "#22c55e" },
+        { name: t("dashboard.storeStatus.trial"), value: ov.trialStores, fill: "#f59e0b" },
+        { name: t("dashboard.storeStatus.expired"), value: ov.expiredStores, fill: "#ef4444" },
       ]);
     } catch (err) {
       console.error("Failed to load superadmin dashboard:", err);
-      toast.error("Không tải được dữ liệu dashboard SuperAdmin.");
+      toast.error(t("dashboard.toast.loadError"));
       setOverview(null);
       setRevenuePoints([]);
       setPlanDistribution([]);
@@ -235,7 +241,7 @@ export default function AdminDashboardPage() {
     value: { label: t("dashboard.planDistribution.label"), color: "var(--chart-3)" },
   } as const;
   const storeStatusConfig = {
-    value: { label: "Cửa hàng", color: "var(--chart-4)" },
+    value: { label: t("dashboard.storeStatusSection.valueLabel"), color: "var(--chart-4)" },
   } as const;
 
   const planColors = ["#FF7B21", "#19D6C8", "#0ea5e9", "#a855f7", "#22c55e", "#f59e0b"] as const;
@@ -286,7 +292,7 @@ export default function AdminDashboardPage() {
                 <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
                   {t("dashboard.badge")}
                 </Badge>
-                <span>System overview dashboard</span>
+                <span>{t("header.dashboard.title")}</span>
               </h2>
               <p className="text-xs text-muted-foreground">
                 {t("dashboard.caption")}
@@ -303,11 +309,11 @@ export default function AdminDashboardPage() {
                   onChange={(e) => {
                     const next = e.target.value;
                     if (isFutureDate(next)) {
-                      toast.error("Ngày bắt đầu không được vượt quá hôm nay.");
+                      toast.error(t("dashboard.validation.fromDateNotAfterToday"));
                       return;
                     }
                     if (toDate && next > toDate) {
-                      toast.error("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
+                      toast.error(t("dashboard.validation.fromDateNotAfterToDate"));
                       return;
                     }
                     setFromDate(next);
@@ -327,11 +333,11 @@ export default function AdminDashboardPage() {
                   onChange={(e) => {
                     const next = e.target.value;
                     if (isFutureDate(next)) {
-                      toast.error("Ngày kết thúc không được vượt quá hôm nay.");
+                      toast.error(t("dashboard.validation.toDateNotAfterToday"));
                       return;
                     }
                     if (fromDate && next < fromDate) {
-                      toast.error("Ngày kết thúc không được nhỏ hơn ngày bắt đầu.");
+                      toast.error(t("dashboard.validation.toDateNotBeforeFromDate"));
                       return;
                     }
                     setToDate(next);
@@ -353,7 +359,7 @@ export default function AdminDashboardPage() {
                   }}
                 >
                   <SelectTrigger className="bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Chọn..." />
+                    <SelectValue placeholder={t("dashboard.filters.selectPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {groupByOptions.map((opt) => (
@@ -378,15 +384,19 @@ export default function AdminDashboardPage() {
             transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
             whileHover={{ scale: 1.02, y: -2 }}
           >
-            <Card className="p-4 hover:shadow-lg transition-all duration-300">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-xs text-muted-foreground">{k.title}</div>
+            <Card className="p-4 h-full hover:shadow-lg transition-all duration-300">
+              <div className="h-full flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs text-muted-foreground leading-snug line-clamp-2 min-h-[2.25rem]">
+                    {k.title}
+                  </div>
                   <div className="mt-1 text-lg font-semibold truncate">
                     {loading && !overview ? <Skeleton className="h-6 w-24" /> : k.value}
                   </div>
                 </div>
-                <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${k.tone} flex items-center justify-center text-white shadow-lg`}>
+                <div
+                  className={`h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br ${k.tone} flex items-center justify-center text-white shadow-lg`}
+                >
                   <k.icon className="h-5 w-5" />
                 </div>
               </div>
@@ -410,7 +420,10 @@ export default function AdminDashboardPage() {
                 </h3>
                 {groupBy === "month" && twelveMonthGrowthPercent != null && (
                   <div className="text-xs text-muted-foreground">
-                    {twelveMonthGrowthPercent >= 0 ? "Tăng trưởng 12 tháng" : "Suy giảm 12 tháng"}:{" "}
+                    {twelveMonthGrowthPercent >= 0
+                      ? t("dashboard.revenueTrend.growth.upLabel")
+                      : t("dashboard.revenueTrend.growth.downLabel")}
+                    :{" "}
                     <span className="font-medium text-foreground">
                       {twelveMonthGrowthPercent >= 0 ? "+" : ""}
                       {twelveMonthGrowthPercent.toFixed(1)}%
@@ -429,7 +442,7 @@ export default function AdminDashboardPage() {
                 </div>
               ) : revenuePoints.length === 0 ? (
                 <div className="h-[240px] flex items-center justify-center text-muted-foreground">
-                  Không có dữ liệu doanh thu trong khoảng thời gian đã chọn.
+                  {t("dashboard.states.noRevenueData")}
                 </div>
               ) : (
                 <ChartContainer config={revenueConfig} className="h-[260px] w-full">
@@ -443,7 +456,7 @@ export default function AdminDashboardPage() {
                       tickLine={false}
                       axisLine={false}
                       tickMargin={8}
-                      tickFormatter={(value: string) => formatRevenueLabel(value, groupBy)}
+                      tickFormatter={(value: string) => formatRevenueLabel(value, groupBy, tAny)}
                     />
                     <YAxis tickLine={false} axisLine={false} tickMargin={8} />
                     <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
@@ -646,7 +659,7 @@ export default function AdminDashboardPage() {
                     {groupBy === "month" && latestRevenuePoint && (
                       <p>
                         {t("dashboard.monthlyRevenueCard.latestMonthLabel")} (
-                        {formatRevenueLabel(latestRevenuePoint.label, "month")}):{" "}
+                        {formatRevenueLabel(latestRevenuePoint.label, "month", tAny)}):{" "}
                         <span className="font-medium text-foreground">
                           {formatVnd(latestRevenuePoint.revenue)}
                         </span>
@@ -679,9 +692,11 @@ export default function AdminDashboardPage() {
         >
           <Card className="h-full p-4 hover:shadow-lg transition-shadow duration-300 overflow-visible flex flex-col">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold">Trạng thái cửa hàng</h3>
+              <h3 className="text-base font-semibold">
+                {t("dashboard.storeStatusSection.title")}
+              </h3>
               <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-                Tổng quan
+                {t("dashboard.storeStatusSection.badge")}
               </Badge>
             </div>
             {loading && storeStatus.length === 0 ? (
@@ -690,7 +705,7 @@ export default function AdminDashboardPage() {
               </div>
             ) : storeStatus.length === 0 ? (
               <div className="h-[260px] flex items-center justify-center text-muted-foreground">
-                Không có dữ liệu cửa hàng.
+                {t("dashboard.states.noStoreData")}
               </div>
             ) : (
               <>

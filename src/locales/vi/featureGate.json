@@ -10,6 +10,11 @@
     "toUseFeatureFallback": "Để sử dụng tính năng này, vui lòng nâng cấp lên gói {{requiredPlan}} hoặc cao hơn.",
     "later": "Để sau",
     "upgradeNow": "Nâng cấp gói ngay"
+  },
+  "errors": {
+    "trialExpired": "Thời gian dùng thử đã hết. Vui lòng mua gói để tiếp tục sử dụng.",
+    "subscriptionExpired": "Gói dịch vụ của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng.",
+    "featureNotAvailable": "Tính năng này không khả dụng trong gói hiện tại của bạn."
   }
 }
 

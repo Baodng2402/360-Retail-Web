@@ -43,6 +43,7 @@
     },
     "form": {
       "fullName": "Full name",
+      "email": "Email",
       "position": "Position",
       "positionModePreset": "Pick from list",
       "positionModeCustom": "Custom input",
@@ -67,6 +68,41 @@
       "updateFailed": "Unable to update staff information.",
       "deactivateSuccess": "Staff member deactivated.",
       "deactivateFailed": "Unable to deactivate staff member. Please try again."
+    }
+  }
+  ,
+  "positions": {
+    "StoreOwner": "Store owner",
+    "Manager": "Manager",
+    "Staff": "Staff",
+    "Cashier": "Cashier",
+    "Sales": "Sales",
+    "Warehouse": "Warehouse"
+  }
+  ,
+  "inviteModal": {
+    "title": "Invite staff",
+    "description": "Send an email invitation to join the store",
+    "fields": {
+      "email": "Email",
+      "role": "Role"
+    },
+    "placeholders": {
+      "email": "staff@example.com"
+    },
+    "roles": {
+      "staff": "Staff",
+      "manager": "Manager"
+    },
+    "actions": {
+      "submit": "Send invitation",
+      "submitting": "Sending..."
+    },
+    "toast": {
+      "emailRequired": "Please enter an email.",
+      "storeRequired": "Store not found. Please select a store first.",
+      "success": "Invitation sent successfully!",
+      "error": "Unable to send invitation. Please try again."
     }
   }
 }

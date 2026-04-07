@@ -15,6 +15,286 @@
   },
   "search": {
     "productsPlaceholder": "Tìm sản phẩm..."
+  },
+  "addModal": {
+    "title": "Thêm sản phẩm mới",
+    "description": "Nhập thông tin sản phẩm để thêm vào kho",
+    "fields": {
+      "productName": "Tên sản phẩm",
+      "category": "Danh mục",
+      "icon": "Biểu tượng",
+      "price": "Giá bán (₫)",
+      "stock": "Tồn kho",
+      "barcode": "Mã vạch"
+    },
+    "placeholders": {
+      "productName": "Ví dụ: Áo thun nam cổ tròn...",
+      "category": "Chọn danh mục"
+    },
+    "states": {
+      "noCategories": "Chưa có danh mục – tạo trong tab Sản phẩm"
+    },
+    "hints": {
+      "barcodeOptional": "Để trống để tự động tạo"
+    },
+    "actions": {
+      "generateBarcode": "Generate",
+      "submit": "Thêm sản phẩm",
+      "submitting": "Đang thêm..."
+    },
+    "preview": {
+      "title": "Preview"
+    },
+    "toast": {
+      "loadCategoriesError": "Không thể tải danh mục.",
+      "productNameRequired": "Vui lòng nhập tên sản phẩm.",
+      "categoryRequired": "Vui lòng chọn danh mục.",
+      "priceInvalid": "Vui lòng nhập giá bán hợp lệ.",
+      "stockInvalid": "Vui lòng nhập số lượng tồn kho hợp lệ.",
+      "success": "Đã thêm sản phẩm \"{{name}}\" thành công!",
+      "needCategoryFirst": "Vui lòng tạo ít nhất một danh mục trước khi thêm sản phẩm.",
+      "defaultError": "Không thể thêm sản phẩm. Vui lòng thử lại."
+    }
+  }
+  ,
+  "filters": {
+    "category": {
+      "placeholder": "Tất cả danh mục",
+      "all": "Tất cả danh mục"
+    },
+    "stockStatus": {
+      "placeholder": "Tất cả trạng thái",
+      "all": "Tất cả trạng thái"
+    },
+    "active": {
+      "placeholder": "Tất cả hoạt động",
+      "all": "Tất cả"
+    }
+  },
+  "table": {
+    "code": "Mã",
+    "image": "Ảnh",
+    "product": "Sản phẩm",
+    "category": "Danh mục",
+    "price": "Giá bán",
+    "costPrice": "Giá vốn",
+    "profit": "Lợi nhuận",
+    "stock": "Tồn kho",
+    "status": "Trạng thái",
+    "actions": "Thao tác"
+  },
+  "status": {
+    "inStock": "Còn hàng",
+    "lowStock": "Sắp hết",
+    "outOfStock": "Hết hàng"
+  },
+  "active": {
+    "active": "Hoạt động",
+    "inactive": "Ngừng hoạt động",
+    "inactiveShort": "Ngừng",
+    "paused": "Tạm dừng"
+  },
+  "actions": {
+    "addProduct": "Thêm sản phẩm",
+    "addCategory": "Thêm danh mục",
+    "addFirstCategory": "Thêm danh mục đầu tiên",
+    "viewBarcode": "Xem mã sản phẩm"
+  },
+  "states": {
+    "noProducts": "Không tìm thấy sản phẩm"
+  },
+  "errors": {
+    "selectStoreFirst": "Vui lòng chọn cửa hàng.",
+    "storeRequired": "Chưa có cửa hàng. Vui lòng đăng nhập lại hoặc bắt đầu dùng thử để gán store.",
+    "loadCategoriesFailed": "Không thể tải danh mục. Vui lòng thử lại.",
+    "loadProductsFailed": "Không thể tải sản phẩm. Vui lòng thử lại.",
+    "updateProductStatusFailed": "Không thể cập nhật trạng thái sản phẩm",
+    "updateCategoryStatusFailed": "Không thể cập nhật trạng thái danh mục"
+  },
+  "toast": {
+    "createProductSuccess": "Thêm sản phẩm thành công!",
+    "updateProductSuccess": "Cập nhật sản phẩm thành công!",
+    "createCategorySuccess": "Thêm danh mục thành công!",
+    "updateCategorySuccess": "Cập nhật danh mục thành công!",
+    "activatingProduct": "Đang kích hoạt sản phẩm \"{{name}}\"...",
+    "deactivatingProduct": "Đang tạm ngừng sản phẩm \"{{name}}\"...",
+    "productActivated": "Sản phẩm \"{{name}}\" đã được kích hoạt",
+    "productDeactivated": "Sản phẩm \"{{name}}\" đã được tạm ngừng hoạt động",
+    "activatingCategory": "Đang kích hoạt danh mục \"{{name}}\"...",
+    "deactivatingCategory": "Đang tạm ngừng danh mục \"{{name}}\"...",
+    "categoryActivated": "Danh mục \"{{name}}\" đã được kích hoạt",
+    "categoryDeactivated": "Danh mục \"{{name}}\" đã được tạm ngừng hoạt động"
+  },
+  "productForm": {
+    "titleCreate": "Thêm sản phẩm",
+    "titleEdit": "Sửa sản phẩm",
+    "description": "Điền thông tin sản phẩm bên dưới",
+    "fields": {
+      "price": "Giá bán (VND)",
+      "costPrice": "Giá vốn (VND)",
+      "stock": "Tồn kho",
+      "variants": "Biến thể",
+      "description": "Mô tả",
+      "image": "Hình ảnh",
+      "status": "Trạng thái"
+    },
+    "stockWhenNoVariants": "nếu không có biến thể",
+    "variantStockHint": "Sản phẩm có biến thể sẽ quản lý tồn kho ở từng biến thể riêng",
+    "variantHint": "Bật nếu sản phẩm có size/màu. Tồn kho sẽ trừ theo từng biến thể.",
+    "profitLabel": "Lợi nhuận",
+    "placeholders": {
+      "productName": "Ví dụ: Coca Cola 330ml",
+      "barcode": "Ví dụ: BEV-001",
+      "price": "15000",
+      "costPrice": "12000",
+      "stock": "100",
+      "description": "Mô tả sản phẩm...",
+      "variantSku": "VD: POLO-M-DEN",
+      "variantSize": "VD: M",
+      "variantColor": "VD: Đen",
+      "variantPriceOverride": "VD: 350000",
+      "variantStock": "VD: 20"
+    },
+    "variantColumns": {
+      "sku": "Mã biến thể",
+      "size": "Kích thước",
+      "color": "Màu sắc",
+      "priceOverride": "Giá bán (tùy chỉnh)",
+      "stock": "Tồn kho"
+    },
+    "actions": {
+      "addVariant": "Thêm biến thể",
+      "removeVariant": "Xoá biến thể #{{index}}"
+    },
+    "toast": {
+      "variantRequired": "Vui lòng thêm ít nhất 1 biến thể.",
+      "variantInvalid": "Vui lòng nhập đầy đủ thông tin biến thể (Mã biến thể, tồn kho, giá > 0)."
+    },
+    "variantCount": "({{count, number}} biến thể)"
+  },
+  "categoryForm": {
+    "titleCreate": "Thêm danh mục",
+    "titleEdit": "Sửa danh mục",
+    "description": "Điền thông tin danh mục bên dưới",
+    "noneParent": "Không có (danh mục gốc)",
+    "fields": {
+      "name": "Tên danh mục",
+      "parent": "Danh mục cha",
+      "color": "Màu sắc",
+      "status": "Trạng thái"
+    },
+    "placeholders": {
+      "name": "Ví dụ: Đồ uống",
+      "parent": "Không có (danh mục gốc)"
+      ,
+      "color": "HSL color"
+    },
+    "nameFallback": "Tên danh mục",
+    "toast": {
+      "nameRequired": "Vui lòng nhập tên danh mục."
+    }
+  },
+  "categories": {
+    "title": "Danh mục sản phẩm",
+    "subtitle": "Quản lý danh mục và nhóm sản phẩm",
+    "parentLabel": "Danh mục cha",
+    "productLabel": "Sản phẩm",
+    "states": {
+      "emptyTitle": "Chưa có danh mục nào",
+      "emptySubtitle": "Tạo danh mục đầu tiên để bắt đầu quản lý sản phẩm"
+    }
+  },
+  "barcodeDialog": {
+    "title": "Mã sản phẩm",
+    "description": "Mã sản phẩm của bạn",
+    "toast": {
+      "copied": "Đã sao chép mã sản phẩm!"
+    },
+    "empty": "Không có mã"
+  },
+  "toggle": {
+    "activate": "Kích hoạt",
+    "deactivate": "Tạm ngừng"
+  },
+  "toggleProductDialog": {
+    "titleDeactivate": "Tạm ngừng hoạt động sản phẩm",
+    "titleActivate": "Kích hoạt sản phẩm",
+    "descriptionDeactivate": "Bạn có chắc chắn muốn tạm ngừng hoạt động sản phẩm \"{{name}}\"? Sản phẩm sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.",
+    "descriptionActivate": "Bạn có chắc chắn muốn kích hoạt sản phẩm \"{{name}}\"? Sản phẩm sẽ được kích hoạt và có thể tiếp tục hoạt động."
+  },
+  "toggleCategoryDialog": {
+    "titleDeactivate": "Tạm ngừng hoạt động danh mục",
+    "titleActivate": "Kích hoạt danh mục",
+    "descriptionDeactivate": "Bạn có chắc chắn muốn tạm ngừng hoạt động danh mục \"{{name}}\"? Danh mục sẽ không thể tiếp tục hoạt động sau khi được tạm ngừng.",
+    "descriptionActivate": "Bạn có chắc chắn muốn kích hoạt danh mục \"{{name}}\"? Danh mục sẽ được kích hoạt và có thể tiếp tục hoạt động."
+  }
+  ,
+  "detail": {
+    "states": {
+      "notFound": "Không tìm thấy sản phẩm"
+    },
+    "categoryFallback": "Không có danh mục",
+    "badges": {
+      "hasVariants": "Có biến thể",
+      "noVariants": "Không biến thể"
+    },
+    "sections": {
+      "basicInfo": "Thông tin cơ bản",
+      "variants": "Biến thể sản phẩm",
+      "image": "Hình ảnh",
+      "quickStats": "Thống kê nhanh",
+      "quickActions": "Thao tác nhanh",
+      "meta": "Thông tin bổ sung"
+    },
+    "form": {
+      "productName": "Tên sản phẩm",
+      "productCode": "Mã sản phẩm (SKU/Barcode)",
+      "category": "Danh mục",
+      "status": "Trạng thái",
+      "price": "Giá bán (VND)",
+      "costPrice": "Giá vốn (VND)",
+      "stock": "Tồn kho",
+      "stockByVariantsHint": "Tồn kho theo biến thể",
+      "description": "Mô tả",
+      "hasVariants": "Có biến thể"
+    },
+    "variantsTable": {
+      "sku": "Mã (SKU)",
+      "size": "Size",
+      "color": "Màu",
+      "price": "Giá",
+      "priceOverride": "Giá riêng",
+      "stock": "Tồn kho",
+      "status": "Trạng thái",
+      "overrideBadge": "(riêng)",
+      "skuPlaceholder": "VD: POLO-M-DEN",
+      "priceOverridePlaceholder": "Giá riêng"
+    },
+    "stats": {
+      "totalStock": "Tổng tồn kho",
+      "price": "Giá bán",
+      "costPrice": "Giá vốn",
+      "profit": "Lợi nhuận"
+    },
+    "actions": {
+      "addVariant": "Thêm biến thể",
+      "inventoryInOut": "Nhập/Xuất kho",
+      "sales": "Bán hàng"
+    },
+    "meta": {
+      "id": "ID sản phẩm",
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Cập nhật lần cuối",
+      "variantsCount": "Số biến thể"
+    },
+    "toasts": {
+      "loadFailed": "Không thể tải thông tin sản phẩm",
+      "minOneVariant": "Phải có ít nhất 1 biến thể",
+      "productNameRequired": "Vui lòng nhập tên sản phẩm",
+      "priceInvalid": "Vui lòng nhập giá bán hợp lệ",
+      "updateSuccess": "Cập nhật sản phẩm thành công!",
+      "updateFailed": "Không thể cập nhật sản phẩm"
+    }
   }
 }
 

@@ -10,6 +10,11 @@
     "toUseFeatureFallback": "To use this feature, please upgrade to {{requiredPlan}} or higher.",
     "later": "Later",
     "upgradeNow": "Upgrade now"
+  },
+  "errors": {
+    "trialExpired": "Your trial has ended. Please purchase a plan to continue.",
+    "subscriptionExpired": "Your subscription has expired. Please renew to continue.",
+    "featureNotAvailable": "This feature is not available in your current plan."
   }
 }
 

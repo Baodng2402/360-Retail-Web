@@ -14,7 +14,7 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 
 export const LanguageSwitcher = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation("common");
   const language = useLanguageStore((s) => s.language);
   const setLanguage = useLanguageStore((s) => s.setLanguage);
 
@@ -29,9 +29,9 @@ export const LanguageSwitcher = () => {
   );
 
   const currentLabel = useMemo(() => {
-    if (language === "vi") return "Tiếng Việt";
-    return "English";
-  }, [language]);
+    if (language === "vi") return t("language.vietnamese");
+    return t("language.english");
+  }, [language, t]);
 
   return (
     <DropdownMenu>
@@ -40,27 +40,27 @@ export const LanguageSwitcher = () => {
           type="button"
           variant="outline"
           className="h-10 gap-2 rounded-full px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
-          aria-label="Language"
+          aria-label={t("language.ariaLabel")}
         >
           <Globe className="h-4 w-4 text-gray-700 dark:text-gray-300" />
           <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{currentLabel}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel>Ngôn ngữ</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("language.label")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => toggleLanguage("vi")}
           className="flex items-center justify-between"
         >
-          <span>Tiếng Việt</span>
+          <span>{t("language.vietnamese")}</span>
           {language === "vi" && <Check className="h-4 w-4" />}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => toggleLanguage("en")}
           className="flex items-center justify-between"
         >
-          <span>English</span>
+          <span>{t("language.english")}</span>
           {language === "en" && <Check className="h-4 w-4" />}
         </DropdownMenuItem>
       </DropdownMenuContent>

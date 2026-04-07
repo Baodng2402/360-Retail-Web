@@ -1,2 +1,31 @@
-{}
+{
+  "brand": "360 Retail Feedback",
+  "title": "Rate your purchase experience",
+  "subtitle": "Please take a few seconds to rate your recent order.",
+  "invalidLink": {
+    "title": "Invalid link",
+    "description": "Missing order or customer information. Please scan the QR code on the receipt again to submit feedback."
+  },
+  "success": {
+    "title": "Thanks for your feedback!",
+    "description": "Your feedback helps the store improve service quality."
+  },
+  "form": {
+    "ratingLabel": "Satisfaction level",
+    "ratingAria": "{{stars}} star(s)",
+    "ratingSummary": "{{rating}}/5",
+    "contentLabel": "Your comments (optional)",
+    "contentPlaceholder": "What did you like? What could be improved?",
+    "submit": "Submit feedback",
+    "submitting": "Submitting...",
+    "legal": "By submitting feedback, you agree that the store may use this feedback to improve service quality.",
+    "errors": {
+      "ratingRequired": "Please select a rating."
+    }
+  },
+  "toast": {
+    "success": "Thanks for your feedback!",
+    "failed": "Unable to submit feedback. Please try again later."
+  }
+}
 

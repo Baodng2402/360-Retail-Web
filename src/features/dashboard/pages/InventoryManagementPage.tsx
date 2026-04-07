@@ -44,6 +44,7 @@ import type {
 } from "@/shared/types/inventory";
 import type { Product } from "@/shared/types/products";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 // ── Types ──────────────────────────────────────────────────────────
 interface TicketItemForm {
@@ -57,6 +58,7 @@ interface TicketItemForm {
 
 // ── Component ──────────────────────────────────────────────────────
 const InventoryManagementPage = () => {
+    const { t, i18n } = useTranslation(["inventory", "common"]);
     const [searchParams, setSearchParams] = useSearchParams();
     // ── State ──────────────────────────────────────────────────────
     const [tickets, setTickets] = useState<InventoryTicket[]>([]);
@@ -99,7 +101,7 @@ const InventoryManagementPage = () => {
             setTickets(result.items);
             setTotalPages(result.totalPages || 1);
         } catch {
-            toast.error("Không thể tải danh sách phiếu kho");
+            toast.error(t("inventory:page.toast.loadTicketsError"));
             setTickets([]);
         } finally {
             setLoading(false);
@@ -123,7 +125,7 @@ const InventoryManagementPage = () => {
                 setDetailOpen(true);
             } catch {
                 if (!cancelled) {
-                    toast.error("Không tìm thấy phiếu kho");
+                    toast.error(t("inventory:page.toast.ticketNotFound"));
                 }
             } finally {
                 if (!cancelled) {
@@ -160,7 +162,7 @@ const InventoryManagementPage = () => {
             });
             setProducts(prods);
         } catch {
-            toast.error("Không thể tải danh sách sản phẩm");
+            toast.error(t("inventory:page.toast.loadProductsError"));
         } finally {
             setProductsLoading(false);
         }
@@ -232,7 +234,7 @@ const InventoryManagementPage = () => {
 
     const handleCreateTicket = async () => {
         if (createItems.length === 0) {
-            toast.error("Vui lòng thêm ít nhất 1 sản phẩm");
+            toast.error(t("inventory:create.toast.needAtLeastOneProduct"));
             return;
         }
         const invalidItems = createItems.filter((item) => {
@@ -242,7 +244,7 @@ const InventoryManagementPage = () => {
             return false;
         });
         if (invalidItems.length > 0) {
-            toast.error("Vui lòng chọn sản phẩm và nhập số lượng hợp lệ");
+            toast.error(t("inventory:create.toast.invalidItems"));
             return;
         }
 
@@ -261,15 +263,15 @@ const InventoryManagementPage = () => {
             await inventoryApi.createTicket(payload);
             toast.success(
                 createType === "Import"
-                    ? "Tạo phiếu nhập kho thành công"
-                    : "Tạo phiếu xuất kho thành công",
+                    ? t("inventory:create.toast.importSuccess")
+                    : t("inventory:create.toast.exportSuccess"),
             );
             setCreateOpen(false);
             void fetchTickets();
         } catch (err: unknown) {
             const message =
                 (err as { response?: { data?: { message?: string } } })?.response?.data
-                    ?.message || "Tạo phiếu kho thất bại";
+                    ?.message || t("inventory:create.toast.createFailed");
             toast.error(message);
         } finally {
             setSubmitting(false);
@@ -282,7 +284,7 @@ const InventoryManagementPage = () => {
             setDetailTicket(ticket);
             setDetailOpen(true);
         } catch {
-            toast.error("Không thể tải chi tiết phiếu");
+            toast.error(t("inventory:page.toast.loadTicketDetailError"));
         }
     };
 
@@ -292,13 +294,13 @@ const InventoryManagementPage = () => {
         try {
             if (actionType === "confirm") {
                 await inventoryApi.confirmTicket(actionTicketId);
-                toast.success("Xác nhận phiếu thành công — tồn kho đã cập nhật");
+                toast.success(t("inventory:actions.toast.confirmSuccess"));
             } else if (actionType === "cancel") {
                 await inventoryApi.cancelTicket(actionTicketId);
-                toast.success("Đã hủy phiếu");
+                toast.success(t("inventory:actions.toast.cancelSuccess"));
             } else if (actionType === "delete") {
                 await inventoryApi.deleteTicket(actionTicketId);
-                toast.success("Đã xóa phiếu");
+                toast.success(t("inventory:actions.toast.deleteSuccess"));
             }
             setActionTicketId(null);
             setActionType(null);
@@ -306,7 +308,7 @@ const InventoryManagementPage = () => {
         } catch (err: unknown) {
             const message =
                 (err as { response?: { data?: { message?: string } } })?.response?.data
-                    ?.message || "Thao tác thất bại";
+                    ?.message || t("inventory:actions.toast.actionFailed");
             toast.error(message);
         } finally {
             setActionLoading(false);
@@ -319,19 +321,19 @@ const InventoryManagementPage = () => {
             case "Draft":
                 return (
                     <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30">
-                        Nháp
+                        {t("inventory:status.draft")}
                     </Badge>
                 );
             case "Confirmed":
                 return (
                     <Badge className="bg-emerald-500 text-white">
-                        Đã xác nhận
+                        {t("inventory:status.confirmed")}
                     </Badge>
                 );
             case "Cancelled":
                 return (
                     <Badge variant="destructive">
-                        Đã hủy
+                        {t("inventory:status.cancelled")}
                     </Badge>
                 );
         }
@@ -341,12 +343,12 @@ const InventoryManagementPage = () => {
         type === "Import" ? (
             <Badge className="bg-blue-500 text-white gap-1">
                 <ArrowDownToLine className="h-3 w-3" />
-                Nhập kho
+                {t("inventory:type.import")}
             </Badge>
         ) : (
             <Badge className="bg-orange-500 text-white gap-1">
                 <ArrowUpFromLine className="h-3 w-3" />
-                Xuất kho
+                {t("inventory:type.export")}
             </Badge>
         );
 
@@ -371,10 +373,10 @@ const InventoryManagementPage = () => {
                     </div>
                     <div>
                         <h1 className="text-xl font-bold text-foreground">
-                            Quản lý tồn kho
+                            {t("inventory:page.title")}
                         </h1>
                         <p className="text-xs text-muted-foreground">
-                            Nhập kho, xuất kho & quản lý phiếu kho
+                            {t("inventory:page.subtitle")}
                         </p>
                     </div>
                 </div>
@@ -383,7 +385,7 @@ const InventoryManagementPage = () => {
                     className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
                 >
                     <Plus className="h-4 w-4" />
-                    Tạo phiếu kho
+                    {t("inventory:page.actions.createTicket")}
                 </Button>
             </motion.div>
 
@@ -396,7 +398,7 @@ const InventoryManagementPage = () => {
                 <Card className="p-4 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
                     <div className="flex flex-wrap gap-3 items-center">
                         <div className="flex items-center gap-2">
-                            <Label className="text-sm text-muted-foreground whitespace-nowrap">Loại:</Label>
+                            <Label className="text-sm text-muted-foreground whitespace-nowrap">{t("inventory:labels.type")}:</Label>
                             <Select
                                 value={filterType}
                                 onValueChange={(v) => {
@@ -408,15 +410,15 @@ const InventoryManagementPage = () => {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Tất cả</SelectItem>
-                                    <SelectItem value="Import">Nhập kho</SelectItem>
-                                    <SelectItem value="Export">Xuất kho</SelectItem>
+                                    <SelectItem value="all">{t("inventory:filters.all")}</SelectItem>
+                                    <SelectItem value="Import">{t("inventory:type.import")}</SelectItem>
+                                    <SelectItem value="Export">{t("inventory:type.export")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="flex items-center gap-2">
                             <Label className="text-sm text-muted-foreground whitespace-nowrap">
-                                Trạng thái:
+                                {t("inventory:labels.status")}:
                             </Label>
                             <Select
                                 value={filterStatus}
@@ -429,10 +431,10 @@ const InventoryManagementPage = () => {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Tất cả</SelectItem>
-                                    <SelectItem value="Draft">Nháp</SelectItem>
-                                    <SelectItem value="Confirmed">Đã xác nhận</SelectItem>
-                                    <SelectItem value="Cancelled">Đã hủy</SelectItem>
+                                    <SelectItem value="all">{t("inventory:filters.all")}</SelectItem>
+                                    <SelectItem value="Draft">{t("inventory:status.draft")}</SelectItem>
+                                    <SelectItem value="Confirmed">{t("inventory:status.confirmed")}</SelectItem>
+                                    <SelectItem value="Cancelled">{t("inventory:status.cancelled")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -450,14 +452,14 @@ const InventoryManagementPage = () => {
                 {loading ? (
                     <div className="flex items-center justify-center py-16">
                         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                        <span className="ml-2 text-sm text-muted-foreground">Đang tải...</span>
+                        <span className="ml-2 text-sm text-muted-foreground">{t("common:states.loading")}</span>
                     </div>
                 ) : tickets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                         <Package className="h-12 w-12 mb-3 opacity-40" />
-                        <p className="text-sm">Chưa có phiếu kho nào</p>
+                        <p className="text-sm">{t("inventory:page.states.empty")}</p>
                         <Button variant="link" className="mt-2 text-teal-600" onClick={handleOpenCreate}>
-                            Tạo phiếu kho đầu tiên
+                            {t("inventory:page.states.createFirst")}
                         </Button>
                     </div>
                 ) : (
@@ -465,12 +467,12 @@ const InventoryManagementPage = () => {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5">
-                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Mã phiếu</th>
-                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Loại</th>
-                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Trạng thái</th>
-                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Ghi chú</th>
-                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Ngày tạo</th>
-                                    <th className="text-right px-4 py-3 font-semibold text-muted-foreground">Thao tác</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{t("inventory:table.code")}</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{t("inventory:table.type")}</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{t("inventory:table.status")}</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{t("inventory:table.note")}</th>
+                                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground">{t("inventory:table.createdAt")}</th>
+                                    <th className="text-right px-4 py-3 font-semibold text-muted-foreground">{t("inventory:table.actions")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -491,7 +493,7 @@ const InventoryManagementPage = () => {
                                             {ticket.note || "—"}
                                         </td>
                                         <td className="px-4 py-3 text-xs text-muted-foreground">
-                                            {new Date(ticket.createdAt).toLocaleString("vi-VN")}
+                                            {new Date(ticket.createdAt).toLocaleString(i18n.language)}
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center justify-end gap-1">
@@ -499,7 +501,7 @@ const InventoryManagementPage = () => {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8"
-                                                    title="Xem chi tiết"
+                                                    title={t("inventory:page.actions.viewDetail")}
                                                     onClick={() => void handleViewDetail(ticket.id)}
                                                 >
                                                     <Eye className="h-4 w-4" />
@@ -510,7 +512,7 @@ const InventoryManagementPage = () => {
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
-                                                            title="Xác nhận phiếu"
+                                                            title={t("inventory:page.actions.confirmTicket")}
                                                             onClick={() => {
                                                                 setActionTicketId(ticket.id);
                                                                 setActionType("confirm");
@@ -522,7 +524,7 @@ const InventoryManagementPage = () => {
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-all duration-200"
-                                                            title="Hủy phiếu"
+                                                            title={t("inventory:page.actions.cancelTicket")}
                                                             onClick={() => {
                                                                 setActionTicketId(ticket.id);
                                                                 setActionType("cancel");
@@ -538,7 +540,7 @@ const InventoryManagementPage = () => {
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
-                                                            title="Xóa phiếu"
+                                                            title={t("inventory:page.actions.deleteTicket")}
                                                             onClick={() => {
                                                                 setActionTicketId(ticket.id);
                                                                 setActionType("delete");
@@ -564,17 +566,17 @@ const InventoryManagementPage = () => {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Warehouse className="h-5 w-5 text-teal-500" />
-                            Tạo phiếu kho mới
+                            {t("inventory:create.title")}
                         </DialogTitle>
                         <DialogDescription>
-                            Chọn loại phiếu, thêm sản phẩm và số lượng.
+                            {t("inventory:create.description")}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-4 mt-2">
                         {/* Type */}
                         <div className="flex items-center gap-3">
-                            <Label className="w-20">Loại:</Label>
+                            <Label className="w-20">{t("inventory:labels.type")}:</Label>
                             <Select
                                 value={createType}
                                 onValueChange={(v) => setCreateType(v as InventoryTicketType)}
@@ -583,18 +585,18 @@ const InventoryManagementPage = () => {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Import">Nhập kho</SelectItem>
-                                    <SelectItem value="Export">Xuất kho</SelectItem>
+                                    <SelectItem value="Import">{t("inventory:type.import")}</SelectItem>
+                                    <SelectItem value="Export">{t("inventory:type.export")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         {/* Note */}
                         <div className="flex items-start gap-3">
-                            <Label className="w-20 mt-2">Ghi chú:</Label>
+                            <Label className="w-20 mt-2">{t("inventory:labels.note")}:</Label>
                             <textarea
                                 className="flex-1 min-h-[60px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                                placeholder="Ghi chú cho phiếu kho..."
+                                placeholder={t("inventory:create.placeholders.note")}
                                 value={createNote}
                                 onChange={(e) => setCreateNote(e.target.value)}
                             />
@@ -603,7 +605,7 @@ const InventoryManagementPage = () => {
                         {/* Items */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label className="font-medium">Sản phẩm</Label>
+                                <Label className="font-medium">{t("inventory:create.fields.items")}</Label>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -612,18 +614,18 @@ const InventoryManagementPage = () => {
                                     className="gap-1"
                                 >
                                     <Plus className="h-3 w-3" />
-                                    Thêm
+                                    {t("common:actions.create")}
                                 </Button>
                             </div>
 
                             {productsLoading ? (
                                 <div className="flex items-center gap-2 py-4 justify-center text-muted-foreground">
                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                    <span className="text-sm">Đang tải sản phẩm...</span>
+                                    <span className="text-sm">{t("inventory:create.states.loadingProducts")}</span>
                                 </div>
                             ) : createItems.length === 0 ? (
                                 <div className="py-8 text-center text-sm text-muted-foreground border rounded-md bg-muted/20">
-                                    Chưa có sản phẩm nào. Nhấn "Thêm" để bắt đầu.
+                                    {t("inventory:create.states.emptyItems")}
                                 </div>
                             ) : (
                                 <div className="space-y-3">
@@ -653,7 +655,7 @@ const InventoryManagementPage = () => {
                                                         }
                                                     >
                                                         <SelectTrigger className="flex-1 h-9">
-                                                            <SelectValue placeholder="Chọn sản phẩm" />
+                                                            <SelectValue placeholder={t("inventory:create.placeholders.selectProduct")} />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {products.map((p) => (
@@ -671,7 +673,7 @@ const InventoryManagementPage = () => {
                                                         type="number"
                                                         min={1}
                                                         className="w-20 h-9 rounded-md border border-input bg-background px-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring"
-                                                        placeholder="SL"
+                                                        placeholder={t("inventory:create.placeholders.quantity")}
                                                         value={item.quantity}
                                                         onChange={(e) =>
                                                             handleItemChange(
@@ -700,7 +702,7 @@ const InventoryManagementPage = () => {
                                                 {hasVariants && (
                                                     <div className="flex items-center gap-2 pl-2">
                                                         <Label className="text-xs text-muted-foreground w-20">
-                                                            Biến thể:
+                                                            {t("inventory:create.fields.variant")}:
                                                         </Label>
                                                         <Select
                                                             value={
@@ -717,7 +719,7 @@ const InventoryManagementPage = () => {
                                                             }
                                                         >
                                                             <SelectTrigger className="flex-1 h-8 text-sm">
-                                                                <SelectValue placeholder="Chọn biến thể (size/màu)" />
+                                                                <SelectValue placeholder={t("inventory:create.placeholders.selectVariant")} />
                                                             </SelectTrigger>
                                                             <SelectContent>
                                                                 {selectedProduct?.variants?.map(
@@ -741,10 +743,7 @@ const InventoryManagementPage = () => {
                                                                                 .join(
                                                                                     " • ",
                                                                                 )}{" "}
-                                                                            (Tồn:{" "}
-                                                                            {variant.stockQuantity ??
-                                                                                0}
-                                                                            )
+                                                                            ({t("inventory:create.variantStock", { stock: variant.stockQuantity ?? 0 })})
                                                                         </SelectItem>
                                                                     ),
                                                                 )}
@@ -756,12 +755,12 @@ const InventoryManagementPage = () => {
                                                 {/* Note */}
                                                 <div className="flex items-center gap-2 pl-2">
                                                     <Label className="text-xs text-muted-foreground w-20">
-                                                        Ghi chú:
+                                                        {t("inventory:create.fields.itemNote")}:
                                                     </Label>
                                                     <input
                                                         type="text"
                                                         className="flex-1 h-8 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                                        placeholder="Ghi chú"
+                                                        placeholder={t("inventory:create.placeholders.itemNote")}
                                                         value={item.note}
                                                         onChange={(e) =>
                                                             handleItemChange(
@@ -777,8 +776,7 @@ const InventoryManagementPage = () => {
                                                 {hasVariants &&
                                                     !item.productVariantId && (
                                                         <p className="text-xs text-amber-600 pl-2">
-                                                            Vui lòng chọn biến
-                                                            thể cụ thể
+                                                            {t("inventory:create.states.variantRequired")}
                                                         </p>
                                                     )}
                                             </div>
@@ -795,7 +793,7 @@ const InventoryManagementPage = () => {
                             onClick={() => setCreateOpen(false)}
                             disabled={submitting}
                         >
-                            Hủy
+                            {t("common:actions.cancel")}
                         </Button>
                         <Button
                             onClick={() => void handleCreateTicket()}
@@ -803,7 +801,9 @@ const InventoryManagementPage = () => {
                             className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white gap-2"
                         >
                             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                            {createType === "Import" ? "Tạo phiếu nhập" : "Tạo phiếu xuất"}
+                            {createType === "Import"
+                              ? t("inventory:create.actions.createImport")
+                              : t("inventory:create.actions.createExport")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -815,32 +815,32 @@ const InventoryManagementPage = () => {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Eye className="h-5 w-5 text-teal-500" />
-                            Chi tiết phiếu kho
+                            {t("inventory:detail.title")}
                         </DialogTitle>
                     </DialogHeader>
                     {detailTicket && (
                         <div className="space-y-4 mt-2">
                             <div className="grid grid-cols-2 gap-3 text-sm">
                                 <div>
-                                    <span className="text-muted-foreground">Mã phiếu:</span>
+                                    <span className="text-muted-foreground">{t("inventory:labels.code")}:</span>
                                     <p className="font-mono font-medium">{detailTicket.code}</p>
                                 </div>
                                 <div>
-                                    <span className="text-muted-foreground">Loại:</span>
+                                    <span className="text-muted-foreground">{t("inventory:labels.type")}:</span>
                                     <div className="mt-1">{typeBadge(detailTicket.type)}</div>
                                 </div>
                                 <div>
-                                    <span className="text-muted-foreground">Trạng thái:</span>
+                                    <span className="text-muted-foreground">{t("inventory:labels.status")}:</span>
                                     <div className="mt-1">{statusBadge(detailTicket.status)}</div>
                                 </div>
                                 <div>
-                                    <span className="text-muted-foreground">Ngày tạo:</span>
-                                    <p>{new Date(detailTicket.createdAt).toLocaleString("vi-VN")}</p>
+                                    <span className="text-muted-foreground">{t("inventory:labels.createdAt")}:</span>
+                                    <p>{new Date(detailTicket.createdAt).toLocaleString(i18n.language)}</p>
                                 </div>
                             </div>
                             {detailTicket.note && (
                                 <div className="text-sm">
-                                    <span className="text-muted-foreground">Ghi chú:</span>
+                                    <span className="text-muted-foreground">{t("inventory:labels.note")}:</span>
                                     <p className="mt-1">{detailTicket.note}</p>
                                 </div>
                             )}
@@ -848,7 +848,7 @@ const InventoryManagementPage = () => {
                             {/* Items */}
                             <div>
                                 <Label className="text-sm font-medium">
-                                    Danh sách sản phẩm ({detailTicket.items?.length ?? 0})
+                                    {t("inventory:detail.itemsTitle", { count: detailTicket.items?.length ?? 0 })}
                                 </Label>
                                 <div className="mt-2 space-y-1.5">
                                     {(detailTicket.items ?? []).map((item, i) => (
@@ -863,7 +863,7 @@ const InventoryManagementPage = () => {
                                                 </div>
                                                 {item.productVariantId && (
                                                     <span className="text-xs text-muted-foreground pl-6">
-                                                        Biến thể: {item.productVariantId}
+                                                        {t("inventory:detail.variantLabel")}: {item.productVariantId}
                                                     </span>
                                                 )}
                                             </div>
@@ -889,17 +889,14 @@ const InventoryManagementPage = () => {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <AlertTriangle className="h-5 w-5 text-amber-500" />
-                            {actionType === "confirm" && "Xác nhận phiếu kho"}
-                            {actionType === "cancel" && "Hủy phiếu kho"}
-                            {actionType === "delete" && "Xóa phiếu kho"}
+                            {actionType === "confirm" && t("inventory:actions.dialog.titleConfirm")}
+                            {actionType === "cancel" && t("inventory:actions.dialog.titleCancel")}
+                            {actionType === "delete" && t("inventory:actions.dialog.titleDelete")}
                         </DialogTitle>
                         <DialogDescription>
-                            {actionType === "confirm" &&
-                                "Xác nhận sẽ cập nhật tồn kho. Hành động này không thể hoàn tác."}
-                            {actionType === "cancel" &&
-                                "Hủy phiếu sẽ chuyển trạng thái sang Cancelled. Tồn kho không thay đổi."}
-                            {actionType === "delete" &&
-                                "Xóa phiếu kho vĩnh viễn. Hành động này không thể hoàn tác."}
+                            {actionType === "confirm" && t("inventory:actions.dialog.descriptionConfirm")}
+                            {actionType === "cancel" && t("inventory:actions.dialog.descriptionCancel")}
+                            {actionType === "delete" && t("inventory:actions.dialog.descriptionDelete")}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-4">
@@ -911,7 +908,7 @@ const InventoryManagementPage = () => {
                             }}
                             disabled={actionLoading}
                         >
-                            Hủy bỏ
+                            {t("common:actions.cancel")}
                         </Button>
                         <Button
                             variant={actionType === "delete" ? "destructive" : "default"}
@@ -924,9 +921,9 @@ const InventoryManagementPage = () => {
                             disabled={actionLoading}
                         >
                             {actionLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                            {actionType === "confirm" && "Xác nhận"}
-                            {actionType === "cancel" && "Hủy phiếu"}
-                            {actionType === "delete" && "Xóa"}
+                            {actionType === "confirm" && t("common:actions.confirm")}
+                            {actionType === "cancel" && t("inventory:actions.dialog.confirmCancel")}
+                            {actionType === "delete" && t("common:actions.delete")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

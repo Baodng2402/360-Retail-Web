@@ -32,13 +32,50 @@
   "insights": {
     "title": "Loyalty & Feedback",
     "subtitle": "Điểm tích lũy và đánh giá của khách.",
-    "selectCustomerHint": "Chọn một khách hàng ở bảng bên trái để xem chi tiết."
+    "selectCustomerHint": "Chọn một khách hàng ở bảng bên trái để xem chi tiết.",
+    "selectCustomerSubHint": "Click vào khách hàng bên trái để xem thông tin"
+  },
+  "stats": {
+    "totalCustomers": "Tổng khách hàng",
+    "totalRevenue": "Tổng doanh thu",
+    "vipCustomers": "Khách VIP"
+  },
+  "list": {
+    "count": "{{count, number}} khách hàng"
+  },
+  "tabs": {
+    "info": "Thông tin",
+    "loyalty": "Tích điểm",
+    "feedback": "Phản hồi"
+  },
+  "detail": {
+    "title": "Thông tin chi tiết",
+    "cards": {
+      "totalOrders": "Tổng đơn hàng",
+      "totalSpend": "Tổng chi tiêu"
+    },
+    "fields": {
+      "fullName": "Họ và tên",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "joinedAt": "Ngày tham gia",
+      "status": "Trạng thái"
+    }
+  },
+  "status": {
+    "active": "Hoạt động",
+    "inactive": "Ngừng"
+  },
+  "misc": {
+    "dash": "-"
   },
   "loyalty": {
     "totalPointsLabel": "Tổng điểm tích lũy",
     "totalPointsValue": "{{points, number}} điểm",
     "rankHint": "Hạng hiện tại giúp khách nhận ưu đãi tốt hơn. Bạn có thể cấu hình luật tích điểm trong phần Loyalty Rules.",
     "empty": "Khách hàng này chưa có dữ liệu loyalty.",
+    "loading": "Đang tải dữ liệu loyalty...",
+    "unavailable": "Tính năng \"Tích điểm Loyalty\" không khả dụng trong gói hiện tại của bạn.",
     "recentTransactions": {
       "title": "Giao dịch điểm gần đây",
       "latest": "Gần nhất",
@@ -82,6 +119,40 @@
     "loadCustomersFailed": "Không thể tải danh sách khách hàng.",
     "saveCustomerFailed": "Không thể lưu khách hàng. Vui lòng thử lại.",
     "deleteCustomerFailed": "Không thể xóa khách hàng. Vui lòng thử lại."
+  }
+  ,
+  "portal": {
+    "states": {
+      "noData": "Chưa có dữ liệu"
+    },
+    "dashboard": {
+      "title": "Đơn hàng của bạn",
+      "subtitle": "Xem lại lịch sử đơn hàng và trạng thái xử lý."
+    },
+    "loyalty": {
+      "title": "Điểm tích lũy",
+      "points": "{{points, number}} điểm",
+      "recent": {
+        "title": "Giao dịch điểm gần đây",
+        "fallback": "Giao dịch điểm"
+      }
+    },
+    "orders": {
+      "loading": "Đang tải đơn hàng...",
+      "empty": "Bạn chưa có đơn hàng nào.",
+      "statusLabel": "Trạng thái",
+      "viewDetail": "Chi tiết"
+    },
+    "orderDetail": {
+      "loading": "Đang tải đơn hàng...",
+      "notFound": "Không tìm thấy đơn hàng.",
+      "title": "Đơn hàng {{code}}",
+      "createdAt": "Ngày tạo",
+      "statusLabel": "Trạng thái",
+      "itemsTitle": "Sản phẩm",
+      "noItems": "Không có thông tin sản phẩm.",
+      "totalLabel": "Tổng tiền"
+    }
   }
 }
 

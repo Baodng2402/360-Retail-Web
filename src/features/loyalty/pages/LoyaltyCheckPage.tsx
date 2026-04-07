@@ -11,10 +11,13 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { loyaltyPublicApi, type LoyaltyPublicCheckResult } from "@/shared/lib/loyaltyPublicApi";
 import { Award, Loader2, QrCode, Search, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
+import i18next from "@/i18n";
 
 const isLikelyUuid = (v: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 
 export default function LoyaltyCheckPage() {
+  const t = (key: string, options?: Record<string, unknown>) =>
+    String((i18next.t as unknown as (k: string, o?: Record<string, unknown>) => unknown)(key, options));
   const [searchParams] = useSearchParams();
   const storeId = (searchParams.get("storeId") ?? "").trim();
 
@@ -23,8 +26,8 @@ export default function LoyaltyCheckPage() {
   const [result, setResult] = useState<LoyaltyPublicCheckResult | null>(null);
 
   const storeIdError = useMemo(() => {
-    if (!storeId) return "Thiếu storeId trong đường dẫn. Vui lòng quét đúng QR hoặc kiểm tra lại link.";
-    if (!isLikelyUuid(storeId)) return "storeId không hợp lệ.";
+    if (!storeId) return t("common:pages.loyaltyCheck.errors.missingStoreId");
+    if (!isLikelyUuid(storeId)) return t("common:pages.loyaltyCheck.errors.invalidStoreId");
     return "";
   }, [storeId]);
 
@@ -35,7 +38,7 @@ export default function LoyaltyCheckPage() {
     }
     const p = phone.trim();
     if (!p) {
-      toast.error("Vui lòng nhập số điện thoại.");
+      toast.error(t("common:pages.loyaltyCheck.errors.phoneRequired"));
       return;
     }
 
@@ -48,7 +51,7 @@ export default function LoyaltyCheckPage() {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
         (err as Error)?.message ||
-        "Tra cứu thất bại.";
+        t("common:pages.loyaltyCheck.errors.lookupFailed");
       toast.error(message);
       setResult(null);
     } finally {
@@ -81,9 +84,9 @@ export default function LoyaltyCheckPage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white border-0 shadow-md shadow-[#FF7B21]/20">
-                    Loyalty
+                    {t("common:pages.loyaltyCheck.badges.loyalty")}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">Public</span>
+                  <span className="text-xs text-muted-foreground">{t("common:pages.loyaltyCheck.badges.public")}</span>
                 </div>
                 <motion.h1
                   initial={{ opacity: 0, x: -10 }}
@@ -92,7 +95,7 @@ export default function LoyaltyCheckPage() {
                   className="text-lg sm:text-xl font-semibold flex items-center gap-2"
                 >
                   <QrCode className="h-5 w-5 text-[#FF7B21]" />
-                  Tra cứu điểm tích lũy
+                  {t("common:pages.loyaltyCheck.title")}
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, x: -10 }}
@@ -100,7 +103,7 @@ export default function LoyaltyCheckPage() {
                   transition={{ delay: 0.15 }}
                   className="text-xs text-muted-foreground"
                 >
-                  Nhập số điện thoại để xem tên khách hàng, điểm và hạng.
+                  {t("common:pages.loyaltyCheck.subtitle")}
                 </motion.p>
               </div>
               <motion.div
@@ -121,7 +124,7 @@ export default function LoyaltyCheckPage() {
                 transition={{ delay: 0.2 }}
                 className="space-y-1"
               >
-                <Label className="text-sm font-medium text-foreground">Store</Label>
+                <Label className="text-sm font-medium text-foreground">{t("common:pages.loyaltyCheck.storeLabel")}</Label>
                 <div className="flex items-center gap-2">
                   <div className="inline-flex items-center gap-2 rounded-lg border bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5 px-3 py-2 text-sm w-full border-[#FF7B21]/20">
                     <Store className="h-4 w-4 text-[#FF7B21]" />
@@ -146,7 +149,7 @@ export default function LoyaltyCheckPage() {
                 transition={{ delay: 0.25 }}
                 className="space-y-1"
               >
-                <Label htmlFor="phone" className="text-sm font-medium text-foreground">Số điện thoại</Label>
+                <Label htmlFor="phone" className="text-sm font-medium text-foreground">{t("common:pages.loyaltyCheck.phoneLabel")}</Label>
                 <Input
                   id="phone"
                   inputMode="tel"
@@ -176,12 +179,12 @@ export default function LoyaltyCheckPage() {
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Đang tra cứu...
+                      {t("common:pages.loyaltyCheck.actions.searching")}
                     </>
                   ) : (
                     <>
                       <Search className="h-4 w-4" />
-                      Tra cứu
+                      {t("common:pages.loyaltyCheck.actions.search")}
                     </>
                   )}
                 </Button>
@@ -208,7 +211,7 @@ export default function LoyaltyCheckPage() {
             >
               <h2 className="text-base font-semibold flex items-center gap-2">
                 <Award className="h-5 w-5 text-[#FF7B21]" />
-                Kết quả
+                {t("common:pages.loyaltyCheck.result.title")}
               </h2>
               {result?.rank ? (
                 <motion.div
@@ -257,7 +260,7 @@ export default function LoyaltyCheckPage() {
                   className="rounded-lg border border-dashed border-[#FF7B21]/30 p-6 text-sm text-muted-foreground text-center bg-gradient-to-br from-[#FF7B21]/5 to-transparent"
                 >
                   <Search className="h-8 w-8 mx-auto mb-2 text-[#FF7B21]/40" />
-                  Chưa có dữ liệu. Vui lòng nhập số điện thoại để tra cứu.
+                  {t("common:pages.loyaltyCheck.states.emptyHint")}
                 </motion.div>
               ) : (
                 <>
@@ -269,7 +272,7 @@ export default function LoyaltyCheckPage() {
                   >
                     <span className="text-sm text-muted-foreground flex items-center gap-2">
                       <Award className="h-4 w-4 text-[#FF7B21]" />
-                      Khách hàng
+                      {t("common:pages.loyaltyCheck.result.customerLabel")}
                     </span>
                     <span className="text-sm font-semibold truncate bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] bg-clip-text text-transparent">
                       {result.customerName}
@@ -283,11 +286,11 @@ export default function LoyaltyCheckPage() {
                   >
                     <span className="text-sm text-muted-foreground flex items-center gap-2">
                       <Search className="h-4 w-4 text-[#19D6C8]" />
-                      Tổng điểm
+                      {t("common:pages.loyaltyCheck.result.totalPointsLabel")}
                     </span>
                     <span className="text-sm font-bold text-lg bg-gradient-to-r from-[#19D6C8] to-[#FF7B21] bg-clip-text text-transparent">
                       {Number.isFinite(result.totalPoints)
-                        ? result.totalPoints.toLocaleString()
+                        ? result.totalPoints.toLocaleString(i18next.language)
                         : String(result.totalPoints)}
                     </span>
                   </motion.div>

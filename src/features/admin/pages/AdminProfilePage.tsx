@@ -71,7 +71,7 @@ export default function AdminProfilePage() {
             </div>
           </div>
           <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-            {user?.role ?? "SuperAdmin"}
+            {user?.role ?? t("sidebar.brand.title")}
           </Badge>
         </Card>
       </motion.div>
@@ -101,7 +101,7 @@ export default function AdminProfilePage() {
                   {t("profile.fields.role")}
                 </div>
                 <div className="text-sm">
-                  <Badge variant="outline">{user?.role ?? "SuperAdmin"}</Badge>
+                  <Badge variant="outline">{user?.role ?? t("sidebar.brand.title")}</Badge>
                 </div>
               </div>
             </div>

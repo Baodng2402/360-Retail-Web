@@ -17,7 +17,9 @@
     "stockOut": "Stock out",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "completeOrder": "Complete order"
+    "completeOrder": "Complete order",
+    "addToCart": "Add to cart",
+    "add": "Add"
   },
   "states": {
     "loadingProducts": "Loading products...",
@@ -51,7 +53,8 @@
     "noProductSelected": "No product selected",
     "currentStock": "Current stock: {{stock}}",
     "amountLabel": "Amount to {{mode}}",
-    "amountPlaceholder": "Enter amount..."
+    "amountPlaceholder": "Enter amount...",
+    "ticketNote": "{{mode}} inventory: {{name}}"
   },
   "confirmRemoveLast": {
     "title": "Remove last item",
@@ -65,12 +68,23 @@
     "loadProductsError": "Unable to load products. Please try again later.",
     "cartEmpty": "Your cart is empty!",
     "orderCreated": "Order created successfully!",
-    "orderCreateFailed": "Unable to create order. Please try again!"
+    "orderCreateFailed": "Unable to create order. Please try again!",
+    "addToCart": "Added {{qty, number}} × {{name}} to cart",
+    "variantOutOfStock": "{{variant}}: only {{stock, number}} left",
+    "addVariantsToCart": "Added {{count, number}} variants to cart",
+    "noVariantsToAdd": "No variants to add"
   },
   "misc": {
     "uncategorized": "Uncategorized",
     "productAlt": "Product",
-    "left": "{{count}} left"
+    "left": "{{count}} left",
+    "outOfStock": "Out of stock",
+    "inStock": "{{count, number}} in stock",
+    "variants": "Variants",
+    "chooseVariant": "Choose variant",
+    "variant": "Variant",
+    "sku": "SKU",
+    "dash": "—"
   },
   "reports": {
     "title": "Best selling products",
@@ -80,6 +94,10 @@
     "revenueLegend": "Revenue",
     "avgPrice": "Avg price",
     "quantitySold": "Quantity sold"
+  }
+  ,
+  "variantPicker": {
+    "description": "Enter quantity for each variant to add to cart"
   }
 }
 

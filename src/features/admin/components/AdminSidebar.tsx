@@ -172,7 +172,9 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
           size="icon"
           onClick={onToggle}
           className="rounded-full w-10 h-10"
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={
+            isCollapsed ? t("sidebar.toggle.expand") : t("sidebar.toggle.collapse")
+          }
         >
           {isCollapsed ? (
             <ChevronRight className="h-5 w-5 text-muted-foreground" />

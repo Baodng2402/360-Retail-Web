@@ -6,6 +6,7 @@ import type { RecentActivityItem } from "@/shared/lib/salesDashboardApi";
 import { motion } from "motion/react";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 const getActivityIcon = (type: string) => {
   switch (type) {
@@ -31,24 +32,24 @@ const getActivityIcon = (type: string) => {
   }
 };
 
-const getActivityBadge = (status: string) => {
+const getActivityBadge = (status: string, tOrders: (key: string, options?: Record<string, unknown>) => string) => {
   switch (status) {
     case "Completed":
       return (
         <Badge variant="success" className="text-xs">
-          Hoàn thành
+          {tOrders("orders:statusLabels.Completed")}
         </Badge>
       );
     case "Cancelled":
       return (
         <Badge variant="warning" className="text-xs">
-          Hủy
+          {tOrders("orders:statusLabels.Cancelled")}
         </Badge>
       );
     case "Processing":
       return (
         <Badge variant="info" className="text-xs">
-          Đang xử lý
+          {tOrders("orders:statusLabels.Processing")}
         </Badge>
       );
     default:
@@ -60,18 +61,22 @@ const getActivityBadge = (status: string) => {
   }
 };
 
-const formatTimeAgo = (dateStr: string) => {
+const formatTimeAgo = (
+  dateStr: string,
+  locale: string,
+  t: (key: string, options?: Record<string, unknown>) => string,
+) => {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
-  if (diffMins < 60) return `${diffMins} phút trước`;
-  if (diffHours < 24) return `${diffHours} giờ trước`;
-  if (diffDays === 1) return "Hôm qua";
-  if (diffDays < 7) return `${diffDays} ngày trước`;
-  return date.toLocaleDateString("vi-VN");
+  if (diffMins < 60) return t("dashboard:recentTransactions.time.minutesAgo", { count: diffMins });
+  if (diffHours < 24) return t("dashboard:recentTransactions.time.hoursAgo", { count: diffHours });
+  if (diffDays === 1) return t("dashboard:recentTransactions.time.yesterday");
+  if (diffDays < 7) return t("dashboard:recentTransactions.time.daysAgo", { count: diffDays });
+  return date.toLocaleDateString(locale);
 };
 
 const getActivityPath = (
@@ -108,6 +113,10 @@ const RecentTransactions = ({
   orderCodeToId = {},
 }: RecentTransactionsProps) => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation(["dashboard", "orders"]);
+  const tAny = (key: string, options?: Record<string, unknown>) =>
+    String(t(key as never, options as never));
+  const locale = i18n.language.toLowerCase().startsWith("en") ? "en-US" : "vi-VN";
 
   return (
     <Card className="p-4 sm:p-5 md:p-6 overflow-hidden">
@@ -115,10 +124,10 @@ const RecentTransactions = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div className="flex flex-col">
           <h3 className="text-lg md:text-xl font-bold text-foreground tracking-tight">
-            Recent Transactions
+            {t("dashboard:recentTransactions.title")}
           </h3>
           <span className="text-sm text-muted-foreground">
-            Giao dịch gần đây
+            {t("dashboard:recentTransactions.subtitle")}
           </span>
         </div>
         <Button
@@ -127,7 +136,7 @@ const RecentTransactions = ({
           size="sm"
           className="shrink-0"
         >
-          View All
+          {t("dashboard:recentTransactions.actions.viewAll")}
         </Button>
       </div>
 
@@ -150,7 +159,7 @@ const RecentTransactions = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
-          <p className="text-muted-foreground">Chưa có giao dịch nào</p>
+          <p className="text-muted-foreground">{t("dashboard:recentTransactions.states.empty")}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -171,10 +180,10 @@ const RecentTransactions = ({
                     <span className="font-semibold text-foreground truncate group-hover:text-[#FF7B21] transition-colors">
                       {activity.description || activity.code}
                     </span>
-                    {getActivityBadge(activity.status)}
+                    {getActivityBadge(activity.status, tAny)}
                   </div>
                   <div className="flex items-center gap-2 md:gap-3 text-xs text-muted-foreground flex-wrap">
-                    <span>{formatTimeAgo(activity.createdAt)}</span>
+                    <span>{formatTimeAgo(activity.createdAt, locale, tAny)}</span>
                     <span className="hidden sm:inline text-border/50">•</span>
                     <span className="hidden sm:inline">{activity.type}</span>
                   </div>

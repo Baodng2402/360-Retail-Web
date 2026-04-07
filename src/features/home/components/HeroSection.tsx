@@ -187,7 +187,7 @@ export function HeroSection() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                Quản lý bán hàng đa kênh
+                {t("hero.headline")}
               </h1>
             </motion.div>
 
@@ -199,7 +199,7 @@ export function HeroSection() {
               className="mb-6 sm:mb-8 flex justify-center lg:justify-start w-full pointer-events-auto"
             >
               <TrueFocus
-                sentence="Cùng 360 Retail"
+                sentence={t("hero.focusSentence")}
                 manualMode
                 blurAmount={5}
                 borderColor="#FF7B21"
@@ -223,7 +223,7 @@ export function HeroSection() {
                 style={{ background: "linear-gradient(135deg, #FF7B21 0%, #FF9F45 45%, #19D6C8 100%)", boxShadow: "0 8px 40px rgba(255, 123, 33, 0.45), 0 2px 10px rgba(0,0,0,0.3)", color: "white" }}
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100" style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%)" }} />
-                <span className="relative z-10">Bắt đầu miễn phí</span>
+                <span className="relative z-10">{t("hero.cta.startFree")}</span>
                 <ArrowRight className="relative z-10 w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" />
               </Link>
 
@@ -232,7 +232,7 @@ export function HeroSection() {
                 className="pointer-events-auto group flex items-center justify-center gap-2 px-5 sm:px-6 md:px-7 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold text-xs sm:text-sm transition-all duration-300 border backdrop-blur-md hover:scale-[1.03] active:scale-[0.98] w-full sm:w-auto dark:bg-white/10 dark:border-white/20 dark:text-slate-100 bg-slate-900/10 border-slate-700/30 text-slate-800"
                 style={{ backdropFilter: "blur(12px)" }}
               >
-                Đăng nhập
+                {t("navbar.login")}
               </Link>
             </motion.div>
 
@@ -270,7 +270,7 @@ export function HeroSection() {
           style={{ opacity: scrollIndicatorOpacity }}
         >
           <span className="text-[9px] sm:text-[10px] font-medium tracking-[0.2em] sm:tracking-[0.25em] uppercase dark:text-slate-400/50 text-slate-600">
-            Scroll để khám phá
+            {t("hero.scrollHint")}
           </span>
           <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
             <ChevronDown className="w-4 sm:w-5 h-4 sm:h-5 dark:text-slate-400/50 text-slate-600" />

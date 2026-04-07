@@ -98,7 +98,7 @@ export default function AdminUsersPage() {
       setItems(res);
     } catch (err) {
       console.error("Failed to load super-admin users:", err);
-      toast.error("Không tải được danh sách users (SuperAdmin).");
+      toast.error(t("users.toast.loadError"));
       setItems([]);
     } finally {
       setLoading(false);
@@ -143,7 +143,7 @@ export default function AdminUsersPage() {
           roleName: form.roleName,
         });
         setItems((prev) => [created, ...prev]);
-        toast.success("Đã tạo user.");
+        toast.success(t("users.toast.createSuccess"));
       } else {
         await superAdminUsersApi.update(editing.id, {
           isActivated: form.isActivated,
@@ -160,12 +160,12 @@ export default function AdminUsersPage() {
               : u,
           ),
         );
-        toast.success("Đã cập nhật user.");
+        toast.success(t("users.toast.updateSuccess"));
       }
       setDialogOpen(false);
     } catch (err) {
       console.error("Failed to save user:", err);
-      toast.error("Lưu user thất bại.");
+      toast.error(t("users.toast.saveError"));
     } finally {
       setSaving(false);
     }
@@ -187,11 +187,11 @@ export default function AdminUsersPage() {
             : u,
         ),
       );
-      toast.success("Đã vô hiệu hóa user (soft delete).");
+      toast.success(t("users.toast.softDeleteSuccess"));
       setDeleteConfirm(null);
     } catch (err) {
       console.error("Failed to delete user:", err);
-      toast.error("Xoá user thất bại.");
+      toast.error(t("users.toast.deleteError"));
     } finally {
       setDeleting(false);
     }
@@ -216,7 +216,7 @@ export default function AdminUsersPage() {
                 <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
                   {t("users.badge")}
                 </Badge>
-                <span className="text-sm text-muted-foreground">Quản lý Users</span>
+                <span className="text-sm text-muted-foreground">{t("users.caption")}</span>
               </div>
               <div className="text-xs text-muted-foreground">
                 {t("users.description")}
@@ -255,7 +255,7 @@ export default function AdminUsersPage() {
               {t("users.listTitle")}
             </h3>
             <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-              {filtered.length.toLocaleString()} user
+              {t("users.count", { count: filtered.length })}
             </Badge>
           </div>
 
@@ -374,9 +374,7 @@ export default function AdminUsersPage() {
                   {t("users.pagination.prev")}
                 </Button>
                 <span>
-                  Trang{" "}
-                  <span className="font-semibold">{page}</span> /{" "}
-                  <span className="font-semibold">{totalPages}</span>
+                  {t("users.pagination.page", { page, totalPages })}
                 </span>
                 <Button
                   variant="outline"
@@ -395,21 +393,23 @@ export default function AdminUsersPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? "Cập nhật user" : "Tạo user"}</DialogTitle>
+            <DialogTitle>
+              {editing ? t("users.dialog.titleEdit") : t("users.dialog.titleCreate")}
+            </DialogTitle>
             <DialogDescription>
               {editing
-                ? "Chỉnh trạng thái/kích hoạt. (Role/email hiện tại không đổi theo API này)"
-                : "Tạo user mới (không cho tạo role SuperAdmin)."}
+                ? t("users.dialog.descriptionEdit")
+                : t("users.dialog.descriptionCreate")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 pt-2">
             <div className="space-y-1">
-              <Label>Email</Label>
+              <Label>{t("users.dialog.fields.email")}</Label>
               <Input
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                placeholder="new@example.com"
+                placeholder={t("users.dialog.placeholders.email")}
                 disabled={!!editing}
               />
             </div>
@@ -417,16 +417,16 @@ export default function AdminUsersPage() {
             {!editing && (
               <>
                 <div className="space-y-1">
-                  <Label>Mật khẩu</Label>
+                  <Label>{t("users.dialog.fields.password")}</Label>
                   <Input
                     type="password"
                     value={form.password}
                     onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                    placeholder="Password123!"
+                    placeholder={t("users.dialog.placeholders.password")}
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label>Role</Label>
+                  <Label>{t("users.dialog.fields.role")}</Label>
                   <Select
                     value={form.roleName}
                     onValueChange={(v) => setForm((p) => ({ ...p, roleName: v }))}
@@ -449,7 +449,7 @@ export default function AdminUsersPage() {
             {editing && (
               <>
                 <div className="space-y-1">
-                  <Label>Trạng thái</Label>
+                  <Label>{t("users.dialog.fields.status")}</Label>
                   <Select
                     value={form.status}
                     onValueChange={(v) => setForm((p) => ({ ...p, status: v }))}
@@ -467,7 +467,7 @@ export default function AdminUsersPage() {
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label>Kích hoạt</Label>
+                  <Label>{t("users.dialog.fields.activated")}</Label>
                   <Select
                     value={form.isActivated ? "true" : "false"}
                     onValueChange={(v) => setForm((p) => ({ ...p, isActivated: v === "true" }))}
@@ -476,8 +476,8 @@ export default function AdminUsersPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="true">Yes</SelectItem>
-                      <SelectItem value="false">No</SelectItem>
+                      <SelectItem value="true">{t("users.activated.yes")}</SelectItem>
+                      <SelectItem value="false">{t("users.activated.no")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

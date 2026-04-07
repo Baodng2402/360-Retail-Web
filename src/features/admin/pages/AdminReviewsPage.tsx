@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
 
 export default function AdminReviewsPage() {
-  const { t } = useTranslation(["admin", "common"]);
+  const { t, i18n } = useTranslation(["admin", "common"]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(false);
@@ -105,14 +105,14 @@ export default function AdminReviewsPage() {
   const onDelete = async (reviewId: string) => {
     try {
       await planReviewsApi.deleteReview(reviewId);
-      toast.success("Đã xoá review.");
+      toast.success(t("admin:reviewsPage.toast.deleteSuccess"));
       // optimistic remove
       setItems((prev) => prev.filter((x) => x.id !== reviewId));
       setTotal((prev) => (prev > 0 ? prev - 1 : 0));
       void loadDashboard();
     } catch (err) {
       console.error("Failed to delete review:", err);
-      toast.error("Xoá review thất bại.");
+      toast.error(t("admin:reviewsPage.toast.deleteError"));
     }
   };
 
@@ -143,13 +143,13 @@ export default function AdminReviewsPage() {
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-4">
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Rating</div>
+                <div className="text-xs text-muted-foreground">{t("admin:reviewsPage.filters.rating")}</div>
                 <Select value={rating} onValueChange={(v) => setRating(v as RatingFilter)}>
                   <SelectTrigger className="bg-background/80 backdrop-blur-sm">
-                    <SelectValue placeholder="Chọn..." />
+                    <SelectValue placeholder={t("admin:dashboard.filters.selectPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">{t("admin:reviewsPage.filters.all")}</SelectItem>
                     <SelectItem value="5">5</SelectItem>
                     <SelectItem value="4">4</SelectItem>
                     <SelectItem value="3">3</SelectItem>
@@ -159,11 +159,11 @@ export default function AdminReviewsPage() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Tìm kiếm</div>
+                <div className="text-xs text-muted-foreground">{t("admin:reviewsPage.filters.search")}</div>
                 <Input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Tìm theo store, plan, nội dung..."
+                  placeholder={t("admin:reviewsPage.filters.searchPlaceholder")}
                   className="bg-background/80 backdrop-blur-sm"
                 />
               </div>
@@ -173,7 +173,11 @@ export default function AdminReviewsPage() {
                   className="w-full bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
                   disabled={loading}
                 >
-                  {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : "Làm mới"}
+                  {loading ? (
+                    <RefreshCcw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    t("admin:reviewsPage.actions.refresh")
+                  )}
                 </Button>
               </div>
             </div>
@@ -186,10 +190,10 @@ export default function AdminReviewsPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-[#FF7B21]" />
-              Review dashboard
+              {t("admin:reviewsPage.dashboard.title")}
             </h3>
             <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-              Tổng quan đánh giá
+              {t("admin:reviewsPage.dashboard.badge")}
             </Badge>
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -202,18 +206,18 @@ export default function AdminReviewsPage() {
             ) : (
               <>
                 <div className="rounded-xl border p-3">
-                  <div className="text-xs text-muted-foreground">Total reviews</div>
+                  <div className="text-xs text-muted-foreground">{t("admin:reviewsPage.dashboard.totalReviews")}</div>
                   <div className="mt-1 text-lg font-semibold">{dash ? dash.totalReviews.toLocaleString() : "—"}</div>
                 </div>
                 <div className="rounded-xl border p-3">
-                  <div className="text-xs text-muted-foreground">Avg rating</div>
+                  <div className="text-xs text-muted-foreground">{t("admin:reviewsPage.dashboard.avgRating")}</div>
                   <div className="mt-1 flex items-center gap-2 text-lg font-semibold">
                     <Star className="h-4 w-4 text-amber-500" />
                     {dash ? dash.overallAvgRating.toFixed(2) : "—"}
                   </div>
                 </div>
                 <div className="rounded-xl border p-3">
-                  <div className="text-xs text-muted-foreground">This month</div>
+                  <div className="text-xs text-muted-foreground">{t("admin:reviewsPage.dashboard.thisMonth")}</div>
                   <div className="mt-1 text-lg font-semibold">{dash ? dash.reviewsThisMonth.toLocaleString() : "—"}</div>
                 </div>
               </>
@@ -222,21 +226,20 @@ export default function AdminReviewsPage() {
         </Card>
 
         <Card className="p-4 hover:shadow-lg transition-shadow duration-300">
-          <div className="text-xs text-muted-foreground">Pagination</div>
+          <div className="text-xs text-muted-foreground">{t("admin:reviewsPage.pagination.title")}</div>
           <div className="mt-2 text-sm">
-            Page <span className="font-semibold">{page}</span> /{" "}
-            <span className="font-semibold">{totalPages}</span>
+            {t("admin:reviewsPage.pagination.page", { page, totalPages })}
           </div>
           <div className="mt-3 flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-              Prev
+              {t("admin:reviewsPage.pagination.prev")}
             </Button>
             <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
-              Next
+              {t("admin:reviewsPage.pagination.next")}
             </Button>
           </div>
           <div className="mt-3 text-xs text-muted-foreground">
-            Total: <span className="font-semibold">{(total || filtered.length).toLocaleString()}</span>
+            {t("admin:reviewsPage.pagination.total", { total: (total || filtered.length).toLocaleString() })}
           </div>
         </Card>
       </div>
@@ -250,10 +253,10 @@ export default function AdminReviewsPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold flex items-center gap-2">
               <Star className="h-4 w-4 text-[#FF7B21]" />
-              Reviews list
+              {t("admin:reviewsPage.list.title")}
             </h3>
             <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
-              {filtered.length.toLocaleString()} items (page)
+              {t("admin:reviewsPage.list.count", { count: filtered.length })}
             </Badge>
           </div>
 
@@ -266,19 +269,19 @@ export default function AdminReviewsPage() {
               </div>
             ) : filtered.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
-                Không có dữ liệu.
+                {t("common:states.noData")}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gradient-to-r from-[#FF7B21]/5 to-[#19D6C8]/5">
-                      <TableHead>Store</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Content</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("admin:reviewsPage.columns.store")}</TableHead>
+                      <TableHead>{t("admin:reviewsPage.columns.plan")}</TableHead>
+                      <TableHead>{t("admin:reviewsPage.columns.rating")}</TableHead>
+                      <TableHead>{t("admin:reviewsPage.columns.content")}</TableHead>
+                      <TableHead>{t("admin:reviewsPage.columns.created")}</TableHead>
+                      <TableHead className="text-right">{t("admin:reviewsPage.columns.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -308,7 +311,7 @@ export default function AdminReviewsPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
-                          {new Date(r.createdAt).toLocaleString("vi-VN")}
+                          {new Date(r.createdAt).toLocaleString(i18n.language)}
                         </TableCell>
                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                           <Button

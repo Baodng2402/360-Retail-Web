@@ -56,7 +56,7 @@ const emptyForm: CustomerFormState = {
 };
 
 const CustomerPage = () => {
-  const { t: tCustomer } = useTranslation("customer");
+  const { t: tCustomer, i18n } = useTranslation("customer");
   const { t: tCommon } = useTranslation("common");
   const { user } = useAuthStore();
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -270,6 +270,7 @@ const CustomerPage = () => {
 
   const totalCustomers = customers.length;
   const totalRevenue = customers.reduce((sum, c) => sum + (c.totalSpend || 0), 0);
+  const vipCount = customers.filter((c) => (c.totalSpend || 0) > 5000000).length;
 
   return (
     <div className="space-y-6">
@@ -285,7 +286,7 @@ const CustomerPage = () => {
         <Card className="p-5 bg-gradient-to-br from-[#FF7B21]/10 to-white dark:from-[#FF7B21]/10 dark:to-background border-[#FF7B21]/20 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Tổng khách hàng</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{tCustomer("stats.totalCustomers")}</p>
               <h3 className="text-xl sm:text-2xl font-bold text-foreground">{totalCustomers}</h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF7B21]/20 to-[#FF7B21]/10 flex items-center justify-center shadow-inner">
@@ -296,8 +297,8 @@ const CustomerPage = () => {
         <Card className="p-4 sm:p-5 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-background border-emerald-200 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Tổng doanh thu</p>
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">{totalRevenue.toLocaleString("vi-VN")}đ</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">{tCustomer("stats.totalRevenue")}</p>
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">{totalRevenue.toLocaleString(i18n.language)}đ</h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-900/10 flex items-center justify-center shadow-inner">
               <ShoppingBag className="h-6 w-6 text-emerald-600" />
@@ -307,9 +308,9 @@ const CustomerPage = () => {
         <Card className="p-4 sm:p-5 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-background border-amber-200 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Khách VIP</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{tCustomer("stats.vipCustomers")}</p>
               <h3 className="text-xl sm:text-2xl font-bold text-foreground">
-                {customers.filter((c) => (c.totalSpend || 0) > 5000000).length}
+                {vipCount}
               </h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-900/10 flex items-center justify-center shadow-inner">
@@ -339,7 +340,7 @@ const CustomerPage = () => {
                     {tCustomer("header.title")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    {filteredCustomers.length} khách hàng
+                    {tCustomer("list.count", { count: filteredCustomers.length })}
                   </p>
                 </div>
               </div>
@@ -347,7 +348,7 @@ const CustomerPage = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Tìm kiếm..."
+                placeholder={tCustomer("search.placeholder")}
                 className="pl-10 bg-background/80 backdrop-blur-sm transition-all duration-200 focus:ring-2 focus:ring-[#FF7B21]/20"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -358,7 +359,7 @@ const CustomerPage = () => {
               onClick={openCreateForm}
             >
               <UserPlus className="mr-2 h-4 w-4" />
-              Thêm khách hàng
+              {tCustomer("actions.addCustomer")}
             </Button>
           </div>
 
@@ -366,7 +367,7 @@ const CustomerPage = () => {
           <div className="max-h-[400px] sm:max-h-[500px] overflow-y-auto">
             {loading ? (
               <div className="p-8 text-center text-muted-foreground">
-                Đang tải...
+                {tCustomer("states.loadingList")}
               </div>
             ) : filteredCustomers.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
@@ -411,7 +412,7 @@ const CustomerPage = () => {
                             {c.totalOrders ?? 0} đơn
                           </Badge>
                           <Badge variant="outline" className="gap-1 text-[#FF7B21] border-[#FF7B21]/30 bg-[#FF7B21]/5">
-                            {(c.totalSpend || 0).toLocaleString("vi-VN")}đ
+                            {(c.totalSpend || 0).toLocaleString(i18n.language)}đ
                           </Badge>
                         </div>
                       )}
@@ -428,8 +429,8 @@ const CustomerPage = () => {
           {!selectedCustomer ? (
             <div className="flex flex-col items-center justify-center h-full min-h-[300px] sm:min-h-[400px] text-muted-foreground p-4">
               <Users className="h-12 w-12 sm:h-16 sm:w-16 mb-4 opacity-30" />
-              <p className="text-base sm:text-lg font-medium">Chọn khách hàng để xem chi tiết</p>
-              <p className="text-xs sm:text-sm hidden sm:block">Click vào khách hàng bên trái để xem thông tin</p>
+              <p className="text-base sm:text-lg font-medium">{tCustomer("insights.selectCustomerHint")}</p>
+              <p className="text-xs sm:text-sm hidden sm:block">{tCustomer("insights.selectCustomerSubHint")}</p>
             </div>
           ) : (
             <>
@@ -461,7 +462,7 @@ const CustomerPage = () => {
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" className="hover:bg-[#FF7B21]/10 hover:border-[#FF7B21]/30 hover:text-[#FF7B21] transition-all duration-200" onClick={() => openEditForm(selectedCustomer)}>
                       <Edit2 className="h-4 w-4 mr-2" />
-                      Sửa
+                      {tCommon("actions.edit")}
                     </Button>
                     {canDelete && (
                       <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors" onClick={() => confirmDelete(selectedCustomer)}>
@@ -477,15 +478,15 @@ const CustomerPage = () => {
                 <TabsList className="w-full justify-start rounded-none border-b px-4 bg-muted/30">
                   <TabsTrigger value="info" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF7B21] data-[state=active]:to-[#19D6C8] data-[state=active]:text-white transition-all duration-300">
                     <Users className="h-4 w-4" />
-                    Thông tin
+                    {tCustomer("tabs.info")}
                   </TabsTrigger>
                   <TabsTrigger value="loyalty" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF7B21] data-[state=active]:to-[#19D6C8] data-[state=active]:text-white transition-all duration-300">
                     <Award className="h-4 w-4" />
-                    Tích điểm
+                    {tCustomer("tabs.loyalty")}
                   </TabsTrigger>
                   <TabsTrigger value="feedback" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF7B21] data-[state=active]:to-[#19D6C8] data-[state=active]:text-white transition-all duration-300">
                     <MessageSquare className="h-4 w-4" />
-                    Phản hồi
+                    {tCustomer("tabs.feedback")}
                   </TabsTrigger>
                 </TabsList>
 
@@ -499,7 +500,7 @@ const CustomerPage = () => {
                             <ShoppingBag className="h-5 w-5 text-blue-600" />
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">Tổng đơn hàng</p>
+                            <p className="text-sm text-muted-foreground">{tCustomer("detail.cards.totalOrders")}</p>
                             <p className="text-xl font-bold">{selectedCustomer.totalOrders ?? 0}</p>
                           </div>
                         </div>
@@ -510,9 +511,9 @@ const CustomerPage = () => {
                             <Crown className="h-5 w-5 text-emerald-600" />
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">Tổng chi tiêu</p>
+                            <p className="text-sm text-muted-foreground">{tCustomer("detail.cards.totalSpend")}</p>
                             <p className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
-                              {(selectedCustomer.totalSpend || 0).toLocaleString("vi-VN")}đ
+                              {(selectedCustomer.totalSpend || 0).toLocaleString(i18n.language)}đ
                             </p>
                           </div>
                         </div>
@@ -520,32 +521,32 @@ const CustomerPage = () => {
                     </div>
 
                     <Card className="p-4">
-                      <h3 className="font-semibold mb-4">Thông tin chi tiết</h3>
+                      <h3 className="font-semibold mb-4">{tCustomer("detail.title")}</h3>
                       <div className="space-y-3 text-sm">
                         <div className="flex justify-between py-2 border-b">
-                          <span className="text-muted-foreground">Họ và tên</span>
+                          <span className="text-muted-foreground">{tCustomer("detail.fields.fullName")}</span>
                           <span className="font-medium">{selectedCustomer.fullName}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
-                          <span className="text-muted-foreground">Số điện thoại</span>
+                          <span className="text-muted-foreground">{tCustomer("detail.fields.phone")}</span>
                           <span className="font-medium">{selectedCustomer.phoneNumber}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
-                          <span className="text-muted-foreground">Email</span>
+                          <span className="text-muted-foreground">{tCustomer("detail.fields.email")}</span>
                           <span className="font-medium">{selectedCustomer.email || "-"}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
-                          <span className="text-muted-foreground">Ngày tham gia</span>
+                          <span className="text-muted-foreground">{tCustomer("detail.fields.joinedAt")}</span>
                           <span className="font-medium">
                             {selectedCustomer.createdAt
-                              ? new Date(selectedCustomer.createdAt).toLocaleDateString("vi-VN")
-                              : "-"}
+                              ? new Date(selectedCustomer.createdAt).toLocaleDateString(i18n.language)
+                              : tCustomer("misc.dash")}
                           </span>
                         </div>
                         <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Trạng thái</span>
+                          <span className="text-muted-foreground">{tCustomer("detail.fields.status")}</span>
                           <Badge className={selectedCustomer.isActive !== false ? "bg-gradient-to-r from-emerald-500 to-emerald-600" : "bg-gray-500"}>
-                            {selectedCustomer.isActive !== false ? "Hoạt động" : "Ngừng"}
+                            {selectedCustomer.isActive !== false ? tCustomer("status.active") : tCustomer("status.inactive")}
                           </Badge>
                         </div>
                       </div>
@@ -558,7 +559,7 @@ const CustomerPage = () => {
                       <Card className="p-6 text-center">
                         <Award className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
                         <p className="text-muted-foreground">
-                          Tính năng "Tích điểm Loyalty" không khả dụng trong gói hiện tại của bạn.
+                          {tCustomer("loyalty.unavailable")}
                         </p>
                       </Card>
                     ) : loyaltySummary ? (
@@ -566,9 +567,9 @@ const CustomerPage = () => {
                         <Card className="p-6 bg-gradient-to-br from-amber-50 to-white border-amber-200">
                           <div className="flex items-center justify-between mb-4">
                             <div>
-                              <p className="text-sm text-muted-foreground">Điểm tích lũy</p>
+                              <p className="text-sm text-muted-foreground">{tCustomer("loyalty.totalPointsLabel")}</p>
                               <p className="text-3xl font-bold text-amber-600">
-                                {(loyaltySummary.totalPoints ?? 0).toLocaleString()}
+                                {(loyaltySummary.totalPoints ?? 0).toLocaleString(i18n.language)}
                               </p>
                             </div>
                             <Badge className="gap-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white">
@@ -581,11 +582,11 @@ const CustomerPage = () => {
                         <Card className="p-4">
                           <h3 className="font-semibold mb-4 flex items-center gap-2">
                             <Clock className="h-5 w-5 text-muted-foreground" />
-                            Lịch sử tích điểm
+                            {tCustomer("loyalty.recentTransactions.title")}
                           </h3>
                           {loyaltyTransactions.length === 0 ? (
                             <p className="text-sm text-muted-foreground text-center py-4">
-                              Chưa có giao dịch tích điểm
+                              {tCustomer("loyalty.recentTransactions.empty")}
                             </p>
                           ) : (
                             <div className="space-y-2">
@@ -597,14 +598,14 @@ const CustomerPage = () => {
                                   <div>
                                     <p className="font-medium text-sm">
                                       {txn.points > 0 ? "+" : ""}
-                                      {txn.points} điểm
+                                      {tCustomer("loyalty.pointsValue", { points: txn.points })}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                      {txn.description || "Tích điểm"}
+                                      {txn.description || tCustomer("loyalty.transactionFallback")}
                                     </p>
                                   </div>
                                   <span className="text-xs text-muted-foreground">
-                                    {new Date(txn.createdAt).toLocaleDateString("vi-VN")}
+                                    {new Date(txn.createdAt).toLocaleDateString(i18n.language)}
                                   </span>
                                 </div>
                               ))}
@@ -614,7 +615,7 @@ const CustomerPage = () => {
                       </>
                     ) : (
                       <Card className="p-6 text-center">
-                        <p className="text-sm text-muted-foreground">Đang tải dữ liệu loyalty...</p>
+                        <p className="text-sm text-muted-foreground">{tCustomer("loyalty.loading")}</p>
                       </Card>
                     )}
                   </TabsContent>
@@ -625,7 +626,7 @@ const CustomerPage = () => {
                       <Card className="p-6 text-center">
                         <MessageSquare className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
                         <p className="text-muted-foreground">
-                          Chưa có phản hồi nào từ khách hàng này
+                          {tCustomer("feedback.empty")}
                         </p>
                       </Card>
                     ) : (
@@ -644,10 +645,10 @@ const CustomerPage = () => {
                                 ))}
                               </div>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(f.createdAt).toLocaleDateString("vi-VN")}
+                                {new Date(f.createdAt).toLocaleDateString(i18n.language)}
                               </span>
                             </div>
-                            <p className="text-sm">{f.content || "Khách hàng không có nội dung phản hồi"}</p>
+                            <p className="text-sm">{f.content || tCustomer("feedback.contentFallback")}</p>
                           </Card>
                         ))}
                       </div>

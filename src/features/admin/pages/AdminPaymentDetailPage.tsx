@@ -13,6 +13,7 @@ import { superAdminSaasApi } from "@/shared/lib/superAdminSaasApi";
 import { subscriptionApi } from "@/shared/lib/subscriptionApi";
 import { formatVnd } from "@/shared/utils/formatMoney";
 import type { PaymentStatus } from "@/shared/types/subscription";
+import { useTranslation } from "react-i18next";
 
 const getStr = (o: Record<string, unknown>, keys: string[]) => {
   for (const k of keys) {
@@ -38,6 +39,7 @@ const toIsoFromDateInput = (date: string, endOfDay = false) => {
 };
 
 export default function AdminPaymentDetailPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -76,12 +78,12 @@ export default function AdminPaymentDetailPage() {
       setStatus(st);
 
       if (!found && !st) {
-        toast.error("Không tìm thấy payment.");
+        toast.error(t("admin:paymentDetail.toast.notFound"));
         navigate("/admin/payments", { replace: true });
       }
     } catch (err) {
       console.error("Failed to load payment detail:", err);
-      toast.error("Không tải được chi tiết payment.");
+      toast.error(t("admin:paymentDetail.toast.loadError"));
       navigate("/admin/payments", { replace: true });
     } finally {
       setLoading(false);
@@ -148,7 +150,7 @@ export default function AdminPaymentDetailPage() {
           onClick={() => navigate("/admin/payments")}
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại danh sách payments
+          {t("admin:paymentDetail.backToList")}
         </Button>
       </motion.div>
 
@@ -175,57 +177,57 @@ export default function AdminPaymentDetailPage() {
           <div className="relative mt-5 grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Amount</span>
+                <span className="text-xs text-muted-foreground">{t("admin:paymentDetail.fields.amount")}</span>
                 <span className="font-semibold">{formatVnd(view.amount ?? 0)}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Provider</span>
+                <span className="text-xs text-muted-foreground">{t("admin:paymentDetail.fields.provider")}</span>
                 <span className="font-medium">{view.provider}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Payment date</span>
+                <span className="text-xs text-muted-foreground">{t("admin:paymentDetail.fields.paymentDate")}</span>
                 <span className="font-mono text-xs">{view.paymentDate}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Transaction</span>
+                <span className="text-xs text-muted-foreground">{t("admin:paymentDetail.fields.transaction")}</span>
                 <span className="font-mono text-xs truncate">{view.transactionCode}</span>
               </div>
             </div>
 
             <div className="rounded-lg border bg-background/60 px-3 py-2 text-sm space-y-2">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Trạng thái thanh toán hiện tại
+                {t("admin:paymentDetail.currentStatus.title")}
               </div>
               {status ? (
                 <div className="space-y-2 text-xs text-muted-foreground">
                   <div className="flex items-center justify-between">
-                    <span>Status</span>
+                    <span>{t("admin:paymentDetail.currentStatus.status")}</span>
                     <span className="font-medium">{status.status}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>Amount</span>
+                    <span>{t("admin:paymentDetail.fields.amount")}</span>
                     <span className="font-medium">{formatVnd(status.amount ?? 0)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>Transaction</span>
+                    <span>{t("admin:paymentDetail.fields.transaction")}</span>
                     <span className="font-mono truncate">{status.transactionCode ?? "—"}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     {status.status === "Completed" ? (
                       <span className="inline-flex items-center gap-1 text-emerald-600">
                         <BadgeCheck className="h-4 w-4" />
-                        Completed
+                        {t("admin:paymentDetail.status.completed")}
                       </span>
                     ) : status.status === "Failed" ? (
                       <span className="inline-flex items-center gap-1 text-red-600">
                         <BadgeX className="h-4 w-4" />
-                        Failed
+                        {t("admin:paymentDetail.status.failed")}
                       </span>
                     ) : null}
                   </div>
                 </div>
               ) : (
-                <div className="text-xs text-muted-foreground">Không lấy được payment status.</div>
+                <div className="text-xs text-muted-foreground">{t("admin:paymentDetail.currentStatus.unavailable")}</div>
               )}
             </div>
           </div>
@@ -234,27 +236,27 @@ export default function AdminPaymentDetailPage() {
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-2" onClick={() => void load()}>
                 <RefreshCcw className="h-4 w-4" />
-                Reload
+                {t("common:actions.reload")}
               </Button>
               <Button variant="outline" size="sm" className="gap-2" onClick={() => setRawOpen(true)}>
                 <Braces className="h-4 w-4" />
-                Raw JSON
+                {t("common:actions.rawJson")}
               </Button>
             </div>
           </div>
         </Card>
 
         <Card className="p-5 space-y-3 hover:shadow-lg transition-shadow duration-300">
-          <div className="text-sm font-semibold">Tóm tắt giao dịch</div>
+          <div className="text-sm font-semibold">{t("admin:paymentDetail.summary.title")}</div>
           <div className="text-xs text-muted-foreground space-y-2">
             <div>
-              Trạng thái: <span className="font-medium text-foreground">{view.status}</span>
+              {t("admin:paymentDetail.summary.status")}: <span className="font-medium text-foreground">{view.status}</span>
             </div>
             <div>
-              Giá trị: <span className="font-medium text-foreground">{formatVnd(view.amount ?? 0)}</span>
+              {t("admin:paymentDetail.summary.amount")}: <span className="font-medium text-foreground">{formatVnd(view.amount ?? 0)}</span>
             </div>
             <div>
-              Nhà cung cấp: <span className="font-medium text-foreground">{view.provider}</span>
+              {t("admin:paymentDetail.summary.provider")}: <span className="font-medium text-foreground">{view.provider}</span>
             </div>
           </div>
         </Card>
@@ -263,7 +265,7 @@ export default function AdminPaymentDetailPage() {
       <JsonViewerDialog
         open={rawOpen}
         onOpenChange={setRawOpen}
-        title={`Payment raw: ${view.id}`}
+        title={t("admin:paymentDetail.rawTitle", { id: view.id })}
         value={{ dashboardRow: raw, paymentStatus: status }}
       />
     </motion.div>

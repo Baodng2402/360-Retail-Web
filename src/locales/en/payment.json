@@ -1,2 +1,24 @@
-{}
+{
+  "common": {
+    "paymentCodeLabel": "Payment code",
+    "transactionCodeLabel": "Transaction code",
+    "needHelp": "Need help? Contact"
+  },
+  "success": {
+    "verifying": "Verifying payment...",
+    "missingPaymentId": "Payment id not found",
+    "activated": "Payment successful! Your subscription has been activated.",
+    "verifyFailed": "Payment verification failed. Please contact support.",
+    "titleLoading": "Verifying",
+    "titleSuccess": "Payment successful!",
+    "titleError": "Something went wrong",
+    "planLabel": "Your plan",
+    "viewPlans": "View plans"
+  },
+  "failed": {
+    "title": "Payment failed",
+    "defaultMessage": "The payment was not successful. Please try again or choose another payment method.",
+    "retryPayment": "Retry payment"
+  }
+}
 

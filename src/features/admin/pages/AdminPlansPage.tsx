@@ -17,7 +17,7 @@ import { formatVnd } from "@/shared/utils/formatMoney";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminPlansPage() {
-  const { t } = useTranslation("admin");
+  const { t } = useTranslation(["admin", "common"]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<SuperAdminPlan[]>([]);
@@ -84,7 +84,7 @@ export default function AdminPlansPage() {
       setItems(res);
     } catch (err) {
       console.error("Failed to load plans:", err);
-      toast.error("Không tải được danh sách gói dịch vụ.");
+      toast.error(t("admin:plansPage.toast.loadError"));
       setItems([]);
     } finally {
       setLoading(false);
@@ -205,7 +205,7 @@ export default function AdminPlansPage() {
           features: featuresString,
         });
         setItems((prev) => [created, ...prev]);
-        toast.success("Đã tạo gói dịch vụ.");
+        toast.success(t("admin:plansPage.toast.createSuccess"));
       } else {
         const payload: SuperAdminUpdatePlanDto = {
           planName: form.planName.trim(),
@@ -219,7 +219,7 @@ export default function AdminPlansPage() {
         } else {
           await load();
         }
-        toast.success("Đã cập nhật gói dịch vụ.");
+        toast.success(t("admin:plansPage.toast.updateSuccess"));
       }
       setDialogOpen(false);
     } catch (err) {
@@ -227,7 +227,7 @@ export default function AdminPlansPage() {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
         (err as Error)?.message ||
-        "Lưu gói thất bại.";
+        t("admin:plansPage.toast.saveError");
       toast.error(message);
     } finally {
       setSaving(false);
@@ -240,14 +240,14 @@ export default function AdminPlansPage() {
       setDeleting(true);
       await superAdminSaasApi.deactivatePlan(deleteConfirm.id);
       setItems((prev) => prev.map((p) => (p.id === deleteConfirm.id ? { ...p, isActive: false } : p)));
-      toast.success("Đã vô hiệu hóa gói.");
+      toast.success(t("admin:plansPage.toast.deactivateSuccess"));
       setDeleteConfirm(null);
     } catch (err) {
       console.error("Failed to deactivate plan:", err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
         (err as Error)?.message ||
-        "Vô hiệu hóa thất bại.";
+        t("admin:plansPage.toast.deactivateError");
       toast.error(message);
     } finally {
       setDeleting(false);
@@ -273,14 +273,14 @@ export default function AdminPlansPage() {
                 <Badge className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] text-white shadow-lg shadow-[#FF7B21]/20">
                   {t("sidebar.brand.title")}
                 </Badge>
-                <span className="text-sm text-muted-foreground">CRUD gói dịch vụ (Plans)</span>
+                <span className="text-sm text-muted-foreground">{t("admin:plansPage.caption")}</span>
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Tìm theo tên hoặc id..."
+                placeholder={t("admin:plansPage.searchPlaceholder")}
                 className="w-full sm:w-[320px] bg-background/80 backdrop-blur-sm"
               />
               <Button
@@ -288,7 +288,7 @@ export default function AdminPlansPage() {
                 className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300 hover:-translate-y-0.5"
               >
                 <Plus className="h-4 w-4" />
-                Tạo gói
+                {t("admin:plansPage.actions.create")}
               </Button>
             </div>
           </div>
@@ -304,7 +304,7 @@ export default function AdminPlansPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold flex items-center gap-2">
               <Package className="h-4 w-4 text-[#FF7B21]" />
-              Danh sách Plans
+              {t("admin:plansPage.list.title")}
             </h3>
             <Badge variant="outline" className="border-[#FF7B21]/30 text-[#FF7B21] bg-[#FF7B21]/5">
               {filtered.length.toLocaleString()}
@@ -320,7 +320,7 @@ export default function AdminPlansPage() {
               </div>
             ) : filtered.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
-                Chưa có plan nào.
+                {t("admin:plansPage.states.noPlans")}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -336,7 +336,7 @@ export default function AdminPlansPage() {
                           );
                         }}
                       >
-                        Tên
+                        {t("admin:plansPage.columns.name")}
                       </TableHead>
                       <TableHead
                         className="cursor-pointer select-none"
@@ -347,7 +347,7 @@ export default function AdminPlansPage() {
                           );
                         }}
                       >
-                        Giá
+                        {t("admin:plansPage.columns.price")}
                       </TableHead>
                       <TableHead
                         className="cursor-pointer select-none"
@@ -358,9 +358,9 @@ export default function AdminPlansPage() {
                           );
                         }}
                       >
-                        Thời hạn
+                        {t("admin:plansPage.columns.duration")}
                       </TableHead>
-                      <TableHead>Trạng thái</TableHead>
+                      <TableHead>{t("admin:plansPage.columns.status")}</TableHead>
                       <TableHead
                         className="cursor-pointer select-none"
                         onClick={() => {
@@ -370,9 +370,9 @@ export default function AdminPlansPage() {
                           );
                         }}
                       >
-                        Active subs
+                        {t("admin:plansPage.columns.activeSubs")}
                       </TableHead>
-                      <TableHead className="text-right">Thao tác</TableHead>
+                      <TableHead className="text-right">{t("admin:plansPage.columns.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -390,10 +390,16 @@ export default function AdminPlansPage() {
                           <div className="text-xs text-muted-foreground truncate">{p.id}</div>
                         </TableCell>
                         <TableCell>{formatVnd(p.price ?? 0)}</TableCell>
-                        <TableCell>{(p.durationDays ?? 0).toLocaleString()} ngày</TableCell>
+                        <TableCell>
+                          {t("admin:plansPage.durationDays", {
+                            days: (p.durationDays ?? 0).toLocaleString(),
+                          })}
+                        </TableCell>
                         <TableCell>
                           <Badge variant={p.isActive ? "outline" : "destructive"} className={p.isActive ? "border-emerald-500/50 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30" : ""}>
-                            {p.isActive ? "Active" : "Inactive"}
+                            {p.isActive
+                              ? t("admin:plansPage.status.active")
+                              : t("admin:plansPage.status.inactive")}
                           </Badge>
                         </TableCell>
                         <TableCell>{(p.activeSubscriptions ?? 0).toLocaleString()}</TableCell>
@@ -436,15 +442,11 @@ export default function AdminPlansPage() {
           transition={{ duration: 0.3, delay: 0.2 }}
         >
           <div>
-            Hiển thị{" "}
-            <span className="font-semibold">
-              {paged.length > 0 ? (page - 1) * pageSize + 1 : 0}
-            </span>{" "}
-            -{" "}
-            <span className="font-semibold">
-              {(page - 1) * pageSize + paged.length}
-            </span>{" "}
-            trong <span className="font-semibold">{filtered.length}</span> plans
+            {t("admin:plansPage.pagination.summary", {
+              from: paged.length > 0 ? (page - 1) * pageSize + 1 : 0,
+              to: (page - 1) * pageSize + paged.length,
+              total: filtered.length,
+            })}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -453,11 +455,10 @@ export default function AdminPlansPage() {
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Trang trước
+              {t("admin:plansPage.pagination.prev")}
             </Button>
             <span>
-              Trang <span className="font-semibold">{page}</span> /{" "}
-              <span className="font-semibold">{totalPages}</span>
+              {t("admin:plansPage.pagination.page", { page, totalPages })}
             </span>
             <Button
               variant="outline"
@@ -465,7 +466,7 @@ export default function AdminPlansPage() {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              Trang sau
+              {t("admin:plansPage.pagination.next")}
             </Button>
           </div>
         </motion.div>
@@ -474,54 +475,56 @@ export default function AdminPlansPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? "Cập nhật Plan" : "Tạo Plan mới"}</DialogTitle>
+            <DialogTitle>
+              {editing ? t("admin:plansPage.dialog.titleEdit") : t("admin:plansPage.dialog.titleCreate")}
+            </DialogTitle>
             <DialogDescription>
-              Cập nhật thông tin gói và cấu hình tính năng.
+              {t("admin:plansPage.dialog.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 pt-2">
             <div className="space-y-1">
-              <Label>Tên gói</Label>
+              <Label>{t("admin:plansPage.dialog.fields.name")}</Label>
               <Input
                 value={form.planName}
                 onChange={(e) => setForm((p) => ({ ...p, planName: e.target.value }))}
-                placeholder="Pro"
+                placeholder={t("admin:plansPage.dialog.placeholders.name")}
               />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1">
-                <Label>Giá (VND)</Label>
+                <Label>{t("admin:plansPage.dialog.fields.price")}</Label>
                 <Input
                   inputMode="numeric"
                   value={String(form.price)}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, price: Number(e.target.value || 0) }))
                   }
-                  placeholder="199000"
+                  placeholder={t("admin:plansPage.dialog.placeholders.price")}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Thời hạn (ngày)</Label>
+                <Label>{t("admin:plansPage.dialog.fields.durationDays")}</Label>
                 <Input
                   inputMode="numeric"
                   value={String(form.durationDays)}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, durationDays: Number(e.target.value || 0) }))
                   }
-                  placeholder="30"
+                  placeholder={t("admin:plansPage.dialog.placeholders.durationDays")}
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Cấu hình tính năng (feature flags)</Label>
+              <Label>{t("admin:plansPage.dialog.fields.features")}</Label>
               <div className="grid gap-3 rounded-lg border bg-muted/40 p-3 md:grid-cols-2">
                 <div className="space-y-2">
                   <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Giới hạn
+                    {t("admin:plansPage.dialog.sections.limits")}
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Max orders</Label>
+                    <Label className="text-xs">{t("admin:plansPage.dialog.limits.maxOrders")}</Label>
                     <Input
                       inputMode="numeric"
                       value={String(featureConfig.max_orders)}
@@ -534,7 +537,7 @@ export default function AdminPlansPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Max products</Label>
+                    <Label className="text-xs">{t("admin:plansPage.dialog.limits.maxProducts")}</Label>
                     <Input
                       inputMode="numeric"
                       value={String(featureConfig.max_products)}
@@ -547,7 +550,7 @@ export default function AdminPlansPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Max employees</Label>
+                    <Label className="text-xs">{t("admin:plansPage.dialog.limits.maxEmployees")}</Label>
                     <Input
                       inputMode="numeric"
                       value={String(featureConfig.max_employees)}
@@ -563,21 +566,21 @@ export default function AdminPlansPage() {
 
                 <div className="space-y-2">
                   <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Tính năng
+                    {t("admin:plansPage.dialog.sections.features")}
                   </div>
                   <div className="grid grid-cols-1 gap-2">
                     {[
-                      ["has_dashboard", "Dashboard tổng quan"],
-                      ["has_tasks", "Quản lý tasks"],
-                      ["has_loyalty", "Loyalty/điểm tích lũy"],
-                      ["has_variants", "Sản phẩm có variants"],
-                      ["has_feedback_qr", "Feedback QR"],
-                      ["has_gps_checkin", "GPS check-in"],
-                      ["has_multi_store", "Multi-store"],
-                      ["has_export_excel", "Export Excel"],
-                      ["has_invite_staff", "Mời nhân viên"],
-                      ["has_inventory_tickets", "Phiếu kho"],
-                      ["has_realtime_notifications", "Realtime notifications"],
+                      ["has_dashboard", t("admin:plansPage.dialog.featureFlags.has_dashboard")],
+                      ["has_tasks", t("admin:plansPage.dialog.featureFlags.has_tasks")],
+                      ["has_loyalty", t("admin:plansPage.dialog.featureFlags.has_loyalty")],
+                      ["has_variants", t("admin:plansPage.dialog.featureFlags.has_variants")],
+                      ["has_feedback_qr", t("admin:plansPage.dialog.featureFlags.has_feedback_qr")],
+                      ["has_gps_checkin", t("admin:plansPage.dialog.featureFlags.has_gps_checkin")],
+                      ["has_multi_store", t("admin:plansPage.dialog.featureFlags.has_multi_store")],
+                      ["has_export_excel", t("admin:plansPage.dialog.featureFlags.has_export_excel")],
+                      ["has_invite_staff", t("admin:plansPage.dialog.featureFlags.has_invite_staff")],
+                      ["has_inventory_tickets", t("admin:plansPage.dialog.featureFlags.has_inventory_tickets")],
+                      ["has_realtime_notifications", t("admin:plansPage.dialog.featureFlags.has_realtime_notifications")],
                     ].map(([key, label]) => (
                       <div key={key} className="flex items-center justify-between gap-2 text-xs">
                         <span className="text-[11px] text-muted-foreground">{label}</span>
@@ -596,14 +599,14 @@ export default function AdminPlansPage() {
                 </div>
               </div>
               <div className="text-[11px] text-muted-foreground">
-                Các trường cấu hình nâng cao (nếu có trong dữ liệu hiện tại) vẫn được giữ nguyên khi lưu.
+                {t("admin:plansPage.dialog.keepExtrasHint")}
               </div>
             </div>
           </div>
 
           <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={saving}>
-              Huỷ
+              {t("common:actions.cancel")}
             </Button>
             <Button
               onClick={() => void save()}
@@ -611,7 +614,7 @@ export default function AdminPlansPage() {
               className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
             >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {editing ? "Lưu" : "Tạo"}
+              {editing ? t("common:actions.save") : t("common:actions.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -622,20 +625,21 @@ export default function AdminPlansPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trash2 className="h-5 w-5 text-red-500" />
-              Vô hiệu hoá plan
+              {t("admin:plansPage.deactivateDialog.title")}
             </DialogTitle>
             <DialogDescription>
-              Bạn có chắc muốn vô hiệu hoá{" "}
-              <strong>{deleteConfirm?.planName}</strong>?
+              {t("admin:plansPage.deactivateDialog.description", {
+                name: deleteConfirm?.planName ?? "",
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setDeleteConfirm(null)} disabled={deleting}>
-              Huỷ
+              {t("common:actions.cancel")}
             </Button>
             <Button variant="destructive" onClick={() => void confirmDeactivate()} disabled={deleting}>
               {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Vô hiệu hoá
+              {t("admin:plansPage.deactivateDialog.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

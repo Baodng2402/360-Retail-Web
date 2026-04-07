@@ -22,7 +22,9 @@
     "notCheckedIn": "Not checked in",
     "checkedOut": "Checked out",
     "notCheckedOut": "Not checked out",
-    "checkInTime": "Check-in time:"
+    "checkInTime": "Check-in time:",
+    "checkInLabel": "Check-in",
+    "checkOutLabel": "Check-out"
   },
   "map": {
     "title": "Store map (OpenStreetMap)",
@@ -38,7 +40,9 @@
     "title": "Timekeeping actions",
     "hint": "The system uses your current GPS location. Please allow Location access when prompted.",
     "hintOwnerDisabled": "Store owner does not need to timekeep.",
-    "ownerCannotCheckIn": "Store owner does not need to check in/out."
+    "ownerCannotCheckIn": "Store owner does not need to check in/out.",
+    "checkIn": "Check in",
+    "checkOut": "Check out"
   },
   "history": {
     "title": "History & overview",
@@ -54,6 +58,8 @@
     "table": {
       "date": "Date",
       "employee": "Employee",
+      "checkIn": "Check in",
+      "checkOut": "Check out",
       "photo": "Check-in photo",
       "viewPhoto": "View photo",
       "noPhoto": "—",
@@ -64,7 +70,8 @@
     "photoModal": {
       "title": "Check-in photo",
       "employee": "Employee",
-      "time": "Time"
+      "time": "Time",
+      "imageAlt": "Check-in selfie"
     }
   },
   "monthly": {

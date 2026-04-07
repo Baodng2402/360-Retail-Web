@@ -63,5 +63,21 @@
   },
   "personalInfo": {
     "title": "Personal information"
+  },
+  "editForm": {
+    "actions": {
+      "edit": "Edit profile"
+    },
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role"
+    },
+    "emailReadonly": "Email cannot be changed",
+    "toast": {
+      "success": "Profile updated successfully!",
+      "error": "Update failed. Please try again."
+    }
   }
 }

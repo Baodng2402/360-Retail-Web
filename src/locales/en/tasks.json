@@ -40,5 +40,36 @@
   },
   "helper": {
     "note": "Note: You can only update status for tasks assigned to your account."
+  },
+  "createModal": {
+    "title": "Create task",
+    "description": "Create a new task and assign it to a staff member",
+    "relatedFeedback": "Related to feedback from: {{customer}}",
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "assignee": "Assignee",
+      "priority": "Priority",
+      "dueDate": "Due date"
+    },
+    "placeholders": {
+      "title": "Example: Stock inventory check...",
+      "description": "Enter task details...",
+      "assignee": "Select staff"
+    },
+    "priority": {
+      "low": "🟢 Low",
+      "medium": "🟡 Medium",
+      "high": "🔴 High"
+    },
+    "actions": {
+      "submit": "Create task",
+      "submitting": "Creating..."
+    },
+    "toast": {
+      "required": "Please fill in all required fields.",
+      "success": "Task created successfully!",
+      "error": "Unable to create task. Please try again."
+    }
   }
 }

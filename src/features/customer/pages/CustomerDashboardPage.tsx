@@ -9,8 +9,10 @@ import { customersApi } from "@/shared/lib/customersApi";
 import type { Order } from "@/shared/types/orders";
 import { formatVnd } from "@/shared/utils/formatMoney";
 import { useAuthStore } from "@/shared/store/authStore";
+import { useTranslation } from "react-i18next";
 
 const CustomerDashboardPage = () => {
+  const { t: tCustomer, i18n } = useTranslation(["customer", "orders", "common"]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -71,10 +73,10 @@ const CustomerDashboardPage = () => {
           </div>
           <div>
             <h1 className="text-xl font-semibold text-foreground">
-              Đơn hàng của bạn
+              {tCustomer("portal.dashboard.title")}
             </h1>
             <p className="text-xs text-muted-foreground">
-              Xem lại lịch sử đơn hàng và trạng thái xử lý.
+              {tCustomer("portal.dashboard.subtitle")}
             </p>
           </div>
         </div>
@@ -86,25 +88,27 @@ const CustomerDashboardPage = () => {
           <div className="flex items-center gap-2">
             <Coins className="h-5 w-5 text-amber-500" />
             <h2 className="text-base font-semibold text-foreground">
-              Điểm tích lũy
+              {tCustomer("portal.loyalty.title")}
             </h2>
           </div>
           {loyaltyLoading ? (
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           ) : loyaltyPoints !== null ? (
             <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm px-3 py-1">
-              {loyaltyPoints.toLocaleString("vi-VN")} điểm
+              {tCustomer("portal.loyalty.points", {
+                points: loyaltyPoints,
+              })}
             </Badge>
           ) : (
             <span className="text-xs text-muted-foreground">
-              Chưa có dữ liệu
+              {tCustomer("portal.states.noData")}
             </span>
           )}
         </div>
         {loyaltyTransactions.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-              Giao dịch điểm gần đây
+              {tCustomer("portal.loyalty.recent.title")}
             </h3>
             {loyaltyTransactions.slice(0, 5).map((tx, i) => (
               <div
@@ -113,11 +117,11 @@ const CustomerDashboardPage = () => {
               >
                 <div className="flex flex-col">
                   <span className="text-foreground font-medium">
-                    {tx.description || tx.type || "Giao dịch điểm"}
+                    {tx.description || tx.type || tCustomer("portal.loyalty.recent.fallback")}
                   </span>
                   <span className="text-[11px] text-muted-foreground">
                     {tx.createdAt
-                      ? new Date(tx.createdAt).toLocaleString("vi-VN")
+                      ? new Date(tx.createdAt).toLocaleString(i18n.language)
                       : ""}
                   </span>
                 </div>
@@ -142,11 +146,11 @@ const CustomerDashboardPage = () => {
       <Card className="p-6">
         {loading ? (
           <div className="py-10 text-center text-muted-foreground text-sm">
-            Đang tải đơn hàng...
+            {tCustomer("portal.orders.loading")}
           </div>
         ) : orders.length === 0 ? (
           <div className="py-10 text-center text-muted-foreground text-sm">
-            Bạn chưa có đơn hàng nào.
+            {tCustomer("portal.orders.empty")}
           </div>
         ) : (
           <div className="space-y-3">
@@ -161,11 +165,15 @@ const CustomerDashboardPage = () => {
                   </span>
                   <span className="text-muted-foreground flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {new Date(order.createdAt).toLocaleString("vi-VN")}
+                    {new Date(order.createdAt).toLocaleString(i18n.language)}
                   </span>
                   <span className="text-muted-foreground">
-                    Trạng thái:{" "}
-                    <span className="font-medium">{order.status}</span>
+                    {tCustomer("portal.orders.statusLabel")}:{" "}
+                    <span className="font-medium">
+                      {tCustomer(`orders:statusLabels.${order.status}` as const, {
+                        defaultValue: order.status,
+                      })}
+                    </span>
                   </span>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -180,7 +188,7 @@ const CustomerDashboardPage = () => {
                       navigate(`/customer/orders/${order.id}`)
                     }
                   >
-                    <span>Chi tiết</span>
+                    <span>{tCustomer("portal.orders.viewDetail")}</span>
                     <ArrowRight className="h-3 w-3" />
                   </Button>
                 </div>

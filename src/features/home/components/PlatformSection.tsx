@@ -11,6 +11,8 @@ import {
   Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 interface ModuleData {
   id: string;
@@ -24,13 +26,18 @@ interface ModuleData {
   accentColor: string;
 }
 
-const platformModules: ModuleData[] = [
+const getPlatformModules = (t: TFunction<"home">): ModuleData[] => [
   {
     id: "people",
-    label: "People",
-    subtitle: "Quản lý Nhân viên & Ca làm",
-    description: "Hệ thống chấm công GPS, phân ca tự động, tính lương thông minh. Không còn sổ sách, không còn nhầm lẫn.",
-    features: ["Chấm công GPS", "Phân ca tự động", "Tính lương thông minh", "Báo cáo nhân sự"],
+    label: t("platform.modules.people.label"),
+    subtitle: t("platform.modules.people.subtitle"),
+    description: t("platform.modules.people.description"),
+    features: [
+      t("platform.modules.people.features.gpsTimekeeping"),
+      t("platform.modules.people.features.autoShifts"),
+      t("platform.modules.people.features.smartPayroll"),
+      t("platform.modules.people.features.hrReports"),
+    ],
     icon: <Users className="w-8 h-8" />,
     color: "#0ea5e9",
     glowColor: "rgba(14, 165, 233, 0.4)",
@@ -38,10 +45,15 @@ const platformModules: ModuleData[] = [
   },
   {
     id: "product",
-    label: "Product",
-    subtitle: "POS & Quản lý Hàng hóa",
-    description: "Bán hàng cực nhanh, tự động trừ tồn kho, đồng bộ online-offline. Một điểm bán, mọi kênh đều quản lý được.",
-    features: ["POS cực nhanh", "Tự động trừ tồn", "Đồng bộ kênh online", "Báo cáo bán hàng"],
+    label: t("platform.modules.product.label"),
+    subtitle: t("platform.modules.product.subtitle"),
+    description: t("platform.modules.product.description"),
+    features: [
+      t("platform.modules.product.features.fastPos"),
+      t("platform.modules.product.features.autoDeductStock"),
+      t("platform.modules.product.features.syncOnline"),
+      t("platform.modules.product.features.salesReports"),
+    ],
     icon: <ShoppingBag className="w-8 h-8" />,
     color: "#FF7B21",
     glowColor: "rgba(255, 123, 33, 0.4)",
@@ -49,10 +61,15 @@ const platformModules: ModuleData[] = [
   },
   {
     id: "customer",
-    label: "Customer",
-    subtitle: "CRM & Chương trình Loyalty",
-    description: "Khách mua là có điểm, có ưu đãi. Hệ thống tự ghi nhận, tự động chăm sóc khách hàng theo segment.",
-    features: ["Tích điểm tự động", "Voucher thông minh", "Phân khúc khách hàng", "Chăm sóc tự động"],
+    label: t("platform.modules.customer.label"),
+    subtitle: t("platform.modules.customer.subtitle"),
+    description: t("platform.modules.customer.description"),
+    features: [
+      t("platform.modules.customer.features.autoPoints"),
+      t("platform.modules.customer.features.smartVouchers"),
+      t("platform.modules.customer.features.segmentation"),
+      t("platform.modules.customer.features.autoCare"),
+    ],
     icon: <Heart className="w-8 h-8" />,
     color: "#19D6C8",
     glowColor: "rgba(25, 214, 200, 0.4)",
@@ -485,6 +502,8 @@ function FloatingParticles({ isDark = true }: { isDark?: boolean }) {
 }
 
 export function PlatformSection() {
+  const { t } = useTranslation("home");
+  const platformModules = getPlatformModules(t);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
 
@@ -561,7 +580,7 @@ export function PlatformSection() {
             }}
           >
             <Cpu className="w-3 h-3" />
-            360° All-in-One Platform
+            {t("platform.badge")}
           </motion.div>
 
           <motion.h2
@@ -577,7 +596,7 @@ export function PlatformSection() {
               className="block"
               style={{ color: isDark ? "#f1f5f9" : "#0f172a" }}
             >
-              Mọi thứ bạn cần,
+              {t("platform.headline.line1")}
             </span>
             <span
               className="block"
@@ -587,7 +606,7 @@ export function PlatformSection() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              trong một nền tảng
+              {t("platform.headline.line2")}
             </span>
           </motion.h2>
 
@@ -598,8 +617,7 @@ export function PlatformSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-            Ba module chính hoạt động đồng bộ: People quản lý nhân sự, Product quản lý
-            hàng hóa, Customer quản lý khách hàng. Dữ liệu liên thông, vận hành trơn tru.
+            {t("platform.subtitle")}
           </motion.p>
         </motion.div>
 
@@ -641,9 +659,9 @@ export function PlatformSection() {
         >
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8">
             {[
-              { value: "3", label: "Module tích hợp", color: "#0ea5e9" },
-              { value: "1", label: "Giao diện duy nhất", color: "#FF7B21" },
-              { value: "24/7", label: "Cloud tự động", color: "#a855f7" },
+              { value: "3", label: t("platform.stats.modules"), color: "#0ea5e9" },
+              { value: "1", label: t("platform.stats.singleUi"), color: "#FF7B21" },
+              { value: "24/7", label: t("platform.stats.cloud"), color: "#a855f7" },
             ].map((stat) => (
               <motion.div
                 key={stat.label}

@@ -66,15 +66,50 @@
     "itemsTable": {
       "product": "Sản phẩm",
       "barcodeSku": "Mã vạch / SKU",
+      "sizeColor": "Size/Màu",
       "quantity": "Số lượng",
       "unitPrice": "Đơn giá",
       "lineTotal": "Thành tiền",
+      "productFallback": "Sản phẩm",
+      "noCode": "Không có mã",
       "sizeLabel": "Size: {{size}}",
       "colorLabel": "Màu: {{color}}"
     },
+    "summary": {
+      "subtotal": "Tạm tính",
+      "discount": "Giảm giá",
+      "total": "Tổng cộng"
+    },
+    "timeline": {
+      "title": "Lịch sử đơn hàng",
+      "completed": "Đơn hàng hoàn thành",
+      "cancelled": "Đơn hàng đã hủy",
+      "created": "Đơn hàng được tạo"
+    },
+    "actions": {
+      "updateStatusTitle": "Cập nhật trạng thái"
+    },
+    "payment": {
+      "method": "Phương thức",
+      "cash": "Tiền mặt",
+      "status": "Trạng thái",
+      "unpaid": "Chưa thanh toán"
+    },
+    "feedback": {
+      "copyLink": "Copy link"
+    },
+    "feedbackQrAlt": "Feedback QR",
+    "meta": {
+      "title": "Thông tin đơn hàng",
+      "code": "Mã đơn",
+      "store": "Cửa hàng",
+      "employee": "Nhân viên",
+      "itemsCount": "Số sản phẩm"
+    },
     "cancelDialog": {
       "title": "Xác nhận hủy đơn hàng",
-      "description": "Bạn có chắc chắn muốn hủy đơn hàng <strong>{{code}}</strong>? Hành động này không thể hoàn tác.",
+      "irreversible": "Hành động này không thể hoàn tác",
+      "description": "Bạn có chắc muốn hủy đơn hàng <strong>{{code}}</strong> không?",
       "no": "Không",
       "confirm": "Hủy đơn hàng",
       "cancelling": "Đang hủy..."
@@ -84,7 +119,9 @@
       "updateStatusSuccess": "Cập nhật trạng thái đơn hàng thành công.",
       "updateStatusFailed": "Không thể cập nhật trạng thái đơn hàng.",
       "cancelSuccess": "Đã hủy đơn hàng thành công.",
-      "cancelFailed": "Không thể hủy đơn hàng."
+      "cancelFailed": "Không thể hủy đơn hàng.",
+      "copyOrderCodeSuccess": "Đã copy mã đơn hàng!",
+      "copyFeedbackLinkSuccess": "Đã copy link khảo sát!"
     }
   }
 }

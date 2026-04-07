@@ -98,6 +98,7 @@
       "search": "Search",
       "selectedCustomerToast": "Selected customer: {{name}}",
       "ratingLabel": "Rating",
+      "ratingOption": "{{stars}} star(s)",
       "contentLabel": "Content (optional)",
       "contentPlaceholder": "Customer comment...",
       "cancel": "Cancel",

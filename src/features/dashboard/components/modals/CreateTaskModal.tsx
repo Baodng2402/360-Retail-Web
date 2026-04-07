@@ -25,6 +25,7 @@ import { tasksApi } from "@/shared/lib/tasksApi";
 import type { Employee } from "@/shared/types/employee";
 import { Loader2, ClipboardList } from "lucide-react";
 import { WowDialogInner } from "@/shared/components/ui/wow-dialog-inner";
+import { useTranslation } from "react-i18next";
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -42,6 +43,7 @@ const CreateTaskModal = ({
   feedbackData,
   onSuccess,
 }: CreateTaskModalProps) => {
+  const { t } = useTranslation(["tasks", "common"]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [assigneeId, setAssigneeId] = useState("");
@@ -65,7 +67,7 @@ const CreateTaskModal = ({
 
   const handleSubmit = async () => {
     if (!title.trim() || !assigneeId || !dueDate) {
-      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      toast.error(t("tasks:createModal.toast.required"));
       return;
     }
 
@@ -78,7 +80,7 @@ const CreateTaskModal = ({
         description: description.trim() || undefined,
         deadline: new Date(dueDate).toISOString(),
       });
-      toast.success("Đã tạo task thành công!");
+      toast.success(t("tasks:createModal.toast.success"));
       setTitle("");
       setDescription("");
       setAssigneeId("");
@@ -88,7 +90,7 @@ const CreateTaskModal = ({
       onSuccess?.();
     } catch (err) {
       console.error("Create task failed:", err);
-      toast.error("Không thể tạo task. Vui lòng thử lại.");
+      toast.error(t("tasks:createModal.toast.error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -103,10 +105,10 @@ const CreateTaskModal = ({
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#FF7B21] to-[#19D6C8] flex items-center justify-center text-white shadow-lg shadow-[#FF7B21]/30">
               <ClipboardList className="h-4 w-4" />
             </div>
-            Create Task / Tạo nhiệm vụ
+            {t("tasks:createModal.title")}
           </DialogTitle>
           <DialogDescription>
-            Tạo nhiệm vụ mới và giao cho nhân viên
+            {t("tasks:createModal.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -119,18 +121,18 @@ const CreateTaskModal = ({
               transition={{ duration: 0.3 }}
             >
               <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
-                Related to feedback from: {feedbackData.customer}
+                {t("tasks:createModal.relatedFeedback", { customer: feedbackData.customer })}
               </p>
             </motion.div>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="title">
-              Task Title / Tiêu đề <span className="text-red-500">*</span>
+              {t("tasks:createModal.fields.title")} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="title"
-              placeholder="Ví dụ: Kiểm kê hàng tồn kho..."
+              placeholder={t("tasks:createModal.placeholders.title")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="bg-background/80 backdrop-blur-sm"
@@ -138,10 +140,10 @@ const CreateTaskModal = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description / Mô tả chi tiết</Label>
+            <Label htmlFor="description">{t("tasks:createModal.fields.description")}</Label>
             <Textarea
               id="description"
-              placeholder="Nhập mô tả chi tiết về nhiệm vụ..."
+              placeholder={t("tasks:createModal.placeholders.description")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
@@ -152,12 +154,11 @@ const CreateTaskModal = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="assignee">
-                Assignee / Người thực hiện{" "}
-                <span className="text-red-500">*</span>
+                {t("tasks:createModal.fields.assignee")} <span className="text-red-500">*</span>
               </Label>
               <Select value={assigneeId} onValueChange={setAssigneeId}>
                 <SelectTrigger className="bg-background/80 backdrop-blur-sm">
-                  <SelectValue placeholder="Chọn nhân viên" />
+                  <SelectValue placeholder={t("tasks:createModal.placeholders.assignee")} />
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((emp) => (
@@ -170,7 +171,7 @@ const CreateTaskModal = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority / Độ ưu tiên</Label>
+              <Label htmlFor="priority">{t("tasks:createModal.fields.priority")}</Label>
               <Select
                 value={priority}
                 onValueChange={(v) => setPriority(v as "Low" | "Medium" | "High")}
@@ -179,9 +180,9 @@ const CreateTaskModal = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Low">🟢 Low / Thấp</SelectItem>
-                  <SelectItem value="Medium">🟡 Medium / Trung bình</SelectItem>
-                  <SelectItem value="High">🔴 High / Cao</SelectItem>
+                  <SelectItem value="Low">{t("tasks:createModal.priority.low")}</SelectItem>
+                  <SelectItem value="Medium">{t("tasks:createModal.priority.medium")}</SelectItem>
+                  <SelectItem value="High">{t("tasks:createModal.priority.high")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -189,7 +190,7 @@ const CreateTaskModal = ({
 
           <div className="space-y-2">
             <Label htmlFor="dueDate">
-              Due Date / Hạn hoàn thành <span className="text-red-500">*</span>
+              {t("tasks:createModal.fields.dueDate")} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="dueDate"
@@ -207,7 +208,7 @@ const CreateTaskModal = ({
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
-            Cancel / Hủy
+            {t("common:actions.cancel")}
           </Button>
           <Button
             className="bg-gradient-to-r from-[#FF7B21] to-[#19D6C8] hover:from-[#FF8B31] hover:to-[#29E6D8] text-white gap-2 shadow-lg shadow-[#FF7B21]/20 hover:shadow-xl hover:shadow-[#FF7B21]/30 transition-all duration-300"
@@ -215,7 +216,7 @@ const CreateTaskModal = ({
             disabled={isSubmitting}
           >
             {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isSubmitting ? "Đang tạo..." : "Create Task / Tạo nhiệm vụ"}
+            {isSubmitting ? t("tasks:createModal.actions.submitting") : t("tasks:createModal.actions.submit")}
           </Button>
         </DialogFooter>
         </WowDialogInner>

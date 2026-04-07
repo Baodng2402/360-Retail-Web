@@ -1,4 +1,5 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
+import i18next from "@/i18n";
 import { useFeatureGateStore } from "@/shared/store/featureGateStore";
 
 const createAxiosInstance = (baseURL: string) => {
@@ -57,21 +58,21 @@ const createAxiosInstance = (baseURL: string) => {
               errorType: "TrialExpired",
               message:
                 data.message ||
-                "Thời gian dùng thử đã hết. Vui lòng mua gói để tiếp tục sử dụng.",
+                i18next.t("featureGate:errors.trialExpired"),
             });
           } else if (errorCode === "SubscriptionExpired") {
             store.openUpgradeModal({
               errorType: "SubscriptionExpired",
               message:
                 data.message ||
-                "Gói dịch vụ của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng.",
+                i18next.t("featureGate:errors.subscriptionExpired"),
             });
           } else if (errorCode === "FeatureNotAvailable" && !skipFeatureGate) {
             store.openUpgradeModal({
               errorType: "FeatureNotAvailable",
               message:
                 data.message ||
-                "Tính năng này không khả dụng trong gói hiện tại của bạn.",
+                i18next.t("featureGate:errors.featureNotAvailable"),
               currentPlan: data.currentPlan,
               requiredPlan: data.requiredPlan,
               feature: data.feature,
