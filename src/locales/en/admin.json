@@ -28,6 +28,10 @@
         "label": "Dashboard",
         "subLabel": "KPI & charts"
       },
+      "revenue": {
+        "label": "Monthly revenue",
+        "subLabel": "KPIs, chart, payments"
+      },
       "users": {
         "label": "Users",
         "subLabel": "CRUD users"
@@ -136,6 +140,45 @@
     },
     "toast": {
       "loadError": "Failed to load SuperAdmin dashboard data."
+    }
+  },
+  "revenuePage": {
+    "title": "Monthly revenue",
+    "caption": "Monthly revenue view (SuperAdmin)",
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "groupBy": "Group by",
+      "status": "Status",
+      "all": "All",
+      "search": "Search",
+      "searchPlaceholder": "Search by store, plan, transaction..."
+    },
+    "actions": {
+      "thisMonth": "This month",
+      "refresh": "Refresh"
+    },
+    "chartHint": "Revenue is calculated as the sum of Completed payments in the selected range.",
+    "payments": {
+      "title": "Payments",
+      "count": "Transactions",
+      "columns": {
+        "store": "Store",
+        "plan": "Plan",
+        "status": "Status",
+        "amount": "Amount",
+        "date": "Payment date",
+        "provider": "Provider",
+        "transaction": "Transaction"
+      },
+      "limitNote": "Showing up to the first {{count}} rows. Use filters/search to narrow down."
+    },
+    "states": {
+      "noChartData": "No revenue data in the selected range.",
+      "noPayments": "No payments data."
+    },
+    "toast": {
+      "loadError": "Failed to load monthly revenue data."
     }
   },
   "users": {

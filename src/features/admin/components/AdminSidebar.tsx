@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Shield,
   UserCircle2,
+  TrendingUp,
 } from "lucide-react";
 
 import logo from "@/assets/logo.png";
@@ -39,6 +40,12 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
         subLabel: t("sidebar.nav.dashboard.subLabel"),
         to: "/admin/dashboard",
         icon: BarChart3,
+      },
+      {
+        label: t("sidebar.nav.revenue.label"),
+        subLabel: t("sidebar.nav.revenue.subLabel"),
+        to: "/admin/revenue",
+        icon: TrendingUp,
       },
       {
         label: t("sidebar.nav.plans.label"),

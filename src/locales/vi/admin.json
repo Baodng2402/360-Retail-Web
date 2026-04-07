@@ -28,6 +28,10 @@
         "label": "Dashboard",
         "subLabel": "KPI & charts"
       },
+      "revenue": {
+        "label": "Doanh thu tháng",
+        "subLabel": "KPI, biểu đồ, payments"
+      },
       "users": {
         "label": "Users",
         "subLabel": "CRUD users"
@@ -136,6 +140,45 @@
     },
     "toast": {
       "loadError": "Không tải được dữ liệu dashboard SuperAdmin."
+    }
+  },
+  "revenuePage": {
+    "title": "Doanh thu tháng",
+    "caption": "Tổng hợp theo API doanh thu tháng (SuperAdmin)",
+    "filters": {
+      "from": "Từ ngày",
+      "to": "Đến ngày",
+      "groupBy": "Nhóm theo",
+      "status": "Trạng thái",
+      "all": "Tất cả",
+      "search": "Tìm kiếm",
+      "searchPlaceholder": "Tìm theo store, plan, mã giao dịch..."
+    },
+    "actions": {
+      "thisMonth": "Tháng này",
+      "refresh": "Làm mới"
+    },
+    "chartHint": "Doanh thu được tính bằng tổng payments Completed theo khoảng thời gian.",
+    "payments": {
+      "title": "Danh sách payments",
+      "count": "Số giao dịch",
+      "columns": {
+        "store": "Store",
+        "plan": "Plan",
+        "status": "Status",
+        "amount": "Amount",
+        "date": "Payment date",
+        "provider": "Provider",
+        "transaction": "Transaction"
+      },
+      "limitNote": "Đang hiển thị tối đa {{count}} dòng đầu tiên. Dùng lọc/tìm kiếm để thu hẹp."
+    },
+    "states": {
+      "noChartData": "Không có dữ liệu doanh thu trong khoảng thời gian đã chọn.",
+      "noPayments": "Không có dữ liệu payments."
+    },
+    "toast": {
+      "loadError": "Không tải được dữ liệu Doanh thu tháng."
     }
   },
   "users": {

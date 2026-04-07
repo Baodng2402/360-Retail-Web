@@ -50,6 +50,7 @@ import AdminSubscriptionDetailPage from "@/features/admin/pages/AdminSubscriptio
 import AdminPaymentsPage from "@/features/admin/pages/AdminPaymentsPage";
 import AdminPaymentDetailPage from "@/features/admin/pages/AdminPaymentDetailPage";
 import AdminReviewDetailPage from "@/features/admin/pages/AdminReviewDetailPage";
+import AdminRevenuePage from "@/features/admin/pages/AdminRevenuePage";
 import EmployeeDetailPage from "@/features/dashboard/pages/EmployeeDetailPage";
 import MyTasksPage from "@/features/dashboard/pages/MyTasksPage";
 import CrmDashboardPage from "@/features/dashboard/pages/CrmDashboardPage";
@@ -176,6 +177,7 @@ function App() {
                 <Route element={<AdminLayout />}>
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
+                  <Route path="revenue" element={<AdminRevenuePage />} />
                   <Route path="plans" element={<AdminPlansPage />} />
                   <Route path="plans/:id" element={<AdminPlanDetailPage />} />
                   <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
